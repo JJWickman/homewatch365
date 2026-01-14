@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { toast } from 'sonner';
 import { 
   Building2, MapPin, Key, Wifi, Phone, Calendar,
-  Save, X, Upload, Plus, Trash2, User
+  Save, X, Upload, Plus, Trash2, User, AlertCircle, CheckCircle
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,8 @@ export default function PropertyForm() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [validatingAddress, setValidatingAddress] = useState(false);
+  const [addressValidation, setAddressValidation] = useState(null);
   const [companyId, setCompanyId] = useState(null);
   const [propertyId, setPropertyId] = useState(null);
   const [clients, setClients] = useState([]);
@@ -150,15 +153,65 @@ export default function PropertyForm() {
     }
   };
 
+  const validateAddress = async () => {
+    if (!formData.address || !formData.city || !formData.state) {
+      toast.error('Please fill in address, city, and state');
+      return false;
+    }
+
+    setValidatingAddress(true);
+    try {
+      const response = await base44.functions.validatePropertyAddress({
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zip: formData.zip
+      });
+
+      if (response.valid) {
+        setAddressValidation({
+          valid: true,
+          message: 'Address verified successfully',
+          latitude: response.latitude,
+          longitude: response.longitude
+        });
+        toast.success('Address verified');
+        return true;
+      } else {
+        setAddressValidation({
+          valid: false,
+          message: response.error || 'Address could not be verified'
+        });
+        toast.error(response.error || 'Address validation failed');
+        return false;
+      }
+    } catch (error) {
+      setAddressValidation({
+        valid: false,
+        message: error.message || 'Address validation error'
+      });
+      toast.error('Address validation error');
+      return false;
+    } finally {
+      setValidatingAddress(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!companyId || !formData.client_id) return;
+
+    // Validate address first
+    const isAddressValid = await validateAddress();
+    if (!isAddressValid) return;
 
     setSaving(true);
     try {
       const data = {
         ...formData,
         company_id: companyId,
+        latitude: addressValidation?.latitude || null,
+        longitude: addressValidation?.longitude || null,
         square_feet: formData.square_feet ? parseFloat(formData.square_feet) : null,
         bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
         bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
@@ -174,6 +227,7 @@ export default function PropertyForm() {
       navigate(createPageUrl('Properties'));
     } catch (error) {
       console.error('Error saving property:', error);
+      toast.error('Error saving property');
     } finally {
       setSaving(false);
     }
@@ -385,7 +439,10 @@ export default function PropertyForm() {
               <Input
                 id="address"
                 value={formData.address}
-                onChange={(e) => handleChange('address', e.target.value)}
+                onChange={(e) => {
+                  handleChange('address', e.target.value);
+                  setAddressValidation(null);
+                }}
                 required
               />
             </div>
@@ -395,7 +452,10 @@ export default function PropertyForm() {
                 <Input
                   id="city"
                   value={formData.city}
-                  onChange={(e) => handleChange('city', e.target.value)}
+                  onChange={(e) => {
+                    handleChange('city', e.target.value);
+                    setAddressValidation(null);
+                  }}
                   required
                 />
               </div>
@@ -404,7 +464,10 @@ export default function PropertyForm() {
                 <Input
                   id="state"
                   value={formData.state}
-                  onChange={(e) => handleChange('state', e.target.value)}
+                  onChange={(e) => {
+                    handleChange('state', e.target.value);
+                    setAddressValidation(null);
+                  }}
                   required
                 />
               </div>
@@ -413,10 +476,29 @@ export default function PropertyForm() {
                 <Input
                   id="zip"
                   value={formData.zip}
-                  onChange={(e) => handleChange('zip', e.target.value)}
+                  onChange={(e) => {
+                    handleChange('zip', e.target.value);
+                    setAddressValidation(null);
+                  }}
                 />
               </div>
             </div>
+
+            {/* Address Validation Status */}
+            {addressValidation && (
+              <div className={`flex items-start gap-3 p-3 rounded-lg ${addressValidation.valid ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'}`}>
+                {addressValidation.valid ? (
+                  <CheckCircle className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0" />
+                ) : (
+                  <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
+                )}
+                <div>
+                  <p className={`text-sm font-medium ${addressValidation.valid ? 'text-emerald-900' : 'text-red-900'}`}>
+                    {addressValidation.message}
+                  </p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
