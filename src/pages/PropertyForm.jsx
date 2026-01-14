@@ -153,6 +153,8 @@ export default function PropertyForm() {
       const compressedFile = await compressImage(file);
       const { file_url } = await base44.integrations.Core.UploadFile({ file: compressedFile });
       setFormData(prev => ({ ...prev, primary_photo_url: file_url }));
+      setStreetViewUrl(file_url);
+      setImageSource('custom');
       toast.success('Photo uploaded successfully');
     } catch (error) {
       console.error('Error uploading photo:', error);
