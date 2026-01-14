@@ -411,13 +411,10 @@ export default function PropertyForm() {
               <div className="col-span-2">
                 <Label htmlFor="city">City *</Label>
                 <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) => {
-                    handleChange('city', e.target.value);
-                    setAddressValidation(null);
-                  }}
-                  required
+                   id="city"
+                   value={formData.city}
+                   onChange={(e) => handleChange('city', e.target.value)}
+                   required
                 />
               </div>
               <div>
