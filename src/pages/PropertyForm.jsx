@@ -656,10 +656,6 @@ export default function PropertyForm() {
             <X className="h-4 w-4 mr-2" />
             Cancel
           </Button>
-          <Button type="submit" disabled={saving} className="bg-slate-900 hover:bg-slate-800">
-            <Save className="h-4 w-4 mr-2" />
-            {saving ? 'Saving...' : (propertyId ? 'Update Property' : 'Create Property')}
-          </Button>
         </div>
       </form>
     </div>
