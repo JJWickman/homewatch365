@@ -80,6 +80,19 @@ export default function Properties() {
     return client ? `${client.first_name} ${client.last_name}` : 'Unknown';
   };
 
+  const handleDeleteProperty = async (propertyId) => {
+    setDeleting(true);
+    try {
+      await base44.entities.Property.update(propertyId, { is_active: false });
+      setProperties(prev => prev.filter(p => p.id !== propertyId));
+      setDeleteConfirm(null);
+    } catch (error) {
+      console.error('Error deleting property:', error);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const filteredProperties = properties.filter(property => {
     const matchesSearch = 
       property.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
