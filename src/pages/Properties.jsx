@@ -106,10 +106,9 @@ export default function Properties() {
 
   const PropertyCard = ({ property }) => (
     <Card 
-      className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-      onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${property.id}`)}
+      className="overflow-hidden hover:shadow-md transition-shadow group"
     >
-      <div className="aspect-video bg-slate-100 relative">
+      <div className="aspect-video bg-slate-100 relative cursor-pointer" onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${property.id}`)}>
         {property.primary_photo_url ? (
           <img 
             src={property.primary_photo_url} 
@@ -121,11 +120,40 @@ export default function Properties() {
             <Building2 className="h-12 w-12 text-slate-300" />
           </div>
         )}
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3 right-3 flex gap-2">
           <StatusBadge status={property.status} />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 bg-white/90 hover:bg-white text-slate-700"
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem 
+                onClick={() => navigate(createPageUrl('PropertyForm') + `?id=${property.id}`)}
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteConfirm(property.id);
+                }}
+                className="text-red-600"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
-      <div className="p-4">
+      <div className="p-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${property.id}`)}>
         <h3 className="font-semibold text-slate-900 truncate">
           {property.name || property.address}
         </h3>
