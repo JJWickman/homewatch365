@@ -241,17 +241,11 @@ export default function PropertyForm() {
     e.preventDefault();
     if (!companyId || !formData.client_id) return;
 
-    // Validate address first
-    const isAddressValid = await validateAddress();
-    if (!isAddressValid) return;
-
     setSaving(true);
     try {
       const data = {
         ...formData,
         company_id: companyId,
-        latitude: addressValidation?.latitude || null,
-        longitude: addressValidation?.longitude || null,
         square_feet: formData.square_feet ? parseFloat(formData.square_feet) : null,
         bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
         bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
