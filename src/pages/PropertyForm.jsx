@@ -227,32 +227,6 @@ export default function PropertyForm() {
     }
   };
 
-  const fetchImageFromZillow = async () => {
-    if (!formData.address || !formData.city || !formData.state) {
-      toast.error('Please fill in address, city, and state');
-      return;
-    }
-
-    setFetchingImage(true);
-    try {
-      const fullAddress = `${formData.address}, ${formData.city}, ${formData.state}${formData.zip ? ' ' + formData.zip : ''}`;
-      const zillowUrl = `https://www.zillow.com/homes/${encodeURIComponent(fullAddress.replace(/\s+/g, '-').toLowerCase())}/`;
-      
-      // Use LLM to generate a property image based on address
-      const result = await base44.integrations.Core.GenerateImage({
-        prompt: `Professional exterior photo of a residential property at ${fullAddress}. High-quality architectural photography, daylight, well-maintained house with landscaping.`,
-      });
-      
-      setFormData(prev => ({ ...prev, primary_photo_url: result.url }));
-      toast.success('Property image generated from Zillow-style photo');
-    } catch (error) {
-      console.error('Error generating property image:', error);
-      toast.error('Error generating image');
-    } finally {
-      setFetchingImage(false);
-    }
-  };
-
 
 
   const handleSubmit = async (e) => {
