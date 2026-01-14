@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
         // Test 2: Street View image (if valid address)
         let streetViewUrl = null;
         if (validationResult.isValid) {
-            streetViewUrl = `https://maps.googleapis.com/maps/api/streetview?size=600x400&location=${validationResult.lat},${validationResult.lng}&key=${apiKey}`;
+            streetViewUrl = `https://maps.googleapis.com/maps/api/streetview?size=1200x400&location=${validationResult.lat},${validationResult.lng}&heading=0&pitch=10&key=${apiKey}`;
         }
 
         // Test 3: Static map with marker
