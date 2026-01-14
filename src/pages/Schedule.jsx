@@ -1,0 +1,305 @@
+import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Link, useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { 
+  format, startOfWeek, endOfWeek, addDays, addWeeks, 
+  subWeeks, isSameDay, parseISO, startOfMonth, endOfMonth,
+  eachDayOfInterval, getDay, isToday
+} from 'date-fns';
+import { 
+  Calendar, ChevronLeft, ChevronRight, Building2, 
+  Clock, User, Plus, MapPin
+} from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import StatusBadge from '@/components/shared/StatusBadge';
+import PageHeader from '@/components/shared/PageHeader';
+
+export default function Schedule() {
+  const navigate = useNavigate();
+  const [inspections, setInspections] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [view, setView] = useState('week');
+  const [companyId, setCompanyId] = useState(null);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const user = await base44.auth.me();
+      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
+      
+      if (members.length > 0) {
+        const cId = members[0].company_id;
+        setCompanyId(cId);
+        
+        const [inspectionsData, tasksData, propertiesData] = await Promise.all([
+          base44.entities.Inspection.filter({ company_id: cId }),
+          base44.entities.Task.filter({ company_id: cId }),
+          base44.entities.Property.filter({ company_id: cId })
+        ]);
+        
+        setInspections(inspectionsData);
+        setTasks(tasksData);
+        setProperties(propertiesData);
+      }
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getProperty = (propertyId) => properties.find(p => p.id === propertyId);
+
+  const getWeekDays = () => {
+    const start = startOfWeek(currentDate, { weekStartsOn: 0 });
+    return Array.from({ length: 7 }, (_, i) => addDays(start, i));
+  };
+
+  const getMonthDays = () => {
+    const start = startOfMonth(currentDate);
+    const end = endOfMonth(currentDate);
+    const days = eachDayOfInterval({ start, end });
+    
+    // Pad start of month
+    const startDay = getDay(start);
+    const paddedStart = Array.from({ length: startDay }, (_, i) => 
+      addDays(start, -(startDay - i))
+    );
+    
+    // Pad end of month
+    const endDay = getDay(end);
+    const paddedEnd = Array.from({ length: 6 - endDay }, (_, i) => 
+      addDays(end, i + 1)
+    );
+    
+    return [...paddedStart, ...days, ...paddedEnd];
+  };
+
+  const getItemsForDate = (date) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    const dayInspections = inspections.filter(i => i.scheduled_date === dateStr);
+    const dayTasks = tasks.filter(t => t.due_date === dateStr);
+    return { inspections: dayInspections, tasks: dayTasks };
+  };
+
+  const navigatePrev = () => {
+    if (view === 'week') {
+      setCurrentDate(subWeeks(currentDate, 1));
+    } else {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    }
+  };
+
+  const navigateNext = () => {
+    if (view === 'week') {
+      setCurrentDate(addWeeks(currentDate, 1));
+    } else {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    }
+  };
+
+  const DayCard = ({ date, compact = false }) => {
+    const { inspections: dayInspections, tasks: dayTasks } = getItemsForDate(date);
+    const isCurrentDay = isToday(date);
+    
+    return (
+      <div 
+        className={`min-h-[120px] ${compact ? 'min-h-[80px]' : ''} border-r last:border-r-0 ${
+          isCurrentDay ? 'bg-blue-50' : ''
+        }`}
+      >
+        <div className={`p-2 border-b text-center ${isCurrentDay ? 'bg-blue-100' : 'bg-slate-50'}`}>
+          <p className="text-xs text-slate-500 uppercase">{format(date, 'EEE')}</p>
+          <p className={`text-lg font-semibold ${isCurrentDay ? 'text-blue-700' : ''}`}>
+            {format(date, 'd')}
+          </p>
+        </div>
+        <div className="p-1 space-y-1 max-h-[200px] overflow-y-auto">
+          {dayInspections.map((inspection) => {
+            const property = getProperty(inspection.property_id);
+            return (
+              <Link
+                key={inspection.id}
+                to={createPageUrl('InspectionDetail') + `?id=${inspection.id}`}
+                className={`block p-1.5 rounded text-xs ${
+                  inspection.status === 'completed' 
+                    ? 'bg-emerald-100 text-emerald-800' 
+                    : inspection.status === 'in_progress'
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-blue-100 text-blue-800'
+                } hover:opacity-80 transition-opacity`}
+              >
+                <div className="font-medium truncate">{property?.name || property?.address?.slice(0, 15)}</div>
+                {inspection.scheduled_time && (
+                  <div className="text-[10px] opacity-75">{inspection.scheduled_time}</div>
+                )}
+              </Link>
+            );
+          })}
+          {dayTasks.map((task) => (
+            <Link
+              key={task.id}
+              to={createPageUrl('Tasks')}
+              className={`block p-1.5 rounded text-xs ${
+                task.status === 'completed'
+                  ? 'bg-slate-100 text-slate-600 line-through'
+                  : task.priority === 'urgent'
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-purple-100 text-purple-800'
+              } hover:opacity-80 transition-opacity`}
+            >
+              <div className="font-medium truncate">{task.title}</div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <PageHeader
+        title="Schedule"
+        subtitle="View and manage inspections and tasks"
+        action={() => navigate(createPageUrl('Inspections') + '?action=new')}
+        actionLabel="New Inspection"
+      />
+
+      {/* Calendar Controls */}
+      <Card className="mb-6">
+        <CardContent className="py-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Button variant="outline" size="icon" onClick={navigatePrev}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <h2 className="text-lg font-semibold min-w-[200px] text-center">
+                {view === 'week' 
+                  ? `${format(startOfWeek(currentDate), 'MMM d')} - ${format(endOfWeek(currentDate), 'MMM d, yyyy')}`
+                  : format(currentDate, 'MMMM yyyy')
+                }
+              </h2>
+              <Button variant="outline" size="icon" onClick={navigateNext}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setCurrentDate(new Date())}
+              >
+                Today
+              </Button>
+              <Tabs value={view} onValueChange={setView}>
+                <TabsList>
+                  <TabsTrigger value="week">Week</TabsTrigger>
+                  <TabsTrigger value="month">Month</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Week View */}
+      {view === 'week' && (
+        <Card className="overflow-hidden">
+          <div className="grid grid-cols-7 border-b">
+            {getWeekDays().map((date, i) => (
+              <DayCard key={i} date={date} />
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Month View */}
+      {view === 'month' && (
+        <Card className="overflow-hidden">
+          <div className="grid grid-cols-7">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+              <div key={day} className="p-2 text-center text-sm font-medium text-slate-500 bg-slate-50 border-b">
+                {day}
+              </div>
+            ))}
+            {getMonthDays().map((date, i) => {
+              const isCurrentMonth = date.getMonth() === currentDate.getMonth();
+              return (
+                <div
+                  key={i}
+                  className={`min-h-[100px] border-b border-r last:border-r-0 ${
+                    !isCurrentMonth ? 'bg-slate-50 opacity-50' : ''
+                  } ${isToday(date) ? 'bg-blue-50' : ''}`}
+                >
+                  <div className={`p-1 text-right ${isToday(date) ? 'font-bold text-blue-700' : ''}`}>
+                    <span className="text-sm">{format(date, 'd')}</span>
+                  </div>
+                  <div className="px-1 space-y-0.5">
+                    {getItemsForDate(date).inspections.slice(0, 3).map((inspection) => {
+                      const property = getProperty(inspection.property_id);
+                      return (
+                        <Link
+                          key={inspection.id}
+                          to={createPageUrl('InspectionDetail') + `?id=${inspection.id}`}
+                          className={`block px-1 py-0.5 rounded text-[10px] truncate ${
+                            inspection.status === 'completed' 
+                              ? 'bg-emerald-100 text-emerald-800' 
+                              : 'bg-blue-100 text-blue-800'
+                          }`}
+                        >
+                          {property?.name || property?.address?.slice(0, 10)}
+                        </Link>
+                      );
+                    })}
+                    {getItemsForDate(date).inspections.length > 3 && (
+                      <div className="text-[10px] text-slate-500 px-1">
+                        +{getItemsForDate(date).inspections.length - 3} more
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      )}
+
+      {/* Legend */}
+      <div className="flex flex-wrap gap-4 mt-4 text-sm">
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-3 rounded bg-blue-100 border border-blue-200" />
+          <span className="text-slate-600">Scheduled</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-3 rounded bg-amber-100 border border-amber-200" />
+          <span className="text-slate-600">In Progress</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-3 rounded bg-emerald-100 border border-emerald-200" />
+          <span className="text-slate-600">Completed</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-3 rounded bg-purple-100 border border-purple-200" />
+          <span className="text-slate-600">Task</span>
+        </div>
+      </div>
+    </div>
+  );
+}

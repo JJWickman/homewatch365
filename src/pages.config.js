@@ -8,6 +8,9 @@ import PropertyDetail from './pages/PropertyDetail';
 import Inspections from './pages/Inspections';
 import InspectionDetail from './pages/InspectionDetail';
 import InspectionFlow from './pages/InspectionFlow';
+import Schedule from './pages/Schedule';
+import Tasks from './pages/Tasks';
+import Settings from './pages/Settings';
 import __Layout from './Layout.jsx';
 
 
@@ -22,6 +25,9 @@ export const PAGES = {
     "Inspections": Inspections,
     "InspectionDetail": InspectionDetail,
     "InspectionFlow": InspectionFlow,
+    "Schedule": Schedule,
+    "Tasks": Tasks,
+    "Settings": Settings,
 }
 
 export const pagesConfig = {
