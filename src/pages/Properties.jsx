@@ -39,6 +39,16 @@ export default function Properties() {
     loadProperties();
   }, []);
 
+  useEffect(() => {
+    // Subscribe to property updates
+    const unsubscribe = base44.entities.Property.subscribe((event) => {
+      if (event.type === 'update') {
+        setProperties(prev => prev.map(p => p.id === event.id ? event.data : p));
+      }
+    });
+    return unsubscribe;
+  }, []);
+
   const loadProperties = async () => {
     try {
       const user = await base44.auth.me();
