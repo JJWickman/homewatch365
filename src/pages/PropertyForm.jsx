@@ -7,6 +7,13 @@ import {
   Building2, MapPin, Key, Wifi, Phone, Calendar,
   Save, X, Upload, Plus, Trash2, User, MapPinCheckInside, Loader
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +46,9 @@ export default function PropertyForm() {
   const [autocompleteList, setAutocompleteList] = useState([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [showCreateClientDialog, setShowCreateClientDialog] = useState(false);
+  const [newClientData, setNewClientData] = useState({ first_name: '', last_name: '', email: '' });
+  const [creatingClient, setCreatingClient] = useState(false);
   const validateTimeoutRef = React.useRef(null);
   const autocompleteServiceRef = React.useRef(null);
   const placesServiceRef = React.useRef(null);
@@ -329,6 +339,35 @@ export default function PropertyForm() {
     }
   };
 
+  const handleCreateClient = async () => {
+    if (!newClientData.first_name || !newClientData.last_name || !newClientData.email || !companyId) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    setCreatingClient(true);
+    try {
+      const newClient = await base44.entities.Client.create({
+        company_id: companyId,
+        first_name: newClientData.first_name,
+        last_name: newClientData.last_name,
+        email: newClientData.email,
+        is_active: true
+      });
+
+      setClients(prev => [...prev, newClient]);
+      setFormData(prev => ({ ...prev, client_id: newClient.id }));
+      setShowCreateClientDialog(false);
+      setNewClientData({ first_name: '', last_name: '', email: '' });
+      toast.success('Client created successfully');
+    } catch (error) {
+      console.error('Error creating client:', error);
+      toast.error('Error creating client');
+    } finally {
+      setCreatingClient(false);
+    }
+  };
+
   const handleUseLocation = async () => {
     setGettingLocation(true);
     try {
@@ -490,11 +529,21 @@ export default function PropertyForm() {
            <CardContent>
              <div>
                <Label htmlFor="client_id">Select Client *</Label>
-               <Select value={formData.client_id} onValueChange={(value) => handleChange('client_id', value)}>
+               <Select value={formData.client_id} onValueChange={(value) => {
+                 if (value === 'create-new') {
+                   setShowCreateClientDialog(true);
+                 } else {
+                   handleChange('client_id', value);
+                 }
+               }}>
                  <SelectTrigger className="w-full">
                    <SelectValue placeholder="Choose a client" />
                  </SelectTrigger>
                  <SelectContent>
+                   <SelectItem value="create-new">
+                     <Plus className="h-4 w-4 inline mr-2" />
+                     Create New Client
+                   </SelectItem>
                    {clients.map(client => (
                      <SelectItem key={client.id} value={client.id}>
                        {client.first_name} {client.last_name}
@@ -919,6 +968,62 @@ export default function PropertyForm() {
           </Button>
         </div>
       </form>
+
+      {/* Create Client Dialog */}
+      <Dialog open={showCreateClientDialog} onOpenChange={setShowCreateClientDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New Client</DialogTitle>
+            <DialogDescription>Add a new client to your property management system</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="new_first_name">First Name *</Label>
+              <Input
+                id="new_first_name"
+                value={newClientData.first_name}
+                onChange={(e) => setNewClientData(prev => ({ ...prev, first_name: e.target.value }))}
+                placeholder="John"
+              />
+            </div>
+            <div>
+              <Label htmlFor="new_last_name">Last Name *</Label>
+              <Input
+                id="new_last_name"
+                value={newClientData.last_name}
+                onChange={(e) => setNewClientData(prev => ({ ...prev, last_name: e.target.value }))}
+                placeholder="Doe"
+              />
+            </div>
+            <div>
+              <Label htmlFor="new_email">Email *</Label>
+              <Input
+                id="new_email"
+                type="email"
+                value={newClientData.email}
+                onChange={(e) => setNewClientData(prev => ({ ...prev, email: e.target.value }))}
+                placeholder="john@example.com"
+              />
+            </div>
+            <div className="flex gap-3 justify-end pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowCreateClientDialog(false)}
+                disabled={creatingClient}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateClient}
+                disabled={creatingClient}
+                className="bg-slate-900 hover:bg-slate-800"
+              >
+                {creatingClient ? 'Creating...' : 'Create Client'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
