@@ -5,7 +5,7 @@ import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { 
   Building2, MapPin, Key, Wifi, Phone, Calendar,
-  Save, X, Upload, Plus, Trash2, User, AlertCircle, CheckCircle
+  Save, X, Upload, Plus, Trash2, User
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
