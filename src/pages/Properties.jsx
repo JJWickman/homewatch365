@@ -34,6 +34,8 @@ export default function Properties() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [companyId, setCompanyId] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadProperties();
