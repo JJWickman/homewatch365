@@ -664,12 +664,41 @@ export default function PropertyForm() {
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="address">Street Address *</Label>
-              <Input
-                id="address"
-                value={formData.address}
-                onChange={(e) => handleAddressChange('address', e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) => handleAddressChange('address', e.target.value)}
+                  onFocus={() => formData.address.length > 2 && setShowAutocomplete(true)}
+                  required
+                  placeholder="Type an address to search..."
+                />
+                {showAutocomplete && autocompleteList.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto mt-1">
+                    {autocompleteList.map((prediction) => (
+                      <div
+                        key={prediction.place_id}
+                        onClick={() => handleSelectAddress(prediction)}
+                        className="px-4 py-2.5 cursor-pointer hover:bg-slate-50 border-b border-slate-100 last:border-b-0 text-sm"
+                      >
+                        <div className="font-medium text-slate-900">{prediction.main_text}</div>
+                        <div className="text-xs text-slate-500">{prediction.secondary_text}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleUseLocation}
+                disabled={gettingLocation}
+                className="mt-2 w-full"
+              >
+                <MapPinCheckInside className="h-4 w-4 mr-2" />
+                {gettingLocation ? 'Getting location...' : 'Use My Location'}
+              </Button>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                <div className="col-span-2">
