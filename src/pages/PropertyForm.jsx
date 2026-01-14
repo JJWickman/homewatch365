@@ -436,21 +436,7 @@ export default function PropertyForm() {
               </div>
             </div>
 
-            {/* Address Validation Status */}
-            {addressValidation && (
-              <div className={`flex items-start gap-3 p-3 rounded-lg ${addressValidation.valid ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'}`}>
-                {addressValidation.valid ? (
-                  <CheckCircle className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0" />
-                ) : (
-                  <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
-                )}
-                <div>
-                  <p className={`text-sm font-medium ${addressValidation.valid ? 'text-emerald-900' : 'text-red-900'}`}>
-                    {addressValidation.message}
-                  </p>
-                </div>
-              </div>
-            )}
+
           </CardContent>
         </Card>
 
