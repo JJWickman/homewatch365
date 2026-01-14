@@ -403,10 +403,7 @@ export default function PropertyForm() {
               <Input
                 id="address"
                 value={formData.address}
-                onChange={(e) => {
-                  handleChange('address', e.target.value);
-                  setAddressValidation(null);
-                }}
+                onChange={(e) => handleChange('address', e.target.value)}
                 required
               />
             </div>
