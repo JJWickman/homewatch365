@@ -34,6 +34,7 @@ export default function PropertyForm() {
   const [fetchingImage, setFetchingImage] = useState(false);
   const [validatingAddress, setValidatingAddress] = useState(false);
   const [addressValidation, setAddressValidation] = useState(null);
+  const [streetViewUrl, setStreetViewUrl] = useState(null);
   
   const [formData, setFormData] = useState({
     client_id: '',
