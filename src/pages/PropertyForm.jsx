@@ -429,12 +429,9 @@ export default function PropertyForm() {
               <div>
                 <Label htmlFor="zip">ZIP</Label>
                 <Input
-                  id="zip"
-                  value={formData.zip}
-                  onChange={(e) => {
-                    handleChange('zip', e.target.value);
-                    setAddressValidation(null);
-                  }}
+                   id="zip"
+                   value={formData.zip}
+                   onChange={(e) => handleChange('zip', e.target.value)}
                 />
               </div>
             </div>
