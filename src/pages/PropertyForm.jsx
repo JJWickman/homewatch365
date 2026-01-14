@@ -303,8 +303,10 @@ export default function PropertyForm() {
 
       if (propertyId) {
         await base44.entities.Property.update(propertyId, data);
+        toast.success('Property updated successfully');
       } else {
         await base44.entities.Property.create(data);
+        toast.success('Property created successfully');
       }
 
       navigate(createPageUrl('Properties'));
