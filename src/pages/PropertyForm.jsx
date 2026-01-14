@@ -399,16 +399,7 @@ export default function PropertyForm() {
                 className="w-full"
                 onClick={validateAndFetchGoogleImage}
               >
-                {validatingAddress ? 'Validating...' : 'Google Maps'}
-              </Button>
-              <Button 
-                type="button" 
-                variant="outline"
-                disabled={fetchingImage}
-                className="w-full"
-                onClick={fetchImageFromZillow}
-              >
-                {fetchingImage ? 'Generating...' : 'Generate Photo'}
+                {validatingAddress ? 'Validating...' : 'Fetch from Maps'}
               </Button>
             </div>
             <p className="text-xs text-slate-500">Full address required to fetch images</p>
