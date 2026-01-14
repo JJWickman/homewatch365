@@ -35,6 +35,8 @@ export default function PropertyForm() {
   const [validatingAddress, setValidatingAddress] = useState(false);
   const [addressValidation, setAddressValidation] = useState(null);
   const [streetViewUrl, setStreetViewUrl] = useState(null);
+  const [imageSource, setImageSource] = useState('auto'); // 'auto' or 'custom'
+  const validateTimeoutRef = React.useRef(null);
   
   const [formData, setFormData] = useState({
     client_id: '',
