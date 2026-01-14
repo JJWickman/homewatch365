@@ -420,13 +420,10 @@ export default function PropertyForm() {
               <div>
                 <Label htmlFor="state">State *</Label>
                 <Input
-                  id="state"
-                  value={formData.state}
-                  onChange={(e) => {
-                    handleChange('state', e.target.value);
-                    setAddressValidation(null);
-                  }}
-                  required
+                   id="state"
+                   value={formData.state}
+                   onChange={(e) => handleChange('state', e.target.value)}
+                   required
                 />
               </div>
               <div>
