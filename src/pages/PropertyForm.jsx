@@ -326,15 +326,12 @@ export default function PropertyForm() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {addressValidation && addressValidation.lat && addressValidation.lng && (
+            {streetViewUrl && (
               <div className="mb-4 w-full">
-                <iframe
-                  width="100%"
-                  height="300"
-                  frameBorder="0"
-                  src={`https://maps.googleapis.com/maps/api/streetview?size=100%x300&location=${addressValidation.lat},${addressValidation.lng}&heading=0&pitch=10&key=${Deno.env.get('GOOGLE_MAPS_API_KEY') || ''}`}
-                  className="rounded-lg border border-slate-200"
-                  title="Property Street View"
+                <img
+                  src={streetViewUrl}
+                  alt="Property Street View"
+                  className="w-full h-64 object-cover rounded-lg border border-slate-200"
                 />
               </div>
             )}
