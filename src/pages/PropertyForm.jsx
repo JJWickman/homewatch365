@@ -353,12 +353,20 @@ export default function PropertyForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             {formData.primary_photo_url && (
-              <div className="mb-4">
+              <div className="mb-4 relative">
                 <img 
                   src={formData.primary_photo_url} 
                   alt="Property preview"
                   className="w-full h-48 object-cover rounded-lg border border-slate-200"
                 />
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, primary_photo_url: '' }))}
+                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors"
+                  title="Remove photo"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
             )}
             <div className="flex flex-col sm:flex-row gap-3">
@@ -374,7 +382,7 @@ export default function PropertyForm() {
                   }}
                 >
                   <Upload className="h-4 w-4 mr-2" />
-                  {uploading ? 'Uploading...' : 'Upload Photo'}
+                  {uploading ? 'Uploading...' : formData.primary_photo_url ? 'Change Photo' : 'Upload Photo'}
                 </Button>
                 <input
                   id="photo-upload"
