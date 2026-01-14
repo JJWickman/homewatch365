@@ -11,6 +11,9 @@ import InspectionFlow from './pages/InspectionFlow';
 import Schedule from './pages/Schedule';
 import Tasks from './pages/Tasks';
 import Settings from './pages/Settings';
+import CompanyOnboarding from './pages/CompanyOnboarding';
+import ClientPortal from './pages/ClientPortal';
+import ClientInspectionView from './pages/ClientInspectionView';
 import __Layout from './Layout.jsx';
 
 
@@ -28,6 +31,9 @@ export const PAGES = {
     "Schedule": Schedule,
     "Tasks": Tasks,
     "Settings": Settings,
+    "CompanyOnboarding": CompanyOnboarding,
+    "ClientPortal": ClientPortal,
+    "ClientInspectionView": ClientInspectionView,
 }
 
 export const pagesConfig = {
