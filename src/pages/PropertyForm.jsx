@@ -145,7 +145,9 @@ export default function PropertyForm() {
     
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      // Compress image before uploading
+      const compressedFile = await compressImage(file);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: compressedFile });
       setFormData(prev => ({ ...prev, primary_photo_url: file_url }));
       toast.success('Photo uploaded successfully');
     } catch (error) {
@@ -154,6 +156,38 @@ export default function PropertyForm() {
     } finally {
       setUploading(false);
     }
+  };
+
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Reduce dimensions if too large
+          if (width > 1200) {
+            height = (height * 1200) / width;
+            width = 1200;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          canvas.toBlob((blob) => {
+            const compressedFile = new File([blob], file.name, { type: 'image/jpeg' });
+            resolve(compressedFile);
+          }, 'image/jpeg', 0.75);
+        };
+      };
+    });
   };
 
   const fetchImageFromGoogle = async () => {

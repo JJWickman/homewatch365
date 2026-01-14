@@ -1,39 +1,39 @@
-import Dashboard from './pages/Dashboard';
-import Clients from './pages/Clients';
-import ClientForm from './pages/ClientForm';
 import ClientDetail from './pages/ClientDetail';
-import Properties from './pages/Properties';
-import PropertyForm from './pages/PropertyForm';
-import PropertyDetail from './pages/PropertyDetail';
-import Inspections from './pages/Inspections';
+import ClientForm from './pages/ClientForm';
+import ClientInspectionView from './pages/ClientInspectionView';
+import ClientPortal from './pages/ClientPortal';
+import Clients from './pages/Clients';
+import CompanyOnboarding from './pages/CompanyOnboarding';
+import Dashboard from './pages/Dashboard';
 import InspectionDetail from './pages/InspectionDetail';
 import InspectionFlow from './pages/InspectionFlow';
+import Inspections from './pages/Inspections';
+import Properties from './pages/Properties';
+import PropertyDetail from './pages/PropertyDetail';
+import PropertyForm from './pages/PropertyForm';
 import Schedule from './pages/Schedule';
-import Tasks from './pages/Tasks';
 import Settings from './pages/Settings';
-import CompanyOnboarding from './pages/CompanyOnboarding';
-import ClientPortal from './pages/ClientPortal';
-import ClientInspectionView from './pages/ClientInspectionView';
+import Tasks from './pages/Tasks';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Dashboard": Dashboard,
-    "Clients": Clients,
-    "ClientForm": ClientForm,
     "ClientDetail": ClientDetail,
-    "Properties": Properties,
-    "PropertyForm": PropertyForm,
-    "PropertyDetail": PropertyDetail,
-    "Inspections": Inspections,
+    "ClientForm": ClientForm,
+    "ClientInspectionView": ClientInspectionView,
+    "ClientPortal": ClientPortal,
+    "Clients": Clients,
+    "CompanyOnboarding": CompanyOnboarding,
+    "Dashboard": Dashboard,
     "InspectionDetail": InspectionDetail,
     "InspectionFlow": InspectionFlow,
+    "Inspections": Inspections,
+    "Properties": Properties,
+    "PropertyDetail": PropertyDetail,
+    "PropertyForm": PropertyForm,
     "Schedule": Schedule,
-    "Tasks": Tasks,
     "Settings": Settings,
-    "CompanyOnboarding": CompanyOnboarding,
-    "ClientPortal": ClientPortal,
-    "ClientInspectionView": ClientInspectionView,
+    "Tasks": Tasks,
 }
 
 export const pagesConfig = {
