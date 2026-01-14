@@ -328,7 +328,14 @@ export default function PropertyForm() {
         subtitle="Enter property details and access information"
         backLink="Properties"
         backLabel="Back to Properties"
-      />
+      >
+        <Button type="submit" form="property-form" disabled={saving} className="bg-slate-900 hover:bg-slate-800">
+          <Save className="h-4 w-4 mr-2" />
+          {saving ? 'Saving...' : (propertyId ? 'Update' : 'Create')}
+        </Button>
+      </PageHeader>
+
+      <form id="property-form" onSubmit={handleSubmit} className="space-y-6">
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Property Photo */}
