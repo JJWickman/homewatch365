@@ -5,6 +5,9 @@ import ClientDetail from './pages/ClientDetail';
 import Properties from './pages/Properties';
 import PropertyForm from './pages/PropertyForm';
 import PropertyDetail from './pages/PropertyDetail';
+import Inspections from './pages/Inspections';
+import InspectionDetail from './pages/InspectionDetail';
+import InspectionFlow from './pages/InspectionFlow';
 import __Layout from './Layout.jsx';
 
 
@@ -16,6 +19,9 @@ export const PAGES = {
     "Properties": Properties,
     "PropertyForm": PropertyForm,
     "PropertyDetail": PropertyDetail,
+    "Inspections": Inspections,
+    "InspectionDetail": InspectionDetail,
+    "InspectionFlow": InspectionFlow,
 }
 
 export const pagesConfig = {
