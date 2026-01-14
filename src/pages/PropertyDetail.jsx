@@ -103,7 +103,7 @@ export default function PropertyDetail() {
       <Card className="mb-6 overflow-hidden">
         <div className="aspect-[3/1] bg-slate-100 relative">
           <img 
-            src={`https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(property.address + ', ' + property.city + ', ' + property.state + ' ' + property.zip)}&zoom=17&size=1200x400&maptype=roadmap&markers=color:red%7C${encodeURIComponent(property.address + ', ' + property.city + ', ' + property.state + ' ' + property.zip)}`}
+            src={property.primary_photo_url || `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(property.address + ', ' + property.city + ', ' + property.state + ' ' + property.zip)}&zoom=17&size=1200x400&maptype=roadmap&markers=color:red%7C${encodeURIComponent(property.address + ', ' + property.city + ', ' + property.state + ' ' + property.zip)}`}
             alt={property.name || property.address}
             className="w-full h-full object-cover"
           />
