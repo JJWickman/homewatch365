@@ -317,66 +317,37 @@ export default function PropertyForm() {
       <form id="property-form" onSubmit={handleSubmit} className="space-y-6">
 
 
-        {/* Property Photo */}
+        {/* Property Location Preview */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              Property Photo
+              <MapPin className="h-5 w-5" />
+              Location Preview
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {formData.primary_photo_url && (
-              <div className="mb-4 relative">
-                <img 
-                  src={formData.primary_photo_url} 
-                  alt="Property preview"
-                  className="w-full h-48 object-cover rounded-lg border border-slate-200"
+            {addressValidation && addressValidation.lat && addressValidation.lng && (
+              <div className="mb-4 w-full">
+                <iframe
+                  width="100%"
+                  height="300"
+                  frameBorder="0"
+                  src={`https://maps.googleapis.com/maps/api/streetview?size=100%x300&location=${addressValidation.lat},${addressValidation.lng}&heading=0&pitch=10&key=${Deno.env.get('GOOGLE_MAPS_API_KEY') || ''}`}
+                  className="rounded-lg border border-slate-200"
+                  title="Property Street View"
                 />
-                <button
-                  type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, primary_photo_url: '' }))}
-                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors"
-                  title="Remove photo"
-                >
-                  <X className="h-4 w-4" />
-                </button>
               </div>
             )}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <label>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  disabled={uploading}
-                  className="w-full"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById('photo-upload').click();
-                  }}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  {uploading ? 'Uploading...' : formData.primary_photo_url ? 'Change Photo' : 'Upload Photo'}
-                </Button>
-                <input
-                  id="photo-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoUpload}
-                  className="hidden"
-                />
-              </label>
-              <Button 
-                type="button" 
-                variant="outline"
-                disabled={validatingAddress}
-                className="w-full"
-                onClick={validateAndFetchGoogleImage}
-              >
-                {validatingAddress ? 'Validating...' : 'Fetch from Maps'}
-              </Button>
-            </div>
-            <p className="text-xs text-slate-500">Full address required to fetch images</p>
+            <Button 
+              type="button" 
+              variant="outline"
+              disabled={validatingAddress}
+              className="w-full"
+              onClick={validateAndFetchGoogleImage}
+            >
+              {validatingAddress ? 'Validating...' : 'Load Location'}
+            </Button>
+            <p className="text-xs text-slate-500">Full address required to preview location</p>
           </CardContent>
         </Card>
 
