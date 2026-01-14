@@ -32,6 +32,8 @@ export default function PropertyForm() {
   const [clients, setClients] = useState([]);
   const [staff, setStaff] = useState([]);
   const [fetchingImage, setFetchingImage] = useState(false);
+  const [validatingAddress, setValidatingAddress] = useState(false);
+  const [addressValidation, setAddressValidation] = useState(null);
   
   const [formData, setFormData] = useState({
     client_id: '',
