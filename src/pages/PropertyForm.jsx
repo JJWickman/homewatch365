@@ -191,23 +191,39 @@ export default function PropertyForm() {
     });
   };
 
-  const fetchImageFromGoogle = async () => {
+  const validateAndFetchGoogleImage = async () => {
     if (!formData.address || !formData.city || !formData.state) {
       toast.error('Please fill in address, city, and state');
       return;
     }
 
-    setFetchingImage(true);
+    setValidatingAddress(true);
     try {
-      const fullAddress = `${formData.address}, ${formData.city}, ${formData.state}${formData.zip ? ' ' + formData.zip : ''}`;
-      const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(fullAddress)}&zoom=17&size=1200x400&maptype=roadmap&markers=color:red%7C${encodeURIComponent(fullAddress)}`;
-      setFormData(prev => ({ ...prev, primary_photo_url: mapImageUrl }));
-      toast.success('Google Maps image set');
+      const response = await base44.functions.invoke('testGoogleMapsAPI', {
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zip: formData.zip
+      });
+
+      if (response.data.validation.isValid) {
+        setAddressValidation(response.data.validation);
+        // Use street view image if available
+        setFormData(prev => ({ 
+          ...prev, 
+          primary_photo_url: response.data.streetViewUrl,
+          latitude: response.data.validation.lat,
+          longitude: response.data.validation.lng
+        }));
+        toast.success('Address validated and image loaded');
+      } else {
+        toast.error('Address could not be validated');
+      }
     } catch (error) {
-      console.error('Error fetching Google Maps image:', error);
-      toast.error('Error fetching image');
+      console.error('Error validating address:', error);
+      toast.error('Error validating address');
     } finally {
-      setFetchingImage(false);
+      setValidatingAddress(false);
     }
   };
 
