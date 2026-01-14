@@ -331,14 +331,78 @@ export default function PropertyForm() {
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Address */}
+        {/* Property Photo */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              Address
+              <Building2 className="h-5 w-5" />
+              Property Photo
             </CardTitle>
           </CardHeader>
+          <CardContent className="space-y-4">
+            {formData.primary_photo_url && (
+              <div className="mb-4">
+                <img 
+                  src={formData.primary_photo_url} 
+                  alt="Property preview"
+                  className="w-full h-48 object-cover rounded-lg border border-slate-200"
+                />
+              </div>
+            )}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <label>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  disabled={uploading}
+                  className="w-full"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('photo-upload').click();
+                  }}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {uploading ? 'Uploading...' : 'Upload Photo'}
+                </Button>
+                <input
+                  id="photo-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
+              </label>
+              <Button 
+                type="button" 
+                variant="outline"
+                disabled={fetchingImage}
+                className="w-full"
+                onClick={fetchImageFromGoogle}
+              >
+                {fetchingImage ? 'Loading...' : 'Google Maps'}
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline"
+                disabled={fetchingImage}
+                className="w-full"
+                onClick={fetchImageFromZillow}
+              >
+                {fetchingImage ? 'Generating...' : 'Generate Photo'}
+              </Button>
+            </div>
+            <p className="text-xs text-slate-500">Full address required to fetch images</p>
+          </CardContent>
+        </Card>
+
+        {/* Address */}
+         <Card>
+           <CardHeader>
+             <CardTitle className="text-lg flex items-center gap-2">
+               <MapPin className="h-5 w-5" />
+               Address
+             </CardTitle>
+           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="address">Street Address *</Label>
