@@ -209,14 +209,13 @@ export default function PropertyForm() {
 
       if (response.data.validation.isValid) {
         setAddressValidation(response.data.validation);
-        // Use street view image if available
+        setStreetViewUrl(response.data.streetViewUrl);
         setFormData(prev => ({ 
           ...prev, 
-          primary_photo_url: response.data.streetViewUrl,
           latitude: response.data.validation.lat,
           longitude: response.data.validation.lng
         }));
-        toast.success('Address validated and image loaded');
+        toast.success('Address validated');
       } else {
         toast.error('Address could not be validated');
       }
