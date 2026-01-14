@@ -408,7 +408,7 @@ export default function PropertyForm() {
               <Input
                 id="address"
                 value={formData.address}
-                onChange={(e) => handleChange('address', e.target.value)}
+                onChange={(e) => handleAddressChange('address', e.target.value)}
                 required
               />
             </div>
@@ -418,7 +418,7 @@ export default function PropertyForm() {
                  <Input
                     id="city"
                     value={formData.city}
-                    onChange={(e) => handleChange('city', e.target.value)}
+                    onChange={(e) => handleAddressChange('city', e.target.value)}
                     required
                  />
                </div>
@@ -427,7 +427,7 @@ export default function PropertyForm() {
                  <Input
                     id="state"
                     value={formData.state}
-                    onChange={(e) => handleChange('state', e.target.value)}
+                    onChange={(e) => handleAddressChange('state', e.target.value)}
                     required
                  />
                </div>
@@ -436,7 +436,7 @@ export default function PropertyForm() {
                  <Input
                     id="zip"
                     value={formData.zip}
-                    onChange={(e) => handleChange('zip', e.target.value)}
+                    onChange={(e) => handleAddressChange('zip', e.target.value)}
                  />
                </div>
             </div>
