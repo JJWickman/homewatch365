@@ -101,12 +101,16 @@ export default function PropertyDetail() {
 
       {/* Hero Image */}
       <Card className="mb-6 overflow-hidden">
-        <div className="aspect-[3/1] bg-slate-100 relative">
-          <img 
-            src={property.primary_photo_url || `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(property.address + ', ' + property.city + ', ' + property.state + ' ' + property.zip)}&zoom=17&size=1200x400&maptype=roadmap&markers=color:red%7C${encodeURIComponent(property.address + ', ' + property.city + ', ' + property.state + ' ' + property.zip)}`}
-            alt={property.name || property.address}
-            className="w-full h-full object-cover"
-          />
+        <div className="aspect-[3/1] bg-slate-100 relative flex items-center justify-center">
+          {property.primary_photo_url ? (
+            <img 
+              src={property.primary_photo_url}
+              alt={property.name || property.address}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="text-slate-400">No photo uploaded</div>
+          )}
           <div className="absolute top-4 right-4">
             <StatusBadge status={property.status} />
           </div>
