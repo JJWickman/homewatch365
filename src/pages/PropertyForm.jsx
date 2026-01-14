@@ -194,39 +194,49 @@ export default function PropertyForm() {
     });
   };
 
-  const validateAndFetchGoogleImage = async () => {
-    if (!formData.address || !formData.city || !formData.state) {
-      toast.error('Please fill in address, city, and state');
+  const validateAndFetchGoogleImage = async (address, city, state, zip) => {
+    if (!address || !city || !state) {
       return;
     }
 
-    setValidatingAddress(true);
     try {
       const response = await base44.functions.invoke('testGoogleMapsAPI', {
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zip: formData.zip
+        address,
+        city,
+        state,
+        zip
       });
 
       if (response.data.validation.isValid) {
         setAddressValidation(response.data.validation);
         setStreetViewUrl(response.data.streetViewUrl);
+        setImageSource('auto');
         setFormData(prev => ({ 
           ...prev, 
+          primary_photo_url: response.data.streetViewUrl,
           latitude: response.data.validation.lat,
           longitude: response.data.validation.lng
         }));
-        toast.success('Address validated');
-      } else {
-        toast.error('Address could not be validated');
       }
     } catch (error) {
       console.error('Error validating address:', error);
-      toast.error('Error validating address');
-    } finally {
-      setValidatingAddress(false);
     }
+  };
+
+  const handleAddressChange = (field, value) => {
+    handleChange(field, value);
+
+    // Debounce auto-validation
+    if (validateTimeoutRef.current) {
+      clearTimeout(validateTimeoutRef.current);
+    }
+
+    validateTimeoutRef.current = setTimeout(() => {
+      const updatedForm = { ...formData, [field]: value };
+      if (updatedForm.address && updatedForm.city && updatedForm.state) {
+        validateAndFetchGoogleImage(updatedForm.address, updatedForm.city, updatedForm.state, updatedForm.zip);
+      }
+    }, 800);
   };
 
 
