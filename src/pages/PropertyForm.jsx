@@ -337,7 +337,7 @@ export default function PropertyForm() {
 
       <form id="property-form" onSubmit={handleSubmit} className="space-y-6">
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+
         {/* Property Photo */}
         <Card>
           <CardHeader>
