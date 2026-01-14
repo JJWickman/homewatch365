@@ -426,33 +426,40 @@ export default function PropertyForm() {
               />
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="col-span-2">
-                <Label htmlFor="city">City *</Label>
-                <Input
-                   id="city"
-                   value={formData.city}
-                   onChange={(e) => handleChange('city', e.target.value)}
-                   required
-                />
-              </div>
-              <div>
-                <Label htmlFor="state">State *</Label>
-                <Input
-                   id="state"
-                   value={formData.state}
-                   onChange={(e) => handleChange('state', e.target.value)}
-                   required
-                />
-              </div>
-              <div>
-                <Label htmlFor="zip">ZIP</Label>
-                <Input
-                   id="zip"
-                   value={formData.zip}
-                   onChange={(e) => handleChange('zip', e.target.value)}
-                />
-              </div>
+               <div className="col-span-2">
+                 <Label htmlFor="city">City *</Label>
+                 <Input
+                    id="city"
+                    value={formData.city}
+                    onChange={(e) => handleChange('city', e.target.value)}
+                    required
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="state">State *</Label>
+                 <Input
+                    id="state"
+                    value={formData.state}
+                    onChange={(e) => handleChange('state', e.target.value)}
+                    required
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="zip">ZIP</Label>
+                 <Input
+                    id="zip"
+                    value={formData.zip}
+                    onChange={(e) => handleChange('zip', e.target.value)}
+                 />
+               </div>
             </div>
+
+            {addressValidation && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm">
+                <p className="text-green-800 font-medium">✓ Address Validated</p>
+                <p className="text-green-700 text-xs mt-1">{addressValidation.formattedAddress}</p>
+              </div>
+            )}
 
 
           </CardContent>
