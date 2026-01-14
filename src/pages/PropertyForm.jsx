@@ -235,49 +235,7 @@ export default function PropertyForm() {
     }
   };
 
-  const validateAddress = async () => {
-    if (!formData.address || !formData.city || !formData.state) {
-      toast.error('Please fill in address, city, and state');
-      return false;
-    }
 
-    setValidatingAddress(true);
-    try {
-      const response = await base44.functions.validatePropertyAddress({
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zip: formData.zip
-      });
-
-      if (response.valid) {
-        setAddressValidation({
-          valid: true,
-          message: 'Address verified successfully',
-          latitude: response.latitude,
-          longitude: response.longitude
-        });
-        toast.success('Address verified');
-        return true;
-      } else {
-        setAddressValidation({
-          valid: false,
-          message: response.error || 'Address could not be verified'
-        });
-        toast.error(response.error || 'Address validation failed');
-        return false;
-      }
-    } catch (error) {
-      setAddressValidation({
-        valid: false,
-        message: error.message || 'Address validation error'
-      });
-      toast.error('Address validation error');
-      return false;
-    } finally {
-      setValidatingAddress(false);
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
