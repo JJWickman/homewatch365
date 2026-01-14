@@ -329,36 +329,70 @@ export default function PropertyForm() {
       <form id="property-form" onSubmit={handleSubmit} className="space-y-6">
 
 
-        {/* Property Location Preview */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              Location Preview
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {streetViewUrl && (
-              <div className="mb-4 w-full">
+        {/* Property Photo */}
+        {streetViewUrl && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Property Photo
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
                 <img
                   src={streetViewUrl}
                   alt="Property Street View"
                   className="w-full h-64 object-cover rounded-lg border border-slate-200"
                 />
+                <p className="text-sm text-slate-600">
+                  {imageSource === 'auto' ? 
+                    'This photo was automatically fetched from Google Maps.' : 
+                    'This is your uploaded custom photo.'
+                  }
+                </p>
               </div>
-            )}
-            <Button 
-              type="button" 
-              variant="outline"
-              disabled={validatingAddress}
-              className="w-full"
-              onClick={validateAndFetchGoogleImage}
-            >
-              {validatingAddress ? 'Validating...' : 'Load Location'}
-            </Button>
-            <p className="text-xs text-slate-500">Full address required to preview location</p>
-          </CardContent>
-        </Card>
+              <div className="flex gap-2">
+                {imageSource === 'auto' && (
+                  <label className="flex-1">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      disabled={uploading}
+                      className="w-full"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById('photo-upload').click();
+                      }}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      {uploading ? 'Uploading...' : 'Use Custom Photo'}
+                    </Button>
+                    <input
+                      id="photo-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => {
+                    setFormData(prev => ({ ...prev, primary_photo_url: '' }));
+                    setStreetViewUrl(null);
+                    setAddressValidation(null);
+                  }}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Remove
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Address */}
          <Card>
