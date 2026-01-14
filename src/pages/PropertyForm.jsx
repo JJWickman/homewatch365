@@ -387,11 +387,11 @@ export default function PropertyForm() {
               <Button 
                 type="button" 
                 variant="outline"
-                disabled={fetchingImage}
+                disabled={validatingAddress}
                 className="w-full"
-                onClick={fetchImageFromGoogle}
+                onClick={validateAndFetchGoogleImage}
               >
-                {fetchingImage ? 'Loading...' : 'Google Maps'}
+                {validatingAddress ? 'Validating...' : 'Google Maps'}
               </Button>
               <Button 
                 type="button" 
