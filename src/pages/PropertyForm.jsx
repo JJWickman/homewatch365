@@ -26,8 +26,7 @@ export default function PropertyForm() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [validatingAddress, setValidatingAddress] = useState(false);
-  const [addressValidation, setAddressValidation] = useState(null);
+
   const [companyId, setCompanyId] = useState(null);
   const [propertyId, setPropertyId] = useState(null);
   const [clients, setClients] = useState([]);
