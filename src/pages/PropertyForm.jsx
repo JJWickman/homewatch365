@@ -282,40 +282,6 @@ export default function PropertyForm() {
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Photo Upload */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-              <div className="w-40 h-28 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden shrink-0">
-                {formData.primary_photo_url ? (
-                  <img src={formData.primary_photo_url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <Building2 className="h-10 w-10 text-slate-300" />
-                )}
-              </div>
-              <div>
-                <h3 className="font-medium text-slate-900">Property Photo</h3>
-                <p className="text-sm text-slate-500 mb-3">Upload a primary photo for this property</p>
-                <Label htmlFor="photo-upload" className="cursor-pointer">
-                  <Button type="button" variant="outline" size="sm" disabled={uploading} asChild>
-                    <span>
-                      <Upload className="h-4 w-4 mr-2" />
-                      {uploading ? 'Uploading...' : 'Upload Photo'}
-                    </span>
-                  </Button>
-                </Label>
-                <input
-                  id="photo-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoUpload}
-                  className="hidden"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Address */}
         <Card>
           <CardHeader>
