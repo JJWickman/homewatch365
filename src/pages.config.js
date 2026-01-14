@@ -14,6 +14,7 @@ import PropertyForm from './pages/PropertyForm';
 import Schedule from './pages/Schedule';
 import Settings from './pages/Settings';
 import Tasks from './pages/Tasks';
+import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
 import __Layout from './Layout.jsx';
 
 
@@ -34,6 +35,7 @@ export const PAGES = {
     "Schedule": Schedule,
     "Settings": Settings,
     "Tasks": Tasks,
+    "TestGoogleMapsAPI": TestGoogleMapsAPI,
 }
 
 export const pagesConfig = {
