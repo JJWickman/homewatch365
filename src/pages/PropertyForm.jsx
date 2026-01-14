@@ -5,7 +5,7 @@ import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { 
   Building2, MapPin, Key, Wifi, Phone, Calendar,
-  Save, X, Upload, Plus, Trash2, User
+  Save, X, Upload, Plus, Trash2, User, MapPinCheckInside, Loader
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +36,12 @@ export default function PropertyForm() {
   const [addressValidation, setAddressValidation] = useState(null);
   const [streetViewUrl, setStreetViewUrl] = useState(null);
   const [imageSource, setImageSource] = useState('auto'); // 'auto' or 'custom'
+  const [autocompleteList, setAutocompleteList] = useState([]);
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [gettingLocation, setGettingLocation] = useState(false);
   const validateTimeoutRef = React.useRef(null);
+  const autocompleteServiceRef = React.useRef(null);
+  const placesServiceRef = React.useRef(null);
   
   const [formData, setFormData] = useState({
     client_id: '',
@@ -75,7 +80,22 @@ export default function PropertyForm() {
 
   useEffect(() => {
     loadData();
+    initializeGooglePlaces();
   }, []);
+
+  const initializeGooglePlaces = () => {
+    const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || 'AIzaSyBPbLVxQ6d5dBkDX_5MHQ9dHJZECXX';
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.async = true;
+    script.onload = () => {
+      if (window.google) {
+        autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+        placesServiceRef.current = new window.google.maps.places.PlacesService(document.createElement('div'));
+      }
+    };
+    document.body.appendChild(script);
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -228,17 +248,146 @@ export default function PropertyForm() {
   const handleAddressChange = (field, value) => {
     handleChange(field, value);
 
-    // Debounce auto-validation
-    if (validateTimeoutRef.current) {
-      clearTimeout(validateTimeoutRef.current);
-    }
+    if (field === 'address' && value.length > 2) {
+      setShowAutocomplete(true);
+      
+      if (validateTimeoutRef.current) {
+        clearTimeout(validateTimeoutRef.current);
+      }
 
-    validateTimeoutRef.current = setTimeout(() => {
+      validateTimeoutRef.current = setTimeout(async () => {
+        if (autocompleteServiceRef.current) {
+          try {
+            const predictions = await autocompleteServiceRef.current.getPlacePredictions({
+              input: value,
+              componentRestrictions: { country: 'us' }
+            });
+            setAutocompleteList(predictions.predictions || []);
+          } catch (error) {
+            console.error('Autocomplete error:', error);
+          }
+        }
+      }, 300);
+    } else if (field !== 'address') {
+      // For city/state/zip, validate when all three are filled
       const updatedForm = { ...formData, [field]: value };
       if (updatedForm.address && updatedForm.city && updatedForm.state) {
         validateAndFetchGoogleImage(updatedForm.address, updatedForm.city, updatedForm.state, updatedForm.zip);
       }
-    }, 800);
+    }
+  };
+
+  const handleSelectAddress = async (prediction) => {
+    setShowAutocomplete(false);
+    setAutocompleteList([]);
+    
+    try {
+      // Get details for the selected place
+      const service = new window.google.maps.places.PlacesService(document.createElement('div'));
+      service.getDetails({ placeId: prediction.place_id }, (place, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && place) {
+          let address = '';
+          let city = '';
+          let state = '';
+          let zip = '';
+
+          // Parse address components
+          place.address_components?.forEach(component => {
+            const types = component.types;
+            if (types.includes('street_number')) {
+              address = component.short_name + ' ' + address;
+            }
+            if (types.includes('route')) {
+              address += component.short_name;
+            }
+            if (types.includes('locality')) {
+              city = component.long_name;
+            }
+            if (types.includes('administrative_area_level_1')) {
+              state = component.short_name;
+            }
+            if (types.includes('postal_code')) {
+              zip = component.long_name;
+            }
+          });
+
+          setFormData(prev => ({
+            ...prev,
+            address: address.trim(),
+            city,
+            state,
+            zip,
+            latitude: place.geometry.location.lat(),
+            longitude: place.geometry.location.lng()
+          }));
+
+          validateAndFetchGoogleImage(address.trim(), city, state, zip);
+        }
+      });
+    } catch (error) {
+      console.error('Error selecting address:', error);
+    }
+  };
+
+  const handleUseLocation = async () => {
+    setGettingLocation(true);
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+
+      const { latitude, longitude } = position.coords;
+      
+      // Use Google's reverse geocoding to get address
+      const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${Deno.env.get('GOOGLE_MAPS_API_KEY') || ''}`;
+      const response = await fetch(geocodingUrl);
+      const data = await response.json();
+
+      if (data.results && data.results.length > 0) {
+        const result = data.results[0];
+        let address = '';
+        let city = '';
+        let state = '';
+        let zip = '';
+
+        result.address_components?.forEach(component => {
+          const types = component.types;
+          if (types.includes('street_number')) {
+            address = component.short_name + ' ' + address;
+          }
+          if (types.includes('route')) {
+            address += component.short_name;
+          }
+          if (types.includes('locality')) {
+            city = component.long_name;
+          }
+          if (types.includes('administrative_area_level_1')) {
+            state = component.short_name;
+          }
+          if (types.includes('postal_code')) {
+            zip = component.long_name;
+          }
+        });
+
+        setFormData(prev => ({
+          ...prev,
+          address: address.trim(),
+          city,
+          state,
+          zip,
+          latitude,
+          longitude
+        }));
+
+        validateAndFetchGoogleImage(address.trim(), city, state, zip);
+        toast.success('Location detected and loaded');
+      }
+    } catch (error) {
+      console.error('Error getting location:', error);
+      toast.error('Unable to get your location. Please enable location services.');
+    } finally {
+      setGettingLocation(false);
+    }
   };
 
 
@@ -324,7 +473,7 @@ export default function PropertyForm() {
       >
         <Button type="submit" form="property-form" disabled={saving} className="bg-slate-900 hover:bg-slate-800">
           <Save className="h-4 w-4 mr-2" />
-          {saving ? 'Saving...' : (propertyId ? 'Update' : 'Create')}
+          {saving ? 'Saving...' : 'Save'}
         </Button>
       </PageHeader>
 
