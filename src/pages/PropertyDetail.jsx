@@ -22,6 +22,7 @@ export default function PropertyDetail() {
   const [client, setClient] = useState(null);
   const [inspections, setInspections] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [contractors, setContractors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [fetchingAerial, setFetchingAerial] = useState(false);
@@ -58,6 +59,14 @@ export default function PropertyDetail() {
           if (clientData.length > 0) {
             setClient(clientData[0]);
           }
+        }
+        
+        // Load contractors
+        if (prop.contractors && prop.contractors.length > 0) {
+          const contractorsData = await base44.entities.Contractor.filter({ 
+            id: { $in: prop.contractors } 
+          });
+          setContractors(contractorsData);
         }
       }
     } catch (error) {
@@ -307,6 +316,7 @@ export default function PropertyDetail() {
             <TabsList className="w-full justify-start mb-4">
               <TabsTrigger value="access">Access Info</TabsTrigger>
               <TabsTrigger value="inspections">Inspections</TabsTrigger>
+              <TabsTrigger value="contractors">Contractors</TabsTrigger>
               <TabsTrigger value="contacts">Contacts</TabsTrigger>
             </TabsList>
 
@@ -425,6 +435,53 @@ export default function PropertyDetail() {
                           </div>
                           <StatusBadge status={inspection.status} />
                         </Link>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="contractors">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Contractors
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {contractors.length === 0 ? (
+                    <p className="text-slate-400 italic text-center py-8">No contractors assigned</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {contractors.map((contractor) => (
+                        <div key={contractor.id} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <p className="font-medium text-slate-900">{contractor.business_name}</p>
+                              <p className="text-sm text-amber-600 capitalize font-medium">
+                                {contractor.contractor_type.replace('_', ' ')}
+                              </p>
+                            </div>
+                          </div>
+                          {contractor.contact_name && (
+                            <p className="text-sm text-slate-600 mb-2">Contact: {contractor.contact_name}</p>
+                          )}
+                          <div className="space-y-1 text-sm">
+                            {contractor.phone && (
+                              <a href={`tel:${contractor.phone}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+                                <Phone className="h-3.5 w-3.5" />
+                                {contractor.phone}
+                              </a>
+                            )}
+                            {contractor.email && (
+                              <a href={`mailto:${contractor.email}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mt-1">
+                                {contractor.email}
+                              </a>
+                            )}
+                          </div>
+                        </div>
                       ))}
                     </div>
                   )}

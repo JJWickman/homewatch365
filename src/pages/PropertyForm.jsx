@@ -38,6 +38,7 @@ export default function PropertyForm() {
   const [propertyId, setPropertyId] = useState(null);
   const [clients, setClients] = useState([]);
   const [staff, setStaff] = useState([]);
+  const [contractors, setContractors] = useState([]);
   const [fetchingImage, setFetchingImage] = useState(false);
   const [validatingAddress, setValidatingAddress] = useState(false);
   const [addressValidation, setAddressValidation] = useState(null);
@@ -76,6 +77,7 @@ export default function PropertyForm() {
     wifi_password: '',
     inspection_frequency: 'weekly',
     assigned_staff: [],
+    contractors: [],
     primary_photo_url: '',
     notes: '',
     emergency_contacts: [],
@@ -120,13 +122,15 @@ export default function PropertyForm() {
         const cId = members[0].company_id;
         setCompanyId(cId);
         
-        const [clientsData, staffData] = await Promise.all([
+        const [clientsData, staffData, contractorsData] = await Promise.all([
           base44.entities.Client.filter({ company_id: cId, is_active: true }),
-          base44.entities.CompanyMember.filter({ company_id: cId, is_active: true })
+          base44.entities.CompanyMember.filter({ company_id: cId, is_active: true }),
+          base44.entities.Contractor.filter({ company_id: cId, is_active: true })
         ]);
         
         setClients(clientsData);
         setStaff(staffData);
+        setContractors(contractorsData);
       }
 
       const params = new URLSearchParams(window.location.search);
@@ -162,6 +166,7 @@ export default function PropertyForm() {
             wifi_password: p.wifi_password || '',
             inspection_frequency: p.inspection_frequency || 'weekly',
             assigned_staff: p.assigned_staff || [],
+            contractors: p.contractors || [],
             primary_photo_url: p.primary_photo_url || '',
             notes: p.notes || '',
             emergency_contacts: p.emergency_contacts || [],
@@ -975,6 +980,62 @@ export default function PropertyForm() {
                   <SelectItem value="custom">Custom</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Contractors */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Contractors
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <Label>Select Contractors</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {contractors.map((contractor) => (
+                  <label
+                    key={contractor.id}
+                    className="flex items-start gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.contractors.includes(contractor.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setFormData(prev => ({
+                            ...prev,
+                            contractors: [...prev.contractors, contractor.id]
+                          }));
+                        } else {
+                          setFormData(prev => ({
+                            ...prev,
+                            contractors: prev.contractors.filter(id => id !== contractor.id)
+                          }));
+                        }
+                      }}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{contractor.business_name}</p>
+                      <p className="text-xs text-amber-600 capitalize">
+                        {contractor.contractor_type.replace('_', ' ')}
+                      </p>
+                      {contractor.phone && (
+                        <p className="text-xs text-slate-500 mt-1">{contractor.phone}</p>
+                      )}
+                    </div>
+                  </label>
+                ))}
+              </div>
+              {contractors.length === 0 && (
+                <p className="text-sm text-slate-500 text-center py-4">
+                  No contractors available. Add contractors from Settings.
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
