@@ -291,7 +291,7 @@ export default function Dashboard() {
               </p>
               <p className="text-sm text-amber-700">Review and address these issues as soon as possible.</p>
             </div>
-            <Link to={createPageUrl('Inspections') + '?filter=issues'}>
+            <Link to={createPageUrl('Issues')}>
               <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100">
                 View Issues
               </Button>
