@@ -532,7 +532,7 @@ export default function Marketing() {
                 rows={6}
               />
               <p className="text-xs text-slate-500 mt-2">
-                Available variables: {{'{'}}{'}client_name}}, {{'{'}}{'}property_name}}, {{'{'}}{'}company_name}}
+                Available variables: {`{client_name}, {property_name}, {company_name}`}
               </p>
             </div>
           </div>
