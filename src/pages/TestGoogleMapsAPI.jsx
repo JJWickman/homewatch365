@@ -55,6 +55,8 @@ export default function TestGoogleMapsAPI() {
             </CardHeader>
             <CardContent className="space-y-2">
               <p><strong>Valid:</strong> {result.validation.isValid ? 'Yes' : 'No'}</p>
+              <p><strong>Status:</strong> {result.validation.status}</p>
+              {result.validation.error && <p className="text-red-600"><strong>Error:</strong> {result.validation.error}</p>}
               <p><strong>Formatted Address:</strong> {result.validation.formattedAddress}</p>
               <p><strong>Latitude:</strong> {result.validation.lat}</p>
               <p><strong>Longitude:</strong> {result.validation.lng}</p>
