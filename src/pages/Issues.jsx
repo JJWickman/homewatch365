@@ -150,10 +150,13 @@ export default function Issues() {
   const handleAssigneeChange = async (issue, newAssignee) => {
     try {
       const assignedMember = staff.find(s => s.user_email === newAssignee);
-      await base44.entities.Issue.update(issue.id, { 
-        assigned_to: newAssignee,
-        assigned_to_name: assignedMember?.user_name || newAssignee
-      });
+      const updates = { 
+        assigned_to: newAssignee || null,
+        assigned_to_name: assignedMember?.user_name || null
+      };
+      // Optimistically update UI
+      setIssues(prev => prev.map(i => i.id === issue.id ? { ...i, ...updates } : i));
+      await base44.entities.Issue.update(issue.id, updates);
     } catch (error) {
       console.error('Error reassigning issue:', error);
     }
@@ -269,13 +272,14 @@ export default function Issues() {
                             </SelectContent>
                           </Select>
                           <Select
-                            value={issue.assigned_to || ''}
-                            onValueChange={(value) => handleAssigneeChange(issue, value)}
+                            value={issue.assigned_to || 'unassigned'}
+                            onValueChange={(value) => handleAssigneeChange(issue, value === 'unassigned' ? '' : value)}
                           >
                             <SelectTrigger className="h-8 text-xs flex-1">
                               <SelectValue placeholder="Assign" />
                             </SelectTrigger>
                             <SelectContent>
+                              <SelectItem value="unassigned">Unassigned</SelectItem>
                               {staff.map(member => (
                                 <SelectItem key={member.id} value={member.user_email}>
                                   {member.user_name}
