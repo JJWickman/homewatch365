@@ -29,13 +29,14 @@ export default function TestGoogleMapsAPI() {
       });
 
       if (response.data?.validation?.isValid) {
-        setLatitude(response.data.validation.lat.toString());
-        setLongitude(response.data.validation.lng.toString());
+        setLatitude('N/A');
+        setLongitude('N/A');
+        setError(null);
       } else {
-        setError(response.data?.validation?.error || 'Failed to get coordinates');
+        setError(response.data?.validation?.error || 'Failed to validate address');
       }
     } catch (err) {
-      setError(err?.response?.data?.error || err.message || 'Failed to get coordinates');
+      setError(err?.response?.data?.error || err.message || 'Failed to validate address');
     } finally {
       setLoading(false);
     }
@@ -55,10 +56,6 @@ export default function TestGoogleMapsAPI() {
       });
       
       setResult(response.data);
-      if (response.data?.validation?.isValid) {
-        setLatitude(response.data.validation.lat.toString());
-        setLongitude(response.data.validation.lng.toString());
-      }
     } catch (err) {
       setError(err?.response?.data?.error || err.message);
     } finally {
@@ -165,8 +162,6 @@ export default function TestGoogleMapsAPI() {
               <p><strong>Status:</strong> {result.validation.status}</p>
               {result.validation.error && <p className="text-red-600"><strong>Error:</strong> {result.validation.error}</p>}
               <p><strong>Formatted Address:</strong> {result.validation.formattedAddress}</p>
-              <p><strong>Latitude:</strong> {result.validation.lat}</p>
-              <p><strong>Longitude:</strong> {result.validation.lng}</p>
             </CardContent>
           </Card>
 
