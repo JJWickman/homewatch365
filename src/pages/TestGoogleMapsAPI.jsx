@@ -192,6 +192,28 @@ export default function TestGoogleMapsAPI() {
             </Card>
           )}
 
+          {result.aerialVideoData && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Aerial View Video</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <p><strong>State:</strong> {result.aerialVideoData.state}</p>
+                {result.aerialVideoData.videoId ? (
+                  <>
+                    <p><strong>Video ID:</strong> {result.aerialVideoData.videoId}</p>
+                    <p className="text-green-600">✓ Aerial video available</p>
+                  </>
+                ) : (
+                  <p className="text-slate-600">No aerial video available for this location</p>
+                )}
+                {result.aerialVideoData.error && (
+                  <p className="text-red-600"><strong>Error:</strong> {JSON.stringify(result.aerialVideoData.error)}</p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
 
         </div>
       )}
