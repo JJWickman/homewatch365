@@ -436,6 +436,15 @@ Your Property Management Team
               <TabsContent value="issues">
                 <Card>
                   <CardContent className="pt-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <p className="text-sm text-slate-500">Issues from this inspection are tracked in the Issues page</p>
+                      <Link to={createPageUrl('Issues')}>
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-2" />
+                          View All Issues
+                        </Button>
+                      </Link>
+                    </div>
                     <div className="space-y-4">
                       {inspection.issues_found.map((issue, index) => (
                         <div key={index} className="p-4 bg-amber-50 border border-amber-200 rounded-lg">

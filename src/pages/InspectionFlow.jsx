@@ -232,6 +232,21 @@ export default function InspectionFlow() {
         });
       });
 
+      // Create Issue entity records for each flagged item
+      for (const issue of issues) {
+        await base44.entities.Issue.create({
+          company_id: inspection.company_id,
+          property_id: inspection.property_id,
+          client_id: inspection.client_id,
+          inspection_id: inspection.id,
+          title: issue.item_name,
+          description: issue.description,
+          status: 'open',
+          priority: issue.severity === 'high' ? 'high' : 'medium',
+          photo_urls: issue.photo_url ? [issue.photo_url] : []
+        });
+      }
+
       await base44.entities.Inspection.update(inspection.id, {
         status: 'completed',
         completed_at: new Date().toISOString(),
