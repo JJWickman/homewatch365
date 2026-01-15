@@ -44,24 +44,29 @@ Deno.serve(async (req) => {
             };
         }
 
-        // Test 2: Street View image (if valid address)
+        // Test 2: Fetch and upload property image
          let streetViewUrl = null;
          if (validationResult.isValid) {
-             // Use static map as fallback since Street View may require additional permissions
-             streetViewUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${validationResult.lat},${validationResult.lng}&zoom=16&size=1200x400&markers=color:red%7C${validationResult.lat},${validationResult.lng}&style=feature:all|element:labels|visibility:off&key=${apiKey}`;
+             const imageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${validationResult.lat},${validationResult.lng}&zoom=19&size=1200x400&maptype=satellite&key=${apiKey}`;
+             
+             // Fetch the image
+             const imageResponse = await fetch(imageUrl);
+             if (imageResponse.ok) {
+                 const imageBlob = await imageResponse.blob();
+                 
+                 // Upload to Base44 storage
+                 const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({
+                     file: imageBlob
+                 });
+                 
+                 streetViewUrl = uploadResult.file_url;
+             }
          }
-
-        // Test 3: Static map with marker
-        let staticMapUrl = null;
-        if (validationResult.isValid) {
-            staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${validationResult.lat},${validationResult.lng}&zoom=17&size=600x400&markers=color:red%7C${validationResult.lat},${validationResult.lng}&key=${apiKey}`;
-        }
 
         return Response.json({
             success: true,
             validation: validationResult,
             streetViewUrl,
-            staticMapUrl,
             fullAddress
         });
     } catch (error) {
