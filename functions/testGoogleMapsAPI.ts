@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
 
         const fullAddress = `${address}, ${city}, ${state}${zip ? ' ' + zip : ''}`;
 
-        // Test 1: Address Validation using Geocoding API
+        // Validate address using Geocoding API
         const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${apiKey}`;
         const geocodingRes = await fetch(geocodingUrl);
         const geocodingData = await geocodingRes.json();
@@ -33,8 +33,6 @@ Deno.serve(async (req) => {
         let validationResult = {
             isValid: false,
             formattedAddress: null,
-            lat: null,
-            lng: null,
             error: geocodingData.error_message || null,
             status: geocodingData.status
         };
@@ -44,21 +42,26 @@ Deno.serve(async (req) => {
             validationResult = {
                 isValid: true,
                 formattedAddress: result.formatted_address,
-                lat: result.geometry.location.lat,
-                lng: result.geometry.location.lng,
                 status: 'OK'
             };
         }
 
-        // Test 2: Fetch Aerial View video
+        // Fetch Aerial View video
          let aerialViewData = null;
          if (validationResult.isValid) {
-             const aerialViewUrl = `https://aerialview.googleapis.com/v1/videos:lookupVideo?key=${apiKey}&address=${encodeURIComponent(fullAddress)}`;
+             const aerialViewUrl = `https://aerialview.googleapis.com/v1/videos:lookupVideo?key=${apiKey}`;
              
-             const aerialResponse = await fetch(aerialViewUrl);
+             const aerialResponse = await fetch(aerialViewUrl, {
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json',
+                 },
+                 body: JSON.stringify({
+                     address: fullAddress
+                 })
+             });
              const aerialData = await aerialResponse.json();
              
-             // Log full response for debugging
              console.log('Aerial View API Response:', JSON.stringify(aerialData, null, 2));
              
              if (aerialData.error) {
