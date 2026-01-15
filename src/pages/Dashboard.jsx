@@ -49,12 +49,12 @@ export default function Dashboard() {
       setCompanyMember(members[0]);
       const companyId = members[0].company_id;
       
-      const [companies, clients, properties, inspections, tasks, activities] = await Promise.all([
+      const [companies, clients, properties, inspections, followUps, activities] = await Promise.all([
         base44.entities.Company.filter({ id: companyId }),
         base44.entities.Client.filter({ company_id: companyId, is_active: true }),
         base44.entities.Property.filter({ company_id: companyId, is_active: true }),
         base44.entities.Inspection.filter({ company_id: companyId }),
-        base44.entities.Task.filter({ company_id: companyId, status: 'pending' }),
+        base44.entities.FollowUp.filter({ company_id: companyId, status: 'open' }),
         base44.entities.ActivityLog.filter({ company_id: companyId }, '-created_date', 10)
       ]);
 
@@ -79,7 +79,7 @@ export default function Dashboard() {
         totalProperties: properties.length,
         inspectionsThisWeek: weekInspections.length,
         completedThisWeek,
-        pendingTasks: tasks.length,
+        pendingTasks: followUps.length,
         issuesFound
       });
 
@@ -87,7 +87,7 @@ export default function Dashboard() {
       
       // Enrich with property data
       const enrichedInspections = await Promise.all(todayScheduled.map(async (inspection) => {
-        const props = await base44.entities.Property.filter({ id: inspection.property_id });
+        const props = await base44.entities.Property.filter({ id: inspection.property_id, company_id: companyId });
         return { ...inspection, property: props[0] };
       }));
       
@@ -291,7 +291,7 @@ export default function Dashboard() {
               </p>
               <p className="text-sm text-amber-700">Review and address these issues as soon as possible.</p>
             </div>
-            <Link to={createPageUrl('Issues')}>
+            <Link to={createPageUrl('FollowUps')}>
               <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100">
                 View Issues
               </Button>
