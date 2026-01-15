@@ -243,24 +243,20 @@ export default function PropertyForm() {
       if (response.data?.validation?.isValid) {
         setAddressValidation(response.data.validation);
         
-        // Check if aerial view is available
-        let imageUrl = null;
-        if (response.data.aerialView?.state === 'ACTIVE' && response.data.aerialView?.uris?.MP4_MEDIUM?.landscapeUri) {
-          // Use the aerial view video thumbnail or first frame
-          imageUrl = response.data.aerialView.uris.MP4_MEDIUM.landscapeUri;
-        }
-        
-        if (imageUrl) {
-          setStreetViewUrl(imageUrl);
+        // Use the aerial view image from Static Maps API
+        if (response.data.aerialViewUrl) {
+          setStreetViewUrl(response.data.aerialViewUrl);
           setImageSource('auto');
           setFormData(prev => ({ 
             ...prev, 
-            primary_photo_url: imageUrl
+            primary_photo_url: response.data.aerialViewUrl
           }));
           toast.success('Property image loaded from Google Maps');
         } else {
-          toast.info('Address validated. No aerial imagery available for this location.');
+          toast.info('Address validated. No imagery available for this location.');
         }
+      } else {
+        toast.error('Unable to validate address');
       }
     } catch (error) {
       console.error('Error validating address:', error);
