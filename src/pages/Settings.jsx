@@ -54,6 +54,8 @@ export default function Settings() {
   const [userFullName, setUserFullName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userPhone, setUserPhone] = useState('');
+  const [userRole, setUserRole] = useState('');
+  const [companyMember, setCompanyMember] = useState(null);
 
   const [companyForm, setCompanyForm] = useState({
     name: '',
@@ -95,6 +97,13 @@ export default function Settings() {
       setUserFullName(currentUser.full_name || '');
       setUserEmail(currentUser.email || '');
       setUserPhone(currentUser.phone || '');
+      
+      // Load company member info
+      const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
+      if (members.length > 0) {
+        setCompanyMember(members[0]);
+        setUserRole(members[0].role || 'technician');
+      }
       const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
       
       if (members.length > 0) {
@@ -179,6 +188,14 @@ export default function Settings() {
         email: userEmail,
         phone: userPhone
       });
+      
+      // Update role in CompanyMember if it changed
+      if (companyMember && userRole !== companyMember.role) {
+        await base44.entities.CompanyMember.update(companyMember.id, { 
+          role: userRole 
+        });
+      }
+      
       setUser({ 
         ...user, 
         full_name: userFullName,
@@ -433,6 +450,19 @@ ${company.name}
                     placeholder="+1 (555) 123-4567"
                     className="mt-1"
                   />
+                </div>
+                <div>
+                  <Label htmlFor="user-role">Security Role</Label>
+                  <select
+                    id="user-role"
+                    value={userRole}
+                    onChange={(e) => setUserRole(e.target.value)}
+                    className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  >
+                    <option value="technician">Technician (View only)</option>
+                    <option value="manager">Manager (Can manage clients & staff)</option>
+                    <option value="owner">Owner (Full administrative access)</option>
+                  </select>
                 </div>
                   {companyMember && (
                     <div>
