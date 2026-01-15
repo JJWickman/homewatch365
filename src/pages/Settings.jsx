@@ -197,7 +197,8 @@ export default function Settings() {
         job_title: userJobTitle,
         location: userLocation
       });
-      navigate(createPageUrl('Dashboard'));
+      // Refresh page to show updated data in layout
+      window.location.reload();
     } catch (error) {
       console.error('Error saving profile:', error);
     } finally {
