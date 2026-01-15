@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { format, parseISO, isToday, isTomorrow, isPast } from 'date-fns';
+import { format, parseISO, isToday, isTomorrow, isPast, addDays, addWeeks, addMonths } from 'date-fns';
 import { 
   ClipboardCheck, Search, Plus, Building2, Calendar,
   Filter, Eye, Play, MoreVertical, User, MapPin, Clock
@@ -32,6 +32,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
@@ -59,8 +60,12 @@ export default function Inspections() {
     scheduled_date: format(new Date(), 'yyyy-MM-dd'),
     scheduled_time: '',
     type: 'routine',
-    assigned_to: ''
+    assigned_to: '',
+    is_recurring: false,
+    recurrence_frequency: 'weekly',
+    recurrence_end_date: ''
   });
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -132,16 +137,16 @@ export default function Inspections() {
 
   const handleCreateInspection = async () => {
     if (!companyId || !newInspection.property_id) return;
+    setCreating(true);
 
     const property = getProperty(newInspection.property_id);
     const staffMember = staff.find(s => s.user_email === newInspection.assigned_to);
 
-    const data = {
+    const baseData = {
       company_id: companyId,
       property_id: newInspection.property_id,
       client_id: property?.client_id,
       template_id: newInspection.template_id || null,
-      scheduled_date: newInspection.scheduled_date,
       scheduled_time: newInspection.scheduled_time || null,
       type: newInspection.type,
       assigned_to: newInspection.assigned_to || null,
@@ -149,7 +154,38 @@ export default function Inspections() {
       status: 'scheduled'
     };
 
-    await base44.entities.Inspection.create(data);
+    // Generate inspection dates
+    const dates = [newInspection.scheduled_date];
+    
+    if (newInspection.is_recurring && newInspection.recurrence_end_date) {
+      let currentDate = parseISO(newInspection.scheduled_date);
+      const endDate = parseISO(newInspection.recurrence_end_date);
+      
+      while (currentDate < endDate) {
+        if (newInspection.recurrence_frequency === 'daily') {
+          currentDate = addDays(currentDate, 1);
+        } else if (newInspection.recurrence_frequency === 'weekly') {
+          currentDate = addWeeks(currentDate, 1);
+        } else if (newInspection.recurrence_frequency === 'bi_weekly') {
+          currentDate = addWeeks(currentDate, 2);
+        } else if (newInspection.recurrence_frequency === 'monthly') {
+          currentDate = addMonths(currentDate, 1);
+        }
+        
+        if (currentDate <= endDate) {
+          dates.push(format(currentDate, 'yyyy-MM-dd'));
+        }
+      }
+    }
+
+    // Create all inspections
+    const inspectionsToCreate = dates.map(date => ({
+      ...baseData,
+      scheduled_date: date
+    }));
+
+    await base44.entities.Inspection.bulkCreate(inspectionsToCreate);
+    
     setShowNewDialog(false);
     setNewInspection({
       property_id: '',
@@ -157,8 +193,12 @@ export default function Inspections() {
       scheduled_date: format(new Date(), 'yyyy-MM-dd'),
       scheduled_time: '',
       type: 'routine',
-      assigned_to: ''
+      assigned_to: '',
+      is_recurring: false,
+      recurrence_frequency: 'weekly',
+      recurrence_end_date: ''
     });
+    setCreating(false);
     loadData();
   };
 
@@ -426,6 +466,48 @@ export default function Inspections() {
                 </Select>
               </div>
             )}
+
+            <div className="flex items-center justify-between py-2">
+              <div>
+                <Label>Recurring Inspection</Label>
+                <p className="text-sm text-slate-500">Schedule multiple inspections</p>
+              </div>
+              <Switch
+                checked={newInspection.is_recurring}
+                onCheckedChange={(checked) => setNewInspection(prev => ({ ...prev, is_recurring: checked }))}
+              />
+            </div>
+
+            {newInspection.is_recurring && (
+              <div className="space-y-4 p-4 bg-slate-50 rounded-lg">
+                <div>
+                  <Label>Frequency</Label>
+                  <Select
+                    value={newInspection.recurrence_frequency}
+                    onValueChange={(value) => setNewInspection(prev => ({ ...prev, recurrence_frequency: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="bi_weekly">Bi-Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>End Date</Label>
+                  <Input
+                    type="date"
+                    value={newInspection.recurrence_end_date}
+                    min={newInspection.scheduled_date}
+                    onChange={(e) => setNewInspection(prev => ({ ...prev, recurrence_end_date: e.target.value }))}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <DialogFooter>
@@ -434,10 +516,10 @@ export default function Inspections() {
             </Button>
             <Button 
               onClick={handleCreateInspection}
-              disabled={!newInspection.property_id || !newInspection.scheduled_date}
+              disabled={!newInspection.property_id || !newInspection.scheduled_date || creating || (newInspection.is_recurring && !newInspection.recurrence_end_date)}
               className="bg-slate-900 hover:bg-slate-800"
             >
-              Schedule
+              {creating ? 'Scheduling...' : 'Schedule'}
             </Button>
           </DialogFooter>
         </DialogContent>
