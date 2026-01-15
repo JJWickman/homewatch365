@@ -17,6 +17,7 @@ import Settings from './pages/Settings';
 import Tasks from './pages/Tasks';
 import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
 import Marketing from './pages/Marketing';
+import RouteOptimizer from './pages/RouteOptimizer';
 import __Layout from './Layout.jsx';
 
 
@@ -40,6 +41,7 @@ export const PAGES = {
     "Tasks": Tasks,
     "TestGoogleMapsAPI": TestGoogleMapsAPI,
     "Marketing": Marketing,
+    "RouteOptimizer": RouteOptimizer,
 }
 
 export const pagesConfig = {

@@ -9,7 +9,7 @@ import {
 } from 'date-fns';
 import { 
   Calendar, ChevronLeft, ChevronRight, Building2, 
-  Clock, User, Plus, MapPin
+  Clock, User, Plus, MapPin, Route
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -207,6 +207,14 @@ export default function Schedule() {
                 onClick={() => setCurrentDate(new Date())}
               >
                 Today
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(createPageUrl('RouteOptimizer') + `?date=${format(currentDate, 'yyyy-MM-dd')}`)}
+              >
+                <Route className="h-4 w-4 mr-2" />
+                Optimize Route
               </Button>
               <Tabs value={view} onValueChange={setView}>
                 <TabsList>
