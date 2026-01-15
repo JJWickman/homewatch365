@@ -237,7 +237,7 @@ export default function FollowUps() {
             Appointments
             {appointmentCount > 0 && <Badge variant="secondary" className="ml-1">{appointmentCount}</Badge>}
           </TabsTrigger>
-          <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          <TabsTrigger value="tasks">Other Follow-Ups</TabsTrigger>
         </TabsList>
       </Tabs>
 

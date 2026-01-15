@@ -470,7 +470,7 @@ export default function PropertyDetail() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{pendingTasks}</p>
-                  <p className="text-sm text-slate-500">Pending Tasks</p>
+                  <p className="text-sm text-slate-500">Pending Follow-Ups</p>
                 </div>
               </div>
             </CardContent>
@@ -616,15 +616,15 @@ export default function PropertyDetail() {
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <FileText className="h-5 w-5" />
-                    Tasks
-                  </CardTitle>
+                     Follow-Ups
+                    </CardTitle>
                   <Button 
                     size="sm" 
                     onClick={() => setShowAddTask(true)}
                     className="bg-slate-900 hover:bg-slate-800 text-white"
                   >
                     <Plus className="h-4 w-4 mr-1" />
-                    Add Task
+                    Add Follow-Up
                   </Button>
                 </CardHeader>
                 <CardContent>
@@ -857,15 +857,15 @@ export default function PropertyDetail() {
         </div>
       </div>
 
-      {/* Add Task Dialog */}
+      {/* Add Follow-Up Dialog */}
       <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Add Task</DialogTitle>
+         <DialogContent className="sm:max-w-md">
+           <DialogHeader>
+             <DialogTitle>Add Follow-Up</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="task-title">Task Title *</Label>
+              <Label htmlFor="task-title">Follow-Up Title *</Label>
               <input
                 id="task-title"
                 type="text"
@@ -876,7 +876,7 @@ export default function PropertyDetail() {
               />
             </div>
             <div>
-              <Label htmlFor="task-description">Description</Label>
+              <Label htmlFor="task-description">Details</Label>
               <textarea
                 id="task-description"
                 value={newTask.description}
@@ -915,7 +915,7 @@ export default function PropertyDetail() {
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setShowAddTask(false)}>Cancel</Button>
               <Button onClick={handleAddTask} disabled={savingTask} className="bg-slate-900 hover:bg-slate-800">
-                {savingTask ? 'Creating...' : 'Create Task'}
+                {savingTask ? 'Creating...' : 'Create Follow-Up'}
               </Button>
             </div>
           </div>
