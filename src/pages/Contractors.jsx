@@ -36,6 +36,7 @@ import {
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
 import StatusBadge from '@/components/shared/StatusBadge';
+import ContractorSearchDialog from '@/components/contractors/ContractorSearchDialog';
 
 const DEFAULT_CONTRACTOR_TYPES = [
   'electrician',
@@ -65,6 +66,8 @@ export default function Contractors() {
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [customTypes, setCustomTypes] = useState([]);
+  const [showSearchDialog, setShowSearchDialog] = useState(false);
+  const [properties, setProperties] = useState([]);
   const [formData, setFormData] = useState({
     business_name: '',
     contact_name: '',
@@ -100,12 +103,14 @@ export default function Contractors() {
         const cId = members[0].company_id;
         setCompanyId(cId);
         
-        const [contractorsData, customTypesData] = await Promise.all([
+        const [contractorsData, customTypesData, propertiesData] = await Promise.all([
           base44.entities.Contractor.filter({ company_id: cId }),
-          base44.entities.CustomContractorType.filter({ company_id: cId })
+          base44.entities.CustomContractorType.filter({ company_id: cId }),
+          base44.entities.Property.filter({ company_id: cId })
         ]);
         setContractors(contractorsData);
         setCustomTypes(customTypesData);
+        setProperties(propertiesData);
       }
     } catch (error) {
       console.error('Error loading contractors:', error);
@@ -169,6 +174,12 @@ export default function Contractors() {
     setShowNewDialog(true);
   };
 
+  const handleSearchResult = (contractor) => {
+    setFormData(contractor);
+    setShowSearchDialog(false);
+    setShowNewDialog(true);
+  };
+
   const handleEdit = (contractor) => {
     setEditingId(contractor.id);
     setFormData(contractor);
@@ -219,7 +230,15 @@ export default function Contractors() {
         subtitle="Manage your contractor network"
         action={handleAddNew}
         actionLabel="Add Contractor"
-      />
+      >
+        <Button 
+          variant="outline"
+          onClick={() => setShowSearchDialog(true)}
+        >
+          <Search className="h-4 w-4 mr-2" />
+          Search External
+        </Button>
+      </PageHeader>
 
       {/* Filters */}
       <Card className="mb-6">
@@ -522,6 +541,15 @@ export default function Contractors() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Search Contractors Dialog */}
+      <ContractorSearchDialog
+        open={showSearchDialog}
+        onOpenChange={setShowSearchDialog}
+        onSelect={handleSearchResult}
+        properties={properties}
+        companyId={companyId}
+      />
     </div>
   );
 }
