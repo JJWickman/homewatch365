@@ -55,6 +55,7 @@ export default function Issues() {
   const [issues, setIssues] = useState([]);
   const [properties, setProperties] = useState([]);
   const [clients, setClients] = useState([]);
+  const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewDialog, setShowNewDialog] = useState(false);
@@ -91,14 +92,16 @@ export default function Issues() {
       
       if (members.length > 0) {
         const companyId = members[0].company_id;
-        const [issuesData, propertiesData, clientsData] = await Promise.all([
+        const [issuesData, propertiesData, clientsData, staffData] = await Promise.all([
           base44.entities.Issue.filter({ company_id: companyId }),
           base44.entities.Property.filter({ company_id: companyId }),
-          base44.entities.Client.filter({ company_id: companyId })
+          base44.entities.Client.filter({ company_id: companyId }),
+          base44.entities.CompanyMember.filter({ company_id: companyId, is_active: true })
         ]);
         setIssues(issuesData);
         setProperties(propertiesData);
         setClients(clientsData);
+        setStaff(staffData);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -141,6 +144,18 @@ export default function Issues() {
       await base44.entities.Issue.update(issue.id, updates);
     } catch (error) {
       console.error('Error updating issue:', error);
+    }
+  };
+
+  const handleAssigneeChange = async (issue, newAssignee) => {
+    try {
+      const assignedMember = staff.find(s => s.user_email === newAssignee);
+      await base44.entities.Issue.update(issue.id, { 
+        assigned_to: newAssignee,
+        assigned_to_name: assignedMember?.user_name || newAssignee
+      });
+    } catch (error) {
+      console.error('Error reassigning issue:', error);
     }
   };
 
@@ -226,12 +241,10 @@ export default function Issues() {
                                 {getPropertyName(issue.property_id)}
                               </p>
                             )}
-                            {issue.client_id && (
-                              <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                                <User className="h-3 w-3" />
-                                {clients.find(c => c.id === issue.client_id)?.first_name} {clients.find(c => c.id === issue.client_id)?.last_name || 'Unknown Owner'}
-                              </p>
-                            )}
+                            <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
+                              <User className="h-3 w-3" />
+                              <span className="text-slate-400">Owner:</span> {issue.assigned_to_name || staff.find(s => s.user_email === issue.assigned_to)?.user_name || issue.assigned_to_name || staff.find(s => s.user_email === issue.created_by)?.user_name || issue.created_by || 'Unassigned'}
+                            </p>
                             {issue.description && (
                               <p className="text-xs text-slate-500 mt-2 line-clamp-2">
                                 {issue.description}
@@ -253,6 +266,21 @@ export default function Issues() {
                               <SelectItem value="open">Open</SelectItem>
                               <SelectItem value="in_progress">In Progress</SelectItem>
                               <SelectItem value="closed">Closed</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Select
+                            value={issue.assigned_to || ''}
+                            onValueChange={(value) => handleAssigneeChange(issue, value)}
+                          >
+                            <SelectTrigger className="h-8 text-xs flex-1">
+                              <SelectValue placeholder="Assign" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {staff.map(member => (
+                                <SelectItem key={member.id} value={member.user_email}>
+                                  {member.user_name}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
