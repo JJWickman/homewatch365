@@ -46,6 +46,12 @@ export default function PropertyDetail() {
   const [changingOwner, setChangingOwner] = useState(false);
   const [showChangeOwnerDialog, setShowChangeOwnerDialog] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState('');
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [showAddContact, setShowAddContact] = useState(false);
+  const [newTask, setNewTask] = useState({ title: '', description: '', priority: 'medium', due_date: '' });
+  const [newContact, setNewContact] = useState({ name: '', relationship: '', phone: '', email: '' });
+  const [savingTask, setSavingTask] = useState(false);
+  const [savingContact, setSavingContact] = useState(false);
 
   useEffect(() => {
     loadProperty();
@@ -234,6 +240,59 @@ export default function PropertyDetail() {
       toast.error('Failed to change owner');
     } finally {
       setChangingOwner(false);
+    }
+  };
+
+  const handleAddTask = async () => {
+    if (!newTask.title) {
+      toast.error('Please enter a task title');
+      return;
+    }
+
+    setSavingTask(true);
+    try {
+      await base44.entities.Task.create({
+        company_id: property.company_id,
+        property_id: property.id,
+        client_id: property.client_id,
+        title: newTask.title,
+        description: newTask.description,
+        priority: newTask.priority,
+        due_date: newTask.due_date,
+        status: 'pending',
+        is_recurring: false
+      });
+      setTasks(await base44.entities.Task.filter({ property_id: property.id }, '-created_date', 10));
+      setNewTask({ title: '', description: '', priority: 'medium', due_date: '' });
+      setShowAddTask(false);
+      toast.success('Task created successfully');
+    } catch (error) {
+      console.error('Error creating task:', error);
+      toast.error('Failed to create task');
+    } finally {
+      setSavingTask(false);
+    }
+  };
+
+  const handleAddContact = async () => {
+    if (!newContact.name) {
+      toast.error('Please enter a contact name');
+      return;
+    }
+
+    setSavingContact(true);
+    try {
+      const updatedContacts = [...(property.emergency_contacts || []), newContact];
+      await base44.entities.Property.update(property.id, { emergency_contacts: updatedContacts });
+      setProperty({ ...property, emergency_contacts: updatedContacts });
+      setNewContact({ name: '', relationship: '', phone: '', email: '' });
+      setShowAddContact(false);
+      toast.success('Emergency contact added successfully');
+    } catch (error) {
+      console.error('Error adding contact:', error);
+      toast.error('Failed to add emergency contact');
+    } finally {
+      setSavingContact(false);
     }
   };
 
@@ -502,8 +561,9 @@ export default function PropertyDetail() {
                   <Button 
                     size="sm" 
                     onClick={() => navigate(createPageUrl('Inspections') + `?action=new&property_id=${property.id}`)}
+                    className="bg-slate-900 hover:bg-slate-800"
                   >
-                    <ClipboardCheck className="h-4 w-4 mr-1" />
+                    <Plus className="h-4 w-4 mr-1" />
                     Schedule
                   </Button>
                 </CardHeader>
@@ -552,11 +612,19 @@ export default function PropertyDetail() {
 
             <TabsContent value="tasks">
               <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <FileText className="h-5 w-5" />
                     Tasks
                   </CardTitle>
+                  <Button 
+                    size="sm" 
+                    onClick={() => setShowAddTask(true)}
+                    className="bg-slate-900 hover:bg-slate-800"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Task
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   {tasks.length === 0 ? (
@@ -682,11 +750,19 @@ export default function PropertyDetail() {
 
             <TabsContent value="contractors">
               <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <User className="h-5 w-5" />
                     Contractors
                   </CardTitle>
+                  <Button 
+                    size="sm" 
+                    onClick={() => navigate(createPageUrl('PropertyForm') + `?id=${property.id}#contractors`)}
+                    className="bg-slate-900 hover:bg-slate-800"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Assign
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   {contractors.length === 0 ? (
@@ -729,11 +805,19 @@ export default function PropertyDetail() {
 
             <TabsContent value="contacts">
               <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Phone className="h-5 w-5" />
                     Emergency Contacts
                   </CardTitle>
+                  <Button 
+                    size="sm" 
+                    onClick={() => setShowAddContact(true)}
+                    className="bg-slate-900 hover:bg-slate-800"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Contact
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   {(!property.emergency_contacts || property.emergency_contacts.length === 0) ? (
@@ -771,6 +855,132 @@ export default function PropertyDetail() {
           </Tabs>
         </div>
       </div>
+
+      {/* Add Task Dialog */}
+      <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Task</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="task-title">Task Title *</Label>
+              <input
+                id="task-title"
+                type="text"
+                value={newTask.title}
+                onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                placeholder="e.g., Fix roof leak"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+              />
+            </div>
+            <div>
+              <Label htmlFor="task-description">Description</Label>
+              <textarea
+                id="task-description"
+                value={newTask.description}
+                onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                placeholder="Task details..."
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="task-priority">Priority</Label>
+                <select
+                  id="task-priority"
+                  value={newTask.priority}
+                  onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="task-due-date">Due Date</Label>
+                <input
+                  id="task-due-date"
+                  type="date"
+                  value={newTask.due_date}
+                  onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowAddTask(false)}>Cancel</Button>
+              <Button onClick={handleAddTask} disabled={savingTask} className="bg-slate-900 hover:bg-slate-800">
+                {savingTask ? 'Creating...' : 'Create Task'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Emergency Contact Dialog */}
+      <Dialog open={showAddContact} onOpenChange={setShowAddContact}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Emergency Contact</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="contact-name">Name *</Label>
+              <input
+                id="contact-name"
+                type="text"
+                value={newContact.name}
+                onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
+                placeholder="Contact name"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+              />
+            </div>
+            <div>
+              <Label htmlFor="contact-relationship">Relationship</Label>
+              <input
+                id="contact-relationship"
+                type="text"
+                value={newContact.relationship}
+                onChange={(e) => setNewContact({ ...newContact, relationship: e.target.value })}
+                placeholder="e.g., Owner, Manager"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+              />
+            </div>
+            <div>
+              <Label htmlFor="contact-phone">Phone</Label>
+              <input
+                id="contact-phone"
+                type="tel"
+                value={newContact.phone}
+                onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
+                placeholder="Phone number"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+              />
+            </div>
+            <div>
+              <Label htmlFor="contact-email">Email</Label>
+              <input
+                id="contact-email"
+                type="email"
+                value={newContact.email}
+                onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
+                placeholder="Email address"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowAddContact(false)}>Cancel</Button>
+              <Button onClick={handleAddContact} disabled={savingContact} className="bg-slate-900 hover:bg-slate-800">
+                {savingContact ? 'Adding...' : 'Add Contact'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Change Owner Dialog */}
       <Dialog open={showChangeOwnerDialog} onOpenChange={setShowChangeOwnerDialog}>
