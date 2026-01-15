@@ -47,6 +47,8 @@ export default function PropertyForm() {
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState(null);
+  const [nearbyAddresses, setNearbyAddresses] = useState([]);
+  const [showNearbyAddresses, setShowNearbyAddresses] = useState(false);
   const [showCreateClientDialog, setShowCreateClientDialog] = useState(false);
   const [newClientData, setNewClientData] = useState({ first_name: '', last_name: '', email: '' });
   const [creatingClient, setCreatingClient] = useState(false);
@@ -402,49 +404,53 @@ export default function PropertyForm() {
 
       const { latitude, longitude } = position.coords;
       
-      // Use Google's reverse geocoding to get address
-      const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${Deno.env.get('GOOGLE_MAPS_API_KEY') || ''}`;
+      // Use Google's reverse geocoding to get multiple addresses
+      const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || 'AIzaSyBPbLVxQ6d5dBkDX_5MHQ9dHJZECXX';
+      const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
       const response = await fetch(geocodingUrl);
       const data = await response.json();
 
       if (data.results && data.results.length > 0) {
-        const result = data.results[0];
-        let address = '';
-        let city = '';
-        let state = '';
-        let zip = '';
+        // Get top 3 results
+        const topResults = data.results.slice(0, 3).map(result => {
+          let address = '';
+          let city = '';
+          let state = '';
+          let zip = '';
 
-        result.address_components?.forEach(component => {
-          const types = component.types;
-          if (types.includes('street_number')) {
-            address = component.short_name + ' ' + address;
-          }
-          if (types.includes('route')) {
-            address += component.short_name;
-          }
-          if (types.includes('locality')) {
-            city = component.long_name;
-          }
-          if (types.includes('administrative_area_level_1')) {
-            state = component.short_name;
-          }
-          if (types.includes('postal_code')) {
-            zip = component.long_name;
-          }
+          result.address_components?.forEach(component => {
+            const types = component.types;
+            if (types.includes('street_number')) {
+              address = component.short_name + ' ' + address;
+            }
+            if (types.includes('route')) {
+              address += component.short_name;
+            }
+            if (types.includes('locality')) {
+              city = component.long_name;
+            }
+            if (types.includes('administrative_area_level_1')) {
+              state = component.short_name;
+            }
+            if (types.includes('postal_code')) {
+              zip = component.long_name;
+            }
+          });
+
+          return {
+            address: address.trim(),
+            city,
+            state,
+            zip,
+            latitude,
+            longitude,
+            formatted: result.formatted_address
+          };
         });
 
-        setFormData(prev => ({
-          ...prev,
-          address: address.trim(),
-          city,
-          state,
-          zip,
-          latitude,
-          longitude
-        }));
-
-        validateAndFetchGoogleImage(address.trim(), city, state, zip);
-        toast.success('Location detected and loaded');
+        setNearbyAddresses(topResults);
+        setShowNearbyAddresses(true);
+        toast.success('Found nearby addresses - select one');
       }
     } catch (error) {
       console.error('Error getting location:', error);
@@ -452,6 +458,23 @@ export default function PropertyForm() {
     } finally {
       setGettingLocation(false);
     }
+  };
+
+  const handleSelectNearbyAddress = (selectedAddress) => {
+    setFormData(prev => ({
+      ...prev,
+      address: selectedAddress.address,
+      city: selectedAddress.city,
+      state: selectedAddress.state,
+      zip: selectedAddress.zip,
+      latitude: selectedAddress.latitude,
+      longitude: selectedAddress.longitude
+    }));
+
+    setShowNearbyAddresses(false);
+    setNearbyAddresses([]);
+    fetchGoogleAerialView();
+    toast.success('Address selected');
   };
 
 
@@ -772,18 +795,38 @@ export default function PropertyForm() {
                  {fetchingImage ? <Loader className="h-4 w-4 animate-spin" /> : <Building2 className="h-4 w-4" />}
                </Button>
              </div>
-             <Button
-               type="button"
-               variant="outline"
-               size="sm"
-               onClick={handleUseLocation}
-               disabled={gettingLocation}
-               className="mt-2 w-full"
-             >
-               <MapPinCheckInside className="h-4 w-4 mr-2" />
-               {gettingLocation ? 'Getting location...' : 'Use My Location'}
-             </Button>
-           </div>
+             <div className="relative">
+               <Button
+                 type="button"
+                 variant="outline"
+                 size="sm"
+                 onClick={handleUseLocation}
+                 disabled={gettingLocation}
+                 className="mt-2 w-full"
+               >
+                 <MapPinCheckInside className="h-4 w-4 mr-2" />
+                 {gettingLocation ? 'Getting location...' : 'Use My Location'}
+               </Button>
+
+               {showNearbyAddresses && nearbyAddresses.length > 0 && (
+                 <div className="absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-lg shadow-lg z-50 mt-1">
+                   <div className="p-2">
+                     <p className="text-xs text-slate-500 px-2 py-1 font-medium">Select an address:</p>
+                     {nearbyAddresses.map((addr, index) => (
+                       <div
+                         key={index}
+                         onClick={() => handleSelectNearbyAddress(addr)}
+                         className="px-3 py-2.5 cursor-pointer hover:bg-slate-50 rounded-md border-b border-slate-100 last:border-b-0 text-sm"
+                       >
+                         <div className="font-medium text-slate-900">{addr.address}</div>
+                         <div className="text-xs text-slate-500">{addr.city}, {addr.state} {addr.zip}</div>
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+               )}
+             </div>
+             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                <div className="col-span-2">
                  <Label htmlFor="city">City *</Label>
