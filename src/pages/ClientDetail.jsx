@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { 
   Mail, Phone, MapPin, Building2, ClipboardCheck, 
   Edit, Plus, Calendar, DollarSign, ExternalLink,
-  FileText, Clock, CheckCircle2
+  FileText, Clock, CheckCircle2, Upload, Download, Trash2, File
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
+import { toast } from 'sonner';
 
 export default function ClientDetail() {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ export default function ClientDetail() {
   const [properties, setProperties] = useState([]);
   const [inspections, setInspections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   useEffect(() => {
     loadClient();
@@ -76,6 +78,61 @@ export default function ClientDetail() {
   };
 
   const completedInspections = inspections.filter(i => i.status === 'completed').length;
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingFile(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      
+      const newFile = {
+        name: file.name,
+        url: file_url,
+        type: file.type,
+        size: file.size,
+        uploaded_at: new Date().toISOString()
+      };
+
+      const updatedFiles = [...(client.files || []), newFile];
+      await base44.entities.Client.update(client.id, { files: updatedFiles });
+      setClient({ ...client, files: updatedFiles });
+      toast.success('File uploaded successfully');
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error('Failed to upload file');
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const handleFileDelete = async (fileUrl) => {
+    try {
+      const updatedFiles = client.files.filter(f => f.url !== fileUrl);
+      await base44.entities.Client.update(client.id, { files: updatedFiles });
+      setClient({ ...client, files: updatedFiles });
+      toast.success('File deleted');
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      toast.error('Failed to delete file');
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  const getFileIcon = (type) => {
+    if (type?.startsWith('image/')) return '🖼️';
+    if (type?.startsWith('video/')) return '🎥';
+    if (type?.includes('pdf')) return '📄';
+    if (type?.includes('word') || type?.includes('document')) return '📝';
+    if (type?.includes('sheet') || type?.includes('excel')) return '📊';
+    return '📎';
+  };
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -190,6 +247,7 @@ export default function ClientDetail() {
             <TabsList className="w-full justify-start mb-4">
               <TabsTrigger value="properties">Properties</TabsTrigger>
               <TabsTrigger value="inspections">Inspections</TabsTrigger>
+              <TabsTrigger value="files">Files</TabsTrigger>
               <TabsTrigger value="notes">Notes</TabsTrigger>
             </TabsList>
 
@@ -276,6 +334,83 @@ export default function ClientDetail() {
                           </div>
                           <StatusBadge status={inspection.status} />
                         </Link>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="files">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="text-lg">Files & Documents</CardTitle>
+                  <div>
+                    <input
+                      type="file"
+                      id="file-upload"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                      disabled={uploadingFile}
+                    />
+                    <Button 
+                      size="sm" 
+                      onClick={() => document.getElementById('file-upload').click()}
+                      disabled={uploadingFile}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      <span>{uploadingFile ? 'Uploading...' : 'Upload File'}</span>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {!client.files || client.files.length === 0 ? (
+                    <EmptyState
+                      icon={FileText}
+                      title="No files uploaded"
+                      description="Upload documents, images, videos, or any other files"
+                      action={() => document.getElementById('file-upload').click()}
+                      actionLabel="Upload File"
+                    />
+                  ) : (
+                    <div className="space-y-2">
+                      {client.files.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-3 rounded-lg border hover:bg-slate-50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="text-2xl">{getFileIcon(file.type)}</div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-slate-900 truncate">{file.name}</p>
+                              <div className="flex items-center gap-2 text-xs text-slate-500">
+                                <span>{formatFileSize(file.size)}</span>
+                                {file.uploaded_at && (
+                                  <>
+                                    <span>•</span>
+                                    <span>{format(new Date(file.uploaded_at), 'MMM d, yyyy')}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => window.open(file.url, '_blank')}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleFileDelete(file.url)}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   )}
