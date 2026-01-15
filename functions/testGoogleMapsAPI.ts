@@ -55,7 +55,16 @@ Deno.serve(async (req) => {
              const aerialResponse = await fetch(aerialViewUrl);
              const aerialData = await aerialResponse.json();
              
-             if (aerialData.state === 'ACTIVE' || aerialData.state === 'PROCESSING') {
+             // Log full response for debugging
+             console.log('Aerial View API Response:', JSON.stringify(aerialData, null, 2));
+             
+             if (aerialData.error) {
+                 aerialViewData = {
+                     state: 'ERROR',
+                     error: aerialData.error.message || 'API Error',
+                     errorDetails: aerialData.error
+                 };
+             } else if (aerialData.state === 'ACTIVE' || aerialData.state === 'PROCESSING') {
                  aerialViewData = {
                      state: aerialData.state,
                      uris: aerialData.uris,
@@ -64,7 +73,7 @@ Deno.serve(async (req) => {
              } else {
                  aerialViewData = {
                      state: aerialData.state || 'NOT_AVAILABLE',
-                     error: aerialData.error?.message || 'Aerial view not available for this location'
+                     error: 'Aerial view not available for this location'
                  };
              }
          }
