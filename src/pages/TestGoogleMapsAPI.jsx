@@ -187,7 +187,22 @@ export default function TestGoogleMapsAPI() {
                   src={result.streetViewUrl} 
                   alt="Street View"
                   className="w-full rounded-lg border border-slate-200"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML += '<p class="text-red-600">Failed to load Street View image</p>';
+                  }}
                 />
+              </CardContent>
+            </Card>
+          )}
+
+          {!result.streetViewAvailable && result.coordinates && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Street View</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600">Street View imagery not available for this location</p>
               </CardContent>
             </Card>
           )}

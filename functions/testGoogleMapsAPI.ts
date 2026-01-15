@@ -49,19 +49,32 @@ Deno.serve(async (req) => {
         // Generate Street View Static image URL with coordinates
         let streetViewUrl = null;
         let coordinates = null;
+        let streetViewAvailable = false;
         if (validationResult.isValid && geocodingData.results?.[0]?.geometry?.location) {
             const location = geocodingData.results[0].geometry.location;
             coordinates = {
                 lat: location.lat,
                 lng: location.lng
             };
-            streetViewUrl = `https://maps.googleapis.com/maps/api/streetview?size=800x600&location=${coordinates.lat},${coordinates.lng}&fov=80&heading=70&pitch=0&key=${apiKey}`;
+            
+            // Check if Street View is available at this location
+            const metadataUrl = `https://maps.googleapis.com/maps/api/streetview/metadata?location=${coordinates.lat},${coordinates.lng}&key=${apiKey}`;
+            const metadataRes = await fetch(metadataUrl);
+            const metadataData = await metadataRes.json();
+            
+            console.log('Street View Metadata:', JSON.stringify(metadataData, null, 2));
+            
+            if (metadataData.status === 'OK') {
+                streetViewAvailable = true;
+                streetViewUrl = `https://maps.googleapis.com/maps/api/streetview?size=800x600&location=${coordinates.lat},${coordinates.lng}&fov=80&heading=70&pitch=0&key=${apiKey}`;
+            }
         }
 
         return Response.json({
             success: true,
             validation: validationResult,
             streetViewUrl,
+            streetViewAvailable,
             coordinates,
             fullAddress
         });
