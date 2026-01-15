@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { createPageUrl } from '@/utils';
 import { 
   Settings as SettingsIcon, Building, Users, FileText, 
   Palette, Save, Upload, Plus, Trash2, User, Mail, Edit2, MoreVertical, Camera,
@@ -173,6 +175,8 @@ export default function Settings() {
     }
   };
 
+  const navigate = useNavigate();
+
   const handleSaveProfile = async () => {
     setSavingProfile(true);
     try {
@@ -193,6 +197,7 @@ export default function Settings() {
         job_title: userJobTitle,
         location: userLocation
       });
+      navigate(createPageUrl('Dashboard'));
     } catch (error) {
       console.error('Error saving profile:', error);
     } finally {
