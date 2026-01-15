@@ -50,6 +50,9 @@ export default function Settings() {
   const [extractWebsiteUrl, setExtractWebsiteUrl] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
   const [userPhone, setUserPhone] = useState('');
+  const [userBio, setUserBio] = useState('');
+  const [userJobTitle, setUserJobTitle] = useState('');
+  const [userLocation, setUserLocation] = useState('');
 
   const [companyForm, setCompanyForm] = useState({
     name: '',
@@ -89,6 +92,9 @@ export default function Settings() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
       setUserPhone(currentUser.phone || '');
+      setUserBio(currentUser.bio || '');
+      setUserJobTitle(currentUser.job_title || '');
+      setUserLocation(currentUser.location || '');
       const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
       
       if (members.length > 0) {
@@ -166,8 +172,19 @@ export default function Settings() {
   const handleSaveProfile = async () => {
     setSavingProfile(true);
     try {
-      await base44.auth.updateMe({ phone: userPhone });
-      setUser({ ...user, phone: userPhone });
+      await base44.auth.updateMe({ 
+        phone: userPhone,
+        bio: userBio,
+        job_title: userJobTitle,
+        location: userLocation
+      });
+      setUser({ 
+        ...user, 
+        phone: userPhone,
+        bio: userBio,
+        job_title: userJobTitle,
+        location: userLocation
+      });
     } catch (error) {
       console.error('Error saving profile:', error);
     } finally {
@@ -399,6 +416,36 @@ ${company.name}
                       onChange={(e) => setUserPhone(e.target.value)}
                       placeholder="+1 (555) 123-4567"
                       className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="user-job-title">Job Title</Label>
+                    <Input
+                      id="user-job-title"
+                      value={userJobTitle}
+                      onChange={(e) => setUserJobTitle(e.target.value)}
+                      placeholder="e.g., Property Inspector"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="user-location">Location</Label>
+                    <Input
+                      id="user-location"
+                      value={userLocation}
+                      onChange={(e) => setUserLocation(e.target.value)}
+                      placeholder="e.g., Miami, FL"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="user-bio">Bio</Label>
+                    <Textarea
+                      id="user-bio"
+                      value={userBio}
+                      onChange={(e) => setUserBio(e.target.value)}
+                      placeholder="Tell us about yourself..."
+                      className="mt-1 min-h-24"
                     />
                   </div>
                   {companyMember && (
