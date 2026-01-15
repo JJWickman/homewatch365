@@ -52,11 +52,6 @@ export default function Settings() {
   const [extractWebsiteUrl, setExtractWebsiteUrl] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
   const [userFullName, setUserFullName] = useState('');
-  const [userEmail, setUserEmail] = useState('');
-  const [userPhone, setUserPhone] = useState('');
-  const [userBio, setUserBio] = useState('');
-  const [userJobTitle, setUserJobTitle] = useState('');
-  const [userLocation, setUserLocation] = useState('');
 
   const [companyForm, setCompanyForm] = useState({
     name: '',
@@ -96,11 +91,6 @@ export default function Settings() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
       setUserFullName(currentUser.full_name || '');
-      setUserEmail(currentUser.email || '');
-      setUserPhone(currentUser.phone || '');
-      setUserBio(currentUser.bio || '');
-      setUserJobTitle(currentUser.job_title || '');
-      setUserLocation(currentUser.location || '');
       const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
       
       if (members.length > 0) {
@@ -181,26 +171,17 @@ export default function Settings() {
     setSavingProfile(true);
     try {
       await base44.auth.updateMe({ 
-        full_name: userFullName,
-        email: userEmail,
-        phone: userPhone,
-        bio: userBio,
-        job_title: userJobTitle,
-        location: userLocation
+        full_name: userFullName
       });
       setUser({ 
         ...user, 
-        full_name: userFullName,
-        email: userEmail,
-        phone: userPhone,
-        bio: userBio,
-        job_title: userJobTitle,
-        location: userLocation
+        full_name: userFullName
       });
       // Refresh page to show updated data in layout
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 500);
     } catch (error) {
       console.error('Error saving profile:', error);
+      alert('Failed to save profile changes');
     } finally {
       setSavingProfile(false);
     }
@@ -413,68 +394,26 @@ ${company.name}
               </div>
               <div className="border-t pt-4">
                 <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="user-full-name">Full Name</Label>
-                    <Input
-                      id="user-full-name"
-                      value={userFullName}
-                      onChange={(e) => setUserFullName(e.target.value)}
-                      placeholder="Your full name"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="user-email">Email</Label>
-                    <Input
-                      id="user-email"
-                      type="email"
-                      value={userEmail}
-                      onChange={(e) => setUserEmail(e.target.value)}
-                      placeholder="your@email.com"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="user-phone">Mobile Phone</Label>
-                    <Input
-                      id="user-phone"
-                      type="tel"
-                      value={userPhone}
-                      onChange={(e) => setUserPhone(e.target.value)}
-                      placeholder="+1 (555) 123-4567"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="user-job-title">Job Title</Label>
-                    <Input
-                      id="user-job-title"
-                      value={userJobTitle}
-                      onChange={(e) => setUserJobTitle(e.target.value)}
-                      placeholder="e.g., Property Inspector"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="user-location">Location</Label>
-                    <Input
-                      id="user-location"
-                      value={userLocation}
-                      onChange={(e) => setUserLocation(e.target.value)}
-                      placeholder="e.g., Miami, FL"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="user-bio">Bio</Label>
-                    <Textarea
-                      id="user-bio"
-                      value={userBio}
-                      onChange={(e) => setUserBio(e.target.value)}
-                      placeholder="Tell us about yourself..."
-                      className="mt-1 min-h-24"
-                    />
-                  </div>
+                <div>
+                  <Label htmlFor="user-full-name">Full Name</Label>
+                  <Input
+                    id="user-full-name"
+                    value={userFullName}
+                    onChange={(e) => setUserFullName(e.target.value)}
+                    placeholder="Your full name"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="user-email">Email</Label>
+                  <Input
+                    id="user-email"
+                    type="email"
+                    value={user?.email || ''}
+                    disabled
+                    className="mt-1 bg-slate-50"
+                  />
+                </div>
                   {companyMember && (
                     <div>
                       <Label className="text-sm text-slate-500">Role</Label>
