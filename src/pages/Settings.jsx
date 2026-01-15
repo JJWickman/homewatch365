@@ -47,6 +47,8 @@ export default function Settings() {
   const [uploading, setUploading] = useState(false);
   const [extractingBranding, setExtractingBranding] = useState(false);
   const [extractWebsiteUrl, setExtractWebsiteUrl] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [userPhone, setUserPhone] = useState('');
 
   const [companyForm, setCompanyForm] = useState({
     name: '',
@@ -81,6 +83,7 @@ export default function Settings() {
     try {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
+      setUserPhone(currentUser.phone || '');
       const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
       
       if (members.length > 0) {
@@ -149,6 +152,18 @@ export default function Settings() {
       console.error('Error uploading profile picture:', error);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    setSavingProfile(true);
+    try {
+      await base44.auth.updateMe({ phone: userPhone });
+      setUser({ ...user, phone: userPhone });
+    } catch (error) {
+      console.error('Error saving profile:', error);
+    } finally {
+      setSavingProfile(false);
     }
   };
 
@@ -344,7 +359,7 @@ ${company.name}
                 </div>
               </div>
               <div className="border-t pt-4">
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div>
                     <Label className="text-sm text-slate-500">Full Name</Label>
                     <p className="font-medium">{user?.full_name || 'N/A'}</p>
@@ -353,6 +368,17 @@ ${company.name}
                     <Label className="text-sm text-slate-500">Email</Label>
                     <p className="font-medium">{user?.email || 'N/A'}</p>
                   </div>
+                  <div>
+                    <Label htmlFor="user-phone">Mobile Phone</Label>
+                    <Input
+                      id="user-phone"
+                      type="tel"
+                      value={userPhone}
+                      onChange={(e) => setUserPhone(e.target.value)}
+                      placeholder="+1 (555) 123-4567"
+                      className="mt-1"
+                    />
+                  </div>
                   {companyMember && (
                     <div>
                       <Label className="text-sm text-slate-500">Role</Label>
@@ -360,6 +386,12 @@ ${company.name}
                     </div>
                   )}
                 </div>
+              </div>
+              <div className="pt-4 flex justify-end">
+                <Button onClick={handleSaveProfile} disabled={savingProfile} className="bg-slate-900 hover:bg-slate-800">
+                  <Save className="h-4 w-4 mr-2" />
+                  {savingProfile ? 'Saving...' : 'Save Profile'}
+                </Button>
               </div>
             </CardContent>
           </Card>
