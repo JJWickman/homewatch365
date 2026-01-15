@@ -15,6 +15,7 @@ import Schedule from './pages/Schedule';
 import Settings from './pages/Settings';
 import Tasks from './pages/Tasks';
 import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
+import Issues from './pages/Issues';
 import __Layout from './Layout.jsx';
 
 
@@ -36,6 +37,7 @@ export const PAGES = {
     "Settings": Settings,
     "Tasks": Tasks,
     "TestGoogleMapsAPI": TestGoogleMapsAPI,
+    "Issues": Issues,
 }
 
 export const pagesConfig = {
