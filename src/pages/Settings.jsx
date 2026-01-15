@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { 
   Settings as SettingsIcon, Building, Users, FileText, 
-  Palette, Save, Upload, Plus, Trash2, User, Mail, Edit2, MoreVertical
+  Palette, Save, Upload, Plus, Trash2, User, Mail, Edit2, MoreVertical, Camera
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +37,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 
 export default function Settings() {
+  const [user, setUser] = useState(null);
   const [company, setCompany] = useState(null);
   const [companyMember, setCompanyMember] = useState(null);
   const [staff, setStaff] = useState([]);
@@ -78,8 +79,9 @@ export default function Settings() {
 
   const loadData = async () => {
     try {
-      const user = await base44.auth.me();
-      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
+      const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
       
       if (members.length > 0) {
         setCompanyMember(members[0]);
@@ -129,6 +131,22 @@ export default function Settings() {
       setCompanyForm(prev => ({ ...prev, logo_url: file_url }));
     } catch (error) {
       console.error('Error uploading logo:', error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleProfilePictureUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.auth.updateMe({ avatar_url: file_url });
+      setUser({ ...user, avatar_url: file_url });
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
     } finally {
       setUploading(false);
     }
@@ -277,12 +295,75 @@ ${company.name}
         subtitle="Manage your company settings and team"
       />
 
-      <Tabs defaultValue="company">
+      <Tabs defaultValue="profile">
         <TabsList className="mb-6">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="company">Company</TabsTrigger>
           <TabsTrigger value="team">Team</TabsTrigger>
           <TabsTrigger value="branding">Branding</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="profile">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                My Profile
+              </CardTitle>
+              <CardDescription>Update your profile information</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <Label>Profile Picture</Label>
+                <div className="flex items-center gap-6 mt-2">
+                  <div className="h-24 w-24 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
+                    {user?.avatar_url ? (
+                      <img src={user.avatar_url} alt="Profile" className="h-full w-full object-cover" />
+                    ) : (
+                      <User className="h-10 w-10 text-slate-300" />
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="profile-upload" className="cursor-pointer">
+                      <Button variant="outline" size="sm" disabled={uploading} asChild>
+                        <span>
+                          <Camera className="h-4 w-4 mr-2" />
+                          {uploading ? 'Uploading...' : 'Upload Photo'}
+                        </span>
+                      </Button>
+                    </Label>
+                    <input
+                      id="profile-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProfilePictureUpload}
+                      className="hidden"
+                    />
+                    <p className="text-xs text-slate-500 mt-2">JPG, PNG or GIF (Max 5MB)</p>
+                  </div>
+                </div>
+              </div>
+              <div className="border-t pt-4">
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-sm text-slate-500">Full Name</Label>
+                    <p className="font-medium">{user?.full_name || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-slate-500">Email</Label>
+                    <p className="font-medium">{user?.email || 'N/A'}</p>
+                  </div>
+                  {companyMember && (
+                    <div>
+                      <Label className="text-sm text-slate-500">Role</Label>
+                      <p className="font-medium capitalize">{companyMember.role}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="company">
           <Card>
