@@ -52,6 +52,7 @@ export default function Settings() {
   const [extractWebsiteUrl, setExtractWebsiteUrl] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
   const [userFullName, setUserFullName] = useState('');
+  const [userPhone, setUserPhone] = useState('');
 
   const [companyForm, setCompanyForm] = useState({
     name: '',
@@ -91,6 +92,7 @@ export default function Settings() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
       setUserFullName(currentUser.full_name || '');
+      setUserPhone(currentUser.phone || '');
       const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
       
       if (members.length > 0) {
@@ -171,11 +173,13 @@ export default function Settings() {
     setSavingProfile(true);
     try {
       await base44.auth.updateMe({ 
-        full_name: userFullName
+        full_name: userFullName,
+        phone: userPhone
       });
       setUser({ 
         ...user, 
-        full_name: userFullName
+        full_name: userFullName,
+        phone: userPhone
       });
       // Refresh page to show updated data in layout
       setTimeout(() => window.location.reload(), 500);
@@ -412,6 +416,17 @@ ${company.name}
                     value={user?.email || ''}
                     disabled
                     className="mt-1 bg-slate-50"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="user-phone">Mobile Phone</Label>
+                  <Input
+                    id="user-phone"
+                    type="tel"
+                    value={userPhone}
+                    onChange={(e) => setUserPhone(e.target.value)}
+                    placeholder="+1 (555) 123-4567"
+                    className="mt-1"
                   />
                 </div>
                   {companyMember && (
