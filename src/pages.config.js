@@ -20,6 +20,7 @@ import Marketing from './pages/Marketing';
 import RouteOptimizer from './pages/RouteOptimizer';
 import Contractors from './pages/Contractors';
 import AdminConsole from './pages/AdminConsole';
+import IssueDetail from './pages/IssueDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -46,6 +47,7 @@ export const PAGES = {
     "RouteOptimizer": RouteOptimizer,
     "Contractors": Contractors,
     "AdminConsole": AdminConsole,
+    "IssueDetail": IssueDetail,
 }
 
 export const pagesConfig = {
