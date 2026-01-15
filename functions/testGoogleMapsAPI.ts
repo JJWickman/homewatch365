@@ -9,7 +9,10 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { address, city, state, zip } = await req.json();
+        const body = await req.json();
+        console.log('Received body:', JSON.stringify(body, null, 2));
+        
+        const { address, city, state, zip } = body || {};
         
         if (!address || !city || !state) {
             return Response.json({ error: 'Address, city, and state are required' }, { status: 400 });
