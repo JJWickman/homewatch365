@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { 
   Mail, MessageSquare, Plus, Edit2, Trash2, Send, Eye, MoreVertical,
-  Calendar, Users, BarChart3
+  Calendar, Users, BarChart3, X, Briefcase
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +43,8 @@ export default function Marketing() {
   const [campaigns, setCampaigns] = useState([]);
   const [logs, setLogs] = useState([]);
   const [clients, setClients] = useState([]);
+  const [contractors, setContractors] = useState([]);
+  const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Template dialog
@@ -71,6 +73,18 @@ export default function Marketing() {
 
   const [sendingCampaign, setSendingCampaign] = useState(false);
 
+  // Marketing list dialog
+  const [showListDialog, setShowListDialog] = useState(false);
+  const [editingList, setEditingList] = useState(null);
+  const [listForm, setListForm] = useState({
+    name: '',
+    description: '',
+    type: 'clients',
+    client_ids: [],
+    contractor_ids: []
+  });
+  const [selectedMembers, setSelectedMembers] = useState([]);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -85,17 +99,21 @@ export default function Marketing() {
         const cId = members[0].company_id;
         setCompanyId(cId);
 
-        const [templatesData, campaignsData, logsData, clientsData] = await Promise.all([
+        const [templatesData, campaignsData, logsData, clientsData, contractorsData, listsData] = await Promise.all([
           base44.entities.CommunicationTemplate.filter({ company_id: cId, is_active: true }),
           base44.entities.Campaign.filter({ company_id: cId }, '-created_date'),
           base44.entities.CommunicationLog.filter({ company_id: cId }, '-created_date', 50),
-          base44.entities.Client.filter({ company_id: cId, is_active: true })
+          base44.entities.Client.filter({ company_id: cId, is_active: true }),
+          base44.entities.Contractor.filter({ company_id: cId, is_active: true }),
+          base44.entities.MarketingList.filter({ company_id: cId, is_active: true })
         ]);
 
         setTemplates(templatesData);
         setCampaigns(campaignsData);
         setLogs(logsData);
         setClients(clientsData);
+        setContractors(contractorsData);
+        setLists(listsData);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -189,6 +207,38 @@ export default function Marketing() {
     loadData();
   };
 
+  const handleSaveList = async () => {
+    if (!companyId || !listForm.name) return;
+
+    const memberCount = (listForm.client_ids?.length || 0) + (listForm.contractor_ids?.length || 0);
+    const data = {
+      company_id: companyId,
+      name: listForm.name,
+      description: listForm.description,
+      type: listForm.type,
+      client_ids: listForm.type === 'clients' || listForm.type === 'both' ? listForm.client_ids : [],
+      contractor_ids: listForm.type === 'contractors' || listForm.type === 'both' ? listForm.contractor_ids : [],
+      member_count: memberCount
+    };
+
+    if (editingList) {
+      await base44.entities.MarketingList.update(editingList.id, data);
+    } else {
+      await base44.entities.MarketingList.create(data);
+    }
+
+    setShowListDialog(false);
+    setListForm({ name: '', description: '', type: 'clients', client_ids: [], contractor_ids: [] });
+    setSelectedMembers([]);
+    setEditingList(null);
+    loadData();
+  };
+
+  const handleDeleteList = async (id) => {
+    await base44.entities.MarketingList.update(id, { is_active: false });
+    loadData();
+  };
+
   const getTemplate = (id) => templates.find(t => t.id === id);
   const getClient = (id) => clients.find(c => c.id === id);
 
@@ -202,9 +252,97 @@ export default function Marketing() {
       <Tabs defaultValue="templates" className="mb-6">
         <TabsList>
           <TabsTrigger value="templates">Templates</TabsTrigger>
+          <TabsTrigger value="lists">Lists</TabsTrigger>
           <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
+
+        {/* Lists Tab */}
+        <TabsContent value="lists">
+          <div className="flex justify-end mb-4">
+            <Button 
+              onClick={() => {
+                setEditingList(null);
+                setListForm({ name: '', description: '', type: 'clients', client_ids: [], contractor_ids: [] });
+                setSelectedMembers([]);
+                setShowListDialog(true);
+              }}
+              className="bg-slate-900 hover:bg-slate-800"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New List
+            </Button>
+          </div>
+
+          {lists.length === 0 ? (
+            <Card>
+              <EmptyState
+                icon={Users}
+                title="No lists yet"
+                description="Create your first marketing list to target specific groups."
+                action={() => setShowListDialog(true)}
+                actionLabel="Create List"
+              />
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {lists.map((list) => (
+                <Card key={list.id}>
+                  <CardContent className="pt-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-semibold">{list.name}</h3>
+                          <Badge variant="outline" className="capitalize">
+                            {list.type}
+                          </Badge>
+                        </div>
+                        {list.description && (
+                          <p className="text-sm text-slate-600 mb-2">{list.description}</p>
+                        )}
+                        <p className="text-sm text-slate-500">
+                          {list.member_count} member{list.member_count !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setEditingList(list);
+                              setListForm({
+                                name: list.name,
+                                description: list.description,
+                                type: list.type,
+                                client_ids: list.client_ids || [],
+                                contractor_ids: list.contractor_ids || []
+                              });
+                              setShowListDialog(true);
+                            }}
+                          >
+                            <Edit2 className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteList(list.id)}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
 
         {/* Templates Tab */}
         <TabsContent value="templates">
@@ -473,6 +611,144 @@ export default function Marketing() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Marketing List Dialog */}
+      <Dialog open={showListDialog} onOpenChange={setShowListDialog}>
+        <DialogContent className="max-w-2xl max-h-96 overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingList ? 'Edit List' : 'New List'}
+            </DialogTitle>
+            <DialogDescription>
+              Create a marketing list of clients and contractors
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>List Name *</Label>
+              <Input
+                value={listForm.name}
+                onChange={(e) => setListForm(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="e.g., VIP Clients"
+              />
+            </div>
+
+            <div>
+              <Label>Description</Label>
+              <Input
+                value={listForm.description}
+                onChange={(e) => setListForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="List purpose or notes"
+              />
+            </div>
+
+            <div>
+              <Label>Type *</Label>
+              <Select
+                value={listForm.type}
+                onValueChange={(value) => setListForm(prev => ({ ...prev, type: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="clients">Clients Only</SelectItem>
+                  <SelectItem value="contractors">Contractors Only</SelectItem>
+                  <SelectItem value="both">Clients & Contractors</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {(listForm.type === 'clients' || listForm.type === 'both') && (
+              <div>
+                <Label>Clients</Label>
+                <div className="border rounded-lg p-3 max-h-40 overflow-y-auto space-y-2">
+                  {clients.length === 0 ? (
+                    <p className="text-sm text-slate-500">No clients available</p>
+                  ) : (
+                    clients.map((client) => (
+                      <div key={client.id} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id={`client-${client.id}`}
+                          checked={listForm.client_ids.includes(client.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setListForm(prev => ({
+                                ...prev,
+                                client_ids: [...prev.client_ids, client.id]
+                              }));
+                            } else {
+                              setListForm(prev => ({
+                                ...prev,
+                                client_ids: prev.client_ids.filter(id => id !== client.id)
+                              }));
+                            }
+                          }}
+                        />
+                        <label htmlFor={`client-${client.id}`} className="text-sm cursor-pointer flex-1">
+                          {client.first_name} {client.last_name}
+                        </label>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {(listForm.type === 'contractors' || listForm.type === 'both') && (
+              <div>
+                <Label>Contractors</Label>
+                <div className="border rounded-lg p-3 max-h-40 overflow-y-auto space-y-2">
+                  {contractors.length === 0 ? (
+                    <p className="text-sm text-slate-500">No contractors available</p>
+                  ) : (
+                    contractors.map((contractor) => (
+                      <div key={contractor.id} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id={`contractor-${contractor.id}`}
+                          checked={listForm.contractor_ids.includes(contractor.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setListForm(prev => ({
+                                ...prev,
+                                contractor_ids: [...prev.contractor_ids, contractor.id]
+                              }));
+                            } else {
+                              setListForm(prev => ({
+                                ...prev,
+                                contractor_ids: prev.contractor_ids.filter(id => id !== contractor.id)
+                              }));
+                            }
+                          }}
+                        />
+                        <label htmlFor={`contractor-${contractor.id}`} className="text-sm cursor-pointer flex-1">
+                          {contractor.business_name}
+                        </label>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowListDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveList}
+              disabled={!listForm.name}
+              className="bg-slate-900 hover:bg-slate-800"
+            >
+              {editingList ? 'Update' : 'Create'} List
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Template Dialog */}
       <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
