@@ -562,7 +562,7 @@ export default function PropertyDetail() {
                   <Button 
                     size="sm" 
                     onClick={() => navigate(createPageUrl('Inspections') + `?action=new&property_id=${property.id}`)}
-                    className="bg-slate-900 hover:bg-slate-800 text-white"
+                    className="bg-black hover:bg-gray-900 text-white"
                   >
                     <Plus className="h-4 w-4 mr-1" />
                     Schedule
