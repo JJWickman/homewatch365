@@ -14,6 +14,8 @@ export default function TestGoogleMapsAPI() {
   const [city, setCity] = useState('Chelsea');
   const [state, setState] = useState('MI');
   const [zip, setZip] = useState('48118');
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
 
   const testAPI = async () => {
     setLoading(true);
@@ -83,10 +85,36 @@ export default function TestGoogleMapsAPI() {
               placeholder="12345"
             />
           </div>
-          <Button onClick={testAPI} disabled={loading} className="w-full">
-            {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Test Address
-          </Button>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="latitude">Latitude</Label>
+              <Input
+                id="latitude"
+                value={latitude}
+                readOnly
+                placeholder="Latitude"
+              />
+            </div>
+            <div>
+              <Label htmlFor="longitude">Longitude</Label>
+              <Input
+                id="longitude"
+                value={longitude}
+                readOnly
+                placeholder="Longitude"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={getLatLon} disabled={loading} className="flex-1">
+              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Get LatLon
+            </Button>
+            <Button onClick={testAPI} disabled={loading} className="flex-1" variant="outline">
+              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Test Address
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
