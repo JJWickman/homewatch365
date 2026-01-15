@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 const navigationItems = [
@@ -221,10 +221,11 @@ export default function Layout({ children, currentPageName }) {
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 hover:bg-slate-100 rounded-lg px-2 py-1.5 transition-colors">
                     <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-slate-900 text-white text-xs">
-                        {getInitials(user?.full_name)}
-                      </AvatarFallback>
-                    </Avatar>
+                          <AvatarImage src={user?.avatar_url} alt={user?.full_name} />
+                          <AvatarFallback className="bg-slate-900 text-white text-xs">
+                            {getInitials(user?.full_name)}
+                          </AvatarFallback>
+                        </Avatar>
                     <div className="hidden sm:block text-left">
                       <p className="text-sm font-medium text-slate-900">{user?.full_name}</p>
                       <p className="text-xs text-slate-500 capitalize">{companyMember?.role || 'Member'}</p>
