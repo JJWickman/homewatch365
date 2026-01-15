@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
   AlertCircle, Clock, CheckCircle2, Plus, Building2, 
-  ChevronRight, Search, Filter
+  ChevronRight, Search, Filter, User
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -224,6 +224,12 @@ export default function Issues() {
                               <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
                                 <Building2 className="h-3 w-3" />
                                 {getPropertyName(issue.property_id)}
+                              </p>
+                            )}
+                            {issue.client_id && (
+                              <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
+                                <User className="h-3 w-3" />
+                                {clients.find(c => c.id === issue.client_id)?.first_name} {clients.find(c => c.id === issue.client_id)?.last_name || 'Unknown Owner'}
                               </p>
                             )}
                             {issue.description && (
