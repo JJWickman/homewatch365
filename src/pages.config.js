@@ -21,6 +21,8 @@ import RouteOptimizer from './pages/RouteOptimizer';
 import Contractors from './pages/Contractors';
 import AdminConsole from './pages/AdminConsole';
 import IssueDetail from './pages/IssueDetail';
+import FollowUps from './pages/FollowUps';
+import FollowUpDetail from './pages/FollowUpDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -48,6 +50,8 @@ export const PAGES = {
     "Contractors": Contractors,
     "AdminConsole": AdminConsole,
     "IssueDetail": IssueDetail,
+    "FollowUps": FollowUps,
+    "FollowUpDetail": FollowUpDetail,
 }
 
 export const pagesConfig = {
