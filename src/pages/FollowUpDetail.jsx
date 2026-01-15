@@ -94,12 +94,12 @@ export default function FollowUpDetail() {
           setContractors(contractorsData);
           
           if (record.property_id) {
-            const propertiesData = await base44.entities.Property.filter({ id: record.property_id });
+            const propertiesData = await base44.entities.Property.filter({ id: record.property_id, company_id: companyId });
             if (propertiesData.length > 0) setProperty(propertiesData[0]);
           }
           
           if (record.client_id) {
-            const clientsData = await base44.entities.Client.filter({ id: record.client_id });
+            const clientsData = await base44.entities.Client.filter({ id: record.client_id, company_id: companyId });
             if (clientsData.length > 0) setClient(clientsData[0]);
           }
 
