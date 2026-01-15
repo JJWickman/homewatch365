@@ -8,6 +8,13 @@ import {
   Edit, ClipboardCheck, Calendar, Clock, 
   AlertTriangle, CheckCircle2, FileText, Upload, Image
 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,6 +27,7 @@ export default function PropertyDetail() {
   const navigate = useNavigate();
   const [property, setProperty] = useState(null);
   const [client, setClient] = useState(null);
+  const [clients, setClients] = useState([]);
   const [inspections, setInspections] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [contractors, setContractors] = useState([]);
@@ -28,6 +36,7 @@ export default function PropertyDetail() {
   const [fetchingAerial, setFetchingAerial] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [changingOwner, setChangingOwner] = useState(false);
 
   useEffect(() => {
     loadProperty();
@@ -55,12 +64,16 @@ export default function PropertyDetail() {
         setInspections(inspectionsData);
         setTasks(tasksData);
         
-        // Load client
+        // Load client and all clients
         if (prop.client_id) {
-          const clientData = await base44.entities.Client.filter({ id: prop.client_id });
+          const [clientData, allClientsData] = await Promise.all([
+            base44.entities.Client.filter({ id: prop.client_id }),
+            base44.entities.Client.filter({ company_id: prop.company_id, is_active: true })
+          ]);
           if (clientData.length > 0) {
             setClient(clientData[0]);
           }
+          setClients(allClientsData);
         }
         
         // Load contractors
@@ -161,6 +174,24 @@ export default function PropertyDetail() {
     }
   };
 
+  const handleChangeOwner = async (newClientId) => {
+    setChangingOwner(true);
+    try {
+      await base44.entities.Property.update(property.id, { client_id: newClientId });
+      const newClientData = await base44.entities.Client.filter({ id: newClientId });
+      if (newClientData.length > 0) {
+        setClient(newClientData[0]);
+        setProperty({ ...property, client_id: newClientId });
+      }
+      toast.success('Owner updated successfully');
+    } catch (error) {
+      console.error('Error changing owner:', error);
+      toast.error('Failed to change owner');
+    } finally {
+      setChangingOwner(false);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto">
       <PageHeader
@@ -254,7 +285,23 @@ export default function PropertyDetail() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-slate-500">Owner</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
+                <Select 
+                  value={property.client_id} 
+                  onValueChange={handleChangeOwner}
+                  disabled={changingOwner}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map(c => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.first_name} {c.last_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Link 
                   to={createPageUrl('ClientDetail') + `?id=${client.id}`}
                   className="flex items-center gap-3 hover:bg-slate-50 -mx-2 px-2 py-2 rounded-lg transition-colors"
