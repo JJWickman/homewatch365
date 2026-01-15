@@ -182,14 +182,12 @@ export default function TestGoogleMapsAPI() {
                   <div className="space-y-2">
                     {result.aerialView.uris.MP4_MEDIUM && (
                       <div>
-                        <p className="text-sm text-slate-600 mb-2">Video (MP4):</p>
-                        <video 
+                        <p className="text-sm text-slate-600 mb-2">Aerial View (iframe):</p>
+                        <iframe 
                           src={result.aerialView.uris.MP4_MEDIUM.landscapeUri} 
-                          controls 
-                          className="w-full rounded-lg border border-slate-200"
-                        >
-                          Your browser does not support video playback.
-                        </video>
+                          className="w-full h-96 rounded-lg border border-slate-200"
+                          allowFullScreen
+                        />
                       </div>
                     )}
                     {result.aerialView.metadata && (
