@@ -5,7 +5,7 @@ import { createPageUrl } from '@/utils';
 import { 
   Settings as SettingsIcon, Building, Users, FileText, 
   Palette, Save, Upload, Plus, Trash2, User, Mail, Edit2, MoreVertical, Camera,
-  Calendar, Copy, Check, ExternalLink, Link2, Unlink
+  Calendar, Copy, Check, ExternalLink, Link2, Unlink, Shield
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -412,6 +412,15 @@ ${company.name}
                 </div>
               </div>
               <div className="border-t pt-4">
+                {userRole === 'owner' && (
+                  <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-3">
+                    <Shield className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold text-blue-900">Administrator</p>
+                      <p className="text-sm text-blue-700">You have full administrative access to this company</p>
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-4">
                 <div>
                   <Label htmlFor="user-full-name">Full Name</Label>
@@ -786,8 +795,11 @@ ${company.name}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="capitalize">{member.role}</Badge>
-                      {canManageStaff && member.user_email !== companyMember?.user_email && (
+                       {member.role === 'owner' && (
+                         <Shield className="h-5 w-5 text-blue-600" title="Administrator" />
+                       )}
+                       <Badge variant="outline" className="capitalize">{member.role}</Badge>
+                       {canManageStaff && member.user_email !== companyMember?.user_email && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">
