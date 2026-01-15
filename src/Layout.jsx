@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { 
   Home, Users, Building2, ClipboardCheck, Calendar, 
   FileText, Settings, Menu, X, LogOut, ChevronDown,
-  Bell, Search, Plus, Building, UserCircle, Megaphone
+  Bell, Search, Plus, Building, UserCircle, Megaphone, Briefcase
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
