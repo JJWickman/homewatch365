@@ -17,6 +17,30 @@ export default function TestGoogleMapsAPI() {
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
 
+  const getLatLon = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await base44.functions.invoke('testGoogleMapsAPI', {
+        address,
+        city,
+        state,
+        zip
+      });
+
+      if (response.data.validation.isValid) {
+        setLatitude(response.data.validation.lat.toString());
+        setLongitude(response.data.validation.lng.toString());
+      } else {
+        setError(response.data.validation.error || 'Failed to get coordinates');
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to get coordinates');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const testAPI = async () => {
     setLoading(true);
     setError(null);
@@ -31,6 +55,10 @@ export default function TestGoogleMapsAPI() {
       });
       
       setResult(response.data);
+      if (response.data.validation.isValid) {
+        setLatitude(response.data.validation.lat.toString());
+        setLongitude(response.data.validation.lng.toString());
+      }
     } catch (err) {
       setError(err.message);
     } finally {
