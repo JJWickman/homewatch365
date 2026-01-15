@@ -313,10 +313,6 @@ export default function PropertyDetail() {
           <Edit className="h-4 w-4 mr-2" />
           <span>Edit</span>
         </Button>
-        <Button onClick={() => navigate(createPageUrl('Inspections') + `?action=new&property_id=${property.id}`)}>
-          <ClipboardCheck className="h-4 w-4 mr-2" />
-          <span>New Inspection</span>
-        </Button>
       </PageHeader>
 
       {/* Hero Image */}
