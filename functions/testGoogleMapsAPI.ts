@@ -15,9 +15,9 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Address, city, and state are required' }, { status: 400 });
         }
 
-        const apiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
+        const apiKey = Deno.env.get('API_KEY');
         if (!apiKey) {
-            return Response.json({ error: 'Google Maps API key not configured' }, { status: 500 });
+            return Response.json({ error: 'API key not configured' }, { status: 500 });
         }
 
         const fullAddress = `${address}, ${city}, ${state}${zip ? ' ' + zip : ''}`;
