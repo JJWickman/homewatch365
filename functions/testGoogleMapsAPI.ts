@@ -31,16 +31,19 @@ Deno.serve(async (req) => {
             isValid: false,
             formattedAddress: null,
             lat: null,
-            lng: null
+            lng: null,
+            error: geocodingData.error_message || null,
+            status: geocodingData.status
         };
 
-        if (geocodingData.results && geocodingData.results.length > 0) {
+        if (geocodingData.status === 'OK' && geocodingData.results && geocodingData.results.length > 0) {
             const result = geocodingData.results[0];
             validationResult = {
                 isValid: true,
                 formattedAddress: result.formatted_address,
                 lat: result.geometry.location.lat,
-                lng: result.geometry.location.lng
+                lng: result.geometry.location.lng,
+                status: 'OK'
             };
         }
 
