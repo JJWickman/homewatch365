@@ -140,14 +140,14 @@ export default function Properties() {
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDeleteConfirm(property.id);
-                }}
-                className="text-red-600"
+               onClick={(e) => {
+                 e.stopPropagation();
+                 setDeleteConfirm(property.id);
+               }}
+               className="text-red-600"
               >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
+               <Trash2 className="h-4 w-4 mr-2" />
+               Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
