@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { 
   Building2, ClipboardCheck, Calendar, MapPin, 
   CheckCircle2, AlertTriangle, LogOut, User,
-  Eye, FileText, Clock
+  Eye, FileText, Clock, Download, Play, File
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -172,6 +172,65 @@ export default function ClientPortal() {
             ))}
           </div>
         </section>
+
+        {/* Documents & Media */}
+        {client.files && client.files.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold mb-4">Documents & Media</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {client.files.map((file, index) => {
+                const isVideo = file.type?.startsWith('video/') || file.name?.match(/\.(mp4|mov|avi|webm)$/i);
+                const isImage = file.type?.startsWith('image/') || file.name?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                
+                return (
+                  <Card key={index} className="overflow-hidden">
+                    {isVideo ? (
+                      <div className="aspect-video bg-slate-900 relative">
+                        <video 
+                          src={file.url} 
+                          className="w-full h-full object-contain"
+                          controls
+                        />
+                      </div>
+                    ) : isImage ? (
+                      <div className="aspect-video bg-slate-100">
+                        <img 
+                          src={file.url} 
+                          alt={file.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="aspect-video bg-slate-100 flex items-center justify-center">
+                        <File className="h-12 w-12 text-slate-300" />
+                      </div>
+                    )}
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{file.name}</p>
+                          {file.uploaded_at && (
+                            <p className="text-xs text-slate-500">
+                              {format(new Date(file.uploaded_at), 'MMM d, yyyy')}
+                            </p>
+                          )}
+                        </div>
+                        <a 
+                          href={file.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                        >
+                          <Download className="h-4 w-4 text-slate-500" />
+                        </a>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Recent Inspections */}
         <section>
