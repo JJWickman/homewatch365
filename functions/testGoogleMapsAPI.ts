@@ -49,17 +49,9 @@ Deno.serve(async (req) => {
         // Fetch Aerial View video
          let aerialViewData = null;
          if (validationResult.isValid) {
-             const aerialViewUrl = `https://aerialview.googleapis.com/v1/videos:lookupVideo?key=${apiKey}`;
+             const aerialViewUrl = `https://aerialview.googleapis.com/v1/videos:lookupVideo?key=${apiKey}&address=${encodeURIComponent(fullAddress)}`;
              
-             const aerialResponse = await fetch(aerialViewUrl, {
-                 method: 'POST',
-                 headers: {
-                     'Content-Type': 'application/json',
-                 },
-                 body: JSON.stringify({
-                     address: fullAddress
-                 })
-             });
+             const aerialResponse = await fetch(aerialViewUrl);
              const aerialData = await aerialResponse.json();
              
              console.log('Aerial View API Response:', JSON.stringify(aerialData, null, 2));
