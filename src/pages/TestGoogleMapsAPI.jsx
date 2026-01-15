@@ -170,41 +170,17 @@ export default function TestGoogleMapsAPI() {
             </CardContent>
           </Card>
 
-          {result.aerialView && (
+          {result.streetViewUrl && (
             <Card>
               <CardHeader>
-                <CardTitle>Aerial View</CardTitle>
+                <CardTitle>Street View</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p><strong>State:</strong> {result.aerialView.state}</p>
-                
-                {result.aerialView.state === 'ACTIVE' && result.aerialView.uris && (
-                  <div className="space-y-2">
-                    {result.aerialView.uris.MP4_MEDIUM && (
-                      <div>
-                        <p className="text-sm text-slate-600 mb-2">Aerial View (iframe):</p>
-                        <iframe 
-                          src={result.aerialView.uris.MP4_MEDIUM.landscapeUri} 
-                          className="w-full h-96 rounded-lg border border-slate-200"
-                          allowFullScreen
-                        />
-                      </div>
-                    )}
-                    {result.aerialView.metadata && (
-                      <div className="text-sm text-slate-600">
-                        <p><strong>Capture Date:</strong> {result.aerialView.metadata.captureDate}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {result.aerialView.state === 'PROCESSING' && (
-                  <p className="text-amber-600">Video is being processed. Try again later.</p>
-                )}
-                
-                {result.aerialView.error && (
-                  <p className="text-slate-600">{result.aerialView.error}</p>
-                )}
+                <img 
+                  src={result.streetViewUrl} 
+                  alt="Street View"
+                  className="w-full rounded-lg border border-slate-200"
+                />
               </CardContent>
             </Card>
           )}

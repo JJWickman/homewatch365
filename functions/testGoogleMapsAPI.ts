@@ -46,40 +46,16 @@ Deno.serve(async (req) => {
             };
         }
 
-        // Fetch Aerial View video
-         let aerialViewData = null;
-         if (validationResult.isValid) {
-             const aerialViewUrl = `https://aerialview.googleapis.com/v1/videos:lookupVideo?key=${apiKey}&address=${encodeURIComponent(fullAddress)}`;
-             
-             const aerialResponse = await fetch(aerialViewUrl);
-             const aerialData = await aerialResponse.json();
-             
-             console.log('Aerial View API Response:', JSON.stringify(aerialData, null, 2));
-             
-             if (aerialData.error) {
-                 aerialViewData = {
-                     state: 'ERROR',
-                     error: aerialData.error.message || 'API Error',
-                     errorDetails: aerialData.error
-                 };
-             } else if (aerialData.state === 'ACTIVE' || aerialData.state === 'PROCESSING') {
-                 aerialViewData = {
-                     state: aerialData.state,
-                     uris: aerialData.uris,
-                     metadata: aerialData.metadata
-                 };
-             } else {
-                 aerialViewData = {
-                     state: aerialData.state || 'NOT_AVAILABLE',
-                     error: 'Aerial view not available for this location'
-                 };
-             }
-         }
+        // Generate Street View image URL
+        let streetViewUrl = null;
+        if (validationResult.isValid) {
+            streetViewUrl = `https://maps.googleapis.com/maps/api/streetview?size=800x600&location=${encodeURIComponent(fullAddress)}&key=${apiKey}`;
+        }
 
         return Response.json({
             success: true,
             validation: validationResult,
-            aerialView: aerialViewData,
+            streetViewUrl,
             fullAddress
         });
     } catch (error) {
