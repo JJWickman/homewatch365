@@ -25,6 +25,7 @@ const navigationItems = [
   { name: 'Inspections', icon: ClipboardCheck, page: 'Inspections' },
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
   { name: 'Tasks', icon: FileText, page: 'Tasks' },
+  { name: 'Issues', icon: Bell, page: 'Issues' },
 ];
 
 const clientPortalPages = ['ClientPortal', 'ClientInspectionView'];
