@@ -198,8 +198,8 @@ export default function ClientDetail() {
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg">Properties</CardTitle>
                   <Button size="sm" onClick={() => navigate(createPageUrl('PropertyForm') + `?client_id=${client.id}`)}>
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add Property
+                    <Plus className="h-4 w-4 mr-2" />
+                    <span>Add Property</span>
                   </Button>
                 </CardHeader>
                 <CardContent>
