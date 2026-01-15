@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { 
   Home, Users, Building2, ClipboardCheck, Calendar, 
   FileText, Settings, Menu, X, LogOut, ChevronDown,
-  Bell, Search, Plus, Building, UserCircle
+  Bell, Search, Plus, Building, UserCircle, Megaphone
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +26,7 @@ const navigationItems = [
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
   { name: 'Tasks', icon: FileText, page: 'Tasks' },
   { name: 'Issues', icon: Bell, page: 'Issues' },
+  { name: 'Marketing', icon: Megaphone, page: 'Marketing' },
 ];
 
 const clientPortalPages = ['ClientPortal', 'ClientInspectionView'];
