@@ -164,6 +164,11 @@ export default function PropertyForm() {
             emergency_contacts: p.emergency_contacts || [],
             utilities: p.utilities || {}
           });
+          
+          // Set the street view URL if property has a photo
+          if (p.primary_photo_url) {
+            setStreetViewUrl(p.primary_photo_url);
+          }
         }
       }
     } catch (error) {
