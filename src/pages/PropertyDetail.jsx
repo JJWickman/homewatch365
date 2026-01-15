@@ -562,7 +562,7 @@ export default function PropertyDetail() {
                   <Button 
                     size="sm" 
                     onClick={() => navigate(createPageUrl('Inspections') + `?action=new&property_id=${property.id}`)}
-                    className="bg-slate-900 hover:bg-slate-800"
+                    className="bg-slate-900 hover:bg-slate-800 text-white"
                   >
                     <Plus className="h-4 w-4 mr-1" />
                     Schedule
@@ -621,7 +621,7 @@ export default function PropertyDetail() {
                   <Button 
                     size="sm" 
                     onClick={() => setShowAddTask(true)}
-                    className="bg-slate-900 hover:bg-slate-800"
+                    className="bg-slate-900 hover:bg-slate-800 text-white"
                   >
                     <Plus className="h-4 w-4 mr-1" />
                     Add Task
@@ -759,7 +759,7 @@ export default function PropertyDetail() {
                   <Button 
                     size="sm" 
                     onClick={() => navigate(createPageUrl('PropertyForm') + `?id=${property.id}#contractors`)}
-                    className="bg-slate-900 hover:bg-slate-800"
+                    className="bg-slate-900 hover:bg-slate-800 text-white"
                   >
                     <Plus className="h-4 w-4 mr-1" />
                     Assign
@@ -814,7 +814,7 @@ export default function PropertyDetail() {
                   <Button 
                     size="sm" 
                     onClick={() => setShowAddContact(true)}
-                    className="bg-slate-900 hover:bg-slate-800"
+                    className="bg-slate-900 hover:bg-slate-800 text-white"
                   >
                     <Plus className="h-4 w-4 mr-1" />
                     Add Contact
