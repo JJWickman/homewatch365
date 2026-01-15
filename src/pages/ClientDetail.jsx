@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import {
@@ -208,10 +208,11 @@ export default function ClientDetail() {
             <CardContent className="pt-6">
               <div className="flex flex-col items-center text-center">
                 <Avatar className="h-20 w-20 mb-4">
-                  <AvatarFallback className="bg-slate-900 text-white text-xl">
-                    {getInitials()}
-                  </AvatarFallback>
-                </Avatar>
+                   <AvatarImage src={client.avatar_url} alt={`${client.first_name} ${client.last_name}`} />
+                   <AvatarFallback className="bg-slate-900 text-white text-xl">
+                     {getInitials()}
+                   </AvatarFallback>
+                 </Avatar>
                 <h2 className="text-xl font-semibold">{client.first_name} {client.last_name}</h2>
                 <StatusBadge status={client.billing_status || 'active'} className="mt-2" />
               </div>
