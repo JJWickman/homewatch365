@@ -49,7 +49,6 @@ Deno.serve(async (req) => {
         // Generate Aerial View using Static Maps API with satellite imagery
         let aerialViewUrl = null;
         let coordinates = null;
-        let aerialVideoData = null;
         if (validationResult.isValid && geocodingData.results?.[0]?.geometry?.location) {
             const location = geocodingData.results[0].geometry.location;
             coordinates = {
@@ -59,62 +58,12 @@ Deno.serve(async (req) => {
             
             // Use Static Maps API with satellite maptype for aerial view
             aerialViewUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${coordinates.lat},${coordinates.lng}&zoom=19&size=800x600&maptype=satellite&key=${apiKey}`;
-            
-            // Check for Aerial View API video availability
-            const aerialViewApiUrl = `https://aerialview.googleapis.com/v1/videos:lookupVideoMetadata?key=${apiKey}`;
-            const aerialViewBody = {
-                address: fullAddress
-            };
-            
-            try {
-                const aerialViewRes = await fetch(aerialViewApiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(aerialViewBody)
-                });
-                
-                console.log('Aerial View API Status:', aerialViewRes.status);
-                const responseText = await aerialViewRes.text();
-                console.log('Aerial View API Response:', responseText);
-                
-                if (!aerialViewRes.ok) {
-                    aerialVideoData = {
-                        videoId: null,
-                        state: 'API_ERROR',
-                        error: `API returned status ${aerialViewRes.status}. The Aerial View API may not be enabled for this API key.`
-                    };
-                } else {
-                    const aerialViewData = JSON.parse(responseText);
-                    
-                    if (aerialViewData.state === 'PROCESSING_COMPLETE' && aerialViewData.videoId) {
-                        aerialVideoData = {
-                            videoId: aerialViewData.videoId,
-                            state: aerialViewData.state,
-                            metadata: aerialViewData
-                        };
-                    } else {
-                        aerialVideoData = {
-                            videoId: null,
-                            state: aerialViewData.state || aerialViewData.error?.status || 'NOT_AVAILABLE',
-                            error: aerialViewData.error
-                        };
-                    }
-                }
-            } catch (aerialError) {
-                console.error('Aerial View API Error:', aerialError);
-                aerialVideoData = {
-                    videoId: null,
-                    state: 'ERROR',
-                    error: aerialError.message
-                };
-            }
         }
 
         return Response.json({
             success: true,
             validation: validationResult,
             aerialViewUrl,
-            aerialVideoData,
             coordinates,
             fullAddress
         });
