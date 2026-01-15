@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { 
   Settings as SettingsIcon, Building, Users, FileText, 
-  Palette, Save, Upload, Plus, Trash2, User, Mail, Edit2, MoreVertical, Camera
+  Palette, Save, Upload, Plus, Trash2, User, Mail, Edit2, MoreVertical, Camera,
+  Calendar, Copy, Check, ExternalLink
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,6 +75,7 @@ export default function Settings() {
   const [editingMember, setEditingMember] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingMember, setDeletingMember] = useState(null);
+  const [calendarUrlCopied, setCalendarUrlCopied] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -295,6 +297,20 @@ ${company.name}
 
   const canManageStaff = companyMember?.role === 'owner' || companyMember?.can_manage_staff;
 
+  // Generate calendar subscription URL
+  const getCalendarUrl = () => {
+    if (!user?.email) return '';
+    const token = btoa(user.email).replace(/[^a-zA-Z0-9]/g, '').substring(0, 20);
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/api/calendarFeed?email=${encodeURIComponent(user.email)}&token=${token}`;
+  };
+
+  const copyCalendarUrl = () => {
+    navigator.clipboard.writeText(getCalendarUrl());
+    setCalendarUrlCopied(true);
+    setTimeout(() => setCalendarUrlCopied(false), 2000);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -392,6 +408,51 @@ ${company.name}
                   <Save className="h-4 w-4 mr-2" />
                   {savingProfile ? 'Saving...' : 'Save Profile'}
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Calendar Sync */}
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Calendar Sync
+              </CardTitle>
+              <CardDescription>
+                Subscribe to your schedule in your favorite calendar app
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-slate-600">
+                Add your inspections and tasks to Outlook, Apple Calendar, Google Calendar, or any app that supports calendar subscriptions.
+              </p>
+              
+              <div>
+                <Label>Subscription URL</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input 
+                    value={getCalendarUrl()} 
+                    readOnly 
+                    className="font-mono text-xs"
+                  />
+                  <Button variant="outline" onClick={copyCalendarUrl}>
+                    {calendarUrlCopied ? (
+                      <Check className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 rounded-lg p-4 space-y-3">
+                <p className="text-sm font-medium">How to subscribe:</p>
+                <div className="space-y-2 text-sm text-slate-600">
+                  <p><strong>Apple Calendar:</strong> File → New Calendar Subscription → paste URL</p>
+                  <p><strong>Outlook:</strong> Add Calendar → Subscribe from web → paste URL</p>
+                  <p><strong>Google Calendar:</strong> Other calendars (+) → From URL → paste URL</p>
+                </div>
               </div>
             </CardContent>
           </Card>
