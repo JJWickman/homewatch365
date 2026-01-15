@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from 'lucide-react';
 
@@ -8,6 +10,10 @@ export default function TestGoogleMapsAPI() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [address, setAddress] = useState('7223 Lake Shore Dr');
+  const [city, setCity] = useState('Chelsea');
+  const [state, setState] = useState('MI');
+  const [zip, setZip] = useState('48118');
 
   const testAPI = async () => {
     setLoading(true);
@@ -16,10 +22,10 @@ export default function TestGoogleMapsAPI() {
     
     try {
       const response = await base44.functions.invoke('testGoogleMapsAPI', {
-        address: '7223 Lake Shore Dr',
-        city: 'Chelsea',
-        state: 'MI',
-        zip: '48118'
+        address,
+        city,
+        state,
+        zip
       });
       
       setResult(response.data);
@@ -34,10 +40,55 @@ export default function TestGoogleMapsAPI() {
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Google Maps API Test</h1>
       
-      <Button onClick={testAPI} disabled={loading} className="mb-6">
-        {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-        Test Address: 7223 Lake Shore Dr, Chelsea, MI 48118
-      </Button>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Enter Address</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="address">Street Address</Label>
+            <Input
+              id="address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="123 Main St"
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-2">
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="City"
+              />
+            </div>
+            <div>
+              <Label htmlFor="state">State</Label>
+              <Input
+                id="state"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                placeholder="ST"
+              />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="zip">ZIP Code</Label>
+            <Input
+              id="zip"
+              value={zip}
+              onChange={(e) => setZip(e.target.value)}
+              placeholder="12345"
+            />
+          </div>
+          <Button onClick={testAPI} disabled={loading} className="w-full">
+            {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            Test Address
+          </Button>
+        </CardContent>
+      </Card>
 
       {error && (
         <Card className="border-red-200 bg-red-50 mb-6">
