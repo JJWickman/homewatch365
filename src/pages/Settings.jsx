@@ -390,32 +390,38 @@ ${company.name}
             <CardContent className="space-y-6">
               <div>
                 <Label>Profile Picture</Label>
-                <div className="flex items-center gap-6 mt-2">
-                  <div className="h-24 w-24 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
-                    {user?.avatar_url ? (
-                      <img src={user.avatar_url} alt="Profile" className="h-full w-full object-cover" />
-                    ) : (
-                      <User className="h-10 w-10 text-slate-300" />
-                    )}
+                <div className="flex items-start justify-between gap-6 mt-2">
+                  <div className="flex items-start gap-6">
+                    <div className="h-24 w-24 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {user?.avatar_url ? (
+                        <img src={user.avatar_url} alt="Profile" className="h-full w-full object-cover" />
+                      ) : (
+                        <User className="h-10 w-10 text-slate-300" />
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="profile-upload" className="cursor-pointer">
+                        <Button variant="outline" size="sm" disabled={uploading} asChild>
+                          <span>
+                            <Camera className="h-4 w-4 mr-2" />
+                            {uploading ? 'Uploading...' : 'Upload Photo'}
+                          </span>
+                        </Button>
+                      </Label>
+                      <input
+                        id="profile-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProfilePictureUpload}
+                        className="hidden"
+                      />
+                      <p className="text-xs text-slate-500 mt-2">JPG, PNG or GIF (Max 5MB)</p>
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="profile-upload" className="cursor-pointer">
-                      <Button variant="outline" size="sm" disabled={uploading} asChild>
-                        <span>
-                          <Camera className="h-4 w-4 mr-2" />
-                          {uploading ? 'Uploading...' : 'Upload Photo'}
-                        </span>
-                      </Button>
-                    </Label>
-                    <input
-                      id="profile-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleProfilePictureUpload}
-                      className="hidden"
-                    />
-                    <p className="text-xs text-slate-500 mt-2">JPG, PNG or GIF (Max 5MB)</p>
-                  </div>
+                  <Button onClick={handleSaveProfile} disabled={savingProfile} className="bg-slate-900 hover:bg-slate-800 flex-shrink-0">
+                    <Save className="h-4 w-4 mr-2" />
+                    {savingProfile ? 'Saving...' : 'Save'}
+                  </Button>
                 </div>
               </div>
               <div className="border-t pt-4">
@@ -481,13 +487,7 @@ ${company.name}
                     </div>
                   )}
                 </div>
-              </div>
-              <div className="pt-4 flex justify-end">
-                <Button onClick={handleSaveProfile} disabled={savingProfile} className="bg-slate-900 hover:bg-slate-800">
-                  <Save className="h-4 w-4 mr-2" />
-                  {savingProfile ? 'Saving...' : 'Save Profile'}
-                </Button>
-              </div>
+                </div>
             </CardContent>
           </Card>
 
