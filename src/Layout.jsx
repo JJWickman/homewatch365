@@ -42,6 +42,18 @@ export default function Layout({ children, currentPageName }) {
     loadUserData();
   }, []);
 
+  useEffect(() => {
+    // Subscribe to company updates
+    if (companyMember?.company_id) {
+      const unsubscribe = base44.entities.Company.subscribe((event) => {
+        if (event.type === 'update' && event.id === companyMember.company_id) {
+          setCompany(event.data);
+        }
+      });
+      return unsubscribe;
+    }
+  }, [companyMember?.company_id]);
+
   const loadUserData = async () => {
     try {
       const currentUser = await base44.auth.me();
