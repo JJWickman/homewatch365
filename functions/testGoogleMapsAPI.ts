@@ -72,22 +72,33 @@ Deno.serve(async (req) => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(aerialViewBody)
                 });
-                const aerialViewData = await aerialViewRes.json();
                 
-                console.log('Aerial View API Response:', JSON.stringify(aerialViewData, null, 2));
+                console.log('Aerial View API Status:', aerialViewRes.status);
+                const responseText = await aerialViewRes.text();
+                console.log('Aerial View API Response:', responseText);
                 
-                if (aerialViewData.state === 'PROCESSING_COMPLETE' && aerialViewData.videoId) {
-                    aerialVideoData = {
-                        videoId: aerialViewData.videoId,
-                        state: aerialViewData.state,
-                        metadata: aerialViewData
-                    };
-                } else {
+                if (!aerialViewRes.ok) {
                     aerialVideoData = {
                         videoId: null,
-                        state: aerialViewData.state || aerialViewData.error?.status || 'NOT_AVAILABLE',
-                        error: aerialViewData.error
+                        state: 'API_ERROR',
+                        error: `API returned status ${aerialViewRes.status}. The Aerial View API may not be enabled for this API key.`
                     };
+                } else {
+                    const aerialViewData = JSON.parse(responseText);
+                    
+                    if (aerialViewData.state === 'PROCESSING_COMPLETE' && aerialViewData.videoId) {
+                        aerialVideoData = {
+                            videoId: aerialViewData.videoId,
+                            state: aerialViewData.state,
+                            metadata: aerialViewData
+                        };
+                    } else {
+                        aerialVideoData = {
+                            videoId: null,
+                            state: aerialViewData.state || aerialViewData.error?.status || 'NOT_AVAILABLE',
+                            error: aerialViewData.error
+                        };
+                    }
                 }
             } catch (aerialError) {
                 console.error('Aerial View API Error:', aerialError);
