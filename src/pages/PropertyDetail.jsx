@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { 
   Building2, MapPin, User, Key, Wifi, Phone, 
   Edit, ClipboardCheck, Calendar, Clock, 
-  AlertTriangle, CheckCircle2, FileText
+  AlertTriangle, CheckCircle2, FileText, Upload, Image
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
+import { toast } from 'sonner';
 
 export default function PropertyDetail() {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ export default function PropertyDetail() {
   const [inspections, setInspections] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [fetchingAerial, setFetchingAerial] = useState(false);
 
   useEffect(() => {
     loadProperty();
@@ -83,6 +86,56 @@ export default function PropertyDetail() {
   const completedInspections = inspections.filter(i => i.status === 'completed').length;
   const pendingTasks = tasks.filter(t => t.status === 'pending').length;
 
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingPhoto(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.Property.update(property.id, { primary_photo_url: file_url });
+      setProperty({ ...property, primary_photo_url: file_url });
+      toast.success('Photo uploaded successfully');
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      toast.error('Failed to upload photo');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleFetchAerialView = async () => {
+    if (!property.address || !property.city || !property.state) {
+      toast.error('Property address is incomplete');
+      return;
+    }
+
+    setFetchingAerial(true);
+    try {
+      const response = await base44.functions.invoke('testGoogleMapsAPI', {
+        address: property.address,
+        city: property.city,
+        state: property.state,
+        zip: property.zip
+      });
+
+      if (response.data?.aerialViewUrl) {
+        await base44.entities.Property.update(property.id, { 
+          primary_photo_url: response.data.aerialViewUrl 
+        });
+        setProperty({ ...property, primary_photo_url: response.data.aerialViewUrl });
+        toast.success('Aerial view loaded successfully');
+      } else {
+        toast.error('Could not fetch aerial view');
+      }
+    } catch (error) {
+      console.error('Error fetching aerial view:', error);
+      toast.error('Failed to fetch aerial view');
+    } finally {
+      setFetchingAerial(false);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto">
       <PageHeader
@@ -112,8 +165,36 @@ export default function PropertyDetail() {
           ) : (
             <div className="text-slate-400">No photo uploaded</div>
           )}
-          <div className="absolute top-4 right-4">
+          <div className="absolute top-4 right-4 flex gap-2">
             <StatusBadge status={property.status} />
+          </div>
+          <div className="absolute bottom-4 right-4 flex gap-2">
+            <input
+              type="file"
+              id="photo-upload"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoUpload}
+              disabled={uploadingPhoto}
+            />
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => document.getElementById('photo-upload').click()}
+              disabled={uploadingPhoto}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {uploadingPhoto ? 'Uploading...' : 'Upload Photo'}
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={handleFetchAerialView}
+              disabled={fetchingAerial}
+            >
+              <Image className="h-4 w-4 mr-2" />
+              {fetchingAerial ? 'Fetching...' : 'Fetch Aerial View'}
+            </Button>
           </div>
         </div>
       </Card>
