@@ -22,6 +22,8 @@ export default function PropertyDetail() {
   const [inspections, setInspections] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [videoData, setVideoData] = useState(null);
+  const [loadingVideo, setLoadingVideo] = useState(false);
 
   useEffect(() => {
     loadProperty();
@@ -44,15 +46,36 @@ export default function PropertyDetail() {
       ]);
 
       if (propertyData.length > 0) {
-        setProperty(propertyData[0]);
+        const prop = propertyData[0];
+        setProperty(prop);
         setInspections(inspectionsData);
         setTasks(tasksData);
         
         // Load client
-        if (propertyData[0].client_id) {
-          const clientData = await base44.entities.Client.filter({ id: propertyData[0].client_id });
+        if (prop.client_id) {
+          const clientData = await base44.entities.Client.filter({ id: prop.client_id });
           if (clientData.length > 0) {
             setClient(clientData[0]);
+          }
+        }
+        
+        // Check for aerial video
+        if (prop.address && prop.city && prop.state) {
+          setLoadingVideo(true);
+          try {
+            const response = await base44.functions.invoke('testGoogleMapsAPI', {
+              address: prop.address,
+              city: prop.city,
+              state: prop.state,
+              zip: prop.zip
+            });
+            if (response.data?.videoData) {
+              setVideoData(response.data.videoData);
+            }
+          } catch (error) {
+            console.log('Could not load aerial video:', error);
+          } finally {
+            setLoadingVideo(false);
           }
         }
       }
@@ -99,21 +122,35 @@ export default function PropertyDetail() {
         </Button>
       </PageHeader>
 
-      {/* Hero Image */}
+      {/* Hero Image/Video */}
       <Card className="mb-6 overflow-hidden">
         <div className="aspect-[3/1] bg-slate-100 relative flex items-center justify-center">
-          {property.primary_photo_url ? (
+          {videoData?.videoId ? (
+            <iframe
+              src={`https://www.google.com/maps/embed/v1/view?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY || 'AIzaSyBPbLVxQ6d5dBkDX_5MHQ9dHJZECXX'}&center=${property.latitude},${property.longitude}&zoom=19&maptype=satellite`}
+              className="w-full h-full"
+              frameBorder="0"
+              allowFullScreen
+            />
+          ) : property.primary_photo_url ? (
             <img 
               src={property.primary_photo_url}
               alt={property.name || property.address}
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="text-slate-400">No photo uploaded</div>
+            <div className="text-slate-400">
+              {loadingVideo ? 'Loading...' : 'No photo uploaded'}
+            </div>
           )}
           <div className="absolute top-4 right-4">
             <StatusBadge status={property.status} />
           </div>
+          {videoData?.videoId && (
+            <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-1.5 rounded-lg text-sm font-medium">
+              Aerial View Available
+            </div>
+          )}
         </div>
       </Card>
 

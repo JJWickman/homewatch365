@@ -49,6 +49,8 @@ Deno.serve(async (req) => {
         // Generate Aerial View using Static Maps API with satellite imagery
         let aerialViewUrl = null;
         let coordinates = null;
+        let videoData = null;
+        
         if (validationResult.isValid && geocodingData.results?.[0]?.geometry?.location) {
             const location = geocodingData.results[0].geometry.location;
             coordinates = {
@@ -58,12 +60,35 @@ Deno.serve(async (req) => {
             
             // Use Static Maps API with satellite maptype for aerial view
             aerialViewUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${coordinates.lat},${coordinates.lng}&zoom=19&size=800x600&maptype=satellite&key=${apiKey}`;
+            
+            // Check for Aerial View API video availability
+            try {
+                const aerialViewApiUrl = `https://aerialview.googleapis.com/v1/videos:lookupVideoMetadata?key=${apiKey}`;
+                const aerialViewRes = await fetch(aerialViewApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address: fullAddress })
+                });
+                
+                if (aerialViewRes.ok) {
+                    const aerialViewData = await aerialViewRes.json();
+                    if (aerialViewData.state === 'PROCESSING_COMPLETE' && aerialViewData.videoId) {
+                        videoData = {
+                            videoId: aerialViewData.videoId,
+                            state: aerialViewData.state
+                        };
+                    }
+                }
+            } catch (aerialError) {
+                console.log('Aerial View API not available:', aerialError.message);
+            }
         }
 
         return Response.json({
             success: true,
             validation: validationResult,
             aerialViewUrl,
+            videoData,
             coordinates,
             fullAddress
         });
