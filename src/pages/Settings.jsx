@@ -382,7 +382,7 @@ ${company.name}
                 <CardDescription>Manage staff access and roles</CardDescription>
               </div>
               {canManageStaff && (
-                <Button onClick={() => setShowInviteDialog(true)}>
+                <Button onClick={() => setShowInviteDialog(true)} className="bg-slate-900 hover:bg-slate-800">
                   <Plus className="h-4 w-4 mr-2" />
                   Invite Member
                 </Button>
