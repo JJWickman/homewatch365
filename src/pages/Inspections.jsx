@@ -490,7 +490,6 @@ export default function Inspections() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="daily">Daily</SelectItem>
                       <SelectItem value="weekly">Weekly</SelectItem>
                       <SelectItem value="bi_weekly">Bi-Weekly</SelectItem>
                       <SelectItem value="monthly">Monthly</SelectItem>

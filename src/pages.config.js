@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import InspectionDetail from './pages/InspectionDetail';
 import InspectionFlow from './pages/InspectionFlow';
 import Inspections from './pages/Inspections';
+import Issues from './pages/Issues';
 import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
 import PropertyForm from './pages/PropertyForm';
@@ -15,7 +16,6 @@ import Schedule from './pages/Schedule';
 import Settings from './pages/Settings';
 import Tasks from './pages/Tasks';
 import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
-import Issues from './pages/Issues';
 import __Layout from './Layout.jsx';
 
 
@@ -30,6 +30,7 @@ export const PAGES = {
     "InspectionDetail": InspectionDetail,
     "InspectionFlow": InspectionFlow,
     "Inspections": Inspections,
+    "Issues": Issues,
     "Properties": Properties,
     "PropertyDetail": PropertyDetail,
     "PropertyForm": PropertyForm,
@@ -37,7 +38,6 @@ export const PAGES = {
     "Settings": Settings,
     "Tasks": Tasks,
     "TestGoogleMapsAPI": TestGoogleMapsAPI,
-    "Issues": Issues,
 }
 
 export const pagesConfig = {
