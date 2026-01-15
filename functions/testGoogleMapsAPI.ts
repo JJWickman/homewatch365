@@ -46,16 +46,26 @@ Deno.serve(async (req) => {
             };
         }
 
-        // Generate Street View image URL
-        let streetViewUrl = null;
+        // Get place photos using Places API
+        let placePhotoUrl = null;
         if (validationResult.isValid) {
-            streetViewUrl = `https://maps.googleapis.com/maps/api/streetview?size=800x600&location=${encodeURIComponent(fullAddress)}&key=${apiKey}`;
+            // Find place using Places API
+            const placesUrl = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(fullAddress)}&inputtype=textquery&fields=photos&key=${apiKey}`;
+            const placesRes = await fetch(placesUrl);
+            const placesData = await placesRes.json();
+
+            console.log('Places API Response:', JSON.stringify(placesData, null, 2));
+
+            if (placesData.status === 'OK' && placesData.candidates?.[0]?.photos?.[0]) {
+                const photoReference = placesData.candidates[0].photos[0].photo_reference;
+                placePhotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoReference}&key=${apiKey}`;
+            }
         }
 
         return Response.json({
             success: true,
             validation: validationResult,
-            streetViewUrl,
+            placePhotoUrl,
             fullAddress
         });
     } catch (error) {
