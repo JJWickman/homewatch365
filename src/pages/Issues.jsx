@@ -233,7 +233,11 @@ export default function Issues() {
                 
                 <div className="space-y-3">
                   {statusIssues.map(issue => (
-                    <Card key={issue.id} className="hover:shadow-md transition-shadow">
+                    <Card 
+                      key={issue.id} 
+                      className="hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => window.location.href = createPageUrl(`IssueDetail?id=${issue.id}`)}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
