@@ -15,6 +15,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -37,6 +43,8 @@ export default function PropertyDetail() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [saving, setSaving] = useState(false);
   const [changingOwner, setChangingOwner] = useState(false);
+  const [showChangeOwnerDialog, setShowChangeOwnerDialog] = useState(false);
+  const [selectedClientId, setSelectedClientId] = useState('');
 
   useEffect(() => {
     loadProperty();
@@ -174,15 +182,18 @@ export default function PropertyDetail() {
     }
   };
 
-  const handleChangeOwner = async (newClientId) => {
+  const handleChangeOwner = async () => {
+    if (!selectedClientId) return;
+    
     setChangingOwner(true);
     try {
-      await base44.entities.Property.update(property.id, { client_id: newClientId });
-      const newClientData = await base44.entities.Client.filter({ id: newClientId });
+      await base44.entities.Property.update(property.id, { client_id: selectedClientId });
+      const newClientData = await base44.entities.Client.filter({ id: selectedClientId });
       if (newClientData.length > 0) {
         setClient(newClientData[0]);
-        setProperty({ ...property, client_id: newClientId });
+        setProperty({ ...property, client_id: selectedClientId });
       }
+      setShowChangeOwnerDialog(false);
       toast.success('Owner updated successfully');
     } catch (error) {
       console.error('Error changing owner:', error);
@@ -282,26 +293,20 @@ export default function PropertyDetail() {
           {/* Client Card */}
           {client && (
             <Card>
-              <CardHeader className="pb-2">
+              <CardHeader className="pb-2 flex flex-row items-center justify-between">
                 <CardTitle className="text-sm font-medium text-slate-500">Owner</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Select 
-                  value={property.client_id} 
-                  onValueChange={handleChangeOwner}
-                  disabled={changingOwner}
+                <Button 
+                  size="sm" 
+                  variant="ghost"
+                  onClick={() => {
+                    setSelectedClientId(property.client_id);
+                    setShowChangeOwnerDialog(true);
+                  }}
                 >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map(c => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.first_name} {c.last_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  Change
+                </Button>
+              </CardHeader>
+              <CardContent>
                 <Link 
                   to={createPageUrl('ClientDetail') + `?id=${client.id}`}
                   className="flex items-center gap-3 hover:bg-slate-50 -mx-2 px-2 py-2 rounded-lg transition-colors"
@@ -601,6 +606,39 @@ export default function PropertyDetail() {
           </Tabs>
         </div>
       </div>
+
+      {/* Change Owner Dialog */}
+      <Dialog open={showChangeOwnerDialog} onOpenChange={setShowChangeOwnerDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Property Owner</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Select value={selectedClientId} onValueChange={setSelectedClientId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map(c => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.first_name} {c.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowChangeOwnerDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleChangeOwner} disabled={changingOwner || !selectedClientId}>
+                {changingOwner ? 'Changing...' : 'Change Owner'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
