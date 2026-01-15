@@ -28,14 +28,14 @@ export default function TestGoogleMapsAPI() {
         zip
       });
 
-      if (response.data.validation.isValid) {
+      if (response.data?.validation?.isValid) {
         setLatitude(response.data.validation.lat.toString());
         setLongitude(response.data.validation.lng.toString());
       } else {
-        setError(response.data.validation.error || 'Failed to get coordinates');
+        setError(response.data?.validation?.error || 'Failed to get coordinates');
       }
     } catch (err) {
-      setError(err.message || 'Failed to get coordinates');
+      setError(err?.response?.data?.error || err.message || 'Failed to get coordinates');
     } finally {
       setLoading(false);
     }
@@ -55,12 +55,12 @@ export default function TestGoogleMapsAPI() {
       });
       
       setResult(response.data);
-      if (response.data.validation.isValid) {
+      if (response.data?.validation?.isValid) {
         setLatitude(response.data.validation.lat.toString());
         setLongitude(response.data.validation.lng.toString());
       }
     } catch (err) {
-      setError(err.message);
+      setError(err?.response?.data?.error || err.message);
     } finally {
       setLoading(false);
     }
