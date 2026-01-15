@@ -243,7 +243,7 @@ export default function Issues() {
                             )}
                             <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
                               <User className="h-3 w-3" />
-                              <span className="text-slate-400">Owner:</span> {issue.assigned_to_name || staff.find(s => s.user_email === issue.assigned_to)?.user_name || issue.assigned_to_name || staff.find(s => s.user_email === issue.created_by)?.user_name || issue.created_by || 'Unassigned'}
+                              <span className="text-slate-400">Owner:</span> {issue.assigned_to_name || staff.find(s => s.user_email === issue.assigned_to)?.user_name || staff.find(s => s.user_email === issue.created_by)?.user_name || 'Unassigned'}
                             </p>
                             {issue.description && (
                               <p className="text-xs text-slate-500 mt-2 line-clamp-2">
