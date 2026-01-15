@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { 
   Settings as SettingsIcon, Building, Users, FileText, 
-  Palette, Save, Upload, Plus, Trash2, User, Mail
+  Palette, Save, Upload, Plus, Trash2, User, Mail, Edit2, MoreVertical
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import PageHeader from '@/components/shared/PageHeader';
@@ -59,6 +65,10 @@ export default function Settings() {
     name: '',
     role: 'technician'
   });
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editingMember, setEditingMember] = useState(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletingMember, setDeletingMember] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -180,14 +190,43 @@ ${company.name}
     }
   };
 
-  const updateStaffRole = async (memberId, newRole) => {
-    await base44.entities.CompanyMember.update(memberId, { role: newRole });
-    loadData();
+  const handleEditMember = (member) => {
+    setEditingMember({
+      id: member.id,
+      user_name: member.user_name || '',
+      user_email: member.user_email,
+      role: member.role
+    });
+    setShowEditDialog(true);
   };
 
-  const deactivateStaff = async (memberId) => {
-    await base44.entities.CompanyMember.update(memberId, { is_active: false });
-    loadData();
+  const handleSaveEdit = async () => {
+    if (!editingMember) return;
+    
+    try {
+      await base44.entities.CompanyMember.update(editingMember.id, {
+        user_name: editingMember.user_name,
+        role: editingMember.role
+      });
+      setShowEditDialog(false);
+      setEditingMember(null);
+      loadData();
+    } catch (error) {
+      console.error('Error updating member:', error);
+    }
+  };
+
+  const handleDeleteMember = async () => {
+    if (!deletingMember) return;
+    
+    try {
+      await base44.entities.CompanyMember.update(deletingMember.id, { is_active: false });
+      setShowDeleteDialog(false);
+      setDeletingMember(null);
+      loadData();
+    } catch (error) {
+      console.error('Error deleting member:', error);
+    }
   };
 
   const getInitials = (name, email) => {
@@ -325,12 +364,10 @@ ${company.name}
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {staff.map((member) => (
+                {staff.filter(m => m.is_active).map((member) => (
                   <div 
                     key={member.id}
-                    className={`flex items-center justify-between p-4 rounded-lg border ${
-                      !member.is_active ? 'opacity-50 bg-slate-50' : ''
-                    }`}
+                    className="flex items-center justify-between p-4 rounded-lg border"
                   >
                     <div className="flex items-center gap-3">
                       <Avatar>
@@ -346,19 +383,29 @@ ${company.name}
                     <div className="flex items-center gap-3">
                       <Badge variant="outline" className="capitalize">{member.role}</Badge>
                       {canManageStaff && member.user_email !== companyMember?.user_email && (
-                        <Select
-                          value={member.role}
-                          onValueChange={(value) => updateStaffRole(member.id, value)}
-                        >
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="owner">Owner</SelectItem>
-                            <SelectItem value="manager">Manager</SelectItem>
-                            <SelectItem value="technician">Technician</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditMember(member)}>
+                              <Edit2 className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => {
+                                setDeletingMember(member);
+                                setShowDeleteDialog(true);
+                              }}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Remove
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       )}
                     </div>
                   </div>
@@ -517,7 +564,7 @@ ${company.name}
                 <SelectContent>
                   <SelectItem value="technician">Technician</SelectItem>
                   <SelectItem value="manager">Manager</SelectItem>
-                  <SelectItem value="owner">Owner</SelectItem>
+                  <SelectItem value="owner">Administrator</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -534,6 +581,91 @@ ${company.name}
             >
               <Mail className="h-4 w-4 mr-2" />
               Send Invite
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Member Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Team Member</DialogTitle>
+          </DialogHeader>
+          
+          {editingMember && (
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={editingMember.user_email}
+                  disabled
+                  className="bg-slate-50"
+                />
+              </div>
+              <div>
+                <Label>Name</Label>
+                <Input
+                  value={editingMember.user_name}
+                  onChange={(e) => setEditingMember(prev => ({ ...prev, user_name: e.target.value }))}
+                  placeholder="Full name"
+                />
+              </div>
+              <div>
+                <Label>Role</Label>
+                <Select
+                  value={editingMember.role}
+                  onValueChange={(value) => setEditingMember(prev => ({ ...prev, role: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="technician">Technician</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="owner">Administrator</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveEdit}
+              className="bg-slate-900 hover:bg-slate-800"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Member Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove Team Member</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove {deletingMember?.user_name || deletingMember?.user_email} from your team?
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={handleDeleteMember}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Remove
             </Button>
           </DialogFooter>
         </DialogContent>
