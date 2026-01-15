@@ -19,6 +19,7 @@ import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
 import Marketing from './pages/Marketing';
 import RouteOptimizer from './pages/RouteOptimizer';
 import Contractors from './pages/Contractors';
+import AdminConsole from './pages/AdminConsole';
 import __Layout from './Layout.jsx';
 
 
@@ -44,6 +45,7 @@ export const PAGES = {
     "Marketing": Marketing,
     "RouteOptimizer": RouteOptimizer,
     "Contractors": Contractors,
+    "AdminConsole": AdminConsole,
 }
 
 export const pagesConfig = {

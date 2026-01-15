@@ -28,6 +28,7 @@ const navigationItems = [
   { name: 'Issues', icon: Bell, page: 'Issues' },
   { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
   { name: 'Marketing', icon: Megaphone, page: 'Marketing' },
+  { name: 'Admin Console', icon: Settings, page: 'AdminConsole' },
 ];
 
 const clientPortalPages = ['ClientPortal', 'ClientInspectionView'];

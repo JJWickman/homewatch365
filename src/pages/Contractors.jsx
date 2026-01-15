@@ -37,7 +37,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
 import StatusBadge from '@/components/shared/StatusBadge';
 
-const CONTRACTOR_TYPES = [
+const DEFAULT_CONTRACTOR_TYPES = [
   'electrician',
   'hvac',
   'roofer',
@@ -64,6 +64,7 @@ export default function Contractors() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [customTypes, setCustomTypes] = useState([]);
   const [formData, setFormData] = useState({
     business_name: '',
     contact_name: '',
@@ -99,14 +100,25 @@ export default function Contractors() {
         const cId = members[0].company_id;
         setCompanyId(cId);
         
-        const contractorsData = await base44.entities.Contractor.filter({ company_id: cId });
+        const [contractorsData, customTypesData] = await Promise.all([
+          base44.entities.Contractor.filter({ company_id: cId }),
+          base44.entities.CustomContractorType.filter({ company_id: cId })
+        ]);
         setContractors(contractorsData);
+        setCustomTypes(customTypesData);
       }
     } catch (error) {
       console.error('Error loading contractors:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getContractorTypeOptions = () => {
+    return [
+      ...DEFAULT_CONTRACTOR_TYPES,
+      ...customTypes.filter(t => t.is_active).map(t => t.slug)
+    ];
   };
 
   const filterContractors = () => {
@@ -228,7 +240,7 @@ export default function Contractors() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  {CONTRACTOR_TYPES.map(type => (
+                  {getContractorTypeOptions().map(type => (
                     <SelectItem key={type} value={type}>
                       {type.replace(/_/g, ' ').charAt(0).toUpperCase() + type.replace(/_/g, ' ').slice(1)}
                     </SelectItem>
@@ -379,7 +391,7 @@ export default function Contractors() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {CONTRACTOR_TYPES.map(type => (
+                    {getContractorTypeOptions().map(type => (
                       <SelectItem key={type} value={type}>
                         {type.replace(/_/g, ' ').charAt(0).toUpperCase() + type.replace(/_/g, ' ').slice(1)}
                       </SelectItem>
