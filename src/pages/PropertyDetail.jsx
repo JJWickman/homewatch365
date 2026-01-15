@@ -26,6 +26,8 @@ export default function PropertyDetail() {
   const [loading, setLoading] = useState(true);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [fetchingAerial, setFetchingAerial] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     loadProperty();
@@ -102,9 +104,9 @@ export default function PropertyDetail() {
     setUploadingPhoto(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      await base44.entities.Property.update(property.id, { primary_photo_url: file_url });
       setProperty({ ...property, primary_photo_url: file_url });
-      toast.success('Photo uploaded successfully');
+      setHasUnsavedChanges(true);
+      toast.success('Photo uploaded - click Save to keep changes');
     } catch (error) {
       console.error('Error uploading photo:', error);
       toast.error('Failed to upload photo');
@@ -129,11 +131,9 @@ export default function PropertyDetail() {
       });
 
       if (response.data?.aerialViewUrl) {
-        await base44.entities.Property.update(property.id, { 
-          primary_photo_url: response.data.aerialViewUrl 
-        });
         setProperty({ ...property, primary_photo_url: response.data.aerialViewUrl });
-        toast.success('Aerial view loaded successfully');
+        setHasUnsavedChanges(true);
+        toast.success('Aerial view loaded - click Save to keep changes');
       } else {
         toast.error('Could not fetch aerial view');
       }
@@ -145,6 +145,22 @@ export default function PropertyDetail() {
     }
   };
 
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await base44.entities.Property.update(property.id, { 
+        primary_photo_url: property.primary_photo_url 
+      });
+      setHasUnsavedChanges(false);
+      toast.success('Property saved successfully');
+    } catch (error) {
+      console.error('Error saving property:', error);
+      toast.error('Failed to save property');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto">
       <PageHeader
@@ -152,6 +168,11 @@ export default function PropertyDetail() {
         backLink="Properties"
         backLabel="Back to Properties"
       >
+        {hasUnsavedChanges && (
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
+        )}
         <Button variant="outline" onClick={() => navigate(createPageUrl('PropertyForm') + `?id=${property.id}`)}>
           <Edit className="h-4 w-4 mr-2" />
           <span>Edit</span>
