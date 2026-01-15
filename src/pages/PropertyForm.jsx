@@ -46,6 +46,7 @@ export default function PropertyForm() {
   const [autocompleteList, setAutocompleteList] = useState([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [previewImageUrl, setPreviewImageUrl] = useState(null);
   const [showCreateClientDialog, setShowCreateClientDialog] = useState(false);
   const [newClientData, setNewClientData] = useState({ first_name: '', last_name: '', email: '' });
   const [creatingClient, setCreatingClient] = useState(false);
@@ -231,32 +232,27 @@ export default function PropertyForm() {
     });
   };
 
-  const validateAndFetchGoogleImage = async (address, city, state, zip) => {
-    if (!address || !city || !state) {
+  const fetchGoogleAerialView = async () => {
+    if (!formData.address || !formData.city || !formData.state) {
+      toast.error('Please fill in address, city, and state first');
       return;
     }
 
     setFetchingImage(true);
     try {
       const response = await base44.functions.invoke('testGoogleMapsAPI', {
-        address,
-        city,
-        state,
-        zip
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zip: formData.zip
       });
 
       if (response.data?.validation?.isValid) {
         setAddressValidation(response.data.validation);
         
-        // Use the aerial view image from Static Maps API
         if (response.data.aerialViewUrl) {
-          setStreetViewUrl(response.data.aerialViewUrl);
-          setImageSource('auto');
-          setFormData(prev => ({ 
-            ...prev, 
-            primary_photo_url: response.data.aerialViewUrl
-          }));
-          toast.success('Property image loaded from Google Maps');
+          setPreviewImageUrl(response.data.aerialViewUrl);
+          toast.success('Aerial view loaded! Click "Approve Image" to use it.');
         } else {
           toast.info('Address validated. No imagery available for this location.');
         }
@@ -264,11 +260,24 @@ export default function PropertyForm() {
         toast.error('Unable to validate address');
       }
     } catch (error) {
-      console.error('Error validating address:', error);
-      toast.error('Failed to validate address');
+      console.error('Error fetching aerial view:', error);
+      toast.error('Failed to fetch aerial view');
     } finally {
       setFetchingImage(false);
     }
+  };
+
+  const approveImage = () => {
+    if (!previewImageUrl) return;
+    
+    setFormData(prev => ({ 
+      ...prev, 
+      primary_photo_url: previewImageUrl
+    }));
+    setStreetViewUrl(previewImageUrl);
+    setImageSource('auto');
+    setPreviewImageUrl(null);
+    toast.success('Image approved and saved');
   };
 
   const handleAddressChange = (field, value) => {
@@ -719,52 +728,62 @@ export default function PropertyForm() {
         )}
 
         {/* Address */}
-         <Card>
-           <CardHeader>
-             <CardTitle className="text-lg flex items-center gap-2">
-               <MapPin className="h-5 w-5" />
-               Address
-             </CardTitle>
-           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="address">Street Address *</Label>
-              <div className="relative">
-                <Input
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => handleAddressChange('address', e.target.value)}
-                  onFocus={() => formData.address.length > 2 && setShowAutocomplete(true)}
-                  required
-                  placeholder="Type an address to search..."
-                />
-                {showAutocomplete && autocompleteList.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto mt-1">
-                    {autocompleteList.map((prediction) => (
-                      <div
-                        key={prediction.place_id}
-                        onClick={() => handleSelectAddress(prediction)}
-                        className="px-4 py-2.5 cursor-pointer hover:bg-slate-50 border-b border-slate-100 last:border-b-0 text-sm"
-                      >
-                        <div className="font-medium text-slate-900">{prediction.main_text}</div>
-                        <div className="text-xs text-slate-500">{prediction.secondary_text}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleUseLocation}
-                disabled={gettingLocation}
-                className="mt-2 w-full"
-              >
-                <MapPinCheckInside className="h-4 w-4 mr-2" />
-                {gettingLocation ? 'Getting location...' : 'Use My Location'}
-              </Button>
-            </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Address
+            </CardTitle>
+          </CardHeader>
+         <CardContent className="space-y-4">
+           <div>
+             <Label htmlFor="address">Street Address *</Label>
+             <div className="flex gap-2">
+               <div className="relative flex-1">
+                 <Input
+                   id="address"
+                   value={formData.address}
+                   onChange={(e) => handleAddressChange('address', e.target.value)}
+                   onFocus={() => formData.address.length > 2 && setShowAutocomplete(true)}
+                   required
+                   placeholder="Type an address to search..."
+                 />
+                 {showAutocomplete && autocompleteList.length > 0 && (
+                   <div className="absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto mt-1">
+                     {autocompleteList.map((prediction) => (
+                       <div
+                         key={prediction.place_id}
+                         onClick={() => handleSelectAddress(prediction)}
+                         className="px-4 py-2.5 cursor-pointer hover:bg-slate-50 border-b border-slate-100 last:border-b-0 text-sm"
+                       >
+                         <div className="font-medium text-slate-900">{prediction.main_text}</div>
+                         <div className="text-xs text-slate-500">{prediction.secondary_text}</div>
+                       </div>
+                     ))}
+                   </div>
+                 )}
+               </div>
+               <Button
+                 type="button"
+                 variant="outline"
+                 onClick={fetchGoogleAerialView}
+                 disabled={fetchingImage}
+               >
+                 {fetchingImage ? <Loader className="h-4 w-4 animate-spin" /> : <Building2 className="h-4 w-4" />}
+               </Button>
+             </div>
+             <Button
+               type="button"
+               variant="outline"
+               size="sm"
+               onClick={handleUseLocation}
+               disabled={gettingLocation}
+               className="mt-2 w-full"
+             >
+               <MapPinCheckInside className="h-4 w-4 mr-2" />
+               {gettingLocation ? 'Getting location...' : 'Use My Location'}
+             </Button>
+           </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                <div className="col-span-2">
                  <Label htmlFor="city">City *</Label>
@@ -801,6 +820,23 @@ export default function PropertyForm() {
               </div>
             )}
 
+            {previewImageUrl && (
+              <div className="space-y-3">
+                <Label>Aerial View Preview</Label>
+                <img
+                  src={previewImageUrl}
+                  alt="Aerial View Preview"
+                  className="w-full h-64 object-cover rounded-lg border border-slate-200"
+                />
+                <Button
+                  type="button"
+                  onClick={approveImage}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  Approve Image
+                </Button>
+              </div>
+            )}
 
           </CardContent>
         </Card>
