@@ -68,17 +68,21 @@ export default function PropertyDetail() {
     }
 
     try {
-      const [propertyData, inspectionsData, tasksData] = await Promise.all([
-        base44.entities.Property.filter({ id }),
-        base44.entities.Inspection.filter({ property_id: id }, '-scheduled_date', 20),
-        base44.entities.Task.filter({ property_id: id }, '-created_date', 10)
+      const user = await base44.auth.me();
+      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
+      const companyId = members[0]?.company_id;
+
+      const [propertyData, inspectionsData, followUpsData] = await Promise.all([
+        base44.entities.Property.filter({ id, company_id: companyId }),
+        base44.entities.Inspection.filter({ property_id: id, company_id: companyId }, '-scheduled_date', 20),
+        base44.entities.FollowUp.filter({ property_id: id, company_id: companyId }, '-created_date', 10)
       ]);
 
       if (propertyData.length > 0) {
         const prop = propertyData[0];
         setProperty(prop);
         setInspections(inspectionsData);
-        setTasks(tasksData);
+        setTasks(followUpsData);
         
         // Load client and all clients
         if (prop.client_id) {
@@ -252,7 +256,7 @@ export default function PropertyDetail() {
 
     setSavingTask(true);
     try {
-      await base44.entities.Task.create({
+      await base44.entities.FollowUp.create({
         company_id: property.company_id,
         property_id: property.id,
         client_id: property.client_id,
@@ -260,10 +264,10 @@ export default function PropertyDetail() {
         description: newTask.description,
         priority: newTask.priority,
         due_date: newTask.due_date,
-        status: 'pending',
-        is_recurring: false
+        type: 'other',
+        status: 'open'
       });
-      setTasks(await base44.entities.Task.filter({ property_id: property.id }, '-created_date', 10));
+      setTasks(await base44.entities.FollowUp.filter({ property_id: property.id, company_id: property.company_id }, '-created_date', 10));
       setNewTask({ title: '', description: '', priority: 'medium', due_date: '' });
       setShowAddTask(false);
       toast.success('Task created successfully');
