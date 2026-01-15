@@ -44,6 +44,8 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [extractingBranding, setExtractingBranding] = useState(false);
+  const [extractWebsiteUrl, setExtractWebsiteUrl] = useState('');
 
   const [companyForm, setCompanyForm] = useState({
     name: '',
@@ -129,6 +131,30 @@ export default function Settings() {
       console.error('Error uploading logo:', error);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleExtractBranding = async () => {
+    if (!extractWebsiteUrl) return;
+    
+    setExtractingBranding(true);
+    try {
+      const response = await base44.functions.invoke('extractBrandingFromWebsite', {
+        website_url: extractWebsiteUrl
+      });
+      
+      if (response.data.success) {
+        const updates = {};
+        if (response.data.logo_url) updates.logo_url = response.data.logo_url;
+        if (response.data.primary_color) updates.primary_color = response.data.primary_color;
+        if (response.data.accent_color) updates.accent_color = response.data.accent_color;
+        
+        setCompanyForm(prev => ({ ...prev, ...updates }));
+      }
+    } catch (error) {
+      console.error('Error extracting branding:', error);
+    } finally {
+      setExtractingBranding(false);
     }
   };
 
@@ -425,6 +451,28 @@ ${company.name}
               <CardDescription>Customize your company's appearance</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Extract from Website */}
+              <div>
+                <Label>Auto-Extract from Website</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    placeholder="https://yourwebsite.com"
+                    value={extractWebsiteUrl}
+                    onChange={(e) => setExtractWebsiteUrl(e.target.value)}
+                  />
+                  <Button
+                    onClick={handleExtractBranding}
+                    disabled={!extractWebsiteUrl || extractingBranding}
+                    variant="outline"
+                  >
+                    {extractingBranding ? 'Extracting...' : 'Extract'}
+                  </Button>
+                </div>
+                <p className="text-xs text-slate-500 mt-2">
+                  Automatically extract logo and colors from your website
+                </p>
+              </div>
+
               {/* Logo */}
               <div>
                 <Label>Company Logo</Label>
