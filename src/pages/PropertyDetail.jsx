@@ -114,11 +114,11 @@ export default function PropertyDetail() {
       >
         <Button variant="outline" onClick={() => navigate(createPageUrl('PropertyForm') + `?id=${property.id}`)}>
           <Edit className="h-4 w-4 mr-2" />
-          Edit
+          <span>Edit</span>
         </Button>
         <Button onClick={() => navigate(createPageUrl('Inspections') + `?action=new&property_id=${property.id}`)}>
           <ClipboardCheck className="h-4 w-4 mr-2" />
-          New Inspection
+          <span>New Inspection</span>
         </Button>
       </PageHeader>
 
