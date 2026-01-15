@@ -26,6 +26,7 @@ const navigationItems = [
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
   { name: 'Tasks', icon: FileText, page: 'Tasks' },
   { name: 'Issues', icon: Bell, page: 'Issues' },
+  { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
   { name: 'Marketing', icon: Megaphone, page: 'Marketing' },
 ];
 
