@@ -179,7 +179,6 @@ export default function Settings() {
     try {
       await base44.auth.updateMe({ 
         full_name: userFullName,
-        email: userEmail,
         phone: userPhone
       });
       
@@ -193,7 +192,6 @@ export default function Settings() {
       setUser({ 
         ...user, 
         full_name: userFullName,
-        email: userEmail,
         phone: userPhone
       });
       // Refresh page to show updated data in layout
