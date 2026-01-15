@@ -36,7 +36,7 @@ import {
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
 import StatusBadge from '@/components/shared/StatusBadge';
-import ContractorSearchDialog from '@/components/contractors/ContractorSearchDialog';
+import ContractorSearchDialog from '@/components/contractors/ContractorSearchDialog.jsx';
 
 const DEFAULT_CONTRACTOR_TYPES = [
   'electrician',
