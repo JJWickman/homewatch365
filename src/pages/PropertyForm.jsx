@@ -231,6 +231,7 @@ export default function PropertyForm() {
       return;
     }
 
+    setFetchingImage(true);
     try {
       const response = await base44.functions.invoke('testGoogleMapsAPI', {
         address,
@@ -239,19 +240,33 @@ export default function PropertyForm() {
         zip
       });
 
-      if (response.data.validation.isValid) {
+      if (response.data?.validation?.isValid) {
         setAddressValidation(response.data.validation);
-        setStreetViewUrl(response.data.streetViewUrl);
-        setImageSource('auto');
-        setFormData(prev => ({ 
-          ...prev, 
-          primary_photo_url: response.data.streetViewUrl,
-          latitude: response.data.validation.lat,
-          longitude: response.data.validation.lng
-        }));
+        
+        // Check if aerial view is available
+        let imageUrl = null;
+        if (response.data.aerialView?.state === 'ACTIVE' && response.data.aerialView?.uris?.MP4_MEDIUM?.landscapeUri) {
+          // Use the aerial view video thumbnail or first frame
+          imageUrl = response.data.aerialView.uris.MP4_MEDIUM.landscapeUri;
+        }
+        
+        if (imageUrl) {
+          setStreetViewUrl(imageUrl);
+          setImageSource('auto');
+          setFormData(prev => ({ 
+            ...prev, 
+            primary_photo_url: imageUrl
+          }));
+          toast.success('Property image loaded from Google Maps');
+        } else {
+          toast.info('Address validated. No aerial imagery available for this location.');
+        }
       }
     } catch (error) {
       console.error('Error validating address:', error);
+      toast.error('Failed to validate address');
+    } finally {
+      setFetchingImage(false);
     }
   };
 
