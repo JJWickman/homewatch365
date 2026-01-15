@@ -46,10 +46,9 @@ Deno.serve(async (req) => {
             };
         }
 
-        // Generate Street View Static image URL with coordinates
-        let streetViewUrl = null;
+        // Generate Aerial View using Static Maps API with satellite imagery
+        let aerialViewUrl = null;
         let coordinates = null;
-        let streetViewAvailable = false;
         if (validationResult.isValid && geocodingData.results?.[0]?.geometry?.location) {
             const location = geocodingData.results[0].geometry.location;
             coordinates = {
@@ -57,24 +56,14 @@ Deno.serve(async (req) => {
                 lng: location.lng
             };
             
-            // Check if Street View is available at this location
-            const metadataUrl = `https://maps.googleapis.com/maps/api/streetview/metadata?location=${coordinates.lat},${coordinates.lng}&key=${apiKey}`;
-            const metadataRes = await fetch(metadataUrl);
-            const metadataData = await metadataRes.json();
-            
-            console.log('Street View Metadata:', JSON.stringify(metadataData, null, 2));
-            
-            if (metadataData.status === 'OK') {
-                streetViewAvailable = true;
-                streetViewUrl = `https://maps.googleapis.com/maps/api/streetview?size=800x600&location=${coordinates.lat},${coordinates.lng}&fov=80&heading=70&pitch=0&key=${apiKey}`;
-            }
+            // Use Static Maps API with satellite maptype for aerial view
+            aerialViewUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${coordinates.lat},${coordinates.lng}&zoom=19&size=800x600&maptype=satellite&key=${apiKey}`;
         }
 
         return Response.json({
             success: true,
             validation: validationResult,
-            streetViewUrl,
-            streetViewAvailable,
+            aerialViewUrl,
             coordinates,
             fullAddress
         });
