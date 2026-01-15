@@ -49,6 +49,8 @@ export default function Settings() {
   const [extractingBranding, setExtractingBranding] = useState(false);
   const [extractWebsiteUrl, setExtractWebsiteUrl] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
+  const [userFullName, setUserFullName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
   const [userPhone, setUserPhone] = useState('');
   const [userBio, setUserBio] = useState('');
   const [userJobTitle, setUserJobTitle] = useState('');
@@ -91,6 +93,8 @@ export default function Settings() {
     try {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
+      setUserFullName(currentUser.full_name || '');
+      setUserEmail(currentUser.email || '');
       setUserPhone(currentUser.phone || '');
       setUserBio(currentUser.bio || '');
       setUserJobTitle(currentUser.job_title || '');
@@ -173,6 +177,8 @@ export default function Settings() {
     setSavingProfile(true);
     try {
       await base44.auth.updateMe({ 
+        full_name: userFullName,
+        email: userEmail,
         phone: userPhone,
         bio: userBio,
         job_title: userJobTitle,
@@ -180,6 +186,8 @@ export default function Settings() {
       });
       setUser({ 
         ...user, 
+        full_name: userFullName,
+        email: userEmail,
         phone: userPhone,
         bio: userBio,
         job_title: userJobTitle,
@@ -400,12 +408,25 @@ ${company.name}
               <div className="border-t pt-4">
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-sm text-slate-500">Full Name</Label>
-                    <p className="font-medium">{user?.full_name || 'N/A'}</p>
+                    <Label htmlFor="user-full-name">Full Name</Label>
+                    <Input
+                      id="user-full-name"
+                      value={userFullName}
+                      onChange={(e) => setUserFullName(e.target.value)}
+                      placeholder="Your full name"
+                      className="mt-1"
+                    />
                   </div>
                   <div>
-                    <Label className="text-sm text-slate-500">Email</Label>
-                    <p className="font-medium">{user?.email || 'N/A'}</p>
+                    <Label htmlFor="user-email">Email</Label>
+                    <Input
+                      id="user-email"
+                      type="email"
+                      value={userEmail}
+                      onChange={(e) => setUserEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      className="mt-1"
+                    />
                   </div>
                   <div>
                     <Label htmlFor="user-phone">Mobile Phone</Label>
