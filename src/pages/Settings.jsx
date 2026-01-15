@@ -55,7 +55,6 @@ export default function Settings() {
   const [userEmail, setUserEmail] = useState('');
   const [userPhone, setUserPhone] = useState('');
   const [userRole, setUserRole] = useState('');
-  const [companyMember, setCompanyMember] = useState(null);
 
   const [companyForm, setCompanyForm] = useState({
     name: '',
@@ -99,16 +98,11 @@ export default function Settings() {
       setUserPhone(currentUser.phone || '');
       
       // Load company member info
-      const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-      if (members.length > 0) {
-        setCompanyMember(members[0]);
-        setUserRole(members[0].role || 'technician');
-      }
-      const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-      
-      if (members.length > 0) {
-        setCompanyMember(members[0]);
-        const companyId = members[0].company_id;
+       const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
+       if (members.length > 0) {
+         setCompanyMember(members[0]);
+         setUserRole(members[0].role || 'technician');
+         const companyId = members[0].company_id;
         
         const [companies, staffData, templatesData] = await Promise.all([
           base44.entities.Company.filter({ id: companyId }),
