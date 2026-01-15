@@ -16,10 +16,10 @@ export default function TestGoogleMapsAPI() {
     
     try {
       const response = await base44.functions.invoke('testGoogleMapsAPI', {
-        address: '13085 via flamina',
-        city: 'placida',
-        state: 'FL',
-        zip: '33946'
+        address: '7223 Lake Shore Dr',
+        city: 'Chelsea',
+        state: 'MI',
+        zip: '48118'
       });
       
       setResult(response.data);
@@ -36,7 +36,7 @@ export default function TestGoogleMapsAPI() {
       
       <Button onClick={testAPI} disabled={loading} className="mb-6">
         {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-        Test Address: 13085 via flamina, placida, FL 33946
+        Test Address: 7223 Lake Shore Dr, Chelsea, MI 48118
       </Button>
 
       {error && (
@@ -76,20 +76,7 @@ export default function TestGoogleMapsAPI() {
             </Card>
           )}
 
-          {result.staticMapUrl && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Static Map</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <img 
-                  src={result.staticMapUrl} 
-                  alt="Static Map" 
-                  className="w-full rounded-lg border border-slate-200"
-                />
-              </CardContent>
-            </Card>
-          )}
+
         </div>
       )}
     </div>
