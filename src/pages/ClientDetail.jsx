@@ -6,12 +6,19 @@ import { format } from 'date-fns';
 import { 
   Mail, Phone, MapPin, Building2, ClipboardCheck, 
   Edit, Plus, Calendar, DollarSign, ExternalLink,
-  FileText, Clock, CheckCircle2, Upload, Download, Trash2, File
+  FileText, Clock, CheckCircle2, Upload, Download, Trash2, File, Lock
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
@@ -24,6 +31,9 @@ export default function ClientDetail() {
   const [inspections, setInspections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [showPortalDialog, setShowPortalDialog] = useState(false);
+  const [portalEmail, setPortalEmail] = useState('');
+  const [savingPortal, setSavingPortal] = useState(false);
 
   useEffect(() => {
     loadClient();
@@ -46,9 +56,11 @@ export default function ClientDetail() {
       ]);
 
       if (clientData.length > 0) {
-        setClient(clientData[0]);
+        const c = clientData[0];
+        setClient(c);
         setProperties(propertiesData);
         setInspections(inspectionsData);
+        setPortalEmail(c.portal_user_email || '');
       }
     } catch (error) {
       console.error('Error loading client:', error);
@@ -134,6 +146,47 @@ export default function ClientDetail() {
     return '📎';
   };
 
+  const handlePortalSetup = async () => {
+    if (!portalEmail) {
+      toast.error('Portal email is required');
+      return;
+    }
+
+    setSavingPortal(true);
+    try {
+      await base44.entities.Client.update(client.id, {
+        portal_access: true,
+        portal_user_email: portalEmail
+      });
+      setClient({ ...client, portal_access: true, portal_user_email: portalEmail });
+      setShowPortalDialog(false);
+      toast.success('Portal access enabled for this client');
+    } catch (error) {
+      console.error('Error setting up portal:', error);
+      toast.error('Failed to enable portal access');
+    } finally {
+      setSavingPortal(false);
+    }
+  };
+
+  const handleDisablePortal = async () => {
+    setSavingPortal(true);
+    try {
+      await base44.entities.Client.update(client.id, {
+        portal_access: false,
+        portal_user_email: ''
+      });
+      setClient({ ...client, portal_access: false, portal_user_email: '' });
+      setPortalEmail('');
+      toast.success('Portal access disabled');
+    } catch (error) {
+      console.error('Error disabling portal:', error);
+      toast.error('Failed to disable portal access');
+    } finally {
+      setSavingPortal(false);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto">
       <PageHeader
@@ -209,9 +262,56 @@ export default function ClientDetail() {
                 <span className="text-sm text-slate-500">Billing</span>
                 <span className="font-medium capitalize">{client.billing_frequency || 'Monthly'}</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-500">Portal Access</span>
-                <span className="font-medium">{client.portal_access ? 'Enabled' : 'Disabled'}</span>
+            </CardContent>
+          </Card>
+
+          {/* Portal Access */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-slate-500 flex items-center gap-2">
+                <Lock className="h-4 w-4" />
+                Portal Access
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Status</span>
+                <span className={`font-medium text-sm px-2 py-1 rounded ${
+                  client.portal_access ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                }`}>
+                  {client.portal_access ? 'Enabled' : 'Disabled'}
+                </span>
+              </div>
+              {client.portal_access && client.portal_user_email && (
+                <div>
+                  <p className="text-xs text-slate-500 mb-1">Portal Email</p>
+                  <p className="font-mono text-sm text-slate-600">{client.portal_user_email}</p>
+                </div>
+              )}
+              <div className="flex gap-2 pt-2">
+                {!client.portal_access ? (
+                  <Button 
+                    size="sm" 
+                    onClick={() => {
+                      setShowPortalDialog(true);
+                      setPortalEmail(client.email || '');
+                    }}
+                    className="w-full bg-slate-900 hover:bg-slate-800"
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-1" />
+                    Create Portal
+                  </Button>
+                ) : (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={handleDisablePortal}
+                    disabled={savingPortal}
+                    className="w-full"
+                  >
+                    {savingPortal ? 'Disabling...' : 'Disable Portal'}
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -435,6 +535,38 @@ export default function ClientDetail() {
           </Tabs>
         </div>
       </div>
+
+      {/* Portal Setup Dialog */}
+      <Dialog open={showPortalDialog} onOpenChange={setShowPortalDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Client Portal</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Enable portal access for this client. They will be able to view their properties and inspection reports.
+            </p>
+            <div>
+              <Label htmlFor="portal-email">Portal Email Address *</Label>
+              <input
+                id="portal-email"
+                type="email"
+                value={portalEmail}
+                onChange={(e) => setPortalEmail(e.target.value)}
+                placeholder="client@example.com"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 mt-1"
+              />
+              <p className="text-xs text-slate-500 mt-2">This is the email the client will use to log into their portal</p>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowPortalDialog(false)}>Cancel</Button>
+              <Button onClick={handlePortalSetup} disabled={savingPortal} className="bg-slate-900 hover:bg-slate-800">
+                {savingPortal ? 'Creating...' : 'Create Portal'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
