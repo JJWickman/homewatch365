@@ -170,17 +170,43 @@ export default function TestGoogleMapsAPI() {
             </CardContent>
           </Card>
 
-          {result.streetViewUrl && (
+          {result.aerialView && (
             <Card>
               <CardHeader>
-                <CardTitle>Street View</CardTitle>
+                <CardTitle>Aerial View</CardTitle>
               </CardHeader>
-              <CardContent>
-                <img 
-                  src={result.streetViewUrl} 
-                  alt="Street View" 
-                  className="w-full rounded-lg border border-slate-200"
-                />
+              <CardContent className="space-y-3">
+                <p><strong>State:</strong> {result.aerialView.state}</p>
+                
+                {result.aerialView.state === 'ACTIVE' && result.aerialView.uris && (
+                  <div className="space-y-2">
+                    {result.aerialView.uris.MP4_MEDIUM && (
+                      <div>
+                        <p className="text-sm text-slate-600 mb-2">Video (MP4):</p>
+                        <video 
+                          src={result.aerialView.uris.MP4_MEDIUM.landscapeUri} 
+                          controls 
+                          className="w-full rounded-lg border border-slate-200"
+                        >
+                          Your browser does not support video playback.
+                        </video>
+                      </div>
+                    )}
+                    {result.aerialView.metadata && (
+                      <div className="text-sm text-slate-600">
+                        <p><strong>Capture Date:</strong> {result.aerialView.metadata.captureDate}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {result.aerialView.state === 'PROCESSING' && (
+                  <p className="text-amber-600">Video is being processed. Try again later.</p>
+                )}
+                
+                {result.aerialView.error && (
+                  <p className="text-slate-600">{result.aerialView.error}</p>
+                )}
               </CardContent>
             </Card>
           )}

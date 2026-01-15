@@ -47,29 +47,32 @@ Deno.serve(async (req) => {
             };
         }
 
-        // Test 2: Fetch and upload property image
-         let streetViewUrl = null;
+        // Test 2: Fetch Aerial View video
+         let aerialViewData = null;
          if (validationResult.isValid) {
-             const imageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${validationResult.lat},${validationResult.lng}&zoom=19&size=1200x400&maptype=satellite&key=${apiKey}`;
+             const aerialViewUrl = `https://aerialview.googleapis.com/v1/videos:lookupVideo?key=${apiKey}&address=${encodeURIComponent(fullAddress)}`;
              
-             // Fetch the image
-             const imageResponse = await fetch(imageUrl);
-             if (imageResponse.ok) {
-                 const imageBlob = await imageResponse.blob();
-                 
-                 // Upload to Base44 storage
-                 const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({
-                     file: imageBlob
-                 });
-                 
-                 streetViewUrl = uploadResult.file_url;
+             const aerialResponse = await fetch(aerialViewUrl);
+             const aerialData = await aerialResponse.json();
+             
+             if (aerialData.state === 'ACTIVE' || aerialData.state === 'PROCESSING') {
+                 aerialViewData = {
+                     state: aerialData.state,
+                     uris: aerialData.uris,
+                     metadata: aerialData.metadata
+                 };
+             } else {
+                 aerialViewData = {
+                     state: aerialData.state || 'NOT_AVAILABLE',
+                     error: aerialData.error?.message || 'Aerial view not available for this location'
+                 };
              }
          }
 
         return Response.json({
             success: true,
             validation: validationResult,
-            streetViewUrl,
+            aerialView: aerialViewData,
             fullAddress
         });
     } catch (error) {
