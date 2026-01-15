@@ -165,28 +165,29 @@ export default function TestGoogleMapsAPI() {
             </CardContent>
           </Card>
 
-          {result.placePhotoUrl && (
-            <Card>
+          {result.coordinates && (
+            <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Place Photo</CardTitle>
+                <CardTitle>Coordinates</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <img 
-                  src={result.placePhotoUrl} 
-                  alt="Place Photo"
-                  className="w-full rounded-lg border border-slate-200"
-                />
+              <CardContent>
+                <p><strong>Latitude:</strong> {result.coordinates.lat}</p>
+                <p><strong>Longitude:</strong> {result.coordinates.lng}</p>
               </CardContent>
             </Card>
           )}
 
-          {result.placePhotoUrl === null && result.validation?.isValid && (
+          {result.streetViewUrl && (
             <Card>
               <CardHeader>
-                <CardTitle>Place Photo</CardTitle>
+                <CardTitle>Street View</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-slate-600">No photos available for this location</p>
+              <CardContent className="space-y-3">
+                <img 
+                  src={result.streetViewUrl} 
+                  alt="Street View"
+                  className="w-full rounded-lg border border-slate-200"
+                />
               </CardContent>
             </Card>
           )}
