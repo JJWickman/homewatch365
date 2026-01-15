@@ -52,6 +52,7 @@ export default function Settings() {
   const [extractWebsiteUrl, setExtractWebsiteUrl] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
   const [userFullName, setUserFullName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
   const [userPhone, setUserPhone] = useState('');
 
   const [companyForm, setCompanyForm] = useState({
@@ -92,6 +93,7 @@ export default function Settings() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
       setUserFullName(currentUser.full_name || '');
+      setUserEmail(currentUser.email || '');
       setUserPhone(currentUser.phone || '');
       const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
       
@@ -174,11 +176,13 @@ export default function Settings() {
     try {
       await base44.auth.updateMe({ 
         full_name: userFullName,
+        email: userEmail,
         phone: userPhone
       });
       setUser({ 
         ...user, 
         full_name: userFullName,
+        email: userEmail,
         phone: userPhone
       });
       // Refresh page to show updated data in layout
@@ -413,9 +417,10 @@ ${company.name}
                   <Input
                     id="user-email"
                     type="email"
-                    value={user?.email || ''}
-                    disabled
-                    className="mt-1 bg-slate-50"
+                    value={userEmail}
+                    onChange={(e) => setUserEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    className="mt-1"
                   />
                 </div>
                 <div>
