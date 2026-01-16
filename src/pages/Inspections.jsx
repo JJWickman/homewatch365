@@ -1026,9 +1026,11 @@ export default function Inspections() {
                       </div>
                     </div>
                   )}
-          </div>
+                  </>
+                  )}
+                  </div>
 
-          <DialogFooter>
+                  <DialogFooter>
             <Button variant="outline" onClick={() => setShowNewDialog(false)}>
               Cancel
             </Button>
