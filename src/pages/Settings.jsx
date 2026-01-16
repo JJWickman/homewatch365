@@ -40,6 +40,7 @@ import { Badge } from "@/components/ui/badge";
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import PaymentMethodCard from '@/components/billing/PaymentMethodCard';
+import CustomFieldsManager from '@/components/admin/CustomFieldsManager';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -1145,6 +1146,9 @@ ${company.name}
         </TabsContent>
 
         <TabsContent value="admin" className="space-y-6">
+          {/* Custom Fields */}
+          <CustomFieldsManager companyId={company?.id} />
+
           {/* Branding */}
           <Card>
             <CardHeader>
