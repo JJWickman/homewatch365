@@ -631,8 +631,8 @@ export default function PropertyDetail() {
                   {tasks.length === 0 ? (
                     <EmptyState
                       icon={FileText}
-                      title="No tasks"
-                      description="No tasks assigned to this property"
+                      title="No follow-ups"
+                      description="No follow-ups assigned to this property"
                     />
                   ) : (
                     <div className="space-y-6">
