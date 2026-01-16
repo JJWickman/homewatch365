@@ -226,7 +226,7 @@ export default function Layout({ children, currentPageName }) {
                           </AvatarFallback>
                         </Avatar>
                     <div className="hidden sm:block text-left">
-                      <p className="text-sm font-medium text-slate-900">{user?.full_name}</p>
+                      <p className="text-sm font-medium text-slate-900">{companyMember?.user_name || user?.full_name}</p>
                       <p className="text-xs text-slate-500 capitalize">{companyMember?.role || 'Member'}</p>
                     </div>
                     <ChevronDown className="h-4 w-4 text-slate-400" />
@@ -234,7 +234,7 @@ export default function Layout({ children, currentPageName }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="px-2 py-1.5">
-                    <p className="text-sm font-medium">{user?.full_name}</p>
+                    <p className="text-sm font-medium">{companyMember?.user_name || user?.full_name}</p>
                     <p className="text-xs text-slate-500">{user?.email}</p>
                   </div>
                   <DropdownMenuSeparator />
