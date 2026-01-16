@@ -387,7 +387,7 @@ Your Property Management Team
                       <p>No checklist data available</p>
                       {inspection.status === 'scheduled' && (
                         <Button 
-                          className="mt-4"
+                          className="mt-4 bg-black text-white hover:bg-slate-900"
                           onClick={() => navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`)}
                         >
                           <Play className="h-4 w-4 mr-2" />
