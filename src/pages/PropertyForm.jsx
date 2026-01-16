@@ -277,7 +277,17 @@ export default function PropertyForm() {
       });
 
       if (response.data?.validation?.isValid) {
-        setAddressValidation(response.data.validation);
+        const validation = response.data.validation;
+        setAddressValidation(validation);
+        
+        // Populate blank fields from validation
+        setFormData(prev => ({
+          ...prev,
+          address: prev.address || validation.street || '',
+          city: prev.city || validation.city || '',
+          state: prev.state || validation.state || '',
+          zip: prev.zip || validation.zip || ''
+        }));
         
         if (response.data.aerialViewUrl) {
           setPreviewImageUrl(response.data.aerialViewUrl);
