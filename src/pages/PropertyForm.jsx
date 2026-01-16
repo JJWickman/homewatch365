@@ -72,6 +72,32 @@ export default function PropertyForm() {
     }
   });
 
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const [companyId, setCompanyId] = useState(null);
+  const [propertyId, setPropertyId] = useState(null);
+  
+  const [clients, setClients] = useState([]);
+  const [staff, setStaff] = useState([]);
+  const [contractors, setContractors] = useState([]);
+  const [fetchingImage, setFetchingImage] = useState(false);
+  const [validatingAddress, setValidatingAddress] = useState(false);
+  const [addressValidation, setAddressValidation] = useState(null);
+  const [streetViewUrl, setStreetViewUrl] = useState(null);
+  const [imageSource, setImageSource] = useState('auto');
+  const [autocompleteList, setAutocompleteList] = useState([]);
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [gettingLocation, setGettingLocation] = useState(false);
+  const [previewImageUrl, setPreviewImageUrl] = useState(null);
+  const [nearbyAddresses, setNearbyAddresses] = useState([]);
+  const [showNearbyAddresses, setShowNearbyAddresses] = useState(false);
+  const [enrichingData, setEnrichingData] = useState(false);
+  const [showCreateClientDialog, setShowCreateClientDialog] = useState(false);
+  const [newClientData, setNewClientData] = useState({ first_name: '', last_name: '', email: '' });
+  const [creatingClient, setCreatingClient] = useState(false);
+
   const autoSaveFunction = async (data) => {
     if (!companyId || !propertyId) return;
     const saveData = {
