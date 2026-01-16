@@ -39,23 +39,6 @@ export default function PropertyForm() {
   const [companyId, setCompanyId] = useState(null);
   const [propertyId, setPropertyId] = useState(null);
   
-  const autoSaveFunction = async (data) => {
-    if (!companyId || !propertyId) return;
-    const saveData = {
-      ...data,
-      company_id: companyId,
-      square_feet: data.square_feet ? parseFloat(data.square_feet) : null,
-      bedrooms: data.bedrooms ? parseInt(data.bedrooms) : null,
-      bathrooms: data.bathrooms ? parseFloat(data.bathrooms) : null,
-      is_active: true
-    };
-    await base44.entities.Property.update(propertyId, saveData);
-  };
-  
-  const { isSaving: isAutoSaving, lastSaved } = useAutoSave(formData, autoSaveFunction, {
-    enabled: !!propertyId,
-    delay: 2000
-  });
   const [clients, setClients] = useState([]);
   const [staff, setStaff] = useState([]);
   const [contractors, setContractors] = useState([]);
