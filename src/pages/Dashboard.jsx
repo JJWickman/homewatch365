@@ -236,14 +236,29 @@ export default function Dashboard() {
           </h1>
           <p className="text-slate-500 mt-1">Here's what's happening with your properties today.</p>
         </div>
-        <div className="flex gap-2">
-          <Link to={createPageUrl('Inspections') + '?action=new'}>
-            <Button variant="outline">
-              <ClipboardCheck className="h-4 w-4 mr-2" />
-              New Inspection
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button>
+              <Calendar className="h-4 w-4 mr-2" />
+              Book a Visit
+              <ChevronDown className="h-4 w-4 ml-1" />
             </Button>
-          </Link>
-        </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link to={createPageUrl('Inspections') + '?action=new&type=inspection'}>
+                <ClipboardCheck className="h-4 w-4 mr-2" />
+                Schedule Inspection
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to={createPageUrl('Inspections') + '?action=new&type=followup'}>
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                Create Follow-Up
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Stats Grid */}
