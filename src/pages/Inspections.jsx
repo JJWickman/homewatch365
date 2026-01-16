@@ -59,11 +59,13 @@ export default function Inspections() {
     template_id: '',
     scheduled_date: format(new Date(), 'yyyy-MM-dd'),
     scheduled_time: '',
-    type: 'routine',
+    type: 'standard',
     assigned_to: '',
     is_recurring: false,
     recurrence_frequency: 'weekly',
-    recurrence_end_date: ''
+    recurrence_end_date: '',
+    custom_name: '',
+    inspection_details: ''
   });
   const [creating, setCreating] = useState(false);
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
@@ -138,7 +140,7 @@ export default function Inspections() {
   });
 
   const checkForScheduledInspection = () => {
-    if (newInspection.type !== 'stop_by') return false;
+    if (newInspection.type !== 'drop_in') return false;
     
     const selectedDate = parseISO(newInspection.scheduled_date);
     const weekStart = addDays(selectedDate, -selectedDate.getDay());
@@ -147,7 +149,7 @@ export default function Inspections() {
     const scheduledInSameWeek = inspections.find(insp => 
       insp.property_id === newInspection.property_id &&
       insp.status === 'scheduled' &&
-      insp.type !== 'stop_by'
+      insp.type === 'standard'
     );
     
     if (scheduledInSameWeek) {
@@ -175,17 +177,21 @@ export default function Inspections() {
     const property = getProperty(newInspection.property_id);
     const staffMember = staff.find(s => s.user_email === newInspection.assigned_to);
 
+    const isFlexibleType = ['other', 'custom_client_request', 'drop_in'].includes(newInspection.type);
+    
     const baseData = {
       company_id: companyId,
       property_id: newInspection.property_id,
       client_id: property?.client_id,
-      template_id: newInspection.template_id || null,
+      template_id: !isFlexibleType ? (newInspection.template_id || null) : null,
       scheduled_time: newInspection.scheduled_time || null,
       type: newInspection.type,
       assigned_to: newInspection.assigned_to || null,
       assigned_to_name: staffMember?.user_name || null,
-      status: newInspection.type === 'stop_by' ? 'completed' : 'scheduled',
-      completed_at: newInspection.type === 'stop_by' ? new Date().toISOString() : null
+      status: isFlexibleType ? 'completed' : 'scheduled',
+      completed_at: isFlexibleType ? new Date().toISOString() : null,
+      ...(isFlexibleType && { summary_notes: newInspection.inspection_details || '' }),
+      ...(newInspection.custom_name && { custom_inspection_name: newInspection.custom_name })
     };
 
     // Generate inspection dates
@@ -226,11 +232,13 @@ export default function Inspections() {
       template_id: '',
       scheduled_date: format(new Date(), 'yyyy-MM-dd'),
       scheduled_time: '',
-      type: 'routine',
+      type: 'standard',
       assigned_to: '',
       is_recurring: false,
       recurrence_frequency: 'weekly',
-      recurrence_end_date: ''
+      recurrence_end_date: '',
+      custom_name: '',
+      inspection_details: ''
     });
     setCreating(false);
     loadData();
@@ -239,43 +247,52 @@ export default function Inspections() {
   const handleReplaceScheduled = async (replace) => {
     setCreating(true);
     
-    if (replace && scheduledInspectionToReplace) {
-      await base44.entities.Inspection.update(scheduledInspectionToReplace.id, {
-        status: 'cancelled'
-      });
-    }
-    
-    setShowReplaceDialog(false);
-    setScheduledInspectionToReplace(null);
-    
     const property = getProperty(newInspection.property_id);
     const staffMember = staff.find(s => s.user_email === newInspection.assigned_to);
     
-    await base44.entities.Inspection.create({
+    const isFlexibleType = ['other', 'custom_client_request', 'drop_in'].includes(newInspection.type);
+    
+    const inspectionData = {
       company_id: companyId,
       property_id: newInspection.property_id,
       client_id: property?.client_id,
-      template_id: newInspection.template_id || null,
+      template_id: !isFlexibleType ? (newInspection.template_id || null) : null,
       scheduled_date: newInspection.scheduled_date,
       scheduled_time: newInspection.scheduled_time || null,
       type: newInspection.type,
       assigned_to: newInspection.assigned_to || null,
       assigned_to_name: staffMember?.user_name || null,
       status: 'completed',
-      completed_at: new Date().toISOString()
-    });
+      completed_at: new Date().toISOString(),
+      ...(isFlexibleType && { summary_notes: newInspection.inspection_details || '' }),
+      ...(newInspection.custom_name && { custom_inspection_name: newInspection.custom_name })
+    };
     
+    if (replace && scheduledInspectionToReplace) {
+      await base44.entities.Inspection.update(scheduledInspectionToReplace.id, {
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        related_drop_in_id: undefined
+      });
+    }
+    
+    await base44.entities.Inspection.create(inspectionData);
+    
+    setShowReplaceDialog(false);
+    setScheduledInspectionToReplace(null);
     setShowNewDialog(false);
     setNewInspection({
       property_id: '',
       template_id: '',
       scheduled_date: format(new Date(), 'yyyy-MM-dd'),
       scheduled_time: '',
-      type: 'routine',
+      type: 'standard',
       assigned_to: '',
       is_recurring: false,
       recurrence_frequency: 'weekly',
-      recurrence_end_date: ''
+      recurrence_end_date: '',
+      custom_name: '',
+      inspection_details: ''
     });
     setCreating(false);
     loadData();
@@ -488,7 +505,7 @@ export default function Inspections() {
               <Label>Type</Label>
               <Select
                 value={newInspection.type}
-                onValueChange={(value) => setNewInspection(prev => ({ ...prev, type: value }))}
+                onValueChange={(value) => setNewInspection(prev => ({ ...prev, type: value, template_id: !['other', 'custom_client_request', 'drop_in'].includes(value) ? prev.template_id : '' }))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -497,17 +514,66 @@ export default function Inspections() {
                   <SelectItem value="standard">Standard</SelectItem>
                   <SelectItem value="pre_storm">Pre-Storm</SelectItem>
                   <SelectItem value="post_storm">Post-Storm</SelectItem>
-                  </SelectContent>
-                  </Select>
-                  </div>
+                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="custom_client_request">Custom Client Request</SelectItem>
+                  <SelectItem value="drop_in">Drop-In</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-                  {newInspection.type === 'stop_by' && (
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-800">
-                  <strong>Stop By:</strong> Recording an unscheduled inspection that already happened. This will be marked as completed.
-                  </p>
-                  </div>
-                  )}
+            {newInspection.type === 'other' && (
+              <div className="space-y-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div>
+                  <Label>Inspection Name</Label>
+                  <Input
+                    placeholder="e.g., Annual Maintenance Check"
+                    value={newInspection.custom_name}
+                    onChange={(e) => setNewInspection(prev => ({ ...prev, custom_name: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label>What was inspected?</Label>
+                  <Textarea
+                    placeholder="Describe what was inspected..."
+                    value={newInspection.inspection_details}
+                    onChange={(e) => setNewInspection(prev => ({ ...prev, inspection_details: e.target.value }))}
+                    rows={2}
+                  />
+                </div>
+                <p className="text-xs text-blue-700">Photos can be added after creation</p>
+              </div>
+            )}
+
+            {newInspection.type === 'custom_client_request' && (
+              <div className="space-y-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                <div>
+                  <Label>What was requested to inspect?</Label>
+                  <Textarea
+                    placeholder="Describe what the client requested..."
+                    value={newInspection.inspection_details}
+                    onChange={(e) => setNewInspection(prev => ({ ...prev, inspection_details: e.target.value }))}
+                    rows={2}
+                  />
+                </div>
+                <p className="text-xs text-purple-700">Photos can be added after creation</p>
+              </div>
+            )}
+
+            {newInspection.type === 'drop_in' && (
+              <div className="space-y-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div>
+                  <Label>Inspection Name</Label>
+                  <Input
+                    placeholder="e.g., Quick Property Check"
+                    value={newInspection.custom_name}
+                    onChange={(e) => setNewInspection(prev => ({ ...prev, custom_name: e.target.value }))}
+                  />
+                </div>
+                <p className="text-xs text-green-700">
+                  <strong>Drop-In:</strong> Unscheduled inspection during convenience visit. If a scheduled inspection exists for this week, you'll be offered to use this instead.
+                </p>
+              </div>
+            )}
 
                   <div>
                   <Label>Assign To</Label>
@@ -528,7 +594,7 @@ export default function Inspections() {
               </Select>
             </div>
 
-            {templates.length > 0 && (
+            {templates.length > 0 && !['other', 'custom_client_request', 'drop_in'].includes(newInspection.type) && (
               <div>
                 <Label>Template</Label>
                 <Select
@@ -549,7 +615,7 @@ export default function Inspections() {
               </div>
             )}
 
-            {newInspection.type !== 'stop_by' && (
+            {!['other', 'custom_client_request', 'drop_in'].includes(newInspection.type) && (
               <div className="flex items-center justify-between py-2">
                 <div>
                   <Label>Recurring Inspection</Label>
@@ -599,7 +665,7 @@ export default function Inspections() {
             </Button>
             <Button 
               onClick={handleCreateInspection}
-              disabled={!newInspection.property_id || !newInspection.scheduled_date || creating || (newInspection.is_recurring && !newInspection.recurrence_end_date)}
+              disabled={!newInspection.property_id || !newInspection.scheduled_date || creating || (newInspection.is_recurring && !newInspection.recurrence_end_date) || (['other', 'custom_client_request'].includes(newInspection.type) && !newInspection.inspection_details)}
               className="bg-slate-900 hover:bg-slate-800"
             >
               {creating ? 'Scheduling...' : 'Schedule'}
@@ -612,11 +678,11 @@ export default function Inspections() {
       <Dialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Scheduled Inspection Found</DialogTitle>
+            <DialogTitle>Use Drop-In to Fulfill Scheduled Inspection?</DialogTitle>
             <DialogDescription>
-              There is already a scheduled inspection for this property this week on{' '}
+              There is a scheduled {scheduledInspectionToReplace?.type === 'standard' ? 'Standard' : scheduledInspectionToReplace?.type} inspection for this property on{' '}
               {scheduledInspectionToReplace && format(parseISO(scheduledInspectionToReplace.scheduled_date), 'MMM d, yyyy')}.
-              Would you like to cancel the scheduled inspection and record this stop-by instead?
+              You can mark that scheduled inspection as complete and link this drop-in visit instead.
             </DialogDescription>
           </DialogHeader>
 
@@ -633,7 +699,7 @@ export default function Inspections() {
               disabled={creating}
               className="bg-slate-900 hover:bg-slate-800"
             >
-              Replace Scheduled
+              Use Drop-In & Mark Scheduled Complete
             </Button>
           </DialogFooter>
         </DialogContent>
