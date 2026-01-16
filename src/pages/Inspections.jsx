@@ -388,17 +388,23 @@ export default function Inspections() {
       cell: (inspection) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => navigate(createPageUrl('InspectionDetail') + `?id=${inspection.id}`)}>
+            <DropdownMenuItem onClick={(e) => {
+              e.stopPropagation();
+              navigate(createPageUrl('InspectionDetail') + `?id=${inspection.id}`);
+            }}>
               <Eye className="h-4 w-4 mr-2" />
               View Details
             </DropdownMenuItem>
             {inspection.status === 'scheduled' && (
-              <DropdownMenuItem onClick={() => navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`)}>
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`);
+              }}>
                 <Play className="h-4 w-4 mr-2" />
                 Start Inspection
               </DropdownMenuItem>
