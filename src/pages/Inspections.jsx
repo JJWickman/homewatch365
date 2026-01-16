@@ -1026,14 +1026,14 @@ export default function Inspections() {
                           onChange={(e) => setNewVisit(prev => ({ ...prev, recurrence_end_date: e.target.value }))}
                         />
                       </div>
-                    </div>
-                  )}
-                  </>
-                  )}
-                  </div>
+                      </div>
+                      )}
+                      </>
+                      )}
+                      </div>
 
-                  <DialogFooter>
-            <Button variant="outline" onClick={() => setShowNewDialog(false)}>
+                      <DialogFooter>
+                      <Button variant="outline" onClick={() => setShowNewDialog(false)}>
               Cancel
             </Button>
             <Button 
