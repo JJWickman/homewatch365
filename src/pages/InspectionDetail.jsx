@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { 
   ClipboardCheck, Building2, User, Calendar, Clock, 
   MapPin, Play, CheckCircle2, AlertTriangle, Camera,
@@ -173,7 +173,7 @@ Your Property Management Team
   return (
     <div className="max-w-5xl mx-auto">
       <PageHeader
-        title={`Inspection - ${format(new Date(inspection.scheduled_date), 'MMM d, yyyy')}`}
+        title={`Inspection - ${format(parseISO(inspection.scheduled_date), 'MMM d, yyyy')}`}
         backLink="Inspections"
         backLabel="Back to Inspections"
       >
@@ -318,7 +318,7 @@ Your Property Management Team
                     onClick={() => setEditingDate(true)}
                     className="font-medium hover:bg-slate-100 px-2 py-1 rounded transition-colors"
                   >
-                    {format(new Date(inspection.scheduled_date), 'MMM d, yyyy')}
+                    {format(parseISO(inspection.scheduled_date), 'MMM d, yyyy')}
                   </button>
                 )}
               </div>
