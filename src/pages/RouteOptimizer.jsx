@@ -94,12 +94,24 @@ export default function RouteOptimizer() {
     setOptimizing(true);
     try {
       const stops = inspections.map(i => {
-        const property = getProperty(i.property_id);
+        let property, address, time;
+        
+        if (i.type === 'inspection') {
+          property = getProperty(i.property_id);
+          address = `${property?.address}, ${property?.city}, ${property?.state} ${property?.zip}`;
+          time = i.scheduled_time;
+        } else {
+          property = getProperty(i.property_id);
+          address = `${property?.address}, ${property?.city}, ${property?.state} ${property?.zip}`;
+          time = i.due_time;
+        }
+        
         return {
           id: i.id,
+          type: i.type,
           name: property?.name || property?.address,
-          address: `${property?.address}, ${property?.city}, ${property?.state} ${property?.zip}`,
-          scheduled_time: i.scheduled_time,
+          address,
+          scheduled_time: time,
           lat: property?.latitude,
           lng: property?.longitude
         };
@@ -309,22 +321,29 @@ Return the optimized order with estimated times and any weather/traffic consider
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {inspections.map((inspection, index) => {
-                    const property = getProperty(inspection.property_id);
+                  {inspections.map((item, index) => {
+                    const property = getProperty(item.property_id);
+                    const time = item.type === 'inspection' ? item.scheduled_time : item.due_time;
+                    const label = item.type === 'inspection' ? 'Inspection' : 'Follow-Up';
                     return (
-                      <div key={inspection.id} className="flex items-start gap-3 p-2 rounded-lg border">
+                      <div key={item.id} className="flex items-start gap-3 p-2 rounded-lg border">
                         <div className="h-6 w-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-medium shrink-0">
                           {index + 1}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{property?.name || property?.address}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-sm truncate">{property?.name || property?.address}</p>
+                            <Badge variant="outline" className="text-xs shrink-0">
+                              {label}
+                            </Badge>
+                          </div>
                           <p className="text-xs text-slate-500 truncate">
                             {property?.address}, {property?.city}
                           </p>
-                          {inspection.scheduled_time && (
+                          {time && (
                             <p className="text-xs text-slate-600 mt-1">
                               <Clock className="h-3 w-3 inline mr-1" />
-                              {inspection.scheduled_time}
+                              {time}
                             </p>
                           )}
                         </div>
