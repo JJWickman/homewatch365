@@ -271,7 +271,7 @@ export default function Dashboard() {
         </div>
         <div onClick={() => openModal('followups')} className="cursor-pointer h-full">
           <StatsCard
-            title="Pending Follow-Ups"
+            title="Pending Visits"
             value={stats.pendingTasks}
             icon={FileWarning}
             iconColor="text-slate-600"
