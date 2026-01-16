@@ -20,6 +20,7 @@ import RouteOptimizer from './pages/RouteOptimizer';
 import Schedule from './pages/Schedule';
 import Settings from './pages/Settings';
 import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
+import Pricing from './pages/Pricing';
 import __Layout from './Layout.jsx';
 
 
@@ -46,6 +47,7 @@ export const PAGES = {
     "Schedule": Schedule,
     "Settings": Settings,
     "TestGoogleMapsAPI": TestGoogleMapsAPI,
+    "Pricing": Pricing,
 }
 
 export const pagesConfig = {
