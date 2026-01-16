@@ -832,7 +832,7 @@ export default function Inspections() {
                     </Select>
                   </div>
 
-                  {visitType === 'inspection' && templates.length > 0 && !['other', 'custom_client_request', 'drop_in'].includes(newVisit.type) && (
+                  {visitType === 'inspection' && templates.length > 0 && !['other', 'custom_client_request', 'drop_in'].includes(newVisit.inspection_type) && (
                     <div>
                       <Label>Template</Label>
                       <Select
