@@ -852,7 +852,7 @@ export default function Inspections() {
                   disabled={!newVisit.property_id || !newVisit.assigned_to || !newVisit.estimated_hours || (visitType === 'inspection' && !newVisit.inspection_type) || (visitType === 'followup' && !newVisit.followup_type)}
                   className="w-full bg-blue-600 hover:bg-blue-700"
                 >
-                  Search Available Times
+                  Find First Available
                 </Button>
                 {searchResults.length > 0 && (
                   <div className="mt-4 space-y-2">
