@@ -526,7 +526,7 @@ export default function Inspections() {
                   <SelectValue placeholder="Select staff member" />
                 </SelectTrigger>
                 <SelectContent>
-                  {staff.map((member) => (
+                  {staff.filter(m => m.role === 'field_inspector' || m.role === 'dispatcher' || m.role === 'administrator').map((member) => (
                     <SelectItem key={member.id} value={member.user_email}>
                       {member.user_name || member.user_email}
                     </SelectItem>

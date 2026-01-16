@@ -572,7 +572,7 @@ export default function FollowUps() {
                     <SelectValue placeholder="Select staff member" />
                   </SelectTrigger>
                   <SelectContent>
-                    {staff.map((member) => (
+                    {staff.filter(m => m.role === 'field_inspector' || m.role === 'dispatcher' || m.role === 'administrator').map((member) => (
                       <SelectItem key={member.id} value={member.user_email}>
                         {member.user_name || member.user_email}
                       </SelectItem>
@@ -622,9 +622,9 @@ export default function FollowUps() {
                   <SelectItem value={currentUser?.email || ''}>
                     Myself ({currentUser?.full_name})
                   </SelectItem>
-                  {staff.filter(m => m.role === 'manager' || m.role === 'owner').map((member) => (
+                  {staff.filter(m => m.role === 'dispatcher' || m.role === 'administrator').map((member) => (
                     <SelectItem key={member.id} value={member.user_email}>
-                      {member.user_name || member.user_email} ({member.role})
+                      {member.user_name || member.user_email} ({m.role === 'dispatcher' ? 'Dispatcher/Manager' : 'Administrator'})
                     </SelectItem>
                   ))}
                 </SelectContent>
