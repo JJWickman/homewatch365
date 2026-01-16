@@ -267,7 +267,7 @@ export default function Dashboard() {
             icon={ClipboardCheck}
             iconColor="text-amber-600"
             iconBg="bg-amber-50"
-            className="[&_p.text-2xl]:mt-8"
+            className="[&_p.text-2xl]:mt-10"
           />
         </div>
         <div onClick={() => openModal('followups')} className="cursor-pointer h-full">
