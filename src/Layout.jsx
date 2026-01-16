@@ -45,6 +45,7 @@ const baseItems = [
   { name: 'Inspections', icon: ClipboardCheck, page: 'Inspections' },
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
   { name: 'Follow-Ups', icon: FileText, page: 'FollowUps' },
+  { name: 'Route Optimizer', icon: Route, page: 'RouteOptimizer' },
   { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
 ];
 
