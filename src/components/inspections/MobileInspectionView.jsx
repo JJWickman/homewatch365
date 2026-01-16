@@ -152,6 +152,19 @@ export default function MobileInspectionView({
                       />
                     </div>
 
+                    {/* Flag for Follow-up */}
+                    <button
+                      onClick={() => toggleFlagItem(`category-${category.id}`)}
+                      className={`w-full p-2 rounded-lg border-2 transition-colors flex items-center gap-2 text-sm font-medium ${
+                        flaggedItems.has(`category-${category.id}`)
+                          ? 'border-red-500 bg-red-50 text-red-700'
+                          : 'border-slate-300 bg-white text-slate-600 hover:border-red-300 hover:bg-red-50'
+                      }`}
+                    >
+                      <AlertCircle className="h-4 w-4" />
+                      {flaggedItems.has(`category-${category.id}`) ? 'Requires Follow-up ✓' : 'Flag for Follow-up'}
+                    </button>
+
                     {/* Photos */}
                     <div>
                       <Label className="text-sm font-medium mb-2 block">Photos</Label>
