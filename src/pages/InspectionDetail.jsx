@@ -120,13 +120,13 @@ Your Property Management Team
         backLabel="Back to Inspections"
       >
         {inspection.status === 'scheduled' && (
-          <Button onClick={() => navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`)}>
+          <Button onClick={() => navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`)} className="bg-black text-white hover:bg-slate-900">
             <Play className="h-4 w-4 mr-2" />
             Start Inspection
           </Button>
         )}
         {inspection.status === 'in_progress' && (
-          <Button onClick={() => navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`)}>
+          <Button onClick={() => navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`)} className="bg-black text-white hover:bg-slate-900">
             <Play className="h-4 w-4 mr-2" />
             Continue Inspection
           </Button>
