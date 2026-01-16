@@ -147,14 +147,62 @@ export default function Inspections() {
     }
     
     return details.length > 0 ? details.join(', ') : '—';
-  };
+    };
 
-  const getDateLabel = (dateStr) => {
+    const getDateLabel = (dateStr) => {
     const date = parseISO(dateStr);
     if (isToday(date)) return 'Today';
     if (isTomorrow(date)) return 'Tomorrow';
     return format(date, 'MMM d, yyyy');
-  };
+    };
+
+    const findAvailableSlots = () => {
+    const propertyId = newVisit.property_id;
+    if (!propertyId) return;
+
+    const results = [];
+    let currentDate = new Date();
+
+    // Search for available slots in the next 30 days
+    for (let i = 0; i < 30; i++) {
+      const dateStr = format(currentDate, 'yyyy-MM-dd');
+      const dayOfWeek = currentDate.getDay();
+
+      // Skip Sundays
+      if (dayOfWeek === 0) {
+        currentDate = addDays(currentDate, 1);
+        continue;
+      }
+
+      // Check morning and afternoon availability
+      const morningBooked = visits.some(v => 
+        v.property_id === propertyId && 
+        v.scheduled_date === dateStr && 
+        v.scheduled_time === 'morning' &&
+        v.status !== 'cancelled'
+      );
+
+      const afternoonBooked = visits.some(v => 
+        v.property_id === propertyId && 
+        v.scheduled_date === dateStr && 
+        v.scheduled_time === 'afternoon' &&
+        v.status !== 'cancelled'
+      );
+
+      if (!morningBooked) {
+        results.push({ date: dateStr, time: 'morning', label: `${getDateLabel(dateStr)} - Morning (8am-12pm)` });
+      }
+      if (!afternoonBooked) {
+        results.push({ date: dateStr, time: 'afternoon', label: `${getDateLabel(dateStr)} - Afternoon (12pm-4pm)` });
+      }
+
+      if (results.length >= 5) break; // Show first 5 available slots
+
+      currentDate = addDays(currentDate, 1);
+    }
+
+    setSearchResults(results);
+    };
 
   const filteredVisits = visits.filter(visit => {
     const property = getProperty(visit.property_id);
