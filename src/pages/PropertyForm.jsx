@@ -522,6 +522,31 @@ export default function PropertyForm() {
     }
   };
 
+  const validateAndFetchGoogleImage = async (address, city, state, zip) => {
+    if (!address || !city || !state) return;
+    
+    setValidatingAddress(true);
+    try {
+      const response = await base44.functions.invoke('testGoogleMapsAPI', {
+        address,
+        city,
+        state,
+        zip
+      });
+
+      if (response.data?.validation?.isValid) {
+        setAddressValidation(response.data.validation);
+        if (response.data.aerialViewUrl) {
+          setPreviewImageUrl(response.data.aerialViewUrl);
+        }
+      }
+    } catch (error) {
+      console.error('Error validating address:', error);
+    } finally {
+      setValidatingAddress(false);
+    }
+  };
+
   const handleSelectNearbyAddress = (selectedAddress) => {
     setFormData(prev => ({
       ...prev,
