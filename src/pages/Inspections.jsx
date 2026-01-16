@@ -133,18 +133,15 @@ export default function Inspections() {
   const getProperty = (propertyId) => properties.find(p => p.id === propertyId);
   const getClient = (clientId) => clients.find(c => c.id === clientId);
   
-  const getInspectionDetails = (inspection) => {
+  const getVisitDetails = (visit) => {
     const details = [];
     
-    // Check for issues
-    if (inspection.overall_status === 'issues_found' || inspection.overall_status === 'urgent') {
-      details.push('Issues found');
-    }
-    
-    // Check for related follow-ups
-    const relatedFollowUps = followUps.filter(fu => fu.inspection_id === inspection.id);
-    if (relatedFollowUps.length > 0) {
-      details.push(`${relatedFollowUps.length} follow-up${relatedFollowUps.length > 1 ? 's' : ''}`);
+    if (visit.visit_type === 'inspection') {
+      if (visit.overall_status === 'issues_found' || visit.overall_status === 'urgent') {
+        details.push('Issues found');
+      }
+    } else if (visit.visit_type === 'followup') {
+      details.push(visit.priority || 'medium');
     }
     
     return details.length > 0 ? details.join(', ') : '—';
