@@ -250,10 +250,10 @@ export default function Dashboard() {
               <p>No recent activity</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recentActivity.slice(0, 6).map((activity) => (
-                <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50">
-                  <Avatar className="h-8 w-8 shrink-0">
+            <div className="space-y-2">
+              {recentActivity.slice(0, 8).map((activity) => (
+                <div key={activity.id} className="flex items-center gap-4 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+                  <Avatar className="h-9 w-9 shrink-0">
                     <AvatarFallback className="text-xs bg-slate-100">
                       {getInitials(activity.user_name)}
                     </AvatarFallback>
@@ -264,9 +264,16 @@ export default function Dashboard() {
                       {' '}{activity.action}d{' '}
                       <span className="font-medium">{activity.entity_name || activity.entity_type}</span>
                     </p>
-                    <p className="text-xs text-slate-500">
+                    {activity.details && (
+                      <p className="text-xs text-slate-500 mt-0.5">{activity.details}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-slate-500 shrink-0">
+                    <StatusBadge status={activity.action} className="text-xs" />
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" />
                       {format(new Date(activity.created_date), 'MMM d, h:mm a')}
-                    </p>
+                    </span>
                   </div>
                 </div>
               ))}
