@@ -31,9 +31,8 @@ const getNavigationItems = (subscriptionPlan, memberRole) => {
 if (memberRole === 'field_inspector' || memberRole === 'technician') {
   return [
     { name: 'Dashboard', icon: Home, page: 'Dashboard' },
-    { name: 'My Inspections', icon: ClipboardCheck, page: 'Inspections' },
-    { name: 'My Schedule', icon: Calendar, page: 'Schedule' },
-    { name: 'Follow-Ups', icon: FileText, page: 'FollowUps' }
+    { name: 'My Visits', icon: ClipboardCheck, page: 'Inspections' },
+    { name: 'My Schedule', icon: Calendar, page: 'Schedule' }
   ];
 }
 
