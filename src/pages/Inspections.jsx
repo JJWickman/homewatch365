@@ -566,12 +566,12 @@ export default function Inspections() {
        </Card>
 
       {/* Table / Empty State */}
-      {inspections.length === 0 && !loading ? (
+      {visits.length === 0 && !loading ? (
         <Card>
           <EmptyState
             icon={ClipboardCheck}
-            title="No inspections yet"
-            description="Schedule your first inspection to start monitoring properties."
+            title="No visits yet"
+            description="Schedule your first visit to start monitoring properties."
             action={() => {
               setVisitType('inspection');
               setShowNewDialog(true);
@@ -582,10 +582,10 @@ export default function Inspections() {
       ) : (
         <DataTable
           columns={columns}
-          data={filteredInspections}
+          data={filteredVisits}
           loading={loading}
-          onRowClick={(inspection) => navigate(createPageUrl('InspectionDetail') + `?id=${inspection.id}`)}
-          emptyMessage="No inspections match your filters"
+          onRowClick={(visit) => navigate(createPageUrl('InspectionDetail') + `?id=${visit.id}`)}
+          emptyMessage="No visits match your filters"
         />
       )}
 
