@@ -50,6 +50,8 @@ export default function Inspections() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [assignedFilter, setAssignedFilter] = useState('all');
+  const [propertyFilter, setPropertyFilter] = useState('all');
   const [companyId, setCompanyId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   
@@ -155,8 +157,10 @@ export default function Inspections() {
     
     const matchesStatus = statusFilter === 'all' || inspection.status === statusFilter;
     const matchesType = typeFilter === 'all' || inspection.type === typeFilter;
+    const matchesAssigned = assignedFilter === 'all' || inspection.assigned_to === assignedFilter;
+    const matchesProperty = propertyFilter === 'all' || inspection.property_id === propertyFilter;
     
-    return matchesSearch && matchesStatus && matchesType;
+    return matchesSearch && matchesStatus && matchesType && matchesAssigned && matchesProperty;
   });
 
   const checkForScheduledInspection = () => {
@@ -427,42 +431,68 @@ export default function Inspections() {
       />
 
       {/* Filters */}
-      <Card className="mb-6 p-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <Input
-              placeholder="Search by property..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-36">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="scheduled">Scheduled</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-full sm:w-36">
-              <SelectValue placeholder="Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="routine">Routine</SelectItem>
-              <SelectItem value="pre_storm">Pre-Storm</SelectItem>
-              <SelectItem value="post_storm">Post-Storm</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </Card>
+       <Card className="mb-6 p-4">
+         <div className="flex flex-col sm:flex-row gap-4">
+           <div className="relative flex-1">
+             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+             <Input
+               placeholder="Search by property..."
+               value={searchQuery}
+               onChange={(e) => setSearchQuery(e.target.value)}
+               className="pl-10"
+             />
+           </div>
+           <Select value={propertyFilter} onValueChange={setPropertyFilter}>
+             <SelectTrigger className="w-full sm:w-36">
+               <SelectValue placeholder="Property" />
+             </SelectTrigger>
+             <SelectContent>
+               <SelectItem value="all">All Properties</SelectItem>
+               {properties.map((property) => (
+                 <SelectItem key={property.id} value={property.id}>
+                   {property.name || property.address}
+                 </SelectItem>
+               ))}
+             </SelectContent>
+           </Select>
+           <Select value={statusFilter} onValueChange={setStatusFilter}>
+             <SelectTrigger className="w-full sm:w-36">
+               <SelectValue placeholder="Status" />
+             </SelectTrigger>
+             <SelectContent>
+               <SelectItem value="all">All Status</SelectItem>
+               <SelectItem value="scheduled">Scheduled</SelectItem>
+               <SelectItem value="in_progress">In Progress</SelectItem>
+               <SelectItem value="completed">Completed</SelectItem>
+               <SelectItem value="cancelled">Cancelled</SelectItem>
+             </SelectContent>
+           </Select>
+           <Select value={typeFilter} onValueChange={setTypeFilter}>
+             <SelectTrigger className="w-full sm:w-36">
+               <SelectValue placeholder="Type" />
+             </SelectTrigger>
+             <SelectContent>
+               <SelectItem value="all">All Types</SelectItem>
+               <SelectItem value="routine">Routine</SelectItem>
+               <SelectItem value="pre_storm">Pre-Storm</SelectItem>
+               <SelectItem value="post_storm">Post-Storm</SelectItem>
+             </SelectContent>
+           </Select>
+           <Select value={assignedFilter} onValueChange={setAssignedFilter}>
+             <SelectTrigger className="w-full sm:w-36">
+               <SelectValue placeholder="Assigned" />
+             </SelectTrigger>
+             <SelectContent>
+               <SelectItem value="all">All Staff</SelectItem>
+               {staff.map((member) => (
+                 <SelectItem key={member.id} value={member.user_email}>
+                   {member.user_name || member.user_email}
+                 </SelectItem>
+               ))}
+             </SelectContent>
+           </Select>
+         </div>
+       </Card>
 
       {/* Table / Empty State */}
       {inspections.length === 0 && !loading ? (
