@@ -71,6 +71,9 @@ export default function FollowUps() {
   
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [showReassignDialog, setShowReassignDialog] = useState(false);
+  const [reassignItem, setReassignItem] = useState(null);
+  const [reassignTo, setReassignTo] = useState('');
   const [newItem, setNewItem] = useState({
     title: '',
     description: '',
@@ -215,6 +218,26 @@ export default function FollowUps() {
 
   const handleStatusChange = async (item, newStatus) => {
     await base44.entities.FollowUp.update(item.id, { status: newStatus });
+  };
+
+  const handleReassign = (item) => {
+    setReassignItem(item);
+    setReassignTo(item.assigned_to || '');
+    setShowReassignDialog(true);
+  };
+
+  const handleSaveReassign = async () => {
+    if (!reassignItem) return;
+    
+    const staffMember = staff.find(s => s.user_email === reassignTo);
+    await base44.entities.FollowUp.update(reassignItem.id, {
+      assigned_to: reassignTo || null,
+      assigned_to_name: staffMember?.user_name || null
+    });
+    
+    setShowReassignDialog(false);
+    setReassignItem(null);
+    setReassignTo('');
   };
 
   const isOverdue = (item) => {
@@ -381,6 +404,10 @@ export default function FollowUps() {
                               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); toggleComplete(item); }}>
                                 <CheckCircle2 className="h-4 w-4 mr-2" />
                                 {item.status === 'completed' ? 'Mark Open' : 'Mark Complete'}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleReassign(item); }}>
+                                <User className="h-4 w-4 mr-2" />
+                                Reassign
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
