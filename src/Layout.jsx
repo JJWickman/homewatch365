@@ -183,8 +183,30 @@ export default function Layout({ children, currentPageName }) {
               Settings
             </Link>
           </div>
-        </div>
-      </aside>
+
+          {/* Estate IQ Footer */}
+          <div className="p-4 border-t border-slate-800 bg-slate-950">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">EIQ</span>
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">Estate IQ</p>
+                  <p className="text-slate-500 text-xs">Property Management</p>
+                </div>
+              </div>
+            </div>
+            <a
+              href="#support"
+              className="flex items-center gap-2 mt-3 text-xs text-slate-400 hover:text-amber-500 transition-colors"
+            >
+              <span>Support</span>
+              <span className="text-slate-600">→</span>
+            </a>
+          </div>
+          </div>
+          </aside>
 
       {/* Main content */}
       <div className="lg:pl-64">
