@@ -88,17 +88,15 @@ export default function PropertyDetail() {
       const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
       const companyId = members[0]?.company_id;
 
-      const [propertyData, inspectionsData, followUpsData] = await Promise.all([
+      const [propertyData, visitsData] = await Promise.all([
         base44.entities.Property.filter({ id, company_id: companyId }),
-        base44.entities.Inspection.filter({ property_id: id, company_id: companyId }, '-scheduled_date', 20),
-        base44.entities.FollowUp.filter({ property_id: id, company_id: companyId }, '-created_date', 10)
+        base44.entities.Visit.filter({ property_id: id, company_id: companyId }, '-scheduled_date', 20)
       ]);
 
       if (propertyData.length > 0) {
         const prop = propertyData[0];
         setProperty(prop);
-        setInspections(inspectionsData);
-        setTasks(followUpsData);
+        setVisits(visitsData);
         
         // Load client and all clients
         if (prop.client_id) {
