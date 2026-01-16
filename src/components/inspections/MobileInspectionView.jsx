@@ -23,12 +23,13 @@ export default function MobileInspectionView({
   handlePhotoUpload,
   uploading,
   saving,
-  saveProgress
+  saveProgress,
+  flaggedItems,
+  setFlaggedItems
 }) {
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [customItems, setCustomItems] = useState([]);
   const [newCustomName, setNewCustomName] = useState('');
-  const [flaggedItems, setFlaggedItems] = useState(new Set());
 
   const updateCategory = (categoryId, field, value) => {
     setCategories(prev => 
@@ -77,15 +78,15 @@ export default function MobileInspectionView({
   };
 
   const toggleFlagItem = (itemKey) => {
-    setFlaggedItems(prev => {
-      const newSet = new Set(prev);
+    if (typeof flaggedItems === 'object' && flaggedItems instanceof Set) {
+      const newSet = new Set(flaggedItems);
       if (newSet.has(itemKey)) {
         newSet.delete(itemKey);
       } else {
         newSet.add(itemKey);
       }
-      return newSet;
-    });
+      setFlaggedItems(newSet);
+    }
   };
 
   return (
