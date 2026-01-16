@@ -39,6 +39,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
+import PaymentMethodCard from '@/components/billing/PaymentMethodCard';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -90,9 +91,12 @@ export default function Settings() {
   const [editingTypeId, setEditingTypeId] = useState(null);
   const [typeFormData, setTypeFormData] = useState({ name: '', slug: '', description: '', is_active: true });
   const [billingCycle, setBillingCycle] = useState('monthly');
+  const [stripePrices, setStripePrices] = useState({});
+  const [loadingCheckout, setLoadingCheckout] = useState(false);
 
   useEffect(() => {
     loadData();
+    loadStripePrices();
   }, []);
 
   const loadData = async () => {
@@ -381,18 +385,44 @@ ${company.name}
     }
   ];
 
+  const loadStripePrices = async () => {
+    try {
+      const response = await base44.functions.invoke('getStripePrices');
+      if (response.data.success) {
+        setStripePrices(response.data.prices);
+      }
+    } catch (error) {
+      console.error('Error loading Stripe prices:', error);
+    }
+  };
+
   const handleSelectPlan = async (tierId) => {
     if (!company) return;
     
+    setLoadingCheckout(true);
     try {
-      await base44.entities.Company.update(company.id, {
+      const priceId = stripePrices[tierId]?.[billingCycle];
+      
+      if (!priceId) {
+        alert('Payment system not configured. Please contact support.');
+        return;
+      }
+
+      const response = await base44.functions.invoke('createCheckoutSession', {
+        price_id: priceId,
+        company_id: company.id,
         subscription_plan: tierId,
-        subscription_status: 'active'
+        billing_cycle: billingCycle
       });
       
-      setCompany({ ...company, subscription_plan: tierId, subscription_status: 'active' });
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      }
     } catch (error) {
-      console.error('Error updating plan:', error);
+      console.error('Error creating checkout:', error);
+      alert('Failed to start checkout. Please try again.');
+    } finally {
+      setLoadingCheckout(false);
     }
   };
   
@@ -1015,6 +1045,9 @@ ${company.name}
             </CardContent>
           </Card>
 
+          {/* Payment Methods */}
+          <PaymentMethodCard company={company} />
+
           {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {PRICING_TIERS.map((tier) => {
@@ -1069,10 +1102,10 @@ ${company.name}
                     
                     <Button 
                       onClick={() => handleSelectPlan(tier.id)}
-                      disabled={isCurrentPlan}
+                      disabled={isCurrentPlan || loadingCheckout}
                       className={`w-full ${tier.popular ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-900 hover:bg-slate-800'}`}
                     >
-                      {isCurrentPlan ? 'Current Plan' : 'Select Plan'}
+                      {loadingCheckout ? 'Loading...' : (isCurrentPlan ? 'Current Plan' : 'Subscribe Now')}
                     </Button>
                   </CardContent>
                 </Card>
