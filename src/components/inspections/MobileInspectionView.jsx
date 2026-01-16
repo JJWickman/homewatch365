@@ -46,6 +46,35 @@ export default function MobileInspectionView({
     input.click();
   };
 
+  const addCustomItem = () => {
+    if (newCustomName.trim()) {
+      setCustomItems([...customItems, { id: Date.now(), name: newCustomName, notes: '', photos: [] }]);
+      setNewCustomName('');
+    }
+  };
+
+  const removeCustomItem = (itemId) => {
+    setCustomItems(customItems.filter(item => item.id !== itemId));
+  };
+
+  const updateCustomItem = (itemId, field, value) => {
+    setCustomItems(prev =>
+      prev.map(item => item.id === itemId ? { ...item, [field]: value } : item)
+    );
+  };
+
+  const addPhotoToCustom = (itemId) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.onchange = (e) => {
+      const file = e?.target?.files?.[0];
+      if (file) handlePhotoUpload(`custom-${itemId}`, null, e);
+    };
+    input.click();
+  };
+
   return (
     <div className="space-y-3 pb-24">
       {/* Quick Stats */}
