@@ -177,19 +177,10 @@ export default function Settings() {
   const handleSaveProfile = async () => {
     setSavingProfile(true);
     try {
-      // Save phone to auth
-      if (userPhone !== user?.phone) {
-        await base44.auth.updateMe({ 
-          phone: userPhone
-        });
-      }
-      
-      // Save full name to CompanyMember
-      if (companyMember && userFullName !== user?.full_name) {
-        await base44.entities.CompanyMember.update(companyMember.id, {
-          user_name: userFullName
-        });
-      }
+      await base44.auth.updateMe({ 
+        full_name: userFullName,
+        phone: userPhone
+      });
       
       // Update role in CompanyMember if it changed
       if (companyMember && userRole !== companyMember.role) {
