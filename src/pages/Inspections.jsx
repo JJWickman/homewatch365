@@ -59,14 +59,14 @@ export default function Inspections() {
     template_id: '',
     scheduled_date: format(new Date(), 'yyyy-MM-dd'),
     scheduled_time: '',
-    type: 'standard',
+    type: 'routine',
     assigned_to: '',
     is_recurring: false,
     recurrence_frequency: 'weekly',
     recurrence_end_date: '',
     custom_name: '',
     inspection_details: ''
-  });
+    });
   const [creating, setCreating] = useState(false);
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const [scheduledInspectionToReplace, setScheduledInspectionToReplace] = useState(null);
@@ -149,7 +149,7 @@ export default function Inspections() {
     const scheduledInSameWeek = inspections.find(insp => 
       insp.property_id === newInspection.property_id &&
       insp.status === 'scheduled' &&
-      insp.type === 'standard'
+      insp.type === 'routine'
     );
     
     if (scheduledInSameWeek) {
@@ -423,7 +423,7 @@ export default function Inspections() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="standard">Standard</SelectItem>
+              <SelectItem value="routine">Routine</SelectItem>
               <SelectItem value="pre_storm">Pre-Storm</SelectItem>
               <SelectItem value="post_storm">Post-Storm</SelectItem>
             </SelectContent>
@@ -511,7 +511,7 @@ export default function Inspections() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="standard">Standard</SelectItem>
+                  <SelectItem value="routine">Routine</SelectItem>
                   <SelectItem value="pre_storm">Pre-Storm</SelectItem>
                   <SelectItem value="post_storm">Post-Storm</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
@@ -680,7 +680,7 @@ export default function Inspections() {
           <DialogHeader>
             <DialogTitle>Use Drop-In to Fulfill Scheduled Inspection?</DialogTitle>
             <DialogDescription>
-              There is a scheduled {scheduledInspectionToReplace?.type === 'standard' ? 'Standard' : scheduledInspectionToReplace?.type} inspection for this property on{' '}
+              There is a scheduled {scheduledInspectionToReplace?.type === 'routine' ? 'Routine' : scheduledInspectionToReplace?.type} inspection for this property on{' '}
               {scheduledInspectionToReplace && format(parseISO(scheduledInspectionToReplace.scheduled_date), 'MMM d, yyyy')}.
               You can mark that scheduled inspection as complete and link this drop-in visit instead.
             </DialogDescription>
