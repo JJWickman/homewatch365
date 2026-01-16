@@ -669,12 +669,19 @@ export default function Inspections() {
                   />
                 </div>
                 <div>
-                  <Label>Time</Label>
-                  <Input
-                    type="time"
+                  <Label>Time Block</Label>
+                  <Select
                     value={newVisit.scheduled_time}
-                    onChange={(e) => setNewVisit(prev => ({ ...prev, scheduled_time: e.target.value }))}
-                  />
+                    onValueChange={(value) => setNewVisit(prev => ({ ...prev, scheduled_time: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="morning">Morning (8am-12pm)</SelectItem>
+                      <SelectItem value="afternoon">Afternoon (12pm-4pm)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             ) : (
@@ -688,12 +695,19 @@ export default function Inspections() {
                   />
                 </div>
                 <div>
-                  <Label>Time</Label>
-                  <Input
-                    type="time"
+                  <Label>Time Block</Label>
+                  <Select
                     value={newVisit.followup_due_time}
-                    onChange={(e) => setNewVisit(prev => ({ ...prev, followup_due_time: e.target.value }))}
-                  />
+                    onValueChange={(value) => setNewVisit(prev => ({ ...prev, followup_due_time: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="morning">Morning (8am-12pm)</SelectItem>
+                      <SelectItem value="afternoon">Afternoon (12pm-4pm)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             )}
