@@ -258,9 +258,11 @@ export default function InspectionFlow() {
         });
 
         // Create follow-ups for flagged items
-        for (const [key, _] of flaggedItems) {
-          if (key.startsWith('category-')) {
-            const categoryId = key.replace('category-', '');
+        for (const flagKey of flaggedItems) {
+          const [itemId, followUpType, priority] = flagKey.split('|');
+          
+          if (itemId.startsWith('category-')) {
+            const categoryId = itemId.replace('category-', '');
             const category = mobileCategories.find(c => c.id === categoryId);
             if (category) {
               await base44.entities.FollowUp.create({
@@ -268,10 +270,10 @@ export default function InspectionFlow() {
                 property_id: inspection.property_id,
                 client_id: inspection.client_id,
                 inspection_id: inspection.id,
-                title: `${category.name} - Requires Attention`,
+                title: `${category.name} - Follow-up Required`,
                 description: category.notes || `Issue identified during routine inspection of ${category.name}`,
-                type: 'inspection_followup',
-                priority: 'medium',
+                type: followUpType || 'inspection_followup',
+                priority: priority || 'medium',
                 status: 'open'
               });
             }
