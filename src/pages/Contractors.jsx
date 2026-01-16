@@ -67,6 +67,7 @@ export default function Contractors() {
   const [editingId, setEditingId] = useState(null);
   const [customTypes, setCustomTypes] = useState([]);
   const [showSearchDialog, setShowSearchDialog] = useState(false);
+  const [showAddChoiceDialog, setShowAddChoiceDialog] = useState(false);
   const [properties, setProperties] = useState([]);
   const [formData, setFormData] = useState({
     business_name: '',
@@ -153,6 +154,11 @@ export default function Contractors() {
   };
 
   const handleAddNew = () => {
+    setShowAddChoiceDialog(true);
+  };
+
+  const handleManualAdd = () => {
+    setShowAddChoiceDialog(false);
     setEditingId(null);
     setFormData({
       business_name: '',
@@ -172,6 +178,11 @@ export default function Contractors() {
       is_active: true
     });
     setShowNewDialog(true);
+  };
+
+  const handleSearchAdd = () => {
+    setShowAddChoiceDialog(false);
+    setShowSearchDialog(true);
   };
 
   const handleSearchResult = (contractor) => {
@@ -230,15 +241,7 @@ export default function Contractors() {
         subtitle="Manage your contractor network"
         action={handleAddNew}
         actionLabel="Add Contractor"
-      >
-        <Button 
-          variant="outline"
-          onClick={() => setShowSearchDialog(true)}
-        >
-          <Search className="h-4 w-4 mr-2" />
-          Search External
-        </Button>
-      </PageHeader>
+      />
 
       {/* Filters */}
       <Card className="mb-6">
@@ -538,6 +541,47 @@ export default function Contractors() {
                 {editingId ? 'Update' : 'Add'} Contractor
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Contractor Choice Dialog */}
+      <Dialog open={showAddChoiceDialog} onOpenChange={setShowAddChoiceDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Contractor</DialogTitle>
+            <DialogDescription>
+              Choose how you'd like to add a contractor
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-3 pt-2">
+            <Button
+              onClick={handleSearchAdd}
+              className="w-full h-auto py-4 flex-col items-start gap-2 bg-slate-900 hover:bg-slate-800"
+            >
+              <div className="flex items-center gap-2 w-full">
+                <Search className="h-5 w-5" />
+                <span className="font-semibold">Search for Contractors</span>
+              </div>
+              <span className="text-xs text-slate-300 font-normal">
+                Search Google Business, Facebook, and Yelp for contractors near a property
+              </span>
+            </Button>
+
+            <Button
+              onClick={handleManualAdd}
+              variant="outline"
+              className="w-full h-auto py-4 flex-col items-start gap-2"
+            >
+              <div className="flex items-center gap-2 w-full">
+                <Plus className="h-5 w-5" />
+                <span className="font-semibold">Add Manually</span>
+              </div>
+              <span className="text-xs text-slate-500 font-normal">
+                Enter contractor information manually
+              </span>
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
