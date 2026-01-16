@@ -281,7 +281,7 @@ export default function PropertyDetail() {
         type: 'other',
         status: 'open'
       });
-      setTasks(await base44.entities.FollowUp.filter({ property_id: property.id, company_id: property.company_id }, '-created_date', 10));
+      setVisits(await base44.entities.Visit.filter({ property_id: property.id, company_id: property.company_id }, '-scheduled_date', 20));
       setNewTask({ title: '', description: '', priority: 'medium', due_date: '' });
       setShowAddTask(false);
       toast.success('Task created successfully');
