@@ -766,20 +766,6 @@ export default function Inspections() {
            )}
 
            <div className="space-y-4 py-4">
-              {/* Visit Type Selector */}
-              <div>
-                <Label>Visit Type *</Label>
-                <Select value={visitType} onValueChange={setVisitType}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="inspection">Inspection</SelectItem>
-                    <SelectItem value="followup">Follow-Up</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Property - Shows first in both modes */}
               <div>
                <Label>Property *</Label>
@@ -798,6 +784,20 @@ export default function Inspections() {
                    ))}
                  </SelectContent>
                </Select>
+              </div>
+
+              {/* Visit Type Selector */}
+              <div>
+                <Label>Visit Type *</Label>
+                <Select value={visitType} onValueChange={setVisitType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inspection">Inspection</SelectItem>
+                    <SelectItem value="followup">Follow-Up</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {scheduleMode === 'search' && !editingId && (
