@@ -13,7 +13,7 @@ export default function StatsCard({
   iconBg = 'bg-slate-100'
 }) {
   return (
-    <Card className={`p-5 ${className}`}>
+    <Card className={`p-5 h-full flex flex-col justify-between ${className}`}>
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm font-medium text-slate-500">{title}</p>
