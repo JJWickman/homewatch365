@@ -675,6 +675,49 @@ export default function FollowUps() {
         </DialogContent>
       </Dialog>
 
+      {/* Reassign Dialog */}
+      <Dialog open={showReassignDialog} onOpenChange={setShowReassignDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reassign Follow-Up</DialogTitle>
+            <DialogDescription>
+              {reassignItem && `Reassign "${reassignItem.title}" to another team member`}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Assign To</Label>
+              <Select value={reassignTo} onValueChange={setReassignTo}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select staff member" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={null}>Unassigned</SelectItem>
+                  {staff.filter(m => m.role === 'field_inspector' || m.role === 'dispatcher' || m.role === 'administrator').map((member) => (
+                    <SelectItem key={member.id} value={member.user_email}>
+                      {member.user_name || member.user_email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReassignDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveReassign}
+              className="bg-slate-900 hover:bg-slate-800"
+            >
+              Reassign
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Contractor Dialog */}
       <Dialog open={showContractorDialog} onOpenChange={setShowContractorDialog}>
         <DialogContent className="max-w-md">
