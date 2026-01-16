@@ -26,6 +26,8 @@ export default function MobileInspectionView({
   saveProgress
 }) {
   const [expandedCategory, setExpandedCategory] = useState(null);
+  const [customItems, setCustomItems] = useState([]);
+  const [newCustomName, setNewCustomName] = useState('');
 
   const updateCategory = (categoryId, field, value) => {
     setCategories(prev => 
