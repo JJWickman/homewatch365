@@ -40,6 +40,7 @@ export default function InspectionDetail() {
   const [loading, setLoading] = useState(true);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [staff, setStaff] = useState([]);
+  const [editingDate, setEditingDate] = useState(false);
   const [editData, setEditData] = useState({
     scheduled_date: '',
     scheduled_time: '',
@@ -283,11 +284,43 @@ Your Property Management Team
                 <span className="text-slate-500">Type</span>
                 <StatusBadge status={inspection.type} />
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-slate-500">Scheduled</span>
-                <span className="font-medium">
-                  {format(new Date(inspection.scheduled_date), 'MMM d, yyyy')}
-                </span>
+                {editingDate ? (
+                  <Input
+                    type="date"
+                    value={editData.scheduled_date}
+                    onChange={(e) => setEditData(prev => ({ ...prev, scheduled_date: e.target.value }))}
+                    onBlur={async () => {
+                      if (editData.scheduled_date !== inspection.scheduled_date) {
+                        setUpdating(true);
+                        try {
+                          await base44.entities.Inspection.update(inspection.id, {
+                            scheduled_date: editData.scheduled_date
+                          });
+                          setInspection(prev => ({ ...prev, scheduled_date: editData.scheduled_date }));
+                        } catch (error) {
+                          console.error('Error updating date:', error);
+                          setEditData(prev => ({ ...prev, scheduled_date: inspection.scheduled_date }));
+                        } finally {
+                          setUpdating(false);
+                          setEditingDate(false);
+                        }
+                      } else {
+                        setEditingDate(false);
+                      }
+                    }}
+                    autoFocus
+                    className="w-40"
+                  />
+                ) : (
+                  <button
+                    onClick={() => setEditingDate(true)}
+                    className="font-medium hover:bg-slate-100 px-2 py-1 rounded transition-colors"
+                  >
+                    {format(new Date(inspection.scheduled_date), 'MMM d, yyyy')}
+                  </button>
+                )}
               </div>
               {inspection.scheduled_time && (
                 <div className="flex justify-between">
