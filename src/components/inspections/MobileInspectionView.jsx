@@ -96,6 +96,7 @@ export default function MobileInspectionView({
 
       {/* Categories */}
       <div className="space-y-2">
+        {/* Standard Categories */}
         {categories.map((category) => {
           const hasContent = category.notes || category.photos.length > 0;
           const isExpanded = expandedCategory === category.id;
