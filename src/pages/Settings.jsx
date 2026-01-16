@@ -367,6 +367,9 @@ ${company.name}
           <TabsTrigger value="company">Company</TabsTrigger>
           <TabsTrigger value="team">Team</TabsTrigger>
           <TabsTrigger value="branding">Branding</TabsTrigger>
+          {userRole === 'owner' && (
+            <TabsTrigger value="admin">Admin Console</TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="profile">
@@ -956,6 +959,26 @@ ${company.name}
                   {saving ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="admin">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Admin Console
+              </CardTitle>
+              <CardDescription>Advanced system administration</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                onClick={() => navigate(createPageUrl('AdminConsole'))}
+                className="bg-slate-900 hover:bg-slate-800"
+              >
+                Open Admin Console
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
