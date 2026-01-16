@@ -141,14 +141,14 @@ export default function PropertyDetail() {
     );
   }
 
-  const completedInspections = inspections.filter(i => i.status === 'completed').length;
-  const pendingTasks = tasks.filter(t => t.status !== 'completed' && t.status !== 'cancelled').length;
+  const completedVisits = visits.filter(v => v.status === 'completed').length;
+  const pendingVisits = visits.filter(v => v.status !== 'completed' && v.status !== 'cancelled').length;
   
-  const tasksByStatus = {
-    completed: tasks.filter(t => t.status === 'completed'),
-    in_progress: tasks.filter(t => t.status === 'in_progress'),
-    open: tasks.filter(t => t.status === 'open'),
-    cancelled: tasks.filter(t => t.status === 'cancelled')
+  const filteredVisits = visits.filter(v => visitTypeFilter === 'all' || v.visit_type === visitTypeFilter);
+  
+  const visitsByType = {
+    inspection: filteredVisits.filter(v => v.visit_type === 'inspection'),
+    followup: filteredVisits.filter(v => v.visit_type === 'followup')
   };
 
   const getTaskStatusIcon = (status) => {
