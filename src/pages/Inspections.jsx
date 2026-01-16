@@ -766,40 +766,42 @@ export default function Inspections() {
            )}
 
            <div className="space-y-4 py-4">
-             {/* Visit Type Selector */}
-             <div>
-               <Label>Visit Type *</Label>
-               <Select value={visitType} onValueChange={setVisitType}>
+              {/* Visit Type Selector */}
+              <div>
+                <Label>Visit Type *</Label>
+                <Select value={visitType} onValueChange={setVisitType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inspection">Inspection</SelectItem>
+                    <SelectItem value="followup">Follow-Up</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Property - Shows first in both modes */}
+              <div>
+               <Label>Property *</Label>
+               <Select
+                 value={newVisit.property_id}
+                 onValueChange={(value) => setNewVisit(prev => ({ ...prev, property_id: value }))}
+               >
                  <SelectTrigger>
-                   <SelectValue />
+                   <SelectValue placeholder="Select property" />
                  </SelectTrigger>
                  <SelectContent>
-                   <SelectItem value="inspection">Inspection</SelectItem>
-                   <SelectItem value="followup">Follow-Up</SelectItem>
+                   {properties.map((property) => (
+                     <SelectItem key={property.id} value={property.id}>
+                       {property.name || property.address}
+                     </SelectItem>
+                   ))}
                  </SelectContent>
                </Select>
-             </div>
-             <div>
-              <Label>Property *</Label>
-              <Select
-                value={newVisit.property_id}
-                onValueChange={(value) => setNewVisit(prev => ({ ...prev, property_id: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select property" />
-                </SelectTrigger>
-                <SelectContent>
-                  {properties.map((property) => (
-                    <SelectItem key={property.id} value={property.id}>
-                      {property.name || property.address}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-             </div>
+              </div>
 
-             {scheduleMode === 'search' && !editingId && (
-              <div className="space-y-4">
+              {scheduleMode === 'search' && !editingId && (
+               <div className="space-y-4">
                 {visitType === 'inspection' && (
                   <div>
                     <Label>Inspection Type *</Label>
