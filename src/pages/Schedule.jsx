@@ -303,24 +303,24 @@ export default function Schedule() {
       )}
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-4 mt-4 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded bg-blue-100 border border-blue-200" />
-          <span className="text-slate-600">Scheduled</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded bg-amber-100 border border-amber-200" />
-          <span className="text-slate-600">In Progress</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded bg-emerald-100 border border-emerald-200" />
-          <span className="text-slate-600">Completed</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded bg-purple-100 border border-purple-200" />
-          <span className="text-slate-600">Task</span>
-        </div>
-      </div>
+       <div className="flex flex-wrap gap-4 mt-4 text-sm">
+         <div className="flex items-center gap-2">
+           <div className="h-3 w-3 rounded bg-blue-100 border border-blue-200" />
+           <span className="text-slate-600">Scheduled Inspection</span>
+         </div>
+         <div className="flex items-center gap-2">
+           <div className="h-3 w-3 rounded bg-amber-100 border border-amber-200" />
+           <span className="text-slate-600">In Progress</span>
+         </div>
+         <div className="flex items-center gap-2">
+           <div className="h-3 w-3 rounded bg-emerald-100 border border-emerald-200" />
+           <span className="text-slate-600">Completed</span>
+         </div>
+         <div className="flex items-center gap-2">
+           <div className="h-3 w-3 rounded bg-purple-100 border border-purple-200" />
+           <span className="text-slate-600">Follow-Up</span>
+         </div>
+       </div>
     </div>
   );
 }
