@@ -36,6 +36,7 @@ const DEFAULT_CONTRACTOR_TYPES = [
 export default function AdminConsole() {
   const [companyId, setCompanyId] = useState(null);
   const [user, setUser] = useState(null);
+  const [companyMember, setCompanyMember] = useState(null);
   const [company, setCompany] = useState(null);
   const [customTypes, setCustomTypes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,14 +63,18 @@ export default function AdminConsole() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      // Check if user is admin
-      if (currentUser.role !== 'admin') {
-        return;
-      }
-
       const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
       if (members.length > 0) {
-        const cId = members[0].company_id;
+        const member = members[0];
+        setCompanyMember(member);
+        
+        // Check if user is owner (admin)
+        if (member.role !== 'owner') {
+          setLoading(false);
+          return;
+        }
+
+        const cId = member.company_id;
         setCompanyId(cId);
 
         const [customTypesData, companies] = await Promise.all([
@@ -219,8 +224,8 @@ export default function AdminConsole() {
     );
   }
 
-  // Only allow admins
-  if (!user || user.role !== 'admin') {
+  // Only allow owners (admins)
+  if (!companyMember || companyMember.role !== 'owner') {
     return (
       <div className="space-y-4">
         <PageHeader
@@ -233,7 +238,7 @@ export default function AdminConsole() {
               <AlertIcon className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium text-amber-900">Access Denied</p>
-                <p className="text-sm text-amber-800 mt-1">Only administrators can access this console.</p>
+                <p className="text-sm text-amber-800 mt-1">Only administrators (owners) can access this console.</p>
               </div>
             </div>
           </CardContent>
