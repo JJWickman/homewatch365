@@ -799,7 +799,7 @@ export default function Inspections() {
               <div>
                 <Button 
                   onClick={findAvailableSlots}
-                  disabled={!newVisit.property_id}
+                  disabled={!newVisit.property_id || !newVisit.assigned_to}
                   className="w-full bg-blue-600 hover:bg-blue-700"
                 >
                   Search Available Times
