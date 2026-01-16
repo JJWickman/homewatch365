@@ -79,7 +79,7 @@ export default function Settings() {
   const [inviteForm, setInviteForm] = useState({
     email: '',
     name: '',
-    role: 'technician'
+    role: 'field_inspector'
   });
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
@@ -111,7 +111,7 @@ export default function Settings() {
        if (members.length > 0) {
          setCompanyMember(members[0]);
          setUserFullName(members[0].user_name || '');
-         setUserRole(members[0].role || 'technician');
+         setUserRole(members[0].role || 'field_inspector');
          const companyId = members[0].company_id;
         
         const [companies, staffData, templatesData, customTypesData] = await Promise.all([
@@ -343,7 +343,7 @@ ${company.name}
     return email?.slice(0, 2).toUpperCase() || '??';
   };
 
-  const canManageStaff = companyMember?.role === 'owner' || companyMember?.can_manage_staff;
+  const canManageStaff = companyMember?.role === 'administrator' || companyMember?.role === 'dispatcher';
 
   const PRICING_TIERS = [
     {
@@ -522,13 +522,11 @@ ${company.name}
         <TabsList className="mb-6">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="company">Company</TabsTrigger>
-          <TabsTrigger value="team">Team</TabsTrigger>
-          {userRole === 'owner' && (
-            <>
-              <TabsTrigger value="billing">Billing</TabsTrigger>
-              <TabsTrigger value="admin">Admin Console</TabsTrigger>
-            </>
+          {(companyMember?.role === 'administrator' || companyMember?.role === 'dispatcher') && (
+            <TabsTrigger value="team">Team</TabsTrigger>
           )}
+          {companyMember?.is_owner && <TabsTrigger value="billing">Billing</TabsTrigger>}
+          {companyMember?.role === 'administrator' && <TabsTrigger value="admin">Admin</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="profile">
@@ -578,12 +576,21 @@ ${company.name}
                 </div>
               </div>
               <div className="border-t pt-4">
-                {userRole === 'owner' && (
+                {companyMember?.is_owner && (
+                  <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-3">
+                    <Shield className="h-5 w-5 text-amber-600 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold text-amber-900">Company Owner</p>
+                      <p className="text-sm text-amber-700">You are the owner of this company and have billing access</p>
+                    </div>
+                  </div>
+                )}
+                {companyMember?.role === 'administrator' && (
                   <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-3">
                     <Shield className="h-5 w-5 text-blue-600 flex-shrink-0" />
                     <div>
                       <p className="font-semibold text-blue-900">Administrator</p>
-                      <p className="text-sm text-blue-700">You have full administrative access to this company</p>
+                      <p className="text-sm text-blue-700">You have full administrative access to manage team and settings</p>
                     </div>
                   </div>
                 )}
@@ -620,23 +627,15 @@ ${company.name}
                     className="mt-1"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="user-role">Security Role</Label>
-                  <select
-                    id="user-role"
-                    value={userRole}
-                    onChange={(e) => setUserRole(e.target.value)}
-                    className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
-                  >
-                    <option value="technician">Technician (View only)</option>
-                    <option value="manager">Manager (Can manage clients & staff)</option>
-                    <option value="owner">Owner (Full administrative access)</option>
-                  </select>
-                </div>
                   {companyMember && (
                     <div>
                       <Label className="text-sm text-slate-500">Role</Label>
-                      <p className="font-medium capitalize">{companyMember.role}</p>
+                      <p className="font-medium capitalize">
+                        {companyMember.role === 'field_inspector' ? 'Field Inspector' : 
+                         companyMember.role === 'dispatcher' ? 'Dispatcher/Manager' : 
+                         'Administrator'}
+                        {companyMember.is_owner && <span className="ml-2 text-amber-600">(Owner)</span>}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -955,10 +954,17 @@ ${company.name}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                       {member.role === 'owner' && (
+                       {member.is_owner && (
+                         <Shield className="h-5 w-5 text-amber-600" title="Company Owner" />
+                       )}
+                       {member.role === 'administrator' && (
                          <Shield className="h-5 w-5 text-blue-600" title="Administrator" />
                        )}
-                       <Badge variant="outline" className="capitalize">{member.role}</Badge>
+                       <Badge variant="outline" className="capitalize">
+                         {member.role === 'field_inspector' ? 'Field Inspector' : 
+                          member.role === 'dispatcher' ? 'Dispatcher/Manager' : 
+                          'Administrator'}
+                       </Badge>
                        {canManageStaff && member.user_email !== companyMember?.user_email && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -1392,9 +1398,9 @@ ${company.name}
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="technician">Technician</SelectItem>
-                  <SelectItem value="manager">Manager</SelectItem>
-                  <SelectItem value="owner">Administrator</SelectItem>
+                  <SelectItem value="field_inspector">Field Inspector</SelectItem>
+                  <SelectItem value="dispatcher">Dispatcher/Manager</SelectItem>
+                  <SelectItem value="administrator">Administrator</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1452,9 +1458,9 @@ ${company.name}
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="technician">Technician</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="owner">Administrator</SelectItem>
+                    <SelectItem value="field_inspector">Field Inspector</SelectItem>
+                    <SelectItem value="dispatcher">Dispatcher/Manager</SelectItem>
+                    <SelectItem value="administrator">Administrator</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
