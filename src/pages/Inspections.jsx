@@ -701,10 +701,10 @@ export default function Inspections() {
             {visitType === 'inspection' ? (
                <>
                  <div>
-                   <Label>Type</Label>
+                   <Label>Inspection Type</Label>
                    <Select
-                     value={newVisit.type}
-                     onValueChange={(value) => setNewVisit(prev => ({ ...prev, type: value, template_id: !['other', 'custom_client_request', 'drop_in'].includes(value) ? prev.template_id : '' }))}
+                     value={newVisit.inspection_type}
+                     onValueChange={(value) => setNewVisit(prev => ({ ...prev, inspection_type: value, template_id: !['other', 'custom_client_request', 'drop_in'].includes(value) ? prev.template_id : '' }))}
                    >
                      <SelectTrigger>
                        <SelectValue />
@@ -720,7 +720,7 @@ export default function Inspections() {
                    </Select>
                  </div>
 
-                 {newVisit.type === 'other' && (
+                 {newVisit.inspection_type === 'other' && (
                    <div className="space-y-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                      <div>
                        <Label>Inspection Name</Label>
