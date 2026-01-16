@@ -70,6 +70,7 @@ export default function FollowUps() {
   const [activeTab, setActiveTab] = useState('all');
   
   const [showNewDialog, setShowNewDialog] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [newItem, setNewItem] = useState({
     title: '',
     description: '',
@@ -77,9 +78,13 @@ export default function FollowUps() {
     contractor_id: '',
     priority: 'medium',
     type: 'issue',
+    follow_up_category: 'general',
     due_date: format(new Date(), 'yyyy-MM-dd'),
     assigned_to: ''
   });
+  const [showAssignmentDialog, setShowAssignmentDialog] = useState(false);
+  const [showContractorDialog, setShowContractorDialog] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -101,6 +106,7 @@ export default function FollowUps() {
   const loadData = async () => {
     try {
       const user = await base44.auth.me();
+      setCurrentUser(user);
       const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
       
       if (members.length > 0) {
@@ -144,6 +150,22 @@ export default function FollowUps() {
     return matchesSearch && matchesStatus && matchesType && matchesPriority && matchesTab;
   });
 
+  const handleCategoryChange = (category) => {
+    setNewItem(prev => ({ ...prev, follow_up_category: category }));
+    
+    if (category === 'general') {
+      setNewItem(prev => ({ 
+        ...prev, 
+        assigned_to: currentUser?.email || '',
+        follow_up_category: category
+      }));
+    } else if (category === 'urgent_issue') {
+      setShowAssignmentDialog(true);
+    } else if (category === 'contractor_needed') {
+      setShowContractorDialog(true);
+    }
+  };
+
   const handleCreate = async () => {
     if (!companyId || !newItem.title) return;
 
@@ -159,6 +181,7 @@ export default function FollowUps() {
       description: newItem.description,
       priority: newItem.priority,
       type: newItem.type,
+      follow_up_category: newItem.follow_up_category,
       due_date: newItem.due_date || null,
       assigned_to: newItem.assigned_to || null,
       assigned_to_name: staffMember?.user_name || null,
@@ -167,6 +190,8 @@ export default function FollowUps() {
 
     await base44.entities.FollowUp.create(data);
     setShowNewDialog(false);
+    setShowAssignmentDialog(false);
+    setShowContractorDialog(false);
     setNewItem({
       title: '',
       description: '',
@@ -174,6 +199,7 @@ export default function FollowUps() {
       contractor_id: '',
       priority: 'medium',
       type: 'issue',
+      follow_up_category: 'general',
       due_date: format(new Date(), 'yyyy-MM-dd'),
       assigned_to: ''
     });
@@ -408,6 +434,23 @@ export default function FollowUps() {
           
           <div className="space-y-4 py-4">
             <div>
+              <Label>Follow-Up Category *</Label>
+              <Select
+                value={newItem.follow_up_category}
+                onValueChange={handleCategoryChange}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">General</SelectItem>
+                  <SelectItem value="urgent_issue">Urgent Issue</SelectItem>
+                  <SelectItem value="contractor_needed">Contractor Needed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
               <Label>Type *</Label>
               <Select
                 value={newItem.type}
@@ -518,24 +561,26 @@ export default function FollowUps() {
               </div>
             )}
 
-            <div>
-              <Label>Assign To</Label>
-              <Select
-                value={newItem.assigned_to}
-                onValueChange={(value) => setNewItem(prev => ({ ...prev, assigned_to: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select staff member" />
-                </SelectTrigger>
-                <SelectContent>
-                  {staff.map((member) => (
-                    <SelectItem key={member.id} value={member.user_email}>
-                      {member.user_name || member.user_email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {newItem.follow_up_category !== 'general' && (
+              <div>
+                <Label>Assign To</Label>
+                <Select
+                  value={newItem.assigned_to}
+                  onValueChange={(value) => setNewItem(prev => ({ ...prev, assigned_to: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select staff member" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {staff.map((member) => (
+                      <SelectItem key={member.id} value={member.user_email}>
+                        {member.user_name || member.user_email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <DialogFooter>
@@ -548,6 +593,146 @@ export default function FollowUps() {
               className="bg-slate-900 hover:bg-slate-800"
             >
               Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assignment Dialog for Urgent Issues */}
+      <Dialog open={showAssignmentDialog} onOpenChange={setShowAssignmentDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Assign Urgent Issue</DialogTitle>
+            <DialogDescription>
+              This is an urgent issue. Would you like to assign it to a manager or keep it for yourself?
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Assign To</Label>
+              <Select
+                value={newItem.assigned_to}
+                onValueChange={(value) => setNewItem(prev => ({ ...prev, assigned_to: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select assignee" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={currentUser?.email || ''}>
+                    Myself ({currentUser?.full_name})
+                  </SelectItem>
+                  {staff.filter(m => m.role === 'manager' || m.role === 'owner').map((member) => (
+                    <SelectItem key={member.id} value={member.user_email}>
+                      {member.user_name || member.user_email} ({member.role})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowAssignmentDialog(false);
+              setNewItem(prev => ({ ...prev, follow_up_category: 'general' }));
+            }}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => setShowAssignmentDialog(false)}
+              disabled={!newItem.assigned_to}
+              className="bg-slate-900 hover:bg-slate-800"
+            >
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Contractor Dialog */}
+      <Dialog open={showContractorDialog} onOpenChange={setShowContractorDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Contractor Needed</DialogTitle>
+            <DialogDescription>
+              {(() => {
+                const prop = getProperty(newItem.property_id);
+                const hasContractors = prop?.contractors && prop.contractors.length > 0;
+                return hasContractors 
+                  ? "Would you like to reach out to one of the assigned contractors?"
+                  : "No contractors are assigned to this property. Search for a contractor.";
+              })()}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {(() => {
+              const prop = getProperty(newItem.property_id);
+              const hasContractors = prop?.contractors && prop.contractors.length > 0;
+              
+              if (hasContractors) {
+                const propertyContractors = contractors.filter(c => prop.contractors.includes(c.id));
+                return (
+                  <div>
+                    <Label>Select Contractor</Label>
+                    <Select
+                      value={newItem.contractor_id}
+                      onValueChange={(value) => setNewItem(prev => ({ ...prev, contractor_id: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a contractor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {propertyContractors.map((contractor) => (
+                          <SelectItem key={contractor.id} value={contractor.id}>
+                            {contractor.business_name} - {contractor.contractor_type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                );
+              } else {
+                return (
+                  <div>
+                    <Label>Search & Assign Contractor</Label>
+                    <Select
+                      value={newItem.contractor_id}
+                      onValueChange={(value) => setNewItem(prev => ({ ...prev, contractor_id: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Search contractors" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {contractors.map((contractor) => (
+                          <SelectItem key={contractor.id} value={contractor.id}>
+                            {contractor.business_name} - {contractor.contractor_type?.replace('_', ' ')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-slate-500 mt-2">
+                      The contractor will be assigned to this follow-up only, not the property.
+                    </p>
+                  </div>
+                );
+              }
+            })()}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowContractorDialog(false);
+              setNewItem(prev => ({ ...prev, follow_up_category: 'general', contractor_id: '' }));
+            }}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => setShowContractorDialog(false)}
+              className="bg-slate-900 hover:bg-slate-800"
+            >
+              Continue
             </Button>
           </DialogFooter>
         </DialogContent>
