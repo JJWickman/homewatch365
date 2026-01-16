@@ -82,8 +82,8 @@ export default function MobileInspectionView({
         <p className="text-sm opacity-90">Progress</p>
         <div className="mt-2">
           <div className="flex justify-between items-center">
-            <span className="text-2xl font-bold">{categories.filter(c => c.notes || c.photos.length > 0).length}/{INSPECTION_CATEGORIES.length}</span>
-            <span className="text-xs opacity-75">categories reviewed</span>
+            <span className="text-2xl font-bold">{categories.filter(c => c.notes || c.photos.length > 0).length + (customItems.length > 0 ? 1 : 0)}/{INSPECTION_CATEGORIES.length + 1}</span>
+            <span className="text-xs opacity-75">sections reviewed</span>
           </div>
           <div className="mt-2 bg-white/20 rounded-full h-2">
             <div 
