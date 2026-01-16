@@ -539,15 +539,14 @@ export default function Inspections() {
                <SelectItem value="cancelled">Cancelled</SelectItem>
              </SelectContent>
            </Select>
-           <Select value={typeFilter} onValueChange={setTypeFilter}>
+           <Select value={visitTypeFilter} onValueChange={setVisitTypeFilter}>
              <SelectTrigger className="w-full sm:w-36">
-               <SelectValue placeholder="Type" />
+               <SelectValue placeholder="Visit Type" />
              </SelectTrigger>
              <SelectContent>
                <SelectItem value="all">All Types</SelectItem>
-               <SelectItem value="routine">Routine</SelectItem>
-               <SelectItem value="pre_storm">Pre-Storm</SelectItem>
-               <SelectItem value="post_storm">Post-Storm</SelectItem>
+               <SelectItem value="inspection">Inspection</SelectItem>
+               <SelectItem value="followup">Follow-Up</SelectItem>
              </SelectContent>
            </Select>
            <Select value={assignedFilter} onValueChange={setAssignedFilter}>
