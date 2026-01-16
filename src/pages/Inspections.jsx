@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
@@ -55,10 +56,11 @@ export default function Inspections() {
   const [companyId, setCompanyId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   
-  // New inspection dialog
+  // New visit dialog (inspection or follow-up)
   const [showNewDialog, setShowNewDialog] = useState(false);
-  const [editingInspectionId, setEditingInspectionId] = useState(null);
-  const [newInspection, setNewInspection] = useState({
+  const [visitType, setVisitType] = useState('inspection'); // 'inspection' or 'followup'
+  const [editingId, setEditingId] = useState(null);
+  const [newVisit, setNewVisit] = useState({
     property_id: '',
     template_id: '',
     scheduled_date: format(new Date(), 'yyyy-MM-dd'),
@@ -69,11 +71,19 @@ export default function Inspections() {
     recurrence_frequency: 'weekly',
     recurrence_end_date: '',
     custom_name: '',
-    inspection_details: ''
+    inspection_details: '',
+    followup_type: 'issue',
+    followup_category: 'general',
+    followup_priority: 'medium',
+    followup_title: '',
+    followup_description: '',
+    followup_due_date: format(new Date(), 'yyyy-MM-dd'),
+    followup_due_time: ''
     });
   const [creating, setCreating] = useState(false);
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const [scheduledInspectionToReplace, setScheduledInspectionToReplace] = useState(null);
+  const [followUpsData, setFollowUpsData] = useState([]);
 
   useEffect(() => {
     loadData();
@@ -457,12 +467,15 @@ export default function Inspections() {
   return (
     <div>
       <PageHeader
-        title="Inspections"
-        subtitle={`${inspections.length} total inspections`}
-        action={() => setShowNewDialog(true)}
-        actionLabel="Schedule Inspection"
-        actionClassName="bg-black text-white hover:bg-slate-900"
-      />
+         title="Inspections"
+         subtitle={`${inspections.length} total inspections`}
+         action={() => {
+           setVisitType('inspection');
+           setShowNewDialog(true);
+         }}
+         actionLabel="Schedule a Visit"
+         actionClassName="bg-black text-white hover:bg-slate-900"
+       />
 
       {/* Search */}
        <Card className="mb-6 p-4">
@@ -537,8 +550,11 @@ export default function Inspections() {
             icon={ClipboardCheck}
             title="No inspections yet"
             description="Schedule your first inspection to start monitoring properties."
-            action={() => setShowNewDialog(true)}
-            actionLabel="Schedule Inspection"
+            action={() => {
+              setVisitType('inspection');
+              setShowNewDialog(true);
+            }}
+            actionLabel="Schedule a Visit"
           />
         </Card>
       ) : (
@@ -551,40 +567,61 @@ export default function Inspections() {
         />
       )}
 
-      {/* New Inspection Dialog */}
-      <Dialog open={showNewDialog} onOpenChange={(open) => {
-        setShowNewDialog(open);
-        if (!open) {
-          setEditingInspectionId(null);
-          setNewInspection({
-            property_id: '',
-            template_id: '',
-            scheduled_date: format(new Date(), 'yyyy-MM-dd'),
-            scheduled_time: '',
-            type: 'routine',
-            assigned_to: '',
-            is_recurring: false,
-            recurrence_frequency: 'weekly',
-            recurrence_end_date: '',
-            custom_name: '',
-            inspection_details: ''
-          });
-        }
-      }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{editingInspectionId ? 'Edit Inspection' : 'Schedule Inspection'}</DialogTitle>
-            <DialogDescription>
-              {editingInspectionId ? 'Update inspection details' : 'Create a new inspection for a property'}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
+      {/* New Visit Dialog (Inspection or Follow-up) */}
+       <Dialog open={showNewDialog} onOpenChange={(open) => {
+         setShowNewDialog(open);
+         if (!open) {
+           setEditingId(null);
+           setVisitType('inspection');
+           setNewVisit({
+             property_id: '',
+             template_id: '',
+             scheduled_date: format(new Date(), 'yyyy-MM-dd'),
+             scheduled_time: '',
+             type: 'routine',
+             assigned_to: '',
+             is_recurring: false,
+             recurrence_frequency: 'weekly',
+             recurrence_end_date: '',
+             custom_name: '',
+             inspection_details: '',
+             followup_type: 'issue',
+             followup_category: 'general',
+             followup_priority: 'medium',
+             followup_title: '',
+             followup_description: '',
+             followup_due_date: format(new Date(), 'yyyy-MM-dd'),
+             followup_due_time: ''
+           });
+         }
+       }}>
+         <DialogContent className="max-w-md">
+           <DialogHeader>
+             <DialogTitle>{editingId ? 'Edit Visit' : 'Schedule a Visit'}</DialogTitle>
+             <DialogDescription>
+               {editingId ? 'Update visit details' : 'Create a new inspection or follow-up'}
+             </DialogDescription>
+           </DialogHeader>
+
+           <div className="space-y-4 py-4">
+             {/* Visit Type Selector */}
+             <div>
+               <Label>Visit Type *</Label>
+               <Select value={visitType} onValueChange={setVisitType}>
+                 <SelectTrigger>
+                   <SelectValue />
+                 </SelectTrigger>
+                 <SelectContent>
+                   <SelectItem value="inspection">Inspection</SelectItem>
+                   <SelectItem value="followup">Follow-Up</SelectItem>
+                 </SelectContent>
+               </Select>
+             </div>
             <div>
               <Label>Property *</Label>
               <Select
-                value={newInspection.property_id}
-                onValueChange={(value) => setNewInspection(prev => ({ ...prev, property_id: value }))}
+                value={newVisit.property_id}
+                onValueChange={(value) => setNewVisit(prev => ({ ...prev, property_id: value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select property" />
@@ -599,181 +636,246 @@ export default function Inspections() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Date *</Label>
-                <Input
-                  type="date"
-                  value={newInspection.scheduled_date}
-                  onChange={(e) => setNewInspection(prev => ({ ...prev, scheduled_date: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label>Time</Label>
-                <Input
-                  type="time"
-                  value={newInspection.scheduled_time}
-                  onChange={(e) => setNewInspection(prev => ({ ...prev, scheduled_time: e.target.value }))}
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label>Type</Label>
-              <Select
-                value={newInspection.type}
-                onValueChange={(value) => setNewInspection(prev => ({ ...prev, type: value, template_id: !['other', 'custom_client_request', 'drop_in'].includes(value) ? prev.template_id : '' }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="routine">Routine</SelectItem>
-                  <SelectItem value="pre_storm">Pre-Storm</SelectItem>
-                  <SelectItem value="post_storm">Post-Storm</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                  <SelectItem value="custom_client_request">Custom Client Request</SelectItem>
-                  <SelectItem value="drop_in">Drop-In</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {newInspection.type === 'other' && (
-              <div className="space-y-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            {visitType === 'inspection' ? (
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Inspection Name</Label>
-                  <Input
-                    placeholder="e.g., Annual Maintenance Check"
-                    value={newInspection.custom_name}
-                    onChange={(e) => setNewInspection(prev => ({ ...prev, custom_name: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label>What was inspected?</Label>
-                  <Textarea
-                    placeholder="Describe what was inspected..."
-                    value={newInspection.inspection_details}
-                    onChange={(e) => setNewInspection(prev => ({ ...prev, inspection_details: e.target.value }))}
-                    rows={2}
-                  />
-                </div>
-                <p className="text-xs text-blue-700">Photos can be added after creation</p>
-              </div>
-            )}
-
-            {newInspection.type === 'custom_client_request' && (
-              <div className="space-y-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                <div>
-                  <Label>What was requested to inspect?</Label>
-                  <Textarea
-                    placeholder="Describe what the client requested..."
-                    value={newInspection.inspection_details}
-                    onChange={(e) => setNewInspection(prev => ({ ...prev, inspection_details: e.target.value }))}
-                    rows={2}
-                  />
-                </div>
-                <p className="text-xs text-purple-700">Photos can be added after creation</p>
-              </div>
-            )}
-
-            {newInspection.type === 'drop_in' && (
-              <div className="space-y-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <div>
-                  <Label>Inspection Name</Label>
-                  <Input
-                    placeholder="e.g., Quick Property Check"
-                    value={newInspection.custom_name}
-                    onChange={(e) => setNewInspection(prev => ({ ...prev, custom_name: e.target.value }))}
-                  />
-                </div>
-                <p className="text-xs text-green-700">
-                  <strong>Drop-In:</strong> Unscheduled inspection during convenience visit. If a scheduled inspection exists for this week, you'll be offered to use this instead.
-                </p>
-              </div>
-            )}
-
-                  <div>
-                  <Label>Assign To</Label>
-              <Select
-                value={newInspection.assigned_to}
-                onValueChange={(value) => setNewInspection(prev => ({ ...prev, assigned_to: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select staff member" />
-                </SelectTrigger>
-                <SelectContent>
-                  {staff.filter(m => m.role === 'field_inspector' || m.role === 'dispatcher' || m.role === 'administrator').map((member) => (
-                    <SelectItem key={member.id} value={member.user_email}>
-                      {member.user_name || member.user_email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {templates.length > 0 && !['other', 'custom_client_request', 'drop_in'].includes(newInspection.type) && (
-              <div>
-                <Label>Template</Label>
-                <Select
-                  value={newInspection.template_id}
-                  onValueChange={(value) => setNewInspection(prev => ({ ...prev, template_id: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select template (optional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {templates.map((template) => (
-                      <SelectItem key={template.id} value={template.id}>
-                        {template.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {!['other', 'custom_client_request', 'drop_in'].includes(newInspection.type) && (
-              <div className="flex items-center justify-between py-2">
-                <div>
-                  <Label>Recurring Inspection</Label>
-                  <p className="text-sm text-slate-500">Schedule multiple inspections</p>
-                </div>
-                <Switch
-                  checked={newInspection.is_recurring}
-                  onCheckedChange={(checked) => setNewInspection(prev => ({ ...prev, is_recurring: checked }))}
-                />
-              </div>
-            )}
-
-            {newInspection.is_recurring && (
-              <div className="space-y-4 p-4 bg-slate-50 rounded-lg">
-                <div>
-                  <Label>Frequency</Label>
-                  <Select
-                    value={newInspection.recurrence_frequency}
-                    onValueChange={(value) => setNewInspection(prev => ({ ...prev, recurrence_frequency: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="bi_weekly">Bi-Weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>End Date</Label>
+                  <Label>Date *</Label>
                   <Input
                     type="date"
-                    value={newInspection.recurrence_end_date}
-                    min={newInspection.scheduled_date}
-                    onChange={(e) => setNewInspection(prev => ({ ...prev, recurrence_end_date: e.target.value }))}
+                    value={newVisit.scheduled_date}
+                    onChange={(e) => setNewVisit(prev => ({ ...prev, scheduled_date: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label>Time</Label>
+                  <Input
+                    type="time"
+                    value={newVisit.scheduled_time}
+                    onChange={(e) => setNewVisit(prev => ({ ...prev, scheduled_time: e.target.value }))}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Due Date *</Label>
+                  <Input
+                    type="date"
+                    value={newVisit.followup_due_date}
+                    onChange={(e) => setNewVisit(prev => ({ ...prev, followup_due_date: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label>Time</Label>
+                  <Input
+                    type="time"
+                    value={newVisit.followup_due_time}
+                    onChange={(e) => setNewVisit(prev => ({ ...prev, followup_due_time: e.target.value }))}
                   />
                 </div>
               </div>
             )}
+
+            {visitType === 'inspection' ? (
+               <div>
+                 <Label>Type</Label>
+                 <Select
+                   value={newVisit.type}
+                   onValueChange={(value) => setNewVisit(prev => ({ ...prev, type: value, template_id: !['other', 'custom_client_request', 'drop_in'].includes(value) ? prev.template_id : '' }))}
+                 >
+                   <SelectTrigger>
+                     <SelectValue />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="routine">Routine</SelectItem>
+                     <SelectItem value="pre_storm">Pre-Storm</SelectItem>
+                     <SelectItem value="post_storm">Post-Storm</SelectItem>
+                     <SelectItem value="other">Other</SelectItem>
+                     <SelectItem value="custom_client_request">Custom Client Request</SelectItem>
+                     <SelectItem value="drop_in">Drop-In</SelectItem>
+                   </SelectContent>
+                 </Select>
+               </div>
+             ) : (
+               <div className="space-y-4">
+                 <div>
+                   <Label>Title *</Label>
+                   <Input
+                     placeholder="e.g., Fix roof leak"
+                     value={newVisit.followup_title}
+                     onChange={(e) => setNewVisit(prev => ({ ...prev, followup_title: e.target.value }))}
+                   />
+                 </div>
+                 <div>
+                   <Label>Priority</Label>
+                   <Select
+                     value={newVisit.followup_priority}
+                     onValueChange={(value) => setNewVisit(prev => ({ ...prev, followup_priority: value }))}
+                   >
+                     <SelectTrigger>
+                       <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="low">Low</SelectItem>
+                       <SelectItem value="medium">Medium</SelectItem>
+                       <SelectItem value="high">High</SelectItem>
+                       <SelectItem value="urgent">Urgent</SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
+               </div>
+             )}
+
+            {visitType === 'inspection' && (
+               <>
+                 {newVisit.type === 'other' && (
+                   <div className="space-y-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                     <div>
+                       <Label>Inspection Name</Label>
+                       <Input
+                         placeholder="e.g., Annual Maintenance Check"
+                         value={newVisit.custom_name}
+                         onChange={(e) => setNewVisit(prev => ({ ...prev, custom_name: e.target.value }))}
+                       />
+                     </div>
+                     <div>
+                       <Label>What was inspected?</Label>
+                       <Textarea
+                         placeholder="Describe what was inspected..."
+                         value={newVisit.inspection_details}
+                         onChange={(e) => setNewVisit(prev => ({ ...prev, inspection_details: e.target.value }))}
+                         rows={2}
+                       />
+                     </div>
+                     <p className="text-xs text-blue-700">Photos can be added after creation</p>
+                   </div>
+                 )}
+
+                 {newVisit.type === 'custom_client_request' && (
+                   <div className="space-y-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                     <div>
+                       <Label>What was requested to inspect?</Label>
+                       <Textarea
+                         placeholder="Describe what the client requested..."
+                         value={newVisit.inspection_details}
+                         onChange={(e) => setNewVisit(prev => ({ ...prev, inspection_details: e.target.value }))}
+                         rows={2}
+                       />
+                     </div>
+                     <p className="text-xs text-purple-700">Photos can be added after creation</p>
+                   </div>
+                 )}
+
+                 {newVisit.type === 'drop_in' && (
+                   <div className="space-y-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                     <div>
+                       <Label>Inspection Name</Label>
+                       <Input
+                         placeholder="e.g., Quick Property Check"
+                         value={newVisit.custom_name}
+                         onChange={(e) => setNewVisit(prev => ({ ...prev, custom_name: e.target.value }))}
+                       />
+                     </div>
+                     <p className="text-xs text-green-700">
+                       <strong>Drop-In:</strong> Unscheduled inspection during convenience visit. If a scheduled inspection exists for this week, you'll be offered to use this instead.
+                     </p>
+                   </div>
+                 )}
+               </>
+             ) : (
+               <div>
+                 <Label>Description</Label>
+                 <Textarea
+                   placeholder="Describe the follow-up details..."
+                   value={newVisit.followup_description}
+                   onChange={(e) => setNewVisit(prev => ({ ...prev, followup_description: e.target.value }))}
+                   rows={2}
+                 />
+               </div>
+             )}
+
+                  <div>
+                    <Label>Assign To</Label>
+                    <Select
+                      value={newVisit.assigned_to}
+                      onValueChange={(value) => setNewVisit(prev => ({ ...prev, assigned_to: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select staff member" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {staff.filter(m => m.role === 'field_inspector' || m.role === 'dispatcher' || m.role === 'administrator').map((member) => (
+                          <SelectItem key={member.id} value={member.user_email}>
+                            {member.user_name || member.user_email}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {visitType === 'inspection' && templates.length > 0 && !['other', 'custom_client_request', 'drop_in'].includes(newVisit.type) && (
+                    <div>
+                      <Label>Template</Label>
+                      <Select
+                        value={newVisit.template_id}
+                        onValueChange={(value) => setNewVisit(prev => ({ ...prev, template_id: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select template (optional)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {templates.map((template) => (
+                            <SelectItem key={template.id} value={template.id}>
+                              {template.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {visitType === 'inspection' && !['other', 'custom_client_request', 'drop_in'].includes(newVisit.type) && (
+                    <div className="flex items-center justify-between py-2">
+                      <div>
+                        <Label>Recurring Inspection</Label>
+                        <p className="text-sm text-slate-500">Schedule multiple inspections</p>
+                      </div>
+                      <Switch
+                        checked={newVisit.is_recurring}
+                        onCheckedChange={(checked) => setNewVisit(prev => ({ ...prev, is_recurring: checked }))}
+                      />
+                    </div>
+                  )}
+
+                  {visitType === 'inspection' && newVisit.is_recurring && (
+                    <div className="space-y-4 p-4 bg-slate-50 rounded-lg">
+                      <div>
+                        <Label>Frequency</Label>
+                        <Select
+                          value={newVisit.recurrence_frequency}
+                          onValueChange={(value) => setNewVisit(prev => ({ ...prev, recurrence_frequency: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                            <SelectItem value="bi_weekly">Bi-Weekly</SelectItem>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>End Date</Label>
+                        <Input
+                          type="date"
+                          value={newVisit.recurrence_end_date}
+                          min={newVisit.scheduled_date}
+                          onChange={(e) => setNewVisit(prev => ({ ...prev, recurrence_end_date: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                  )}
           </div>
 
           <DialogFooter>
@@ -782,10 +884,18 @@ export default function Inspections() {
             </Button>
             <Button 
               onClick={handleCreateInspection}
-              disabled={!newInspection.property_id || !newInspection.scheduled_date || creating || (newInspection.is_recurring && !newInspection.recurrence_end_date) || (['other', 'custom_client_request'].includes(newInspection.type) && !newInspection.inspection_details)}
+              disabled={
+                !newVisit.property_id ||
+                (visitType === 'inspection' && !newVisit.scheduled_date) ||
+                (visitType === 'followup' && !newVisit.followup_due_date) ||
+                (visitType === 'followup' && !newVisit.followup_title) ||
+                creating ||
+                (visitType === 'inspection' && newVisit.is_recurring && !newVisit.recurrence_end_date) ||
+                (visitType === 'inspection' && ['other', 'custom_client_request'].includes(newVisit.type) && !newVisit.inspection_details)
+              }
               className="bg-slate-900 hover:bg-slate-800"
             >
-              {creating ? (editingInspectionId ? 'Updating...' : 'Scheduling...') : (editingInspectionId ? 'Update' : 'Schedule')}
+              {creating ? (editingId ? 'Updating...' : 'Creating...') : (editingId ? 'Update' : 'Create')}
             </Button>
           </DialogFooter>
         </DialogContent>
