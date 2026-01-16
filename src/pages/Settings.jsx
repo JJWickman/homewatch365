@@ -876,23 +876,39 @@ ${company.name}
                       <Building className="h-8 w-8 text-slate-300" />
                     )}
                   </div>
-                  <div>
-                    <Label htmlFor="logo-upload" className="cursor-pointer">
-                      <Button variant="outline" size="sm" disabled={uploading} asChild>
-                        <span>
-                          <Upload className="h-4 w-4 mr-2" />
-                          {uploading ? 'Uploading...' : 'Upload Logo'}
-                        </span>
-                      </Button>
-                    </Label>
-                    <input
-                      id="logo-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoUpload}
-                      className="hidden"
-                    />
-                    <p className="text-xs text-slate-500 mt-2">Recommended: 200x200px PNG or SVG</p>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Label htmlFor="logo-upload" className="cursor-pointer">
+                        <Button variant="outline" size="sm" disabled={uploading} asChild>
+                          <span>
+                            <Upload className="h-4 w-4 mr-2" />
+                            {uploading ? 'Uploading...' : companyForm.logo_url ? 'Replace Logo' : 'Upload Logo'}
+                          </span>
+                        </Button>
+                      </Label>
+                      <input
+                        id="logo-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                      />
+                      {companyForm.logo_url && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setCompanyForm(prev => ({ 
+                            ...prev, 
+                            logo_url: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/7e2dc0976_EstateIQFavIcon.png' 
+                          }))}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500">Recommended: 200x200px PNG or SVG</p>
                   </div>
                 </div>
               </div>
