@@ -5,7 +5,8 @@ import { createPageUrl } from '@/utils';
 import { 
   Settings as SettingsIcon, Building, Users, FileText, 
   Palette, Save, Upload, Plus, Trash2, User, Mail, Edit2, MoreVertical, Camera,
-  Calendar, Copy, Check, ExternalLink, Link2, Unlink, Shield, Edit, AlertCircle as AlertIcon, Loader2
+  Calendar, Copy, Check, ExternalLink, Link2, Unlink, Shield, Edit, AlertCircle as AlertIcon, Loader2,
+  CreditCard, TrendingUp, Briefcase, Zap, X
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,6 +89,7 @@ export default function Settings() {
   const [showNewTypeDialog, setShowNewTypeDialog] = useState(false);
   const [editingTypeId, setEditingTypeId] = useState(null);
   const [typeFormData, setTypeFormData] = useState({ name: '', slug: '', description: '', is_active: true });
+  const [billingCycle, setBillingCycle] = useState('monthly');
 
   useEffect(() => {
     loadData();
@@ -338,6 +340,61 @@ ${company.name}
   };
 
   const canManageStaff = companyMember?.role === 'owner' || companyMember?.can_manage_staff;
+
+  const PRICING_TIERS = [
+    {
+      id: 'solopreneur',
+      name: 'Solopreneur',
+      icon: Users,
+      monthlyPrice: 99,
+      annualPrice: 79,
+      features: ['Unlimited Clients', 'Unlimited Properties', 'Inspections & Scheduling', 'Follow-ups & Tasks'],
+      limits: { users: 1, admins: 1 }
+    },
+    {
+      id: 'growth',
+      name: 'Growth',
+      icon: TrendingUp,
+      monthlyPrice: 199,
+      annualPrice: 159,
+      popular: true,
+      features: ['Everything in Solopreneur', 'Up to 5 Field Inspectors', '1 Admin User', 'Team Collaboration'],
+      limits: { users: 5, admins: 1 }
+    },
+    {
+      id: 'professional',
+      name: 'Professional',
+      icon: Briefcase,
+      monthlyPrice: 249,
+      annualPrice: 199,
+      features: ['Everything in Growth', 'Up to 10 Team Members', '2 Admin Users', 'Priority Support'],
+      limits: { users: 10, admins: 2 }
+    },
+    {
+      id: 'enterprise',
+      name: 'Enterprise',
+      icon: Shield,
+      monthlyPrice: 499,
+      annualPrice: 399,
+      features: ['Everything in Professional', 'Up to 50 Team Members', '5 Admin Users', 'Contractor Management', 'Marketing Tools'],
+      limits: { users: 50, admins: 5 }
+    }
+  ];
+
+  const handleSelectPlan = async (tierId) => {
+    if (!company) return;
+    
+    try {
+      await base44.entities.Company.update(company.id, {
+        subscription_plan: tierId,
+        subscription_status: 'active'
+      });
+      
+      setCompany({ ...company, subscription_plan: tierId, subscription_status: 'active' });
+    } catch (error) {
+      console.error('Error updating plan:', error);
+    }
+  };
   
   const DEFAULT_CONTRACTOR_TYPES = [
     'electrician', 'hvac', 'roofer', 'plumber', 'pool_service', 'landscaping', 
@@ -437,7 +494,10 @@ ${company.name}
           <TabsTrigger value="company">Company</TabsTrigger>
           <TabsTrigger value="team">Team</TabsTrigger>
           {userRole === 'owner' && (
-            <TabsTrigger value="admin">Admin Console</TabsTrigger>
+            <>
+              <TabsTrigger value="billing">Billing</TabsTrigger>
+              <TabsTrigger value="admin">Admin Console</TabsTrigger>
+            </>
           )}
         </TabsList>
 
@@ -902,7 +962,124 @@ ${company.name}
           </Card>
         </TabsContent>
 
+        <TabsContent value="billing" className="space-y-6">
+          {/* Current Plan */}
+          {company?.subscription_plan && (
+            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-slate-600">Current Plan</p>
+                    <p className="text-2xl font-bold capitalize text-slate-900">
+                      {PRICING_TIERS.find(t => t.id === company.subscription_plan)?.name || company.subscription_plan}
+                    </p>
+                  </div>
+                  <Badge className="bg-blue-600 text-white">
+                    {company.subscription_status === 'trial' ? 'Trial' : 'Active'}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
+          {/* Billing Cycle Toggle */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex justify-center">
+                <div className="inline-flex items-center rounded-lg border p-1">
+                  <button
+                    onClick={() => setBillingCycle('monthly')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      billingCycle === 'monthly'
+                        ? 'bg-slate-900 text-white'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Monthly
+                  </button>
+                  <button
+                    onClick={() => setBillingCycle('annual')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      billingCycle === 'annual'
+                        ? 'bg-slate-900 text-white'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Annual
+                    <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                      Save 20%
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Pricing Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {PRICING_TIERS.map((tier) => {
+              const TierIcon = tier.icon;
+              const price = billingCycle === 'monthly' ? tier.monthlyPrice : tier.annualPrice;
+              const isCurrentPlan = company?.subscription_plan === tier.id;
+              
+              return (
+                <Card 
+                  key={tier.id}
+                  className={`relative ${tier.popular ? 'border-2 border-blue-500 shadow-lg' : ''} ${isCurrentPlan ? 'ring-2 ring-green-500' : ''}`}
+                >
+                  {tier.popular && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <Badge className="bg-blue-600 text-white">Most Popular</Badge>
+                    </div>
+                  )}
+                  {isCurrentPlan && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <Badge className="bg-green-600 text-white">Current Plan</Badge>
+                    </div>
+                  )}
+                  
+                  <CardHeader className="text-center">
+                    <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center">
+                      <TierIcon className="h-6 w-6 text-slate-700" />
+                    </div>
+                    <CardTitle className="text-xl">{tier.name}</CardTitle>
+                    
+                    <div className="mt-4">
+                      <div className="flex items-baseline justify-center">
+                        <span className="text-4xl font-bold">${price}</span>
+                        <span className="text-slate-500 ml-2">/mo</span>
+                      </div>
+                      {billingCycle === 'annual' && (
+                        <p className="text-sm text-green-600 mt-2">
+                          Save ${(tier.monthlyPrice * 12) - (tier.annualPrice * 12)}/year
+                        </p>
+                      )}
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent>
+                    <ul className="space-y-3 mb-6">
+                      {tier.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm">
+                          <Check className="h-5 w-5 text-green-600 shrink-0" />
+                          <span className="text-slate-700">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    
+                    <Button 
+                      onClick={() => handleSelectPlan(tier.id)}
+                      disabled={isCurrentPlan}
+                      className={`w-full ${tier.popular ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-900 hover:bg-slate-800'}`}
+                    >
+                      {isCurrentPlan ? 'Current Plan' : 'Select Plan'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </TabsContent>
 
         <TabsContent value="admin" className="space-y-6">
           {/* Contractor Types */}
