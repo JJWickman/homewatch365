@@ -24,7 +24,18 @@ import {
 import { Label } from "@/components/ui/label";
 import StandardInspectionView from '@/components/inspections/StandardInspectionView';
 import FlexibleInspectionView from '@/components/inspections/FlexibleInspectionView';
+import MobileInspectionView from '@/components/inspections/MobileInspectionView';
 import StatusBadge from '@/components/shared/StatusBadge';
+
+const INSPECTION_CATEGORIES = [
+  { id: 'plumbing', name: 'Plumbing', section: 'Plumbing' },
+  { id: 'electrical', name: 'Electrical', section: 'Electrical' },
+  { id: 'hvac', name: 'HVAC', section: 'HVAC' },
+  { id: 'roof', name: 'Roof', section: 'Roof' },
+  { id: 'appliances', name: 'Appliances', section: 'Appliances' },
+  { id: 'landscape', name: 'Landscape', section: 'Landscape' },
+  { id: 'lawn', name: 'Lawn', section: 'Lawn' }
+];
 
 // Default checklist if no template
 const DEFAULT_CHECKLIST = [
@@ -82,9 +93,11 @@ export default function InspectionFlow() {
   const [summaryNotes, setSummaryNotes] = useState('');
   const [overallStatus, setOverallStatus] = useState('all_clear');
   const [photoUrls, setPhotoUrls] = useState([]);
+  const [mobileCategories, setMobileCategories] = useState([]);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   
   const isFlexibleType = inspection && ['other', 'custom_client_request', 'drop_in'].includes(inspection.type);
+  const isStandardType = inspection && ['standard', 'pre_storm', 'post_storm'].includes(inspection.type);
 
   useEffect(() => {
     loadInspection();
@@ -113,8 +126,16 @@ export default function InspectionFlow() {
          if (propertyData.length > 0) setProperty(propertyData[0]);
 
          const isFlexible = ['other', 'custom_client_request', 'drop_in'].includes(insp.type);
+         const isStandard = ['standard', 'pre_storm', 'post_storm'].includes(insp.type);
 
-         if (!isFlexible) {
+         if (isStandard) {
+           // Initialize mobile categories
+           setMobileCategories(INSPECTION_CATEGORIES.map(cat => ({
+             ...cat,
+             notes: '',
+             photos: []
+           })));
+         } else if (!isFlexible) {
            // Initialize checklist for standard inspection types
            if (insp.checklist_data && insp.checklist_data.length > 0) {
              setChecklist(insp.checklist_data);
@@ -172,38 +193,33 @@ export default function InspectionFlow() {
     setChecklist(newChecklist);
   };
 
-  const handlePhotoUpload = async (sectionIndex, itemIndex, e) => {
-    const file = e.target.files[0];
+  const handlePhotoUpload = async (sectionIndexOrCategoryId, itemIndex, e) => {
+    const file = e?.target?.files?.[0];
     if (!file) return;
     
     setUploading(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      if (isFlexibleType) {
+      
+      if (isStandardType) {
+        // For mobile categories, add to category photo list
+        setMobileCategories(prev =>
+          prev.map(cat =>
+            cat.id === sectionIndexOrCategoryId
+              ? { ...cat, photos: [...(cat.photos || []), file_url] }
+              : cat
+          )
+        );
+      } else if (isFlexibleType) {
         // For flexible types, add to general photo list
         setPhotoUrls([...photoUrls, file_url]);
       } else {
-        // For standard types, add to checklist item
+        // For complex checklist types, add to checklist item
         const newChecklist = [...checklist];
-        const currentPhotos = newChecklist[sectionIndex].items[itemIndex].photo_urls || [];
-        newChecklist[sectionIndex].items[itemIndex].photo_urls = [...currentPhotos, file_url];
+        const currentPhotos = newChecklist[sectionIndexOrCategoryId].items[itemIndex].photo_urls || [];
+        newChecklist[sectionIndexOrCategoryId].items[itemIndex].photo_urls = [...currentPhotos, file_url];
         setChecklist(newChecklist);
       }
-    } catch (error) {
-      console.error('Error uploading photo:', error);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleFlexiblePhotoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    setUploading(true);
-    try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setPhotoUrls([...photoUrls, file_url]);
     } catch (error) {
       console.error('Error uploading photo:', error);
     } finally {
@@ -216,7 +232,35 @@ export default function InspectionFlow() {
     
     setSaving(true);
     try {
-      if (isFlexibleType) {
+      if (isStandardType) {
+        // For standard types, build checklist from mobile categories and generate AI report
+        const checklistData = mobileCategories.map(cat => ({
+          section_name: cat.section,
+          items: [{
+            name: cat.name,
+            status: cat.notes || cat.photos.length > 0 ? 'checked' : '',
+            notes: cat.notes,
+            photo_urls: cat.photos,
+            flagged: false
+          }]
+        }));
+
+        const totalPhotos = mobileCategories.reduce((sum, cat) => sum + cat.photos.length, 0);
+
+        // Save inspection first
+        await base44.entities.Inspection.update(inspection.id, {
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+          checklist_data: checklistData,
+          photo_count: totalPhotos,
+          overall_status: overallStatus
+        });
+
+        // Generate AI report
+        await base44.functions.invoke('generateInspectionReport', {
+          inspection_id: inspection.id
+        });
+      } else if (isFlexibleType) {
         // For flexible types, save photos and notes
         await base44.entities.Inspection.update(inspection.id, {
           status: 'completed',
@@ -226,7 +270,7 @@ export default function InspectionFlow() {
           photo_count: photoUrls.length
         });
       } else {
-        // For standard types, save checklist and overall status
+        // For complex checklist types
         const photoCount = checklist.reduce((sum, section) => 
           sum + section.items.reduce((itemSum, item) => itemSum + (item.photo_urls?.length || 0), 0), 0);
         
@@ -240,7 +284,6 @@ export default function InspectionFlow() {
       navigate(createPageUrl('InspectionDetail') + `?id=${inspection.id}`);
     } catch (error) {
       console.error('Error saving:', error);
-    } finally {
       setSaving(false);
     }
   };
@@ -332,11 +375,21 @@ export default function InspectionFlow() {
 
       {/* Content */}
       <div className="px-4 py-6 lg:px-6">
-        {isFlexibleType ? (
+        {isStandardType ? (
+          <MobileInspectionView
+            inspection={inspection}
+            categories={mobileCategories}
+            setCategories={setMobileCategories}
+            handlePhotoUpload={handlePhotoUpload}
+            uploading={uploading}
+            saving={saving}
+            saveProgress={saveProgress}
+          />
+        ) : isFlexibleType ? (
           <FlexibleInspectionView
             inspection={inspection}
             photoUrls={photoUrls}
-            handlePhotoUpload={handleFlexiblePhotoUpload}
+            handlePhotoUpload={handlePhotoUpload}
             summaryNotes={summaryNotes}
             setSummaryNotes={setSummaryNotes}
             uploading={uploading}
@@ -355,8 +408,8 @@ export default function InspectionFlow() {
         )}
       </div>
 
-      {/* Complete Dialog for Standard Inspections */}
-      {!isFlexibleType && (
+      {/* Complete Dialog for Complex Checklist Inspections */}
+      {!isStandardType && !isFlexibleType && (
         <Dialog open={showCompleteDialog} onOpenChange={setShowCompleteDialog}>
           <DialogContent>
             <DialogHeader>
