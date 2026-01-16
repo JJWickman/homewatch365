@@ -59,6 +59,8 @@ export default function Inspections() {
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [visitType, setVisitType] = useState('inspection'); // 'inspection' or 'followup'
   const [editingId, setEditingId] = useState(null);
+  const [scheduleMode, setScheduleMode] = useState('manual'); // 'manual' or 'search'
+  const [searchResults, setSearchResults] = useState([]);
   const [newVisit, setNewVisit] = useState({
     property_id: '',
     template_id: '',
