@@ -483,7 +483,7 @@ export default function PropertyDetail() {
             <TabsList className="w-full justify-start mb-4">
               <TabsTrigger value="access">Access Info</TabsTrigger>
               <TabsTrigger value="inspections">Inspections</TabsTrigger>
-              <TabsTrigger value="tasks">Tasks</TabsTrigger>
+              <TabsTrigger value="tasks">Follow-Ups</TabsTrigger>
               <TabsTrigger value="contractors">Contractors</TabsTrigger>
               <TabsTrigger value="contacts">Contacts</TabsTrigger>
             </TabsList>
