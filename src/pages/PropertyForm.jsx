@@ -422,6 +422,41 @@ export default function PropertyForm() {
     }
   };
 
+  const handleEnrichPropertyData = async () => {
+    if (!formData.address || !formData.city || !formData.state) {
+      toast.error('Please fill in address, city, and state first');
+      return;
+    }
+
+    setEnrichingData(true);
+    try {
+      const response = await base44.functions.invoke('enrichPropertyData', {
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zip: formData.zip
+      });
+
+      if (response.data?.success) {
+        const enrichedData = response.data.data;
+        setFormData(prev => ({
+          ...prev,
+          bedrooms: enrichedData.bedrooms || prev.bedrooms,
+          bathrooms: enrichedData.bathrooms || prev.bathrooms,
+          square_feet: enrichedData.square_feet || prev.square_feet
+        }));
+        toast.success('Property details updated from public records');
+      } else {
+        toast.info('No additional property data found in public records');
+      }
+    } catch (error) {
+      console.error('Error enriching property data:', error);
+      toast.error('Failed to look up property details');
+    } finally {
+      setEnrichingData(false);
+    }
+  };
+
   const handleUseLocation = async () => {
     setGettingLocation(true);
     try {
