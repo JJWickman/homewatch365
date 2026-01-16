@@ -6,12 +6,29 @@ import { format } from 'date-fns';
 import { 
   ClipboardCheck, Building2, User, Calendar, Clock, 
   MapPin, Play, CheckCircle2, AlertTriangle, Camera,
-  FileText, Download, Send, Eye
+  FileText, Download, Send, Eye, Edit
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 
@@ -21,6 +38,15 @@ export default function InspectionDetail() {
   const [property, setProperty] = useState(null);
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [staff, setStaff] = useState([]);
+  const [editData, setEditData] = useState({
+    scheduled_date: '',
+    scheduled_time: '',
+    type: 'routine',
+    assigned_to: ''
+  });
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     loadInspection();
@@ -41,19 +67,50 @@ export default function InspectionDetail() {
       if (inspectionData.length > 0) {
         const insp = inspectionData[0];
         setInspection(insp);
+        setEditData({
+          scheduled_date: insp.scheduled_date,
+          scheduled_time: insp.scheduled_time || '',
+          type: insp.type,
+          assigned_to: insp.assigned_to || ''
+        });
         
-        const [propertyData, clientData] = await Promise.all([
+        const [propertyData, clientData, staffData] = await Promise.all([
           base44.entities.Property.filter({ id: insp.property_id }),
-          insp.client_id ? base44.entities.Client.filter({ id: insp.client_id }) : []
+          insp.client_id ? base44.entities.Client.filter({ id: insp.client_id }) : [],
+          base44.entities.CompanyMember.filter({ company_id: insp.company_id, is_active: true })
         ]);
         
         if (propertyData.length > 0) setProperty(propertyData[0]);
         if (clientData.length > 0) setClient(clientData[0]);
+        setStaff(staffData);
       }
     } catch (error) {
       console.error('Error loading inspection:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateInspection = async () => {
+    if (!inspection) return;
+    
+    setUpdating(true);
+    try {
+      const staffMember = staff.find(s => s.user_email === editData.assigned_to);
+      await base44.entities.Inspection.update(inspection.id, {
+        scheduled_date: editData.scheduled_date,
+        scheduled_time: editData.scheduled_time || null,
+        type: editData.type,
+        assigned_to: editData.assigned_to || null,
+        assigned_to_name: staffMember?.user_name || null
+      });
+      
+      setShowEditDialog(false);
+      loadInspection();
+    } catch (error) {
+      console.error('Error updating inspection:', error);
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -119,24 +176,32 @@ Your Property Management Team
         backLink="Inspections"
         backLabel="Back to Inspections"
       >
-        {inspection.status === 'scheduled' && (
-          <Button onClick={() => navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`)} className="bg-black text-white hover:bg-slate-900">
-            <Play className="h-4 w-4 mr-2" />
-            Start Inspection
-          </Button>
-        )}
-        {inspection.status === 'in_progress' && (
-          <Button onClick={() => navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`)} className="bg-black text-white hover:bg-slate-900">
-            <Play className="h-4 w-4 mr-2" />
-            Continue Inspection
-          </Button>
-        )}
-        {inspection.status === 'completed' && !inspection.client_notified && client && (
-          <Button onClick={handleNotifyClient}>
-            <Send className="h-4 w-4 mr-2" />
-            Notify Client
-          </Button>
-        )}
+        <div className="flex gap-3">
+          {inspection.status === 'scheduled' && (
+            <>
+              <Button variant="outline" onClick={() => setShowEditDialog(true)}>
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+              <Button onClick={() => navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`)} className="bg-black text-white hover:bg-slate-900">
+                <Play className="h-4 w-4 mr-2" />
+                Start Inspection
+              </Button>
+            </>
+          )}
+          {inspection.status === 'in_progress' && (
+            <Button onClick={() => navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`)} className="bg-black text-white hover:bg-slate-900">
+              <Play className="h-4 w-4 mr-2" />
+              Continue Inspection
+            </Button>
+          )}
+          {inspection.status === 'completed' && !inspection.client_notified && client && (
+            <Button onClick={handleNotifyClient}>
+              <Send className="h-4 w-4 mr-2" />
+              Notify Client
+            </Button>
+          )}
+        </div>
       </PageHeader>
 
       {/* Status Banner */}
@@ -480,6 +545,92 @@ Your Property Management Team
           </Tabs>
         </div>
       </div>
+
+      {/* Edit Inspection Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Inspection</DialogTitle>
+            <DialogDescription>
+              Update inspection details
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Date</Label>
+                <Input
+                  type="date"
+                  value={editData.scheduled_date}
+                  onChange={(e) => setEditData(prev => ({ ...prev, scheduled_date: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Time</Label>
+                <Input
+                  type="time"
+                  value={editData.scheduled_time}
+                  onChange={(e) => setEditData(prev => ({ ...prev, scheduled_time: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label>Type</Label>
+              <Select
+                value={editData.type}
+                onValueChange={(value) => setEditData(prev => ({ ...prev, type: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="routine">Routine</SelectItem>
+                  <SelectItem value="pre_storm">Pre-Storm</SelectItem>
+                  <SelectItem value="post_storm">Post-Storm</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="custom_client_request">Custom Client Request</SelectItem>
+                  <SelectItem value="drop_in">Drop-In</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Assign To</Label>
+              <Select
+                value={editData.assigned_to}
+                onValueChange={(value) => setEditData(prev => ({ ...prev, assigned_to: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select staff member" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={null}>Unassigned</SelectItem>
+                  {staff.map((member) => (
+                    <SelectItem key={member.id} value={member.user_email}>
+                      {member.user_name || member.user_email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)} disabled={updating}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleUpdateInspection}
+              disabled={updating || !editData.scheduled_date}
+              className="bg-slate-900 hover:bg-slate-800"
+            >
+              {updating ? 'Updating...' : 'Update'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
