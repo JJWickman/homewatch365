@@ -72,7 +72,7 @@ export default function Dashboard() {
       });
 
       const completedThisWeek = weekInspections.filter(i => i.status === 'completed').length;
-      const issuesFound = inspections.filter(i => i.overall_status === 'issues_found' || i.overall_status === 'urgent').length;
+      const issuesFound = followUps.filter(f => f.type === 'issue' && (f.priority === 'high' || f.priority === 'urgent')).length;
 
       setStats({
         totalClients: clients.length,
@@ -291,11 +291,11 @@ export default function Dashboard() {
             </div>
             <div className="flex-1">
               <p className="font-medium text-amber-900">
-                {stats.issuesFound} inspection{stats.issuesFound !== 1 ? 's' : ''} with issues found
+                {stats.issuesFound} high priority issue{stats.issuesFound !== 1 ? 's' : ''} require attention
               </p>
               <p className="text-sm text-amber-700">Review and address these issues as soon as possible.</p>
             </div>
-            <Link to={createPageUrl('FollowUps')}>
+            <Link to={createPageUrl('FollowUps') + '?type=issue&priority=high'}>
               <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100">
                 View Issues
               </Button>
