@@ -70,6 +70,7 @@ export default function PropertyForm() {
   const [previewImageUrl, setPreviewImageUrl] = useState(null);
   const [nearbyAddresses, setNearbyAddresses] = useState([]);
   const [showNearbyAddresses, setShowNearbyAddresses] = useState(false);
+  const [enrichingData, setEnrichingData] = useState(false);
   const [showCreateClientDialog, setShowCreateClientDialog] = useState(false);
   const [newClientData, setNewClientData] = useState({ first_name: '', last_name: '', email: '' });
   const [creatingClient, setCreatingClient] = useState(false);
@@ -691,34 +692,59 @@ export default function PropertyForm() {
                  </Select>
                </div>
              </div>
-             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-               <div>
-                 <Label htmlFor="bedrooms">Bedrooms</Label>
-                 <Input
-                   id="bedrooms"
-                   type="number"
-                   value={formData.bedrooms}
-                   onChange={(e) => handleChange('bedrooms', e.target.value)}
-                 />
+             <div className="space-y-3">
+               <div className="flex items-end gap-2">
+                 <Button
+                   type="button"
+                   variant="outline"
+                   size="sm"
+                   onClick={handleEnrichPropertyData}
+                   disabled={enrichingData || !formData.address || !formData.city || !formData.state}
+                   className="whitespace-nowrap"
+                 >
+                   {enrichingData ? (
+                     <>
+                       <Loader className="h-4 w-4 mr-2 animate-spin" />
+                       Looking up...
+                     </>
+                   ) : (
+                     <>
+                       <Building2 className="h-4 w-4 mr-2" />
+                       Auto-fill Details
+                     </>
+                   )}
+                 </Button>
+                 <p className="text-xs text-slate-500">Uses public property records</p>
                </div>
-               <div>
-                 <Label htmlFor="bathrooms">Bathrooms</Label>
-                 <Input
-                   id="bathrooms"
-                   type="number"
-                   step="0.5"
-                   value={formData.bathrooms}
-                   onChange={(e) => handleChange('bathrooms', e.target.value)}
-                 />
-               </div>
-               <div>
-                 <Label htmlFor="square_feet">Square Feet</Label>
-                 <Input
-                   id="square_feet"
-                   type="number"
-                   value={formData.square_feet}
-                   onChange={(e) => handleChange('square_feet', e.target.value)}
-                 />
+               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                 <div>
+                   <Label htmlFor="bedrooms">Bedrooms</Label>
+                   <Input
+                     id="bedrooms"
+                     type="number"
+                     value={formData.bedrooms}
+                     onChange={(e) => handleChange('bedrooms', e.target.value)}
+                   />
+                 </div>
+                 <div>
+                   <Label htmlFor="bathrooms">Bathrooms</Label>
+                   <Input
+                     id="bathrooms"
+                     type="number"
+                     step="0.5"
+                     value={formData.bathrooms}
+                     onChange={(e) => handleChange('bathrooms', e.target.value)}
+                   />
+                 </div>
+                 <div>
+                   <Label htmlFor="square_feet">Square Feet</Label>
+                   <Input
+                     id="square_feet"
+                     type="number"
+                     value={formData.square_feet}
+                     onChange={(e) => handleChange('square_feet', e.target.value)}
+                   />
+                 </div>
                </div>
              </div>
            </CardContent>

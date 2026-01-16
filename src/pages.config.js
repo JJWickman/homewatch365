@@ -13,15 +13,15 @@ import InspectionDetail from './pages/InspectionDetail';
 import InspectionFlow from './pages/InspectionFlow';
 import Inspections from './pages/Inspections';
 import Marketing from './pages/Marketing';
+import Pricing from './pages/Pricing';
 import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
 import PropertyForm from './pages/PropertyForm';
 import RouteOptimizer from './pages/RouteOptimizer';
 import Schedule from './pages/Schedule';
 import Settings from './pages/Settings';
-import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
-import Pricing from './pages/Pricing';
 import StripeSetup from './pages/StripeSetup';
+import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
 import __Layout from './Layout.jsx';
 
 
@@ -41,15 +41,15 @@ export const PAGES = {
     "InspectionFlow": InspectionFlow,
     "Inspections": Inspections,
     "Marketing": Marketing,
+    "Pricing": Pricing,
     "Properties": Properties,
     "PropertyDetail": PropertyDetail,
     "PropertyForm": PropertyForm,
     "RouteOptimizer": RouteOptimizer,
     "Schedule": Schedule,
     "Settings": Settings,
-    "TestGoogleMapsAPI": TestGoogleMapsAPI,
-    "Pricing": Pricing,
     "StripeSetup": StripeSetup,
+    "TestGoogleMapsAPI": TestGoogleMapsAPI,
 }
 
 export const pagesConfig = {
