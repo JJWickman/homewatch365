@@ -144,13 +144,13 @@ export default function PropertyDetail() {
   }
 
   const completedInspections = inspections.filter(i => i.status === 'completed').length;
-  const pendingTasks = tasks.filter(t => t.status === 'pending').length;
+  const pendingTasks = tasks.filter(t => t.status !== 'completed' && t.status !== 'cancelled').length;
   
   const tasksByStatus = {
     completed: tasks.filter(t => t.status === 'completed'),
     in_progress: tasks.filter(t => t.status === 'in_progress'),
-    pending: tasks.filter(t => t.status === 'pending'),
-    upcoming: tasks.filter(t => t.due_date && new Date(t.due_date) > new Date() && t.status === 'pending')
+    open: tasks.filter(t => t.status === 'open'),
+    cancelled: tasks.filter(t => t.status === 'cancelled')
   };
 
   const getTaskStatusIcon = (status) => {
