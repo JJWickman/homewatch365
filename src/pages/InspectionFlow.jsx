@@ -394,14 +394,16 @@ export default function InspectionFlow() {
       <div className="px-4 py-6 lg:px-6">
         {isStandardType ? (
           <MobileInspectionView
-            inspection={inspection}
-            categories={mobileCategories}
-            setCategories={setMobileCategories}
-            handlePhotoUpload={handlePhotoUpload}
-            uploading={uploading}
-            saving={saving}
-            saveProgress={saveProgress}
-          />
+              inspection={inspection}
+              categories={mobileCategories}
+              setCategories={setMobileCategories}
+              handlePhotoUpload={handlePhotoUpload}
+              uploading={uploading}
+              saving={saving}
+              saveProgress={saveProgress}
+              flaggedItems={flaggedItems}
+              setFlaggedItems={setFlaggedItems}
+            />
         ) : isFlexibleType ? (
           <FlexibleInspectionView
             inspection={inspection}
@@ -414,15 +416,17 @@ export default function InspectionFlow() {
             saveProgress={saveProgress}
           />
         ) : (
-          <StandardInspectionView
-            checklist={checklist}
-            updateItem={updateItem}
-            handlePhotoUpload={handlePhotoUpload}
-            uploading={uploading}
-            saving={saving}
-            saveProgress={saveProgress}
-          />
-        )}
+           <StandardInspectionView
+             checklist={checklist}
+             updateItem={updateItem}
+             handlePhotoUpload={handlePhotoUpload}
+             uploading={uploading}
+             saving={saving}
+             saveProgress={saveProgress}
+             flaggedItems={flaggedItems}
+             setFlaggedItems={setFlaggedItems}
+           />
+         )}
       </div>
 
       {/* Complete Dialog for Complex Checklist Inspections */}
