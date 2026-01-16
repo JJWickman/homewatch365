@@ -406,13 +406,9 @@ export default function Inspections() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="routine">Routine</SelectItem>
-              <SelectItem value="arrival">Arrival</SelectItem>
-              <SelectItem value="departure">Departure</SelectItem>
+              <SelectItem value="standard">Standard</SelectItem>
               <SelectItem value="pre_storm">Pre-Storm</SelectItem>
               <SelectItem value="post_storm">Post-Storm</SelectItem>
-              <SelectItem value="emergency">Emergency</SelectItem>
-              <SelectItem value="stop_by">Stop By</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -498,13 +494,9 @@ export default function Inspections() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="routine">Routine</SelectItem>
-                  <SelectItem value="arrival">Arrival</SelectItem>
-                  <SelectItem value="departure">Departure</SelectItem>
+                  <SelectItem value="standard">Standard</SelectItem>
                   <SelectItem value="pre_storm">Pre-Storm</SelectItem>
                   <SelectItem value="post_storm">Post-Storm</SelectItem>
-                  <SelectItem value="emergency">Emergency</SelectItem>
-                  <SelectItem value="stop_by">Stop By</SelectItem>
                   </SelectContent>
                   </Select>
                   </div>
