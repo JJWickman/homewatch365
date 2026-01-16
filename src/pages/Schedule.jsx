@@ -14,6 +14,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import StatusBadge from '@/components/shared/StatusBadge';
 import PageHeader from '@/components/shared/PageHeader';
 
@@ -27,7 +34,8 @@ export default function Schedule() {
   const [view, setView] = useState('week');
   const [companyId, setCompanyId] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
-  const [filterMode, setFilterMode] = useState('my'); // 'my' or 'all'
+  const [staffMembers, setStaffMembers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState('my');
 
   useEffect(() => {
     loadData();
@@ -43,15 +51,17 @@ export default function Schedule() {
         const cId = members[0].company_id;
         setCompanyId(cId);
         
-        const [inspectionsData, followUpsData, propertiesData] = await Promise.all([
+        const [inspectionsData, followUpsData, propertiesData, staffData] = await Promise.all([
           base44.entities.Inspection.filter({ company_id: cId }),
           base44.entities.FollowUp.filter({ company_id: cId }),
-          base44.entities.Property.filter({ company_id: cId })
+          base44.entities.Property.filter({ company_id: cId }),
+          base44.entities.CompanyMember.filter({ company_id: cId, is_active: true })
         ]);
         
         setInspections(inspectionsData);
         setFollowUps(followUpsData);
         setProperties(propertiesData);
+        setStaffMembers(staffData);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -92,9 +102,12 @@ export default function Schedule() {
     let dayInspections = inspections.filter(i => i.scheduled_date === dateStr && i.status !== 'cancelled');
     let dayFollowUps = followUps.filter(f => f.due_date === dateStr && f.status !== 'completed' && f.status !== 'cancelled');
     
-    if (filterMode === 'my' && userEmail) {
+    if (selectedUser === 'my' && userEmail) {
       dayInspections = dayInspections.filter(i => i.assigned_to === userEmail);
       dayFollowUps = dayFollowUps.filter(f => f.assigned_to === userEmail);
+    } else if (selectedUser !== 'all') {
+      dayInspections = dayInspections.filter(i => i.assigned_to === selectedUser);
+      dayFollowUps = dayFollowUps.filter(f => f.assigned_to === selectedUser);
     }
     
     return { inspections: dayInspections, followUps: dayFollowUps };
@@ -225,24 +238,20 @@ export default function Schedule() {
                 <Route className="h-4 w-4 mr-2" />
                 Optimize Route
               </Button>
-              <div className="flex items-center gap-2 border rounded-lg p-1">
-                <Button
-                  variant={filterMode === 'my' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setFilterMode('my')}
-                  className="h-7"
-                >
-                  My Schedule
-                </Button>
-                <Button
-                  variant={filterMode === 'all' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setFilterMode('all')}
-                  className="h-7"
-                >
-                  Everyone
-                </Button>
-              </div>
+              <Select value={selectedUser} onValueChange={setSelectedUser}>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="my">My Schedule</SelectItem>
+                  <SelectItem value="all">Everyone</SelectItem>
+                  {staffMembers.map((member) => (
+                    <SelectItem key={member.id} value={member.user_email}>
+                      {member.user_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Tabs value={view} onValueChange={setView}>
                 <TabsList>
                   <TabsTrigger value="week">Week</TabsTrigger>
