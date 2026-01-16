@@ -88,7 +88,7 @@ export default function MobileInspectionView({
           <div className="mt-2 bg-white/20 rounded-full h-2">
             <div 
               className="bg-white rounded-full h-2 transition-all"
-              style={{ width: `${(categories.filter(c => c.notes || c.photos.length > 0).length / INSPECTION_CATEGORIES.length) * 100}%` }}
+              style={{ width: `${((categories.filter(c => c.notes || c.photos.length > 0).length + (customItems.length > 0 ? 1 : 0)) / (INSPECTION_CATEGORIES.length + 1)) * 100}%` }}
             />
           </div>
         </div>
