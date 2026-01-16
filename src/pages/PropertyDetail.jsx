@@ -60,14 +60,14 @@ export default function PropertyDetail() {
 
   useEffect(() => {
     if (!property?.id) return;
-    const unsubscribe = base44.entities.FollowUp.subscribe((event) => {
+    const unsubscribe = base44.entities.Visit.subscribe((event) => {
       if (event.property_id === property.id) {
         if (event.type === 'create') {
-          setTasks(prev => [event.data, ...prev]);
+          setVisits(prev => [event.data, ...prev]);
         } else if (event.type === 'update') {
-          setTasks(prev => prev.map(t => t.id === event.id ? event.data : t));
+          setVisits(prev => prev.map(v => v.id === event.id ? event.data : v));
         } else if (event.type === 'delete') {
-          setTasks(prev => prev.filter(t => t.id !== event.id));
+          setVisits(prev => prev.filter(v => v.id !== event.id));
         }
       }
     });
