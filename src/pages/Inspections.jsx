@@ -373,6 +373,7 @@ export default function Inspections() {
         subtitle={`${inspections.length} total inspections`}
         action={() => setShowNewDialog(true)}
         actionLabel="Schedule Inspection"
+        actionClassName="bg-black text-white hover:bg-slate-900"
       />
 
       {/* Filters */}
