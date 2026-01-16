@@ -36,8 +36,8 @@ export default function PropertyDetail() {
   const [property, setProperty] = useState(null);
   const [client, setClient] = useState(null);
   const [clients, setClients] = useState([]);
-  const [inspections, setInspections] = useState([]);
-  const [tasks, setTasks] = useState([]);
+  const [visits, setVisits] = useState([]);
+  const [visitTypeFilter, setVisitTypeFilter] = useState('all');
   const [contractors, setContractors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
