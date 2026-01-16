@@ -53,7 +53,8 @@ export default function Settings() {
   const [extractingBranding, setExtractingBranding] = useState(false);
   const [extractWebsiteUrl, setExtractWebsiteUrl] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
-  const [userFullName, setUserFullName] = useState('');
+  const [userFirstName, setUserFirstName] = useState('');
+  const [userLastName, setUserLastName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userPhone, setUserPhone] = useState('');
   const [userRole, setUserRole] = useState('');
@@ -114,7 +115,10 @@ export default function Settings() {
        const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
        if (members.length > 0) {
          setCompanyMember(members[0]);
-         setUserFullName(members[0].user_name || '');
+         const fullName = members[0].user_name || '';
+         const nameParts = fullName.split(' ');
+         setUserFirstName(nameParts[0] || '');
+         setUserLastName(nameParts.slice(1).join(' ') || '');
          setUserRole(members[0].role || 'field_inspector');
          const companyId = members[0].company_id;
         
@@ -194,21 +198,24 @@ export default function Settings() {
   const handleSaveProfile = async () => {
     setSavingProfile(true);
     try {
+      const fullName = `${userFirstName} ${userLastName}`.trim();
+      
       await base44.auth.updateMe({ 
+        full_name: fullName,
         phone: userPhone
       });
       
       // Update full name and role in CompanyMember
       if (companyMember) {
         await base44.entities.CompanyMember.update(companyMember.id, { 
-          user_name: userFullName,
+          user_name: fullName,
           role: userRole 
         });
       }
       
       setUser({ 
         ...user, 
-        full_name: userFullName,
+        full_name: fullName,
         phone: userPhone
       });
       // Refresh page to show updated data in layout
@@ -597,15 +604,27 @@ ${company.name}
                   </div>
                 )}
                 <div className="space-y-4">
-                <div>
-                  <Label htmlFor="user-full-name">Full Name</Label>
-                  <Input
-                    id="user-full-name"
-                    value={userFullName}
-                    onChange={(e) => setUserFullName(e.target.value)}
-                    placeholder="Your full name"
-                    className="mt-1"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="user-first-name">First Name</Label>
+                    <Input
+                      id="user-first-name"
+                      value={userFirstName}
+                      onChange={(e) => setUserFirstName(e.target.value)}
+                      placeholder="First name"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="user-last-name">Last Name</Label>
+                    <Input
+                      id="user-last-name"
+                      value={userLastName}
+                      onChange={(e) => setUserLastName(e.target.value)}
+                      placeholder="Last name"
+                      className="mt-1"
+                    />
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="user-email">Email</Label>
