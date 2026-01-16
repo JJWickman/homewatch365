@@ -194,30 +194,31 @@ export default function Inspections() {
     return false;
   };
 
-  const handleCreateInspection = async () => {
+  const handleCreateVisit = async () => {
     if (!companyId || !newVisit.property_id) return;
     
     setCreating(true);
 
     try {
+      const property = getProperty(newVisit.property_id);
+      const staffMember = staff.find(s => s.user_email === newVisit.assigned_to);
+
       if (visitType === 'inspection') {
-        // Check for scheduled inspection in same week for stop-by
         if (!editingId && checkForScheduledInspection()) {
           return;
         }
 
-        const property = getProperty(newVisit.property_id);
-        const staffMember = staff.find(s => s.user_email === newVisit.assigned_to);
-
-        const isFlexibleType = ['other', 'custom_client_request', 'drop_in'].includes(newVisit.type);
+        const isFlexibleType = ['other', 'custom_client_request', 'drop_in'].includes(newVisit.inspection_type);
         
-        const baseData = {
+        const visitData = {
           company_id: companyId,
           property_id: newVisit.property_id,
           client_id: property?.client_id,
+          visit_type: 'inspection',
+          inspection_type: newVisit.inspection_type,
           template_id: !isFlexibleType ? (newVisit.template_id || null) : null,
+          scheduled_date: newVisit.scheduled_date,
           scheduled_time: newVisit.scheduled_time || null,
-          type: newVisit.type,
           assigned_to: newVisit.assigned_to || null,
           assigned_to_name: staffMember?.user_name || null,
           status: isFlexibleType ? 'completed' : 'scheduled',
@@ -227,7 +228,7 @@ export default function Inspections() {
         };
 
         if (editingId) {
-          await base44.entities.Inspection.update(editingId, baseData);
+          await base44.entities.Visit.update(editingId, visitData);
         } else {
           const dates = [newVisit.scheduled_date];
           
@@ -252,38 +253,35 @@ export default function Inspections() {
             }
           }
 
-          const inspectionsToCreate = dates.map(date => ({
-            ...baseData,
+          const visitsToCreate = dates.map(date => ({
+            ...visitData,
             scheduled_date: date
           }));
 
-          await base44.entities.Inspection.bulkCreate(inspectionsToCreate);
+          await base44.entities.Visit.bulkCreate(visitsToCreate);
         }
       } else {
-        // Create follow-up
-        const property = getProperty(newVisit.property_id);
-        const staffMember = staff.find(s => s.user_email === newVisit.assigned_to);
-
-        const followupData = {
+        const visitData = {
           company_id: companyId,
           property_id: newVisit.property_id,
           client_id: property?.client_id,
+          visit_type: 'followup',
           title: newVisit.followup_title,
           description: newVisit.followup_description,
-          type: newVisit.followup_type,
+          followup_type: newVisit.followup_type,
           priority: newVisit.followup_priority,
-          category: newVisit.followup_category,
+          followup_category: newVisit.followup_category,
           status: 'open',
-          due_date: newVisit.followup_due_date,
-          due_time: newVisit.followup_due_time || null,
+          scheduled_date: newVisit.followup_due_date,
+          scheduled_time: newVisit.followup_due_time || null,
           assigned_to: newVisit.assigned_to || null,
           assigned_to_name: staffMember?.user_name || null
         };
 
         if (editingId) {
-          await base44.entities.FollowUp.update(editingId, followupData);
+          await base44.entities.Visit.update(editingId, visitData);
         } else {
-          await base44.entities.FollowUp.create(followupData);
+          await base44.entities.Visit.create(visitData);
         }
       }
     } catch (error) {
@@ -297,7 +295,7 @@ export default function Inspections() {
         template_id: '',
         scheduled_date: format(new Date(), 'yyyy-MM-dd'),
         scheduled_time: '',
-        type: 'routine',
+        inspection_type: 'routine',
         assigned_to: '',
         is_recurring: false,
         recurrence_frequency: 'weekly',
