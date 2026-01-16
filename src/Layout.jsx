@@ -19,8 +19,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 const getNavigationItems = (subscriptionPlan, memberRole) => {
-// Field Inspector - limited access
-if (memberRole === 'field_inspector') {
+// Field Inspector - limited access (includes backward compatibility for 'technician')
+if (memberRole === 'field_inspector' || memberRole === 'technician') {
   return [
     { name: 'Dashboard', icon: Home, page: 'Dashboard' },
     { name: 'My Inspections', icon: ClipboardCheck, page: 'Inspections' },

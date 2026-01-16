@@ -343,7 +343,7 @@ ${company.name}
     return email?.slice(0, 2).toUpperCase() || '??';
   };
 
-  const canManageStaff = companyMember?.role === 'administrator' || companyMember?.role === 'dispatcher';
+  const canManageStaff = isDispatcherOrAdmin;
 
   const PRICING_TIERS = [
     {
@@ -522,11 +522,9 @@ ${company.name}
         <TabsList className="mb-6">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="company">Company</TabsTrigger>
-          {(companyMember?.role === 'administrator' || companyMember?.role === 'dispatcher') && (
-            <TabsTrigger value="team">Team</TabsTrigger>
-          )}
-          {companyMember?.is_owner && <TabsTrigger value="billing">Billing</TabsTrigger>}
-          {companyMember?.role === 'administrator' && <TabsTrigger value="admin">Admin</TabsTrigger>}
+          {isDispatcherOrAdmin && <TabsTrigger value="team">Team</TabsTrigger>}
+          {(companyMember?.is_owner || companyMember?.role === 'owner') && <TabsTrigger value="billing">Billing</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="profile">
