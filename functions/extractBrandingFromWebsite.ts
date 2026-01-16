@@ -22,9 +22,15 @@ Deno.serve(async (req) => {
     // Extract logo from common meta tags and patterns
     let logo_url = null;
     
-    // Try og:image meta tag
-    const ogImageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i);
-    if (ogImageMatch) logo_url = ogImageMatch[1];
+    // Try favicon FIRST (user requirement: use favicon as default)
+    const faviconMatch = html.match(/<link[^>]*rel=["'][^"']*icon["'][^>]*href=["']([^"']+)["']/i);
+    if (faviconMatch) logo_url = faviconMatch[1];
+    
+    // Try og:image meta tag as fallback
+    if (!logo_url) {
+      const ogImageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i);
+      if (ogImageMatch) logo_url = ogImageMatch[1];
+    }
     
     // Try logo in schema.org JSON-LD
     if (!logo_url) {
@@ -41,12 +47,6 @@ Deno.serve(async (req) => {
     if (!logo_url) {
       const imgMatch = html.match(/<img[^>]*(?:class|id)=["'][^"']*logo[^"']*["'][^>]*src=["']([^"']+)["']/i);
       if (imgMatch) logo_url = imgMatch[1];
-    }
-    
-    // Try favicon
-    if (!logo_url) {
-      const faviconMatch = html.match(/<link[^>]*rel=["'][^"']*icon["'][^>]*href=["']([^"']+)["']/i);
-      if (faviconMatch) logo_url = faviconMatch[1];
     }
 
     // Make logo URL absolute if relative
