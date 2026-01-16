@@ -390,8 +390,8 @@ export default function Inspections() {
   const columns = [
     {
       header: 'Property',
-      cell: (inspection) => {
-        const property = getProperty(inspection.property_id);
+      cell: (visit) => {
+        const property = getProperty(visit.property_id);
         return (
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
@@ -415,46 +415,46 @@ export default function Inspections() {
     },
     {
       header: 'Date',
-      cell: (inspection) => (
+      cell: (visit) => (
         <div>
-          <p className="font-medium">{getDateLabel(inspection.scheduled_date)}</p>
-          {inspection.scheduled_time && (
-            <p className="text-sm text-slate-500">{inspection.scheduled_time}</p>
+          <p className="font-medium">{getDateLabel(visit.scheduled_date)}</p>
+          {visit.scheduled_time && (
+            <p className="text-sm text-slate-500">{visit.scheduled_time}</p>
           )}
         </div>
       ),
       className: 'hidden sm:table-cell'
     },
     {
-      header: 'Type',
-      cell: (inspection) => (
-        <StatusBadge status={inspection.type} />
+      header: 'Visit Type',
+      cell: (visit) => (
+        <StatusBadge status={visit.visit_type} />
       ),
       className: 'hidden md:table-cell'
     },
     {
       header: 'Assigned',
-      cell: (inspection) => (
-        <span className="text-slate-600">{inspection.assigned_to_name || '—'}</span>
+      cell: (visit) => (
+        <span className="text-slate-600">{visit.assigned_to_name || '—'}</span>
       ),
       className: 'hidden lg:table-cell'
     },
     {
       header: 'Status',
-      cell: (inspection) => (
-        <StatusBadge status={inspection.status} />
+      cell: (visit) => (
+        <StatusBadge status={visit.status} />
       )
     },
     {
       header: 'Details',
-      cell: (inspection) => (
-        <span className="text-sm text-slate-600">{getInspectionDetails(inspection)}</span>
+      cell: (visit) => (
+        <span className="text-sm text-slate-600">{getVisitDetails(visit)}</span>
       ),
       className: 'hidden sm:table-cell'
     },
     {
       header: '',
-      cell: (inspection) => (
+      cell: (visit) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
@@ -464,23 +464,16 @@ export default function Inspections() {
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={(e) => {
               e.stopPropagation();
-              navigate(createPageUrl('InspectionDetail') + `?id=${inspection.id}`);
+              navigate(createPageUrl('InspectionDetail') + `?id=${visit.id}`);
             }}>
               <Eye className="h-4 w-4 mr-2" />
               View Details
             </DropdownMenuItem>
-            {inspection.status === 'scheduled' && (
+            {visit.visit_type === 'inspection' && visit.status === 'scheduled' && (
               <>
                 <DropdownMenuItem onClick={(e) => {
                   e.stopPropagation();
-                  handleEditInspection(inspection);
-                }}>
-                  <Eye className="h-4 w-4 mr-2" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`);
+                  navigate(createPageUrl('InspectionFlow') + `?id=${visit.id}`);
                 }}>
                   <Play className="h-4 w-4 mr-2" />
                   Start Inspection
