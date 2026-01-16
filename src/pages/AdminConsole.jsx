@@ -396,7 +396,7 @@ export default function AdminConsole() {
                         id="logo-upload"
                         type="file"
                         accept="image/*"
-                        onChange={handleLogoUpload}
+                        onChange={(e) => handleLogoUpload(e)}
                         className="hidden"
                       />
                       {companyForm.logo_url && (
