@@ -483,8 +483,8 @@ export default function PropertyDetail() {
                   <FileText className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{pendingTasks}</p>
-                  <p className="text-sm text-slate-500">Pending Follow-Ups</p>
+                  <p className="text-2xl font-bold">{pendingVisits}</p>
+                  <p className="text-sm text-slate-500">Pending Visits</p>
                 </div>
               </div>
             </CardContent>
