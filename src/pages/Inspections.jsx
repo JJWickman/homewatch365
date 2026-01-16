@@ -853,7 +853,7 @@ export default function Inspections() {
                     </div>
                   )}
 
-                  {visitType === 'inspection' && !['other', 'custom_client_request', 'drop_in'].includes(newVisit.type) && (
+                  {visitType === 'inspection' && !['other', 'custom_client_request', 'drop_in'].includes(newVisit.inspection_type) && (
                     <div className="flex items-center justify-between py-2">
                       <div>
                         <Label>Recurring Inspection</Label>
