@@ -5,7 +5,7 @@ import { createPageUrl } from '@/utils';
 import { 
   Settings as SettingsIcon, Building, Users, FileText, 
   Palette, Save, Upload, Plus, Trash2, User, Mail, Edit2, MoreVertical, Camera,
-  Calendar, Copy, Check, ExternalLink, Link2, Unlink, Shield
+  Calendar, Copy, Check, ExternalLink, Link2, Unlink, Shield, Edit, AlertCircle as AlertIcon, Loader2
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,6 +84,10 @@ export default function Settings() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingMember, setDeletingMember] = useState(null);
   const [calendarUrlCopied, setCalendarUrlCopied] = useState(false);
+  const [customTypes, setCustomTypes] = useState([]);
+  const [showNewTypeDialog, setShowNewTypeDialog] = useState(false);
+  const [editingTypeId, setEditingTypeId] = useState(null);
+  const [typeFormData, setTypeFormData] = useState({ name: '', slug: '', description: '', is_active: true });
 
   useEffect(() => {
     loadData();
@@ -104,11 +108,14 @@ export default function Settings() {
          setUserRole(members[0].role || 'technician');
          const companyId = members[0].company_id;
         
-        const [companies, staffData, templatesData] = await Promise.all([
+        const [companies, staffData, templatesData, customTypesData] = await Promise.all([
           base44.entities.Company.filter({ id: companyId }),
           base44.entities.CompanyMember.filter({ company_id: companyId }),
-          base44.entities.InspectionTemplate.filter({ company_id: companyId })
+          base44.entities.InspectionTemplate.filter({ company_id: companyId }),
+          base44.entities.CustomContractorType.filter({ company_id: companyId })
         ]);
+        
+        setCustomTypes(customTypesData);
         
         if (companies.length > 0) {
           const c = companies[0];
@@ -331,6 +338,69 @@ ${company.name}
   };
 
   const canManageStaff = companyMember?.role === 'owner' || companyMember?.can_manage_staff;
+  
+  const DEFAULT_CONTRACTOR_TYPES = [
+    'electrician', 'hvac', 'roofer', 'plumber', 'pool_service', 'landscaping', 
+    'painter', 'carpenter', 'general_contractor', 'pest_control', 'cleaning', 'security', 'other'
+  ];
+  
+  const handleAddType = () => {
+    setEditingTypeId(null);
+    setTypeFormData({ name: '', slug: '', description: '', is_active: true });
+    setShowNewTypeDialog(true);
+  };
+
+  const handleEditType = (type) => {
+    setEditingTypeId(type.id);
+    setTypeFormData(type);
+    setShowNewTypeDialog(true);
+  };
+
+  const generateSlug = (name) => {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/(^_|_$)/g, '');
+  };
+
+  const handleSaveType = async () => {
+    if (!typeFormData.name.trim()) return;
+
+    const slug = typeFormData.slug || generateSlug(typeFormData.name);
+
+    try {
+      if (editingTypeId) {
+        await base44.entities.CustomContractorType.update(editingTypeId, {
+          ...typeFormData,
+          slug
+        });
+      } else {
+        const exists = customTypes.some(t => t.slug === slug);
+        if (exists) {
+          alert('A contractor type with this name already exists');
+          return;
+        }
+
+        await base44.entities.CustomContractorType.create({
+          ...typeFormData,
+          slug,
+          company_id: companyMember.company_id
+        });
+      }
+      setShowNewTypeDialog(false);
+      loadData();
+    } catch (error) {
+      console.error('Error saving contractor type:', error);
+    }
+  };
+
+  const handleDeleteType = async (id) => {
+    if (window.confirm('Are you sure you want to delete this contractor type?')) {
+      try {
+        await base44.entities.CustomContractorType.delete(id);
+        loadData();
+      } catch (error) {
+        console.error('Error deleting contractor type:', error);
+      }
+    }
+  };
 
   // Generate calendar subscription URL
   const getCalendarUrl = () => {
@@ -834,22 +904,219 @@ ${company.name}
 
 
 
-        <TabsContent value="admin">
+        <TabsContent value="admin" className="space-y-6">
+          {/* Contractor Types */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Contractor Types</CardTitle>
+                  <CardDescription>Manage custom contractor types for your company</CardDescription>
+                </div>
+                <Button 
+                  onClick={handleAddType}
+                  className="bg-slate-900 hover:bg-slate-800"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Type
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm font-medium text-blue-900 mb-2">Default Types Available</p>
+                  <div className="flex flex-wrap gap-2">
+                    {DEFAULT_CONTRACTOR_TYPES.map(type => (
+                      <span key={type} className="px-2 py-1 bg-white border border-blue-200 rounded text-xs text-blue-700">
+                        {type.replace(/_/g, ' ')}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {customTypes.length > 0 ? (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-700">Custom Types ({customTypes.length})</p>
+                    <div className="grid gap-2">
+                      {customTypes.map(type => (
+                        <div key={type.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50 transition-colors">
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{type.name}</p>
+                            {type.description && (
+                              <p className="text-xs text-slate-500 mt-1">{type.description}</p>
+                            )}
+                            <p className="text-xs text-slate-400 mt-1">Slug: <code className="bg-slate-100 px-1 py-0.5 rounded">{type.slug}</code></p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className={`text-xs px-2 py-1 rounded ${type.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                              {type.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditType(type)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteType(type.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-center text-slate-500 py-6 text-sm">No custom contractor types added yet</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Branding */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Admin Console
+                <Palette className="h-5 w-5" />
+                Company Branding
               </CardTitle>
-              <CardDescription>Advanced system administration</CardDescription>
+              <CardDescription>Customize your company's appearance</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Button 
-                onClick={() => navigate(createPageUrl('AdminConsole'))}
-                className="bg-slate-900 hover:bg-slate-800"
-              >
-                Open Admin Console
-              </Button>
+            <CardContent className="space-y-6">
+              <div>
+                <Label>Auto-Extract from Website</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    placeholder="https://yourwebsite.com"
+                    value={extractWebsiteUrl}
+                    onChange={(e) => setExtractWebsiteUrl(e.target.value)}
+                  />
+                  <Button
+                    onClick={handleExtractBranding}
+                    disabled={!extractWebsiteUrl || extractingBranding}
+                    variant="outline"
+                  >
+                    {extractingBranding ? 'Extracting...' : 'Extract'}
+                  </Button>
+                </div>
+                <p className="text-xs text-slate-500 mt-2">
+                  Automatically extract logo (favicon) and colors from your website
+                </p>
+              </div>
+
+              <div>
+                <Label>Company Logo</Label>
+                <div className="flex items-center gap-6 mt-2">
+                  <div className="h-20 w-20 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden">
+                    {companyForm.logo_url ? (
+                      <img src={companyForm.logo_url} alt="Logo" className="h-full w-full object-contain" />
+                    ) : (
+                      <Building className="h-8 w-8 text-slate-300" />
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Label htmlFor="logo-upload-admin" className="cursor-pointer">
+                        <Button variant="outline" size="sm" disabled={uploading} asChild>
+                          <span>
+                            <Upload className="h-4 w-4 mr-2" />
+                            {uploading ? 'Uploading...' : companyForm.logo_url ? 'Replace Logo' : 'Upload Logo'}
+                          </span>
+                        </Button>
+                      </Label>
+                      <input
+                        id="logo-upload-admin"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                      />
+                      {companyForm.logo_url && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setCompanyForm(prev => ({ 
+                            ...prev, 
+                            logo_url: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/7e2dc0976_EstateIQFavIcon.png' 
+                          }))}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Reset to Default
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500">Recommended: 200x200px PNG or SVG</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <Label>Primary Color</Label>
+                  <div className="flex items-center gap-3 mt-2">
+                    <input
+                      type="color"
+                      value={companyForm.primary_color}
+                      onChange={(e) => setCompanyForm(prev => ({ ...prev, primary_color: e.target.value }))}
+                      className="h-10 w-14 rounded border cursor-pointer"
+                    />
+                    <Input
+                      value={companyForm.primary_color}
+                      onChange={(e) => setCompanyForm(prev => ({ ...prev, primary_color: e.target.value }))}
+                      className="w-32"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label>Accent Color</Label>
+                  <div className="flex items-center gap-3 mt-2">
+                    <input
+                      type="color"
+                      value={companyForm.accent_color}
+                      onChange={(e) => setCompanyForm(prev => ({ ...prev, accent_color: e.target.value }))}
+                      className="h-10 w-14 rounded border cursor-pointer"
+                    />
+                    <Input
+                      value={companyForm.accent_color}
+                      onChange={(e) => setCompanyForm(prev => ({ ...prev, accent_color: e.target.value }))}
+                      className="w-32"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label>Preview</Label>
+                <div className="mt-2 p-6 rounded-lg border" style={{ backgroundColor: companyForm.primary_color }}>
+                  <div className="flex items-center gap-3">
+                    {companyForm.logo_url ? (
+                      <img src={companyForm.logo_url} alt="Logo" className="h-10 w-10 rounded" />
+                    ) : (
+                      <div className="h-10 w-10 rounded bg-white/20 flex items-center justify-center">
+                        <Building className="h-5 w-5 text-white" />
+                      </div>
+                    )}
+                    <span className="text-white font-semibold">{companyForm.name || 'Your Company'}</span>
+                  </div>
+                  <Button className="mt-4" style={{ backgroundColor: companyForm.accent_color, color: '#000' }}>
+                    Sample Button
+                  </Button>
+                </div>
+              </div>
+
+              <div className="pt-4 flex justify-end">
+                <Button onClick={saveCompanySettings} disabled={saving} className="bg-slate-900 hover:bg-slate-800">
+                  <Save className="h-4 w-4 mr-2" />
+                  {saving ? 'Saving...' : 'Save Branding'}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -974,6 +1241,80 @@ ${company.name}
               Save Changes
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Contractor Type Dialog */}
+      <Dialog open={showNewTypeDialog} onOpenChange={setShowNewTypeDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingTypeId ? 'Edit Contractor Type' : 'Add Contractor Type'}</DialogTitle>
+            <DialogDescription>
+              {editingTypeId ? 'Update the contractor type information' : 'Create a new custom contractor type'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label>Type Name *</Label>
+              <Input
+                value={typeFormData.name}
+                onChange={(e) => {
+                  setTypeFormData({ 
+                    ...typeFormData, 
+                    name: e.target.value,
+                    slug: !editingTypeId ? generateSlug(e.target.value) : typeFormData.slug
+                  });
+                }}
+                placeholder="e.g., Roofing Specialist"
+              />
+            </div>
+
+            <div>
+              <Label>Slug (URL-friendly) *</Label>
+              <Input
+                value={typeFormData.slug}
+                onChange={(e) => setTypeFormData({ ...typeFormData, slug: e.target.value })}
+                placeholder="e.g., roofing_specialist"
+                className="font-mono text-xs"
+              />
+              <p className="text-xs text-slate-500 mt-1">Used internally to identify the type</p>
+            </div>
+
+            <div>
+              <Label>Description</Label>
+              <Textarea
+                value={typeFormData.description}
+                onChange={(e) => setTypeFormData({ ...typeFormData, description: e.target.value })}
+                placeholder="What does this contractor type do?"
+                className="min-h-20"
+              />
+            </div>
+
+            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+              <input
+                type="checkbox"
+                id="is_active"
+                checked={typeFormData.is_active}
+                onChange={(e) => setTypeFormData({ ...typeFormData, is_active: e.target.checked })}
+                className="rounded"
+              />
+              <Label htmlFor="is_active" className="mb-0 text-sm">Active (available for selection)</Label>
+            </div>
+
+            <div className="flex gap-3 justify-end pt-2">
+              <Button variant="outline" onClick={() => setShowNewTypeDialog(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSaveType}
+                disabled={!typeFormData.name.trim()}
+                className="bg-slate-900 hover:bg-slate-800"
+              >
+                {editingTypeId ? 'Update' : 'Add'} Type
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
