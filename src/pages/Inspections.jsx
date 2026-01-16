@@ -109,21 +109,19 @@ export default function Inspections() {
         const cId = members[0].company_id;
         setCompanyId(cId);
         
-        const [inspectionsData, propertiesData, clientsData, templatesData, staffData, followUpsData] = await Promise.all([
-          base44.entities.Inspection.filter({ company_id: cId }, '-scheduled_date'),
+        const [visitsData, propertiesData, clientsData, templatesData, staffData] = await Promise.all([
+          base44.entities.Visit.filter({ company_id: cId }, '-scheduled_date'),
           base44.entities.Property.filter({ company_id: cId, is_active: true }),
           base44.entities.Client.filter({ company_id: cId }),
           base44.entities.InspectionTemplate.filter({ company_id: cId, is_active: true }),
-          base44.entities.CompanyMember.filter({ company_id: cId, is_active: true }),
-          base44.entities.FollowUp.filter({ company_id: cId })
+          base44.entities.CompanyMember.filter({ company_id: cId, is_active: true })
         ]);
         
-        setInspections(inspectionsData);
+        setVisits(visitsData);
         setProperties(propertiesData);
         setClients(clientsData);
         setTemplates(templatesData);
         setStaff(staffData);
-        setFollowUps(followUpsData);
       }
     } catch (error) {
       console.error('Error loading data:', error);
