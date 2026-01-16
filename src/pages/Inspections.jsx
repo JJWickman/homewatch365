@@ -713,7 +713,7 @@ export default function Inspections() {
               </div>
             )}
 
-            {visitType === 'inspection' && (
+            {visitType === 'inspection' ? (
                <>
                  <div>
                    <Label>Type</Label>
@@ -790,7 +790,7 @@ export default function Inspections() {
                  )}
                </>
              ) : (
-               <div>
+               <div className="space-y-4">
                  <div>
                    <Label>Title *</Label>
                    <Input
