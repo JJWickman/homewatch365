@@ -758,7 +758,7 @@ export default function Inspections() {
                    </div>
                  )}
 
-                 {newVisit.type === 'drop_in' && (
+                 {newVisit.inspection_type === 'drop_in' && (
                    <div className="space-y-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                      <div>
                        <Label>Inspection Name</Label>
