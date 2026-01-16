@@ -18,25 +18,36 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
-const getNavigationItems = (subscriptionPlan) => {
-  const baseItems = [
+const getNavigationItems = (subscriptionPlan, memberRole) => {
+// Field Inspector - limited access
+if (memberRole === 'field_inspector') {
+  return [
     { name: 'Dashboard', icon: Home, page: 'Dashboard' },
-    { name: 'Clients', icon: Users, page: 'Clients' },
-    { name: 'Properties', icon: Building2, page: 'Properties' },
-    { name: 'Inspections', icon: ClipboardCheck, page: 'Inspections' },
-    { name: 'Schedule', icon: Calendar, page: 'Schedule' },
-    { name: 'Follow-Ups', icon: FileText, page: 'FollowUps' },
+    { name: 'My Inspections', icon: ClipboardCheck, page: 'Inspections' },
+    { name: 'My Schedule', icon: Calendar, page: 'Schedule' },
+    { name: 'Follow-Ups', icon: FileText, page: 'FollowUps' }
   ];
+}
 
-  // Only show Contractors and Marketing for Enterprise plan
-  if (subscriptionPlan === 'enterprise') {
-    baseItems.push(
-      { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
-      { name: 'Marketing', icon: Megaphone, page: 'Marketing' }
-    );
-  }
+// Dispatcher/Manager and Administrator - full access
+const baseItems = [
+  { name: 'Dashboard', icon: Home, page: 'Dashboard' },
+  { name: 'Clients', icon: Users, page: 'Clients' },
+  { name: 'Properties', icon: Building2, page: 'Properties' },
+  { name: 'Inspections', icon: ClipboardCheck, page: 'Inspections' },
+  { name: 'Schedule', icon: Calendar, page: 'Schedule' },
+  { name: 'Follow-Ups', icon: FileText, page: 'FollowUps' },
+];
 
-  return baseItems;
+// Only show Contractors and Marketing for Enterprise plan
+if (subscriptionPlan === 'enterprise') {
+  baseItems.push(
+    { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
+    { name: 'Marketing', icon: Megaphone, page: 'Marketing' }
+  );
+}
+
+return baseItems;
 };
 
 const clientPortalPages = ['ClientPortal', 'ClientInspectionView'];
@@ -119,7 +130,7 @@ export default function Layout({ children, currentPageName }) {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  const navigationItems = getNavigationItems(company?.subscription_plan);
+  const navigationItems = getNavigationItems(company?.subscription_plan, companyMember?.role);
 
   return (
     <div className="min-h-screen bg-slate-50">

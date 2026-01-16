@@ -71,16 +71,14 @@ export default function CompanyOnboarding() {
         is_active: true
       });
 
-      // Create company member (owner)
+      // Create company member (owner with administrator role)
       await base44.entities.CompanyMember.create({
         company_id: company.id,
         user_email: user.email,
         user_name: user.full_name,
-        role: 'owner',
-        is_active: true,
-        can_manage_clients: true,
-        can_manage_staff: true,
-        can_manage_billing: true
+        role: 'administrator',
+        is_owner: true,
+        is_active: true
       });
 
       // Create default inspection template
