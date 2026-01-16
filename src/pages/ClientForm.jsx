@@ -159,18 +159,24 @@ export default function ClientForm() {
         backLink="Clients"
         backLabel="Back to Clients"
       >
-        {clientId && (
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <Clock className="h-4 w-4" />
-            {isAutoSaving ? (
-              <span className="text-amber-600">Saving...</span>
-            ) : lastSaved ? (
-              <span>Saved {new Date(lastSaved).toLocaleTimeString()}</span>
-            ) : (
-              <span>Auto-save enabled</span>
-            )}
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {clientId && (
+            <div className="flex items-center gap-2 text-sm text-slate-500">
+              <Clock className="h-4 w-4" />
+              {isAutoSaving ? (
+                <span className="text-amber-600">Saving...</span>
+              ) : lastSaved ? (
+                <span>Saved {new Date(lastSaved).toLocaleTimeString()}</span>
+              ) : (
+                <span>Auto-save enabled</span>
+              )}
+            </div>
+          )}
+          <Button type="submit" form="client-form" disabled={saving} className="bg-slate-900 hover:bg-slate-800">
+            <Save className="h-4 w-4 mr-2" />
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
+        </div>
       </PageHeader>
 
       <form onSubmit={handleSubmit} className="space-y-6">
