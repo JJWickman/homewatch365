@@ -180,7 +180,7 @@ export default function Dashboard() {
           iconBg="bg-amber-50"
         />
         <StatsCard
-          title="Pending Tasks"
+          title="Pending Follow-Ups"
           value={stats.pendingTasks}
           icon={FileWarning}
           iconColor="text-slate-600"
