@@ -154,18 +154,18 @@ export default function Inspections() {
     return format(date, 'MMM d, yyyy');
   };
 
-  const filteredInspections = inspections.filter(inspection => {
-    const property = getProperty(inspection.property_id);
+  const filteredVisits = visits.filter(visit => {
+    const property = getProperty(visit.property_id);
     const matchesSearch = 
       property?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       property?.address?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesStatus = statusFilter === 'all' || inspection.status === statusFilter;
-    const matchesType = typeFilter === 'all' || inspection.type === typeFilter;
-    const matchesAssigned = assignedFilter === 'all' || inspection.assigned_to === assignedFilter;
-    const matchesProperty = propertyFilter === 'all' || inspection.property_id === propertyFilter;
+    const matchesStatus = statusFilter === 'all' || visit.status === statusFilter;
+    const matchesVisitType = visitTypeFilter === 'all' || visit.visit_type === visitTypeFilter;
+    const matchesAssigned = assignedFilter === 'all' || visit.assigned_to === assignedFilter;
+    const matchesProperty = propertyFilter === 'all' || visit.property_id === propertyFilter;
     
-    return matchesSearch && matchesStatus && matchesType && matchesAssigned && matchesProperty;
+    return matchesSearch && matchesStatus && matchesVisitType && matchesAssigned && matchesProperty;
   });
 
   const checkForScheduledInspection = () => {
