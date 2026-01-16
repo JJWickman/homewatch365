@@ -230,14 +230,6 @@ export default function Schedule() {
               >
                 Today
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate(createPageUrl('RouteOptimizer') + `?date=${format(currentDate, 'yyyy-MM-dd')}`)}
-              >
-                <Route className="h-4 w-4 mr-2" />
-                Optimize Route
-              </Button>
               <Select value={selectedUser} onValueChange={setSelectedUser}>
                 <SelectTrigger className="w-48">
                   <SelectValue />
