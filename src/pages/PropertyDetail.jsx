@@ -652,83 +652,83 @@ export default function PropertyDetail() {
                     />
                   ) : (
                     <div className="space-y-6">
-                      {/* In Progress */}
-                      {tasksByStatus.in_progress.length > 0 && (
-                        <div>
-                          <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-blue-600" />
-                            In Progress ({tasksByStatus.in_progress.length})
-                          </h4>
-                          <div className="space-y-2">
-                            {tasksByStatus.in_progress.map((task) => (
-                              <div key={task.id} className="p-3 rounded-lg border border-blue-200 bg-blue-50">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <p className="font-medium text-slate-900">{task.title}</p>
-                                    {task.description && (
-                                      <p className="text-sm text-slate-600 mt-1">{task.description}</p>
-                                    )}
-                                    <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
-                                      <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">In Progress</span>
-                                      {task.priority && (
-                                        <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-700 capitalize">{task.priority}</span>
-                                      )}
-                                      {task.due_date && (
-                                        <span className="flex items-center gap-1 text-slate-600">
-                                          <Calendar className="h-3 w-3" />
-                                          {format(new Date(task.due_date), 'MMM d')}
-                                        </span>
-                                      )}
-                                      {task.assigned_to_name && (
-                                        <span className="text-slate-600">Assigned: {task.assigned_to_name}</span>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                       {/* Open */}
+                       {tasksByStatus.open.length > 0 && (
+                         <div>
+                           <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                             <AlertCircle className="h-4 w-4 text-amber-600" />
+                             Open ({tasksByStatus.open.length})
+                           </h4>
+                           <div className="space-y-2">
+                             {tasksByStatus.open.map((task) => (
+                               <div key={task.id} className="p-3 rounded-lg border border-amber-200 bg-amber-50">
+                                 <div className="flex items-start justify-between">
+                                   <div className="flex-1">
+                                     <p className="font-medium text-slate-900">{task.title}</p>
+                                     {task.description && (
+                                       <p className="text-sm text-slate-600 mt-1">{task.description}</p>
+                                     )}
+                                     <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
+                                       <span className="px-2 py-1 rounded-full bg-amber-100 text-amber-700 font-medium">Open</span>
+                                       {task.priority && (
+                                         <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-700 capitalize">{task.priority}</span>
+                                       )}
+                                       {task.due_date && (
+                                         <span className="flex items-center gap-1 text-slate-600">
+                                           <Calendar className="h-3 w-3" />
+                                           {format(new Date(task.due_date), 'MMM d')}
+                                         </span>
+                                       )}
+                                       {task.assigned_to_name && (
+                                         <span className="text-slate-600">Assigned: {task.assigned_to_name}</span>
+                                       )}
+                                     </div>
+                                   </div>
+                                 </div>
+                               </div>
+                             ))}
+                           </div>
+                         </div>
+                       )}
 
-                      {/* Pending */}
-                      {tasksByStatus.pending.length > 0 && (
-                        <div>
-                          <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                            <AlertCircle className="h-4 w-4 text-amber-600" />
-                            Pending ({tasksByStatus.pending.length})
-                          </h4>
-                          <div className="space-y-2">
-                            {tasksByStatus.pending.map((task) => (
-                              <div key={task.id} className="p-3 rounded-lg border border-amber-200 bg-amber-50">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <p className="font-medium text-slate-900">{task.title}</p>
-                                    {task.description && (
-                                      <p className="text-sm text-slate-600 mt-1">{task.description}</p>
-                                    )}
-                                    <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
-                                      <span className="px-2 py-1 rounded-full bg-amber-100 text-amber-700 font-medium">Pending</span>
-                                      {task.priority && (
-                                        <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-700 capitalize">{task.priority}</span>
-                                      )}
-                                      {task.due_date && (
-                                        <span className="flex items-center gap-1 text-slate-600">
-                                          <Calendar className="h-3 w-3" />
-                                          {format(new Date(task.due_date), 'MMM d')}
-                                        </span>
-                                      )}
-                                      {task.assigned_to_name && (
-                                        <span className="text-slate-600">Assigned: {task.assigned_to_name}</span>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                       {/* In Progress */}
+                       {tasksByStatus.in_progress.length > 0 && (
+                         <div>
+                           <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                             <Clock className="h-4 w-4 text-blue-600" />
+                             In Progress ({tasksByStatus.in_progress.length})
+                           </h4>
+                           <div className="space-y-2">
+                             {tasksByStatus.in_progress.map((task) => (
+                               <div key={task.id} className="p-3 rounded-lg border border-blue-200 bg-blue-50">
+                                 <div className="flex items-start justify-between">
+                                   <div className="flex-1">
+                                     <p className="font-medium text-slate-900">{task.title}</p>
+                                     {task.description && (
+                                       <p className="text-sm text-slate-600 mt-1">{task.description}</p>
+                                     )}
+                                     <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
+                                       <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">In Progress</span>
+                                       {task.priority && (
+                                         <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-700 capitalize">{task.priority}</span>
+                                       )}
+                                       {task.due_date && (
+                                         <span className="flex items-center gap-1 text-slate-600">
+                                           <Calendar className="h-3 w-3" />
+                                           {format(new Date(task.due_date), 'MMM d')}
+                                         </span>
+                                       )}
+                                       {task.assigned_to_name && (
+                                         <span className="text-slate-600">Assigned: {task.assigned_to_name}</span>
+                                       )}
+                                     </div>
+                                   </div>
+                                 </div>
+                               </div>
+                             ))}
+                           </div>
+                         </div>
+                       )}
 
                       {/* Completed */}
                       {tasksByStatus.completed.length > 0 && (
