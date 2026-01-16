@@ -92,7 +92,9 @@ Deno.serve(async (req) => {
     }
 
     // Create all visits
-    await base44.asServiceRole.entities.Visit.bulkCreate(visitsToCreate);
+    if (visitsToCreate.length > 0) {
+      await base44.entities.Visit.bulkCreate(visitsToCreate);
+    }
 
     return Response.json({
       message: 'Migration completed successfully',
