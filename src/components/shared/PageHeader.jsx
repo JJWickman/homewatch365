@@ -12,6 +12,7 @@ export default function PageHeader({
   actionIcon: ActionIcon = Plus,
   backLink,
   backLabel = 'Back',
+  actionClassName = 'bg-slate-900 hover:bg-slate-800',
   children 
 }) {
   return (
@@ -33,7 +34,7 @@ export default function PageHeader({
         <div className="flex items-center gap-3">
           {children}
           {action && (
-            <Button onClick={action} className="bg-slate-900 hover:bg-slate-800">
+            <Button onClick={action} className={actionClassName}>
               <ActionIcon className="h-4 w-4 mr-2" />
               {actionLabel}
             </Button>
