@@ -93,7 +93,6 @@ export default function Settings() {
     try {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
-      setUserFullName(currentUser.full_name || '');
       setUserEmail(currentUser.email || '');
       setUserPhone(currentUser.phone || '');
       
@@ -101,6 +100,7 @@ export default function Settings() {
        const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
        if (members.length > 0) {
          setCompanyMember(members[0]);
+         setUserFullName(members[0].user_name || '');
          setUserRole(members[0].role || 'technician');
          const companyId = members[0].company_id;
         
@@ -178,13 +178,13 @@ export default function Settings() {
     setSavingProfile(true);
     try {
       await base44.auth.updateMe({ 
-        full_name: userFullName,
         phone: userPhone
       });
       
-      // Update role in CompanyMember if it changed
-      if (companyMember && userRole !== companyMember.role) {
+      // Update full name and role in CompanyMember
+      if (companyMember) {
         await base44.entities.CompanyMember.update(companyMember.id, { 
+          user_name: userFullName,
           role: userRole 
         });
       }
