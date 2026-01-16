@@ -58,6 +58,22 @@ export default function PropertyDetail() {
     loadProperty();
   }, []);
 
+  useEffect(() => {
+    if (!property?.id) return;
+    const unsubscribe = base44.entities.FollowUp.subscribe((event) => {
+      if (event.property_id === property.id) {
+        if (event.type === 'create') {
+          setTasks(prev => [event.data, ...prev]);
+        } else if (event.type === 'update') {
+          setTasks(prev => prev.map(t => t.id === event.id ? event.data : t));
+        } else if (event.type === 'delete') {
+          setTasks(prev => prev.filter(t => t.id !== event.id));
+        }
+      }
+    });
+    return unsubscribe;
+  }, [property?.id]);
+
   const loadProperty = async () => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
