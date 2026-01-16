@@ -58,6 +58,7 @@ export default function Settings() {
   const [userEmail, setUserEmail] = useState('');
   const [userPhone, setUserPhone] = useState('');
   const [userRole, setUserRole] = useState('');
+  const [userTimezone, setUserTimezone] = useState('America/New_York');
 
   const [companyForm, setCompanyForm] = useState({
     name: '',
@@ -110,6 +111,7 @@ export default function Settings() {
       setUser(currentUser);
       setUserEmail(currentUser.email || '');
       setUserPhone(currentUser.phone || '');
+      setUserTimezone(currentUser.timezone || 'America/New_York');
       
       // Load company member info
        const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
@@ -202,7 +204,8 @@ export default function Settings() {
 
       await base44.auth.updateMe({ 
         full_name: fullName,
-        phone: userPhone
+        phone: userPhone,
+        timezone: userTimezone
       });
 
       // Update full name and role in CompanyMember
@@ -227,7 +230,8 @@ export default function Settings() {
       setUser({ 
         ...user, 
         full_name: fullName,
-        phone: userPhone
+        phone: userPhone,
+        timezone: userTimezone
       });
       // Refresh page to show updated data in layout
       window.location.reload();
@@ -649,28 +653,50 @@ ${company.name}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="user-phone">Mobile Phone</Label>
-                  <Input
-                    id="user-phone"
-                    type="tel"
-                    value={userPhone}
-                    onChange={(e) => setUserPhone(e.target.value)}
-                    placeholder="+1 (555) 123-4567"
-                    className="mt-1"
-                  />
-                </div>
-                  {companyMember && (
-                    <div>
-                      <Label className="text-sm text-slate-500">Role</Label>
-                      <p className="font-medium capitalize">
-                        {companyMember.role === 'field_inspector' ? 'Field Inspector' : 
-                         companyMember.role === 'dispatcher' ? 'Dispatcher/Manager' : 
-                         'Administrator'}
-                        {companyMember.is_owner && <span className="ml-2 text-amber-600">(Owner)</span>}
-                      </p>
-                    </div>
-                  )}
-                </div>
+                   <Label htmlFor="user-phone">Mobile Phone</Label>
+                   <Input
+                     id="user-phone"
+                     type="tel"
+                     value={userPhone}
+                     onChange={(e) => setUserPhone(e.target.value)}
+                     placeholder="+1 (555) 123-4567"
+                     className="mt-1"
+                   />
+                 </div>
+                 <div>
+                   <Label htmlFor="user-timezone">Timezone</Label>
+                   <Select value={userTimezone} onValueChange={setUserTimezone}>
+                     <SelectTrigger id="user-timezone" className="mt-1">
+                       <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
+                       <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
+                       <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
+                       <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
+                       <SelectItem value="America/Anchorage">Alaska Time (AKT)</SelectItem>
+                       <SelectItem value="Pacific/Honolulu">Hawaii Time (HST)</SelectItem>
+                       <SelectItem value="Europe/London">London (GMT/BST)</SelectItem>
+                       <SelectItem value="Europe/Paris">Central European Time (CET)</SelectItem>
+                       <SelectItem value="Asia/Tokyo">Japan Standard Time (JST)</SelectItem>
+                       <SelectItem value="Asia/Singapore">Singapore Time (SGT)</SelectItem>
+                       <SelectItem value="Australia/Sydney">Australian Eastern Time (AEDT)</SelectItem>
+                       <SelectItem value="UTC">UTC</SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
+                   {companyMember && (
+                     <div>
+                       <Label className="text-sm text-slate-500">Role</Label>
+                       <p className="font-medium capitalize">
+                         {companyMember.role === 'field_inspector' ? 'Field Inspector' : 
+                          companyMember.role === 'dispatcher' ? 'Dispatcher/Manager' : 
+                          'Administrator'}
+                         {companyMember.is_owner && <span className="ml-2 text-amber-600">(Owner)</span>}
+                       </p>
+                     </div>
+                   )}
+                 </div>
                 </div>
             </CardContent>
           </Card>
