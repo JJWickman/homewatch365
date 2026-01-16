@@ -168,11 +168,116 @@ export default function MobileInspectionView({
                 )}
               </CardContent>
             </Card>
-          );
-        })}
-      </div>
+            );
+            })}
 
-      {/* Complete Button */}
+            {/* Other/Custom Items Section */}
+            <Card>
+            <CardContent className="p-0">
+            <button
+              onClick={() => setExpandedCategory(expandedCategory === 'other' ? null : 'other')}
+              className="w-full p-4 text-left hover:bg-slate-50 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h3 className="font-medium text-slate-900">Other</h3>
+                  <p className="text-xs text-slate-500">Add custom inspection items</p>
+                  {customItems.length > 0 && (
+                    <div className="mt-2 text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded inline-block">{customItems.length} item{customItems.length !== 1 ? 's' : ''}</div>
+                  )}
+                </div>
+                <div className={`transition-transform ${expandedCategory === 'other' ? 'rotate-180' : ''}`}>
+                  <span className="text-slate-400">▼</span>
+                </div>
+              </div>
+            </button>
+
+            {expandedCategory === 'other' && (
+              <div className="border-t p-4 space-y-4 bg-white">
+                {/* Add New Custom Item */}
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Add Custom Item</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter item name..."
+                      value={newCustomName}
+                      onChange={(e) => setNewCustomName(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && addCustomItem()}
+                      className="text-sm"
+                    />
+                    <Button 
+                      onClick={addCustomItem}
+                      size="icon"
+                      className="bg-slate-900 hover:bg-slate-800"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Custom Items List */}
+                {customItems.length > 0 && (
+                  <div className="space-y-3 border-t pt-4">
+                    {customItems.map(item => (
+                      <div key={item.id} className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                        <div className="flex items-start justify-between mb-2">
+                          <h4 className="font-medium text-slate-900">{item.name}</h4>
+                          <button
+                            onClick={() => removeCustomItem(item.id)}
+                            className="text-slate-400 hover:text-red-600 transition-colors"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+
+                        {/* Notes */}
+                        <div className="mb-3">
+                          <Label className="text-xs font-medium mb-1 block">Notes</Label>
+                          <Textarea
+                            placeholder="Add observations..."
+                            value={item.notes}
+                            onChange={(e) => updateCustomItem(item.id, 'notes', e.target.value)}
+                            rows={2}
+                            className="text-xs"
+                          />
+                        </div>
+
+                        {/* Photos */}
+                        <div>
+                          <Label className="text-xs font-medium mb-1 block">Photos</Label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {item.photos.map((url, idx) => (
+                              <div key={idx} className="rounded-lg overflow-hidden bg-slate-100 aspect-square">
+                                <img src={url} alt="" className="h-full w-full object-cover" />
+                              </div>
+                            ))}
+                            <button
+                              onClick={() => addPhotoToCustom(item.id)}
+                              disabled={uploading}
+                              className="rounded-lg border-2 border-dashed border-amber-300 flex items-center justify-center aspect-square hover:border-amber-400 bg-amber-50 transition-colors disabled:opacity-50"
+                            >
+                              {uploading ? (
+                                <Loader2 className="h-5 w-5 animate-spin text-amber-400" />
+                              ) : (
+                                <div className="text-center">
+                                  <Camera className="h-5 w-5 text-amber-400 mx-auto mb-1" />
+                                  <span className="text-xs text-amber-600">Add</span>
+                                </div>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            </CardContent>
+            </Card>
+            </div>
+
+            {/* Complete Button */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 lg:left-64">
         <div className="max-w-2xl mx-auto">
           <Button
