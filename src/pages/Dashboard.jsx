@@ -65,8 +65,8 @@ export default function Dashboard() {
     try {
       const currentUser = await base44.auth.me();
       // Fetch fresh user data to get full_name
-      const userList = await base44.entities.User.filter({ id: currentUser.id });
-      const freshUser = userList.length > 0 ? { ...currentUser, full_name: userList[0].full_name } : currentUser;
+      const userList = await base44.entities.User.filter({ email: currentUser.email });
+      const freshUser = userList.length > 0 ? { ...currentUser, full_name: userList[0].full_name, id: userList[0].id } : currentUser;
       setUser(freshUser);
 
       const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
