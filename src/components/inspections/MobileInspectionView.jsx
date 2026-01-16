@@ -87,7 +87,7 @@ export default function MobileInspectionView({
 
   const handleFlagConfirm = (details) => {
     if (pendingFlagItem) {
-      const flagKey = `${pendingFlagItem.key}|${details.type}|${details.priority}`;
+      const flagKey = `${pendingFlagItem.key}|${details.type}|${details.priority}|${details.timeframe}`;
       const newSet = new Set(flaggedItems);
       newSet.add(flagKey);
       setFlaggedItems(newSet);
