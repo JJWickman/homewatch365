@@ -745,7 +745,7 @@ export default function Inspections() {
                    setScheduleMode('manual');
                    setSearchResults([]);
                  }}
-                 className="flex-1"
+                 className={`flex-1 font-medium ${scheduleMode === 'manual' ? 'bg-slate-900 text-white' : ''}`}
                >
                  Manual Schedule
                </Button>
@@ -755,7 +755,7 @@ export default function Inspections() {
                    setScheduleMode('search');
                    setSearchResults([]);
                  }}
-                 className="flex-1"
+                 className={`flex-1 font-medium ${scheduleMode === 'search' ? 'bg-slate-900 text-white' : ''}`}
                >
                  Find Available
                </Button>
