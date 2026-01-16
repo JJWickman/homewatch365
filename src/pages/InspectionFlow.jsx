@@ -95,6 +95,7 @@ export default function InspectionFlow() {
   const [photoUrls, setPhotoUrls] = useState([]);
   const [mobileCategories, setMobileCategories] = useState([]);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
+  const [flaggedItems, setFlaggedItems] = useState(new Set());
   
   const isFlexibleType = inspection && ['other', 'custom_client_request', 'drop_in'].includes(inspection.type);
   const isStandardType = inspection && ['routine', 'pre_storm', 'post_storm'].includes(inspection.type);
@@ -241,7 +242,7 @@ export default function InspectionFlow() {
             status: cat.notes || cat.photos.length > 0 ? 'checked' : '',
             notes: cat.notes,
             photo_urls: cat.photos,
-            flagged: false
+            flagged: flaggedItems.has(`category-${cat.id}`)
           }]
         }));
 
@@ -255,6 +256,27 @@ export default function InspectionFlow() {
           photo_count: totalPhotos,
           overall_status: overallStatus
         });
+
+        // Create follow-ups for flagged items
+        for (const [key, _] of flaggedItems) {
+          if (key.startsWith('category-')) {
+            const categoryId = key.replace('category-', '');
+            const category = mobileCategories.find(c => c.id === categoryId);
+            if (category) {
+              await base44.entities.FollowUp.create({
+                company_id: inspection.company_id,
+                property_id: inspection.property_id,
+                client_id: inspection.client_id,
+                inspection_id: inspection.id,
+                title: `${category.name} - Requires Attention`,
+                description: category.notes || `Issue identified during routine inspection of ${category.name}`,
+                type: 'inspection_followup',
+                priority: 'medium',
+                status: 'open'
+              });
+            }
+          }
+        }
 
         // Generate AI report
         await base44.functions.invoke('generateInspectionReport', {
