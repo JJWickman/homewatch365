@@ -351,11 +351,6 @@ export default function InspectionFlow() {
     );
   }
 
-  const currentSection = checklist[currentSectionIndex];
-  const totalItems = checklist.reduce((sum, s) => sum + s.items.length, 0);
-  const completedItems = checklist.reduce((sum, s) => sum + s.items.filter(i => i.status).length, 0);
-  const progress = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
-
   return (
     <div className="max-w-2xl mx-auto -mx-4 lg:-mx-6">
       {/* Header */}
