@@ -29,22 +29,6 @@ export default function ClientForm() {
   const [companyId, setCompanyId] = useState(null);
   const [clientId, setClientId] = useState(null);
   
-  const autoSaveFunction = async (data) => {
-    if (!companyId || !clientId) return;
-    const saveData = {
-      ...data,
-      company_id: companyId,
-      monthly_rate: data.monthly_rate ? parseFloat(data.monthly_rate) : null,
-      portal_user_email: data.portal_access ? data.email : null
-    };
-    await base44.entities.Client.update(clientId, saveData);
-  };
-  
-  const { isSaving: isAutoSaving, lastSaved } = useAutoSave(formData, autoSaveFunction, {
-    enabled: !!clientId,
-    delay: 2000
-  });
-  
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -61,6 +45,22 @@ export default function ClientForm() {
     portal_access: true,
     notes: '',
     is_active: true
+  });
+  
+  const autoSaveFunction = async (data) => {
+    if (!companyId || !clientId) return;
+    const saveData = {
+      ...data,
+      company_id: companyId,
+      monthly_rate: data.monthly_rate ? parseFloat(data.monthly_rate) : null,
+      portal_user_email: data.portal_access ? data.email : null
+    };
+    await base44.entities.Client.update(clientId, saveData);
+  };
+  
+  const { isSaving: isAutoSaving, lastSaved } = useAutoSave(formData, autoSaveFunction, {
+    enabled: !!clientId,
+    delay: 2000
   });
 
   useEffect(() => {
