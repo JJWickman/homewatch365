@@ -238,7 +238,7 @@ export default function Dashboard() {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button>
+            <Button className="bg-black text-white hover:bg-slate-900">
               <Calendar className="h-4 w-4 mr-2" />
               Book a Visit
               <ChevronDown className="h-4 w-4 ml-1" />
