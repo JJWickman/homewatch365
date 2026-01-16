@@ -199,20 +199,31 @@ export default function Settings() {
     setSavingProfile(true);
     try {
       const fullName = `${userFirstName} ${userLastName}`.trim();
-      
+
       await base44.auth.updateMe({ 
         full_name: fullName,
         phone: userPhone
       });
-      
+
       // Update full name and role in CompanyMember
       if (companyMember) {
         await base44.entities.CompanyMember.update(companyMember.id, { 
           user_name: fullName,
           role: userRole 
         });
+
+        // Trigger retroactive name update in all historical records
+        try {
+          await base44.functions.invoke('updateNameReferences', {
+            user_email: userEmail,
+            new_name: fullName,
+            company_id: companyMember.company_id
+          });
+        } catch (error) {
+          console.error('Warning: Could not update historical records:', error);
+        }
       }
-      
+
       setUser({ 
         ...user, 
         full_name: fullName,
