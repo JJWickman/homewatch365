@@ -41,16 +41,15 @@ import DataTable from '@/components/shared/DataTable';
 
 export default function Inspections() {
   const navigate = useNavigate();
-  const [inspections, setInspections] = useState([]);
+  const [visits, setVisits] = useState([]);
   const [properties, setProperties] = useState([]);
   const [clients, setClients] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [staff, setStaff] = useState([]);
-  const [followUps, setFollowUps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const [visitTypeFilter, setVisitTypeFilter] = useState('all');
   const [assignedFilter, setAssignedFilter] = useState('all');
   const [propertyFilter, setPropertyFilter] = useState('all');
   const [companyId, setCompanyId] = useState(null);
