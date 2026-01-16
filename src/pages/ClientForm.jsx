@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import PageHeader from '@/components/shared/PageHeader';
+import { useAutoSave } from '@/components/shared/useAutoSave';
+import { Clock } from 'lucide-react';
 
 export default function ClientForm() {
   const navigate = useNavigate();
@@ -26,6 +28,22 @@ export default function ClientForm() {
   const [saving, setSaving] = useState(false);
   const [companyId, setCompanyId] = useState(null);
   const [clientId, setClientId] = useState(null);
+  
+  const autoSaveFunction = async (data) => {
+    if (!companyId || !clientId) return;
+    const saveData = {
+      ...data,
+      company_id: companyId,
+      monthly_rate: data.monthly_rate ? parseFloat(data.monthly_rate) : null,
+      portal_user_email: data.portal_access ? data.email : null
+    };
+    await base44.entities.Client.update(clientId, saveData);
+  };
+  
+  const { isSaving: isAutoSaving, lastSaved } = useAutoSave(formData, autoSaveFunction, {
+    enabled: !!clientId,
+    delay: 2000
+  });
   
   const [formData, setFormData] = useState({
     first_name: '',
@@ -140,7 +158,20 @@ export default function ClientForm() {
         subtitle="Enter client information and service details"
         backLink="Clients"
         backLabel="Back to Clients"
-      />
+      >
+        {clientId && (
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Clock className="h-4 w-4" />
+            {isAutoSaving ? (
+              <span className="text-amber-600">Saving...</span>
+            ) : lastSaved ? (
+              <span>Saved {new Date(lastSaved).toLocaleTimeString()}</span>
+            ) : (
+              <span>Auto-save enabled</span>
+            )}
+          </div>
+        )}
+      </PageHeader>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}

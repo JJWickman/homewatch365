@@ -27,6 +27,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import PageHeader from '@/components/shared/PageHeader';
+import { useAutoSave } from '@/components/shared/useAutoSave';
+import { Clock } from 'lucide-react';
 
 export default function PropertyForm() {
   const navigate = useNavigate();
@@ -36,6 +38,24 @@ export default function PropertyForm() {
 
   const [companyId, setCompanyId] = useState(null);
   const [propertyId, setPropertyId] = useState(null);
+  
+  const autoSaveFunction = async (data) => {
+    if (!companyId || !propertyId) return;
+    const saveData = {
+      ...data,
+      company_id: companyId,
+      square_feet: data.square_feet ? parseFloat(data.square_feet) : null,
+      bedrooms: data.bedrooms ? parseInt(data.bedrooms) : null,
+      bathrooms: data.bathrooms ? parseFloat(data.bathrooms) : null,
+      is_active: true
+    };
+    await base44.entities.Property.update(propertyId, saveData);
+  };
+  
+  const { isSaving: isAutoSaving, lastSaved } = useAutoSave(formData, autoSaveFunction, {
+    enabled: !!propertyId,
+    delay: 2000
+  });
   const [clients, setClients] = useState([]);
   const [staff, setStaff] = useState([]);
   const [contractors, setContractors] = useState([]);
@@ -563,10 +583,24 @@ export default function PropertyForm() {
         backLink="Properties"
         backLabel="Back to Properties"
       >
-        <Button type="submit" form="property-form" disabled={saving} className="bg-slate-900 hover:bg-slate-800">
-          <Save className="h-4 w-4 mr-2" />
-          {saving ? 'Saving...' : 'Save'}
-        </Button>
+        <div className="flex items-center gap-3">
+          {propertyId && (
+            <div className="flex items-center gap-2 text-sm text-slate-500">
+              <Clock className="h-4 w-4" />
+              {isAutoSaving ? (
+                <span className="text-amber-600">Saving...</span>
+              ) : lastSaved ? (
+                <span>Saved {new Date(lastSaved).toLocaleTimeString()}</span>
+              ) : (
+                <span>Auto-save enabled</span>
+              )}
+            </div>
+          )}
+          <Button type="submit" form="property-form" disabled={saving} className="bg-slate-900 hover:bg-slate-800">
+            <Save className="h-4 w-4 mr-2" />
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
+        </div>
       </PageHeader>
 
       <form id="property-form" onSubmit={handleSubmit} className="space-y-6">
