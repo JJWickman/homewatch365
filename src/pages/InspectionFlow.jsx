@@ -259,12 +259,23 @@ export default function InspectionFlow() {
 
         // Create follow-ups for flagged items
         for (const flagKey of flaggedItems) {
-          const [itemId, followUpType, priority] = flagKey.split('|');
+          const [itemId, followUpType, priority, timeframe] = flagKey.split('|');
           
           if (itemId.startsWith('category-')) {
             const categoryId = itemId.replace('category-', '');
             const category = mobileCategories.find(c => c.id === categoryId);
             if (category) {
+              // Calculate due date based on timeframe
+              let dueDate;
+              const today = new Date();
+              if (timeframe === 'asap') {
+                dueDate = today;
+              } else if (timeframe === 'within_week') {
+                dueDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+              } else {
+                dueDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+              }
+
               await base44.entities.FollowUp.create({
                 company_id: inspection.company_id,
                 property_id: inspection.property_id,
@@ -274,7 +285,8 @@ export default function InspectionFlow() {
                 description: category.notes || `Issue identified during routine inspection of ${category.name}`,
                 type: followUpType || 'inspection_followup',
                 priority: priority || 'medium',
-                status: 'open'
+                status: 'open',
+                due_date: dueDate.toISOString().split('T')[0]
               });
             }
           }
