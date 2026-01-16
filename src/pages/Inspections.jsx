@@ -490,8 +490,8 @@ export default function Inspections() {
   return (
     <div>
       <PageHeader
-         title="Inspections"
-         subtitle={`${inspections.length} total inspections`}
+         title="Visits"
+         subtitle={`${visits.length} total visits`}
          action={() => {
            setVisitType('inspection');
            setShowNewDialog(true);
