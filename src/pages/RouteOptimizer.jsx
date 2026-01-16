@@ -10,11 +10,21 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import PageHeader from '@/components/shared/PageHeader';
 import RouteMap from '@/components/route/RouteMap';
 
 export default function RouteOptimizer() {
   const [companyId, setCompanyId] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [teamMembers, setTeamMembers] = useState([]);
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [inspections, setInspections] = useState([]);
   const [properties, setProperties] = useState([]);
@@ -28,22 +38,30 @@ export default function RouteOptimizer() {
   }, []);
 
   useEffect(() => {
-    if (companyId) {
+    if (companyId && selectedUser) {
       loadInspectionsForDate();
     }
-  }, [selectedDate, companyId]);
+  }, [selectedDate, companyId, selectedUser]);
 
   const loadData = async () => {
     try {
       const user = await base44.auth.me();
+      setCurrentUser(user);
+      setSelectedUser(user.email);
+      
       const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
       
       if (members.length > 0) {
         const cId = members[0].company_id;
         setCompanyId(cId);
         
-        const propertiesData = await base44.entities.Property.filter({ company_id: cId });
+        const [propertiesData, teamMembersData] = await Promise.all([
+          base44.entities.Property.filter({ company_id: cId }),
+          base44.entities.CompanyMember.filter({ company_id: cId, is_active: true })
+        ]);
+        
         setProperties(propertiesData);
+        setTeamMembers(teamMembersData);
         
         // Use user's Base HQ address if available, otherwise fall back to company address
         if (user.base_hq_address && user.base_hq_address.address) {
@@ -67,10 +85,12 @@ export default function RouteOptimizer() {
       base44.entities.Inspection.filter({ 
         company_id: companyId, 
         scheduled_date: selectedDate,
+        assigned_to: selectedUser,
         status: { $in: ['scheduled', 'in_progress'] }
       }),
       base44.entities.FollowUp.filter({
         company_id: companyId,
+        assigned_to: selectedUser,
         due_date: selectedDate,
         status: { $in: ['open', 'in_progress'] }
       })
@@ -232,30 +252,53 @@ Return the optimized order with estimated times and any weather/traffic consider
       />
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Left Panel - Controls & Stops */}
-        <div className="lg:col-span-1 space-y-4">
-          {/* Date & Start Location */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Route Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>Date</Label>
-                <Input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label>Starting Location</Label>
-                <Input
-                  value={startAddress}
-                  onChange={(e) => setStartAddress(e.target.value)}
-                  placeholder="Enter starting address"
-                />
-              </div>
+         {/* Left Panel - Controls & Stops */}
+         <div className="lg:col-span-1 space-y-4">
+           {/* User Selection & Settings */}
+           <Card>
+             <CardHeader className="pb-3">
+               <CardTitle className="text-base">Create Optimized Route For:</CardTitle>
+             </CardHeader>
+             <CardContent className="space-y-4">
+               <div>
+                 <Select value={selectedUser || ''} onValueChange={setSelectedUser}>
+                   <SelectTrigger>
+                     <SelectValue placeholder="Select a user" />
+                   </SelectTrigger>
+                   <SelectContent>
+                     {teamMembers.map((member) => (
+                       <SelectItem key={member.id} value={member.user_email}>
+                         {member.user_name} ({member.role})
+                       </SelectItem>
+                     ))}
+                   </SelectContent>
+                 </Select>
+               </div>
+             </CardContent>
+           </Card>
+
+           {/* Date & Start Location */}
+           <Card>
+             <CardHeader className="pb-3">
+               <CardTitle className="text-base">Route Settings</CardTitle>
+             </CardHeader>
+             <CardContent className="space-y-4">
+               <div>
+                 <Label>Date</Label>
+                 <Input
+                   type="date"
+                   value={selectedDate}
+                   onChange={(e) => setSelectedDate(e.target.value)}
+                 />
+               </div>
+               <div>
+                 <Label>Starting Location</Label>
+                 <Input
+                   value={startAddress}
+                   onChange={(e) => setStartAddress(e.target.value)}
+                   placeholder="Enter starting address"
+                 />
+               </div>
               <Button 
                 onClick={optimizeRoute} 
                 disabled={inspections.length === 0 || optimizing}
