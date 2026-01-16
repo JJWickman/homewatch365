@@ -57,6 +57,7 @@ export default function Inspections() {
   
   // New inspection dialog
   const [showNewDialog, setShowNewDialog] = useState(false);
+  const [editingInspectionId, setEditingInspectionId] = useState(null);
   const [newInspection, setNewInspection] = useState({
     property_id: '',
     template_id: '',
@@ -192,7 +193,7 @@ export default function Inspections() {
     if (!companyId || !newInspection.property_id) return;
     
     // Check for scheduled inspection in same week for stop-by
-    if (checkForScheduledInspection()) {
+    if (!editingInspectionId && checkForScheduledInspection()) {
       return;
     }
     
@@ -218,39 +219,45 @@ export default function Inspections() {
       ...(newInspection.custom_name && { custom_inspection_name: newInspection.custom_name })
     };
 
-    // Generate inspection dates
-    const dates = [newInspection.scheduled_date];
-    
-    if (newInspection.is_recurring && newInspection.recurrence_end_date) {
-      let currentDate = parseISO(newInspection.scheduled_date);
-      const endDate = parseISO(newInspection.recurrence_end_date);
+    if (editingInspectionId) {
+      // Update existing inspection
+      await base44.entities.Inspection.update(editingInspectionId, baseData);
+    } else {
+      // Generate inspection dates
+      const dates = [newInspection.scheduled_date];
       
-      while (currentDate < endDate) {
-        if (newInspection.recurrence_frequency === 'daily') {
-          currentDate = addDays(currentDate, 1);
-        } else if (newInspection.recurrence_frequency === 'weekly') {
-          currentDate = addWeeks(currentDate, 1);
-        } else if (newInspection.recurrence_frequency === 'bi_weekly') {
-          currentDate = addWeeks(currentDate, 2);
-        } else if (newInspection.recurrence_frequency === 'monthly') {
-          currentDate = addMonths(currentDate, 1);
-        }
+      if (newInspection.is_recurring && newInspection.recurrence_end_date) {
+        let currentDate = parseISO(newInspection.scheduled_date);
+        const endDate = parseISO(newInspection.recurrence_end_date);
         
-        if (currentDate <= endDate) {
-          dates.push(format(currentDate, 'yyyy-MM-dd'));
+        while (currentDate < endDate) {
+          if (newInspection.recurrence_frequency === 'daily') {
+            currentDate = addDays(currentDate, 1);
+          } else if (newInspection.recurrence_frequency === 'weekly') {
+            currentDate = addWeeks(currentDate, 1);
+          } else if (newInspection.recurrence_frequency === 'bi_weekly') {
+            currentDate = addWeeks(currentDate, 2);
+          } else if (newInspection.recurrence_frequency === 'monthly') {
+            currentDate = addMonths(currentDate, 1);
+          }
+          
+          if (currentDate <= endDate) {
+            dates.push(format(currentDate, 'yyyy-MM-dd'));
+          }
         }
       }
+
+      // Create all inspections
+      const inspectionsToCreate = dates.map(date => ({
+        ...baseData,
+        scheduled_date: date
+      }));
+
+      await base44.entities.Inspection.bulkCreate(inspectionsToCreate);
     }
-
-    // Create all inspections
-    const inspectionsToCreate = dates.map(date => ({
-      ...baseData,
-      scheduled_date: date
-    }));
-
-    await base44.entities.Inspection.bulkCreate(inspectionsToCreate);
     
     setShowNewDialog(false);
+    setEditingInspectionId(null);
     setNewInspection({
       property_id: '',
       template_id: '',
@@ -266,6 +273,24 @@ export default function Inspections() {
     });
     setCreating(false);
     loadData();
+  };
+
+  const handleEditInspection = (inspection) => {
+    setEditingInspectionId(inspection.id);
+    setNewInspection({
+      property_id: inspection.property_id,
+      template_id: inspection.template_id || '',
+      scheduled_date: inspection.scheduled_date,
+      scheduled_time: inspection.scheduled_time || '',
+      type: inspection.type,
+      assigned_to: inspection.assigned_to || '',
+      is_recurring: false,
+      recurrence_frequency: 'weekly',
+      recurrence_end_date: '',
+      custom_name: inspection.custom_inspection_name || '',
+      inspection_details: inspection.summary_notes || ''
+    });
+    setShowNewDialog(true);
   };
 
   const handleReplaceScheduled = async (replace) => {
@@ -405,13 +430,22 @@ export default function Inspections() {
               View Details
             </DropdownMenuItem>
             {inspection.status === 'scheduled' && (
-              <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`);
-              }}>
-                <Play className="h-4 w-4 mr-2" />
-                Start Inspection
-              </DropdownMenuItem>
+              <>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditInspection(inspection);
+                }}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`);
+                }}>
+                  <Play className="h-4 w-4 mr-2" />
+                  Start Inspection
+                </DropdownMenuItem>
+              </>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -518,12 +552,30 @@ export default function Inspections() {
       )}
 
       {/* New Inspection Dialog */}
-      <Dialog open={showNewDialog} onOpenChange={setShowNewDialog}>
+      <Dialog open={showNewDialog} onOpenChange={(open) => {
+        setShowNewDialog(open);
+        if (!open) {
+          setEditingInspectionId(null);
+          setNewInspection({
+            property_id: '',
+            template_id: '',
+            scheduled_date: format(new Date(), 'yyyy-MM-dd'),
+            scheduled_time: '',
+            type: 'routine',
+            assigned_to: '',
+            is_recurring: false,
+            recurrence_frequency: 'weekly',
+            recurrence_end_date: '',
+            custom_name: '',
+            inspection_details: ''
+          });
+        }
+      }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Schedule Inspection</DialogTitle>
+            <DialogTitle>{editingInspectionId ? 'Edit Inspection' : 'Schedule Inspection'}</DialogTitle>
             <DialogDescription>
-              Create a new inspection for a property
+              {editingInspectionId ? 'Update inspection details' : 'Create a new inspection for a property'}
             </DialogDescription>
           </DialogHeader>
           
@@ -733,7 +785,7 @@ export default function Inspections() {
               disabled={!newInspection.property_id || !newInspection.scheduled_date || creating || (newInspection.is_recurring && !newInspection.recurrence_end_date) || (['other', 'custom_client_request'].includes(newInspection.type) && !newInspection.inspection_details)}
               className="bg-slate-900 hover:bg-slate-800"
             >
-              {creating ? 'Scheduling...' : 'Schedule'}
+              {creating ? (editingInspectionId ? 'Updating...' : 'Scheduling...') : (editingInspectionId ? 'Update' : 'Schedule')}
             </Button>
           </DialogFooter>
         </DialogContent>
