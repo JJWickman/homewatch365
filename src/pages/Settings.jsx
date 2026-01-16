@@ -993,8 +993,27 @@ ${company.name}
         </TabsContent>
 
         <TabsContent value="billing" className="space-y-6">
-          {/* Current Plan */}
-          {company?.subscription_plan && (
+          {/* Current Plan & Trial Status */}
+          {company?.subscription_status === 'trial' && company.trial_ends_at && (
+            <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-amber-700">Free Trial Active</p>
+                    <p className="text-2xl font-bold text-slate-900">
+                      {Math.ceil((new Date(company.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24))} days remaining
+                    </p>
+                    <p className="text-sm text-amber-600 mt-1">
+                      Trial ends {new Date(company.trial_ends_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Badge className="bg-amber-600 text-white">Free Trial</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {company?.subscription_status === 'active' && (
             <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
@@ -1004,9 +1023,7 @@ ${company.name}
                       {PRICING_TIERS.find(t => t.id === company.subscription_plan)?.name || company.subscription_plan}
                     </p>
                   </div>
-                  <Badge className="bg-blue-600 text-white">
-                    {company.subscription_status === 'trial' ? 'Trial' : 'Active'}
-                  </Badge>
+                  <Badge className="bg-blue-600 text-white">Active</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -1105,8 +1122,13 @@ ${company.name}
                       disabled={isCurrentPlan || loadingCheckout}
                       className={`w-full ${tier.popular ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-900 hover:bg-slate-800'}`}
                     >
-                      {loadingCheckout ? 'Loading...' : (isCurrentPlan ? 'Current Plan' : 'Subscribe Now')}
+                      {loadingCheckout ? 'Loading...' : (isCurrentPlan ? 'Current Plan' : company?.subscription_status === 'trial' ? 'Start Subscription' : 'Subscribe Now')}
                     </Button>
+                    {company?.subscription_status === 'trial' && !isCurrentPlan && (
+                      <p className="text-xs text-center text-slate-500 mt-2">
+                        14-day free trial included
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               );

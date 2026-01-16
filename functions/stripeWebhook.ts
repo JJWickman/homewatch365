@@ -31,10 +31,15 @@ Deno.serve(async (req) => {
         const companyId = session.metadata.company_id;
         const subscriptionPlan = session.metadata.subscription_plan;
         
+        // Set to trial if subscription has trial period, otherwise active
+        const subscription = await stripe.subscriptions.retrieve(session.subscription);
+        const status = subscription.status === 'trialing' ? 'trial' : 'active';
+        
         await base44.asServiceRole.entities.Company.update(companyId, {
           subscription_plan: subscriptionPlan,
-          subscription_status: 'active',
-          stripe_subscription_id: session.subscription
+          subscription_status: status,
+          stripe_subscription_id: session.subscription,
+          trial_ends_at: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null
         });
         break;
       }
