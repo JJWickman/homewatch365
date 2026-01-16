@@ -42,9 +42,8 @@ const baseItems = [
   { name: 'Dashboard', icon: Home, page: 'Dashboard' },
   { name: 'Clients', icon: Users, page: 'Clients' },
   { name: 'Properties', icon: Building2, page: 'Properties' },
-  { name: 'Inspections', icon: ClipboardCheck, page: 'Inspections' },
+  { name: 'Visits', icon: ClipboardCheck, page: 'Inspections' },
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
-  { name: 'Follow-Ups', icon: FileText, page: 'FollowUps' },
   { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
   { name: 'Route Optimizer', icon: Route, page: 'RouteOptimizer' },
 ];
