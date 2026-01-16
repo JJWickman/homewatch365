@@ -156,9 +156,16 @@ export default function Inspections() {
     return format(date, 'MMM d, yyyy');
     };
 
-    const findAvailableSlots = () => {
+    const findAvailableSlots = async () => {
     const propertyId = newVisit.property_id;
-    if (!propertyId) return;
+    const staffEmail = newVisit.assigned_to;
+    if (!propertyId || !staffEmail) return;
+
+    const selectedProperty = getProperty(propertyId);
+    if (!selectedProperty?.address) {
+      alert('Property address is required to find available slots');
+      return;
+    }
 
     const results = [];
     let currentDate = new Date();
@@ -174,34 +181,87 @@ export default function Inspections() {
         continue;
       }
 
-      // Check morning and afternoon availability
-      const morningBooked = visits.some(v => 
-        v.property_id === propertyId && 
-        v.scheduled_date === dateStr && 
-        v.scheduled_time === 'morning' &&
+      // Get all visits for this staff member on this date
+      const staffVisitsOnDate = visits.filter(v => 
+        v.assigned_to === staffEmail && 
+        v.scheduled_date === dateStr &&
         v.status !== 'cancelled'
       );
 
-      const afternoonBooked = visits.some(v => 
-        v.property_id === propertyId && 
-        v.scheduled_date === dateStr && 
-        v.scheduled_time === 'afternoon' &&
-        v.status !== 'cancelled'
+      // Check morning availability (8am-12pm)
+      const canDoMorning = await checkTimeSlotFeasibility(
+        selectedProperty, 
+        staffVisitsOnDate, 
+        'morning',
+        dateStr
       );
 
-      if (!morningBooked) {
+      // Check afternoon availability (12pm-4pm)
+      const canDoAfternoon = await checkTimeSlotFeasibility(
+        selectedProperty, 
+        staffVisitsOnDate, 
+        'afternoon',
+        dateStr
+      );
+
+      if (canDoMorning) {
         results.push({ date: dateStr, time: 'morning', label: `${getDateLabel(dateStr)} - Morning (8am-12pm)` });
       }
-      if (!afternoonBooked) {
+      if (canDoAfternoon) {
         results.push({ date: dateStr, time: 'afternoon', label: `${getDateLabel(dateStr)} - Afternoon (12pm-4pm)` });
       }
 
-      if (results.length >= 5) break; // Show first 5 available slots
-
+      if (results.length >= 5) break;
       currentDate = addDays(currentDate, 1);
     }
 
     setSearchResults(results);
+    };
+
+    const checkTimeSlotFeasibility = async (selectedProperty, staffVisitsOnDate, timeSlot, dateStr) => {
+    if (staffVisitsOnDate.length === 0) return true;
+
+    // Allow 1 hour buffer for travel and inspection
+    const TRAVEL_BUFFER_MINUTES = 60;
+
+    for (const visit of staffVisitsOnDate) {
+      const otherProperty = getProperty(visit.property_id);
+      if (!otherProperty?.address) continue;
+
+      try {
+        const response = await base44.functions.invoke('calculateTravelTime', {
+          fromAddress: otherProperty.address,
+          toAddress: selectedProperty.address
+        });
+
+        const travelTimeMinutes = Math.ceil(response.data.duration / 60);
+        const totalTimeNeeded = travelTimeMinutes + TRAVEL_BUFFER_MINUTES;
+
+        // Check if time slot conflicts
+        if (visit.scheduled_time === 'morning' && timeSlot === 'morning') {
+          return false; // Same time block
+        }
+        if (visit.scheduled_time === 'afternoon' && timeSlot === 'afternoon') {
+          return false; // Same time block
+        }
+
+        // Check if travel time is feasible between morning and afternoon
+        if (visit.scheduled_time === 'morning' && timeSlot === 'afternoon') {
+          // Morning ends at 12pm, afternoon starts at 12pm - need at least 4 hours buffer
+          if (totalTimeNeeded > 240) return false;
+        }
+        if (visit.scheduled_time === 'afternoon' && timeSlot === 'morning') {
+          // Not feasible - would need to complete morning before afternoon starts
+          return false;
+        }
+      } catch (error) {
+        console.error('Error calculating travel time:', error);
+        // If we can't calculate, assume it's not feasible
+        return false;
+      }
+    }
+
+    return true;
     };
 
   const filteredVisits = visits.filter(visit => {
