@@ -345,6 +345,13 @@ export default function MobileInspectionView({
           </Button>
         </div>
       </div>
+
+      <FollowUpFlagDialog
+        isOpen={dialogOpen}
+        onOpenChange={setDialogOpen}
+        itemName={pendingFlagItem?.name}
+        onConfirm={handleFlagConfirm}
+      />
     </div>
   );
 }
