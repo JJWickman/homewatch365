@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Camera, CheckCircle2, Loader2, Plus } from 'lucide-react';
+import { Camera, CheckCircle2, Loader2, Plus, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 const INSPECTION_CATEGORIES = [
   { id: 'plumbing', name: 'Plumbing', description: 'Sinks, showers, leaks' },
