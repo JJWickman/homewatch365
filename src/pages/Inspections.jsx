@@ -713,58 +713,28 @@ export default function Inspections() {
               </div>
             )}
 
-            {visitType === 'inspection' ? (
-               <div>
-                 <Label>Type</Label>
-                 <Select
-                   value={newVisit.type}
-                   onValueChange={(value) => setNewVisit(prev => ({ ...prev, type: value, template_id: !['other', 'custom_client_request', 'drop_in'].includes(value) ? prev.template_id : '' }))}
-                 >
-                   <SelectTrigger>
-                     <SelectValue />
-                   </SelectTrigger>
-                   <SelectContent>
-                     <SelectItem value="routine">Routine</SelectItem>
-                     <SelectItem value="pre_storm">Pre-Storm</SelectItem>
-                     <SelectItem value="post_storm">Post-Storm</SelectItem>
-                     <SelectItem value="other">Other</SelectItem>
-                     <SelectItem value="custom_client_request">Custom Client Request</SelectItem>
-                     <SelectItem value="drop_in">Drop-In</SelectItem>
-                   </SelectContent>
-                 </Select>
-               </div>
-             ) : (
-               <div className="space-y-4">
+            {visitType === 'inspection' && (
+               <>
                  <div>
-                   <Label>Title *</Label>
-                   <Input
-                     placeholder="e.g., Fix roof leak"
-                     value={newVisit.followup_title}
-                     onChange={(e) => setNewVisit(prev => ({ ...prev, followup_title: e.target.value }))}
-                   />
-                 </div>
-                 <div>
-                   <Label>Priority</Label>
+                   <Label>Type</Label>
                    <Select
-                     value={newVisit.followup_priority}
-                     onValueChange={(value) => setNewVisit(prev => ({ ...prev, followup_priority: value }))}
+                     value={newVisit.type}
+                     onValueChange={(value) => setNewVisit(prev => ({ ...prev, type: value, template_id: !['other', 'custom_client_request', 'drop_in'].includes(value) ? prev.template_id : '' }))}
                    >
                      <SelectTrigger>
                        <SelectValue />
                      </SelectTrigger>
                      <SelectContent>
-                       <SelectItem value="low">Low</SelectItem>
-                       <SelectItem value="medium">Medium</SelectItem>
-                       <SelectItem value="high">High</SelectItem>
-                       <SelectItem value="urgent">Urgent</SelectItem>
+                       <SelectItem value="routine">Routine</SelectItem>
+                       <SelectItem value="pre_storm">Pre-Storm</SelectItem>
+                       <SelectItem value="post_storm">Post-Storm</SelectItem>
+                       <SelectItem value="other">Other</SelectItem>
+                       <SelectItem value="custom_client_request">Custom Client Request</SelectItem>
+                       <SelectItem value="drop_in">Drop-In</SelectItem>
                      </SelectContent>
                    </Select>
                  </div>
-               </div>
-             )}
 
-            {visitType === 'inspection' && (
-               <>
                  {newVisit.type === 'other' && (
                    <div className="space-y-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                      <div>
@@ -821,13 +791,40 @@ export default function Inspections() {
                </>
              ) : (
                <div>
-                 <Label>Description</Label>
-                 <Textarea
-                   placeholder="Describe the follow-up details..."
-                   value={newVisit.followup_description}
-                   onChange={(e) => setNewVisit(prev => ({ ...prev, followup_description: e.target.value }))}
-                   rows={2}
-                 />
+                 <div>
+                   <Label>Title *</Label>
+                   <Input
+                     placeholder="e.g., Fix roof leak"
+                     value={newVisit.followup_title}
+                     onChange={(e) => setNewVisit(prev => ({ ...prev, followup_title: e.target.value }))}
+                   />
+                 </div>
+                 <div>
+                   <Label>Priority</Label>
+                   <Select
+                     value={newVisit.followup_priority}
+                     onValueChange={(value) => setNewVisit(prev => ({ ...prev, followup_priority: value }))}
+                   >
+                     <SelectTrigger>
+                       <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="low">Low</SelectItem>
+                       <SelectItem value="medium">Medium</SelectItem>
+                       <SelectItem value="high">High</SelectItem>
+                       <SelectItem value="urgent">Urgent</SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
+                 <div>
+                   <Label>Description</Label>
+                   <Textarea
+                     placeholder="Describe the follow-up details..."
+                     value={newVisit.followup_description}
+                     onChange={(e) => setNewVisit(prev => ({ ...prev, followup_description: e.target.value }))}
+                     rows={2}
+                   />
+                 </div>
                </div>
              )}
 
