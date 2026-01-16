@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Camera, CheckCircle2, Loader2, Plus, X, AlertCircle } from 'lucide-react';
+import FollowUpFlagDialog from './FollowUpFlagDialog';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,6 +31,8 @@ export default function MobileInspectionView({
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [customItems, setCustomItems] = useState([]);
   const [newCustomName, setNewCustomName] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [pendingFlagItem, setPendingFlagItem] = useState(null);
 
   const updateCategory = (categoryId, field, value) => {
     setCategories(prev => 
@@ -77,15 +80,18 @@ export default function MobileInspectionView({
     input.click();
   };
 
-  const toggleFlagItem = (itemKey) => {
-    if (typeof flaggedItems === 'object' && flaggedItems instanceof Set) {
+  const handleFlagClick = (itemKey, itemName) => {
+    setPendingFlagItem({ key: itemKey, name: itemName });
+    setDialogOpen(true);
+  };
+
+  const handleFlagConfirm = (details) => {
+    if (pendingFlagItem) {
+      const flagKey = `${pendingFlagItem.key}|${details.type}|${details.priority}`;
       const newSet = new Set(flaggedItems);
-      if (newSet.has(itemKey)) {
-        newSet.delete(itemKey);
-      } else {
-        newSet.add(itemKey);
-      }
+      newSet.add(flagKey);
       setFlaggedItems(newSet);
+      setPendingFlagItem(null);
     }
   };
 
