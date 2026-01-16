@@ -188,95 +188,92 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Today's Schedule */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-lg font-semibold">Today's Inspections</CardTitle>
-            <Link to={createPageUrl('Schedule')} className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1">
-              View all <ArrowRight className="h-4 w-4" />
-            </Link>
-          </CardHeader>
-          <CardContent>
-            {todayInspections.length === 0 ? (
-              <div className="text-center py-8 text-slate-500">
-                <Calendar className="h-10 w-10 mx-auto mb-2 text-slate-300" />
-                <p>No inspections scheduled for today</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {todayInspections.map((inspection) => (
-                  <Link 
-                    key={inspection.id} 
-                    to={createPageUrl('InspectionDetail') + `?id=${inspection.id}`}
-                    className="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200"
-                  >
-                    <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-                      <Building2 className="h-6 w-6 text-slate-500" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-900 truncate">
-                        {inspection.property?.name || inspection.property?.address}
-                      </p>
-                      <div className="flex items-center gap-3 text-sm text-slate-500">
-                        {inspection.scheduled_time && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5" />
-                            {inspection.scheduled_time}
-                          </span>
-                        )}
-                        <span className="flex items-center gap-1 truncate">
-                          <MapPin className="h-3.5 w-3.5 shrink-0" />
-                          {inspection.property?.city}
+      {/* Today's Inspections - Full Width */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-lg font-semibold">Today's Inspections</CardTitle>
+          <Link to={createPageUrl('Schedule')} className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1">
+            View all <ArrowRight className="h-4 w-4" />
+          </Link>
+        </CardHeader>
+        <CardContent>
+          {todayInspections.length === 0 ? (
+            <div className="text-center py-8 text-slate-500">
+              <Calendar className="h-10 w-10 mx-auto mb-2 text-slate-300" />
+              <p>No inspections scheduled for today</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {todayInspections.map((inspection) => (
+                <Link 
+                  key={inspection.id} 
+                  to={createPageUrl('InspectionDetail') + `?id=${inspection.id}`}
+                  className="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200"
+                >
+                  <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                    <Building2 className="h-6 w-6 text-slate-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-slate-900 truncate">
+                      {inspection.property?.name || inspection.property?.address}
+                    </p>
+                    <div className="flex items-center gap-3 text-sm text-slate-500">
+                      {inspection.scheduled_time && (
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          {inspection.scheduled_time}
                         </span>
-                      </div>
-                    </div>
-                    <StatusBadge status={inspection.status} />
-                  </Link>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Quick Actions / Activity */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {recentActivity.length === 0 ? (
-              <div className="text-center py-8 text-slate-500">
-                <Clock className="h-10 w-10 mx-auto mb-2 text-slate-300" />
-                <p>No recent activity</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {recentActivity.slice(0, 6).map((activity) => (
-                  <div key={activity.id} className="flex items-start gap-3">
-                    <Avatar className="h-8 w-8 shrink-0">
-                      <AvatarFallback className="text-xs bg-slate-100">
-                        {getInitials(activity.user_name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-slate-900">
-                        <span className="font-medium">{activity.user_name || 'Someone'}</span>
-                        {' '}{activity.action}d{' '}
-                        <span className="font-medium">{activity.entity_name || activity.entity_type}</span>
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        {format(new Date(activity.created_date), 'MMM d, h:mm a')}
-                      </p>
+                      )}
+                      <span className="flex items-center gap-1 truncate">
+                        <MapPin className="h-3.5 w-3.5 shrink-0" />
+                        {inspection.property?.city}
+                      </span>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                  <StatusBadge status={inspection.status} />
+                </Link>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Recent Activity - Full Width */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {recentActivity.length === 0 ? (
+            <div className="text-center py-8 text-slate-500">
+              <Clock className="h-10 w-10 mx-auto mb-2 text-slate-300" />
+              <p>No recent activity</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recentActivity.slice(0, 6).map((activity) => (
+                <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50">
+                  <Avatar className="h-8 w-8 shrink-0">
+                    <AvatarFallback className="text-xs bg-slate-100">
+                      {getInitials(activity.user_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-slate-900">
+                      <span className="font-medium">{activity.user_name || 'Someone'}</span>
+                      {' '}{activity.action}d{' '}
+                      <span className="font-medium">{activity.entity_name || activity.entity_type}</span>
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {format(new Date(activity.created_date), 'MMM d, h:mm a')}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Issues Alert */}
       {stats.issuesFound > 0 && (
