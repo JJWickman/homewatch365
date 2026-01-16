@@ -66,6 +66,8 @@ export default function Inspections() {
     recurrence_end_date: ''
   });
   const [creating, setCreating] = useState(false);
+  const [showReplaceDialog, setShowReplaceDialog] = useState(false);
+  const [scheduledInspectionToReplace, setScheduledInspectionToReplace] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -135,8 +137,39 @@ export default function Inspections() {
     return matchesSearch && matchesStatus && matchesType;
   });
 
+  const checkForScheduledInspection = () => {
+    if (newInspection.type !== 'stop_by') return false;
+    
+    const selectedDate = parseISO(newInspection.scheduled_date);
+    const weekStart = addDays(selectedDate, -selectedDate.getDay());
+    const weekEnd = addDays(weekStart, 6);
+    
+    const scheduledInSameWeek = inspections.find(insp => 
+      insp.property_id === newInspection.property_id &&
+      insp.status === 'scheduled' &&
+      insp.type !== 'stop_by'
+    );
+    
+    if (scheduledInSameWeek) {
+      const inspDate = parseISO(scheduledInSameWeek.scheduled_date);
+      if (inspDate >= weekStart && inspDate <= weekEnd) {
+        setScheduledInspectionToReplace(scheduledInSameWeek);
+        setShowReplaceDialog(true);
+        return true;
+      }
+    }
+    
+    return false;
+  };
+
   const handleCreateInspection = async () => {
     if (!companyId || !newInspection.property_id) return;
+    
+    // Check for scheduled inspection in same week for stop-by
+    if (checkForScheduledInspection()) {
+      return;
+    }
+    
     setCreating(true);
 
     const property = getProperty(newInspection.property_id);
@@ -151,7 +184,8 @@ export default function Inspections() {
       type: newInspection.type,
       assigned_to: newInspection.assigned_to || null,
       assigned_to_name: staffMember?.user_name || null,
-      status: 'scheduled'
+      status: newInspection.type === 'stop_by' ? 'completed' : 'scheduled',
+      completed_at: newInspection.type === 'stop_by' ? new Date().toISOString() : null
     };
 
     // Generate inspection dates
@@ -185,6 +219,51 @@ export default function Inspections() {
     }));
 
     await base44.entities.Inspection.bulkCreate(inspectionsToCreate);
+    
+    setShowNewDialog(false);
+    setNewInspection({
+      property_id: '',
+      template_id: '',
+      scheduled_date: format(new Date(), 'yyyy-MM-dd'),
+      scheduled_time: '',
+      type: 'routine',
+      assigned_to: '',
+      is_recurring: false,
+      recurrence_frequency: 'weekly',
+      recurrence_end_date: ''
+    });
+    setCreating(false);
+    loadData();
+  };
+
+  const handleReplaceScheduled = async (replace) => {
+    setCreating(true);
+    
+    if (replace && scheduledInspectionToReplace) {
+      await base44.entities.Inspection.update(scheduledInspectionToReplace.id, {
+        status: 'cancelled'
+      });
+    }
+    
+    setShowReplaceDialog(false);
+    setScheduledInspectionToReplace(null);
+    
+    const property = getProperty(newInspection.property_id);
+    const staffMember = staff.find(s => s.user_email === newInspection.assigned_to);
+    
+    await base44.entities.Inspection.create({
+      company_id: companyId,
+      property_id: newInspection.property_id,
+      client_id: property?.client_id,
+      template_id: newInspection.template_id || null,
+      scheduled_date: newInspection.scheduled_date,
+      scheduled_time: newInspection.scheduled_time || null,
+      type: newInspection.type,
+      assigned_to: newInspection.assigned_to || null,
+      assigned_to_name: staffMember?.user_name || null,
+      status: 'completed',
+      completed_at: new Date().toISOString()
+    });
     
     setShowNewDialog(false);
     setNewInspection({
@@ -332,6 +411,7 @@ export default function Inspections() {
               <SelectItem value="pre_storm">Pre-Storm</SelectItem>
               <SelectItem value="post_storm">Post-Storm</SelectItem>
               <SelectItem value="emergency">Emergency</SelectItem>
+              <SelectItem value="stop_by">Stop By</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -423,12 +503,21 @@ export default function Inspections() {
                   <SelectItem value="pre_storm">Pre-Storm</SelectItem>
                   <SelectItem value="post_storm">Post-Storm</SelectItem>
                   <SelectItem value="emergency">Emergency</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+                  <SelectItem value="stop_by">Stop By</SelectItem>
+                  </SelectContent>
+                  </Select>
+                  </div>
 
-            <div>
-              <Label>Assign To</Label>
+                  {newInspection.type === 'stop_by' && (
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                  <strong>Stop By:</strong> Recording an unscheduled inspection that already happened. This will be marked as completed.
+                  </p>
+                  </div>
+                  )}
+
+                  <div>
+                  <Label>Assign To</Label>
               <Select
                 value={newInspection.assigned_to}
                 onValueChange={(value) => setNewInspection(prev => ({ ...prev, assigned_to: value }))}
@@ -467,16 +556,18 @@ export default function Inspections() {
               </div>
             )}
 
-            <div className="flex items-center justify-between py-2">
-              <div>
-                <Label>Recurring Inspection</Label>
-                <p className="text-sm text-slate-500">Schedule multiple inspections</p>
+            {newInspection.type !== 'stop_by' && (
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <Label>Recurring Inspection</Label>
+                  <p className="text-sm text-slate-500">Schedule multiple inspections</p>
+                </div>
+                <Switch
+                  checked={newInspection.is_recurring}
+                  onCheckedChange={(checked) => setNewInspection(prev => ({ ...prev, is_recurring: checked }))}
+                />
               </div>
-              <Switch
-                checked={newInspection.is_recurring}
-                onCheckedChange={(checked) => setNewInspection(prev => ({ ...prev, is_recurring: checked }))}
-              />
-            </div>
+            )}
 
             {newInspection.is_recurring && (
               <div className="space-y-4 p-4 bg-slate-50 rounded-lg">
@@ -519,6 +610,37 @@ export default function Inspections() {
               className="bg-slate-900 hover:bg-slate-800"
             >
               {creating ? 'Scheduling...' : 'Schedule'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Replace Scheduled Inspection Dialog */}
+      <Dialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Scheduled Inspection Found</DialogTitle>
+            <DialogDescription>
+              There is already a scheduled inspection for this property this week on{' '}
+              {scheduledInspectionToReplace && format(parseISO(scheduledInspectionToReplace.scheduled_date), 'MMM d, yyyy')}.
+              Would you like to cancel the scheduled inspection and record this stop-by instead?
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => handleReplaceScheduled(false)}
+              disabled={creating}
+            >
+              Keep Both
+            </Button>
+            <Button 
+              onClick={() => handleReplaceScheduled(true)}
+              disabled={creating}
+              className="bg-slate-900 hover:bg-slate-800"
+            >
+              Replace Scheduled
             </Button>
           </DialogFooter>
         </DialogContent>
