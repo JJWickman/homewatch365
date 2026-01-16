@@ -1034,24 +1034,24 @@ export default function Inspections() {
 
                       <DialogFooter>
                       <Button variant="outline" onClick={() => setShowNewDialog(false)}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleCreateVisit}
-              disabled={
-                !newVisit.property_id ||
-                (visitType === 'inspection' && !newVisit.scheduled_date) ||
-                (visitType === 'followup' && !newVisit.followup_due_date) ||
-                (visitType === 'followup' && !newVisit.followup_title) ||
-                creating ||
-                (visitType === 'inspection' && newVisit.is_recurring && !newVisit.recurrence_end_date) ||
-                (visitType === 'inspection' && ['other', 'custom_client_request'].includes(newVisit.inspection_type) && !newVisit.inspection_details)
-              }
-              className="bg-slate-900 hover:bg-slate-800"
-            >
-              {creating ? (editingId ? 'Updating...' : 'Creating...') : (editingId ? 'Update' : 'Create')}
-            </Button>
-          </DialogFooter>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleCreateVisit}
+                disabled={
+                  !newVisit.property_id ||
+                  (visitType === 'inspection' && !newVisit.scheduled_date) ||
+                  (visitType === 'followup' && !newVisit.followup_due_date) ||
+                  (visitType === 'followup' && !newVisit.followup_title) ||
+                  creating ||
+                  (visitType === 'inspection' && newVisit.is_recurring && !newVisit.recurrence_end_date) ||
+                  (visitType === 'inspection' && ['other', 'custom_client_request'].includes(newVisit.inspection_type) && !newVisit.inspection_details)
+                }
+                className="bg-slate-900 hover:bg-slate-800"
+              >
+                {creating ? (editingId ? 'Updating...' : 'Creating...') : (editingId ? 'Update' : 'Create')}
+              </Button>
+            </DialogFooter>
         </DialogContent>
       </Dialog>
 
