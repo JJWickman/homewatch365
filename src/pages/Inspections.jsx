@@ -430,18 +430,20 @@ export default function Inspections() {
         actionClassName="bg-black text-white hover:bg-slate-900"
       />
 
-      {/* Filters */}
+      {/* Search */}
        <Card className="mb-6 p-4">
+         <div className="relative mb-4">
+           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+           <Input
+             placeholder="Search inspections by property name or address..."
+             value={searchQuery}
+             onChange={(e) => setSearchQuery(e.target.value)}
+             className="pl-10 h-10 text-base"
+           />
+         </div>
+
+         {/* Filters */}
          <div className="flex flex-col sm:flex-row gap-4">
-           <div className="relative flex-1">
-             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-             <Input
-               placeholder="Search by property..."
-               value={searchQuery}
-               onChange={(e) => setSearchQuery(e.target.value)}
-               className="pl-10"
-             />
-           </div>
            <Select value={propertyFilter} onValueChange={setPropertyFilter}>
              <SelectTrigger className="w-full sm:w-36">
                <SelectValue placeholder="Property" />
