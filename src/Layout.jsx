@@ -17,6 +17,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from 'lucide-react';
+
+const getPageRestrictions = () => {
+  return {
+    'Marketing': 'enterprise'
+  };
+};
 
 const getNavigationItems = (subscriptionPlan, memberRole) => {
 // Field Inspector - limited access (includes backward compatibility for 'technician')
@@ -131,6 +139,11 @@ export default function Layout({ children, currentPageName }) {
   };
 
   const navigationItems = getNavigationItems(company?.subscription_plan, companyMember?.role);
+
+  const pageRestrictions = getPageRestrictions();
+  const isPageRestricted = pageRestrictions[currentPageName] && 
+                          company?.subscription_plan !== pageRestrictions[currentPageName];
+  const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'admin';
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -308,6 +321,17 @@ export default function Layout({ children, currentPageName }) {
 
         {/* Page content */}
         <main className="p-4 lg:p-6">
+          {isPageRestricted && isAdmin && (
+            <Alert className="mb-6 bg-amber-50 border-amber-200">
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-900">
+                <strong>Demo Mode:</strong> This feature is for demonstration purposes only and requires an Enterprise subscription to be fully functional. 
+                <a href={createPageUrl('Settings')} className="underline ml-1 font-medium hover:text-amber-700">
+                  Upgrade your plan
+                </a>
+              </AlertDescription>
+            </Alert>
+          )}
           {children}
         </main>
       </div>
