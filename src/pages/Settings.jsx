@@ -94,6 +94,10 @@ export default function Settings() {
   const [stripePrices, setStripePrices] = useState({});
   const [loadingCheckout, setLoadingCheckout] = useState(false);
 
+  // Helper function to check if user is admin (backward compatible)
+  const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'owner';
+  const isDispatcherOrAdmin = isAdmin || companyMember?.role === 'dispatcher' || companyMember?.role === 'manager';
+
   useEffect(() => {
     loadData();
     loadStripePrices();
@@ -208,7 +212,7 @@ export default function Settings() {
         phone: userPhone
       });
       // Refresh page to show updated data in layout
-      setTimeout(() => window.location.reload(), 500);
+      window.location.reload();
     } catch (error) {
       console.error('Error saving profile:', error);
       alert('Failed to save profile changes');
@@ -292,7 +296,7 @@ ${company.name}
       }
       
       setShowInviteDialog(false);
-      setInviteForm({ email: '', name: '', role: 'technician' });
+      setInviteForm({ email: '', name: '', role: 'field_inspector' });
       loadData();
     } catch (error) {
       console.error('Error inviting staff:', error);
