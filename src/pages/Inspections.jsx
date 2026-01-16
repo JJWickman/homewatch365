@@ -714,7 +714,7 @@ export default function Inspections() {
                  </SelectContent>
                </Select>
              </div>
-            <div>
+             <div>
               <Label>Property *</Label>
               <Select
                 value={newVisit.property_id}
@@ -731,9 +731,51 @@ export default function Inspections() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+             </div>
 
-            {visitType === 'inspection' ? (
+             {scheduleMode === 'search' && !editingId && (
+              <div>
+                <Button 
+                  onClick={findAvailableSlots}
+                  disabled={!newVisit.property_id}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  Search Available Times
+                </Button>
+                {searchResults.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {searchResults.map((result, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          if (visitType === 'inspection') {
+                            setNewVisit(prev => ({
+                              ...prev,
+                              scheduled_date: result.date,
+                              scheduled_time: result.time
+                            }));
+                          } else {
+                            setNewVisit(prev => ({
+                              ...prev,
+                              followup_due_date: result.date,
+                              followup_due_time: result.time
+                            }));
+                          }
+                          setScheduleMode('manual');
+                        }}
+                        className="w-full text-left p-3 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 transition-colors text-sm font-medium text-slate-900"
+                      >
+                        {result.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+             )}
+
+             {scheduleMode === 'manual' && (
+              <>
+             {visitType === 'inspection' ? (
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Date *</Label>
