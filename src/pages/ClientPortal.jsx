@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { 
   Building2, ClipboardCheck, Calendar, MapPin, 
   CheckCircle2, AlertTriangle, LogOut, User,
-  Eye, FileText, Clock, Download, Play, File
+  Eye, FileText, Clock, Download, Play, File, CreditCard
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +21,7 @@ export default function ClientPortal() {
   const [properties, setProperties] = useState([]);
   const [inspections, setInspections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingCheckout, setLoadingCheckout] = useState(false);
 
   useEffect(() => {
     loadPortalData();
@@ -65,6 +66,33 @@ export default function ClientPortal() {
 
   const handleLogout = () => {
     base44.auth.logout();
+  };
+
+  const handleSubscribe = async () => {
+    if (!client || !client.monthly_rate) {
+      alert('Subscription not configured. Please contact your property manager.');
+      return;
+    }
+
+    setLoadingCheckout(true);
+    try {
+      const response = await base44.functions.invoke('createClientSubscription', {
+        client_id: client.id,
+        company_id: client.company_id,
+        email: user.email,
+        amount: client.monthly_rate,
+        billing_frequency: client.billing_frequency || 'monthly'
+      });
+
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      }
+    } catch (error) {
+      console.error('Error starting checkout:', error);
+      alert('Failed to start checkout. Please try again.');
+    } finally {
+      setLoadingCheckout(false);
+    }
   };
 
   if (loading) {
@@ -135,6 +163,55 @@ export default function ClientPortal() {
           </h1>
           <p className="text-slate-500">View your property inspections and reports</p>
         </div>
+
+        {/* Subscription Card */}
+        {client.monthly_rate && client.billing_status !== 'active' && !client.stripe_customer_id && (
+          <Card className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+            <CardContent className="pt-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                    <CreditCard className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-900 mb-1">
+                      Subscribe to Property Management Services
+                    </h3>
+                    <p className="text-sm text-slate-600 mb-3">
+                      ${client.monthly_rate}/month • {client.billing_frequency || 'Monthly'} billing
+                    </p>
+                    <p className="text-sm text-slate-500 mb-4">
+                      Secure payments via credit card, Apple Pay, or Google Pay
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={handleSubscribe}
+                  disabled={loadingCheckout}
+                  className="bg-blue-600 hover:bg-blue-700 shrink-0"
+                >
+                  {loadingCheckout ? 'Loading...' : 'Subscribe Now'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {client.billing_status === 'active' && (
+          <Card className="mb-8 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="h-6 w-6 text-green-600" />
+                <div>
+                  <p className="font-semibold text-slate-900">Active Subscription</p>
+                  <p className="text-sm text-slate-600">
+                    ${client.monthly_rate}/month • Next billing date: {format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'MMM d, yyyy')}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Properties */}
         <section className="mb-8">
