@@ -26,6 +26,8 @@ export default function Schedule() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState('week');
   const [companyId, setCompanyId] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
+  const [filterMode, setFilterMode] = useState('my'); // 'my' or 'all'
 
   useEffect(() => {
     loadData();
@@ -34,6 +36,7 @@ export default function Schedule() {
   const loadData = async () => {
     try {
       const user = await base44.auth.me();
+      setUserEmail(user.email);
       const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
       
       if (members.length > 0) {
@@ -86,8 +89,14 @@ export default function Schedule() {
 
   const getItemsForDate = (date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
-    const dayInspections = inspections.filter(i => i.scheduled_date === dateStr && i.status !== 'cancelled');
-    const dayFollowUps = followUps.filter(f => f.due_date === dateStr && f.status !== 'completed' && f.status !== 'cancelled');
+    let dayInspections = inspections.filter(i => i.scheduled_date === dateStr && i.status !== 'cancelled');
+    let dayFollowUps = followUps.filter(f => f.due_date === dateStr && f.status !== 'completed' && f.status !== 'cancelled');
+    
+    if (filterMode === 'my' && userEmail) {
+      dayInspections = dayInspections.filter(i => i.assigned_to === userEmail);
+      dayFollowUps = dayFollowUps.filter(f => f.assigned_to === userEmail);
+    }
+    
     return { inspections: dayInspections, followUps: dayFollowUps };
   };
 
