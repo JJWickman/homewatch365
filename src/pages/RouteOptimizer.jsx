@@ -42,14 +42,17 @@ export default function RouteOptimizer() {
         const cId = members[0].company_id;
         setCompanyId(cId);
         
-        const [propertiesData, companyData] = await Promise.all([
-          base44.entities.Property.filter({ company_id: cId }),
-          base44.entities.Company.filter({ id: cId })
-        ]);
-        
+        const propertiesData = await base44.entities.Property.filter({ company_id: cId });
         setProperties(propertiesData);
-        if (companyData.length > 0 && companyData[0].address) {
-          setStartAddress(`${companyData[0].address}, ${companyData[0].city}, ${companyData[0].state}`);
+        
+        // Use user's Base HQ address if available, otherwise fall back to company address
+        if (user.base_hq_address && user.base_hq_address.address) {
+          setStartAddress(`${user.base_hq_address.address}, ${user.base_hq_address.city}, ${user.base_hq_address.state}`);
+        } else {
+          const companyData = await base44.entities.Company.filter({ id: cId });
+          if (companyData.length > 0 && companyData[0].address) {
+            setStartAddress(`${companyData[0].address}, ${companyData[0].city}, ${companyData[0].state}`);
+          }
         }
       }
     } catch (error) {
@@ -60,12 +63,26 @@ export default function RouteOptimizer() {
   };
 
   const loadInspectionsForDate = async () => {
-    const inspectionsData = await base44.entities.Inspection.filter({ 
-      company_id: companyId, 
-      scheduled_date: selectedDate,
-      status: { $in: ['scheduled', 'in_progress'] }
-    });
-    setInspections(inspectionsData);
+    const [inspectionsData, followUpsData] = await Promise.all([
+      base44.entities.Inspection.filter({ 
+        company_id: companyId, 
+        scheduled_date: selectedDate,
+        status: { $in: ['scheduled', 'in_progress'] }
+      }),
+      base44.entities.FollowUp.filter({
+        company_id: companyId,
+        due_date: selectedDate,
+        status: { $in: ['open', 'in_progress'] }
+      })
+    ]);
+    
+    // Combine inspections and follow-ups into a single list
+    const combined = [
+      ...inspectionsData.map(i => ({ ...i, type: 'inspection' })),
+      ...followUpsData.map(f => ({ ...f, type: 'followup' }))
+    ];
+    
+    setInspections(combined);
     setOptimizedRoute(null);
   };
 
