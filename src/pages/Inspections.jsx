@@ -743,7 +743,7 @@ export default function Inspections() {
                    </div>
                  )}
 
-                 {newVisit.type === 'custom_client_request' && (
+                 {newVisit.inspection_type === 'custom_client_request' && (
                    <div className="space-y-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
                      <div>
                        <Label>What was requested to inspect?</Label>
