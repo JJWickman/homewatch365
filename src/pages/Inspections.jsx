@@ -45,6 +45,7 @@ export default function Inspections() {
   const [clients, setClients] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [staff, setStaff] = useState([]);
+  const [followUps, setFollowUps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -96,12 +97,13 @@ export default function Inspections() {
         const cId = members[0].company_id;
         setCompanyId(cId);
         
-        const [inspectionsData, propertiesData, clientsData, templatesData, staffData] = await Promise.all([
+        const [inspectionsData, propertiesData, clientsData, templatesData, staffData, followUpsData] = await Promise.all([
           base44.entities.Inspection.filter({ company_id: cId }, '-scheduled_date'),
           base44.entities.Property.filter({ company_id: cId, is_active: true }),
           base44.entities.Client.filter({ company_id: cId }),
           base44.entities.InspectionTemplate.filter({ company_id: cId, is_active: true }),
-          base44.entities.CompanyMember.filter({ company_id: cId, is_active: true })
+          base44.entities.CompanyMember.filter({ company_id: cId, is_active: true }),
+          base44.entities.FollowUp.filter({ company_id: cId })
         ]);
         
         setInspections(inspectionsData);
@@ -109,6 +111,7 @@ export default function Inspections() {
         setClients(clientsData);
         setTemplates(templatesData);
         setStaff(staffData);
+        setFollowUps(followUpsData);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -119,6 +122,23 @@ export default function Inspections() {
 
   const getProperty = (propertyId) => properties.find(p => p.id === propertyId);
   const getClient = (clientId) => clients.find(c => c.id === clientId);
+  
+  const getInspectionDetails = (inspection) => {
+    const details = [];
+    
+    // Check for issues
+    if (inspection.overall_status === 'issues_found' || inspection.overall_status === 'urgent') {
+      details.push('Issues found');
+    }
+    
+    // Check for related follow-ups
+    const relatedFollowUps = followUps.filter(fu => fu.inspection_id === inspection.id);
+    if (relatedFollowUps.length > 0) {
+      details.push(`${relatedFollowUps.length} follow-up${relatedFollowUps.length > 1 ? 's' : ''}`);
+    }
+    
+    return details.length > 0 ? details.join(', ') : '—';
+  };
 
   const getDateLabel = (dateStr) => {
     const date = parseISO(dateStr);
@@ -355,6 +375,13 @@ export default function Inspections() {
       cell: (inspection) => (
         <StatusBadge status={inspection.status} />
       )
+    },
+    {
+      header: 'Details',
+      cell: (inspection) => (
+        <span className="text-sm text-slate-600">{getInspectionDetails(inspection)}</span>
+      ),
+      className: 'hidden sm:table-cell'
     },
     {
       header: '',
