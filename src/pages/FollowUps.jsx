@@ -561,26 +561,24 @@ export default function FollowUps() {
               </div>
             )}
 
-            {newItem.follow_up_category !== 'general' && (
-              <div>
-                <Label>Assign To</Label>
-                <Select
-                  value={newItem.assigned_to}
-                  onValueChange={(value) => setNewItem(prev => ({ ...prev, assigned_to: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select staff member" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {staff.filter(m => m.role === 'field_inspector' || m.role === 'dispatcher' || m.role === 'administrator').map((member) => (
-                      <SelectItem key={member.id} value={member.user_email}>
-                        {member.user_name || member.user_email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            <div>
+              <Label>Assign To</Label>
+              <Select
+                value={newItem.assigned_to}
+                onValueChange={(value) => setNewItem(prev => ({ ...prev, assigned_to: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select staff member" />
+                </SelectTrigger>
+                <SelectContent>
+                  {staff.filter(m => m.role === 'field_inspector' || m.role === 'dispatcher' || m.role === 'administrator').map((member) => (
+                    <SelectItem key={member.id} value={member.user_email}>
+                      {member.user_name || member.user_email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <DialogFooter>
