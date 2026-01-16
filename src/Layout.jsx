@@ -188,11 +188,15 @@ export default function Layout({ children, currentPageName }) {
           <div className="p-4 border-t border-slate-800 bg-slate-950">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">EIQ</span>
-                </div>
+                {company?.logo_url ? (
+                  <img src={company.logo_url} alt={company.name} className="h-8 w-8 rounded object-cover" />
+                ) : (
+                  <div className="h-8 w-8 rounded bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">EIQ</span>
+                  </div>
+                )}
                 <div>
-                  <p className="text-white font-semibold text-sm">Estate IQ</p>
+                  <p className="text-white font-semibold text-sm">{company?.name || 'Estate IQ'}</p>
                   <p className="text-slate-500 text-xs">Property Management</p>
                 </div>
               </div>
