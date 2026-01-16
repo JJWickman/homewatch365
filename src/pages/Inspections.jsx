@@ -169,21 +169,22 @@ export default function Inspections() {
   });
 
   const checkForScheduledInspection = () => {
-    if (newInspection.type !== 'drop_in') return false;
+    if (newVisit.inspection_type !== 'drop_in') return false;
     
-    const selectedDate = parseISO(newInspection.scheduled_date);
+    const selectedDate = parseISO(newVisit.scheduled_date);
     const weekStart = addDays(selectedDate, -selectedDate.getDay());
     const weekEnd = addDays(weekStart, 6);
     
-    const scheduledInSameWeek = inspections.find(insp => 
-      insp.property_id === newInspection.property_id &&
-      insp.status === 'scheduled' &&
-      insp.type === 'routine'
+    const scheduledInSameWeek = visits.find(v => 
+      v.property_id === newVisit.property_id &&
+      v.visit_type === 'inspection' &&
+      v.status === 'scheduled' &&
+      v.inspection_type === 'routine'
     );
     
     if (scheduledInSameWeek) {
-      const inspDate = parseISO(scheduledInSameWeek.scheduled_date);
-      if (inspDate >= weekStart && inspDate <= weekEnd) {
+      const visitDate = parseISO(scheduledInSameWeek.scheduled_date);
+      if (visitDate >= weekStart && visitDate <= weekEnd) {
         setScheduledInspectionToReplace(scheduledInSameWeek);
         setShowReplaceDialog(true);
         return true;
