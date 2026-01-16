@@ -568,185 +568,107 @@ export default function PropertyDetail() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="inspections">
+            <TabsContent value="visits">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg">Recent Inspections</CardTitle>
-                  <Button 
-                    size="sm" 
-                    onClick={() => navigate(createPageUrl('Inspections') + `?action=new&property_id=${property.id}`)}
-                    className="bg-black hover:bg-gray-900 text-white"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Schedule
-                  </Button>
+                  <CardTitle className="text-lg">Visits</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Select value={visitTypeFilter} onValueChange={setVisitTypeFilter}>
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="inspection">Inspections</SelectItem>
+                        <SelectItem value="followup">Follow-Ups</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button 
+                      size="sm" 
+                      onClick={() => navigate(createPageUrl('Inspections') + `?action=new&property_id=${property.id}`)}
+                      className="bg-black hover:bg-gray-900 text-white"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Schedule
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  {inspections.length === 0 ? (
+                  {filteredVisits.length === 0 ? (
                     <EmptyState
                       icon={ClipboardCheck}
-                      title="No inspections"
-                      description="Schedule the first inspection for this property"
-                    />
-                  ) : (
-                    <div className="space-y-3">
-                      {inspections.slice(0, 10).map((inspection) => (
-                        <Link
-                          key={inspection.id}
-                          to={createPageUrl('InspectionDetail') + `?id=${inspection.id}`}
-                          className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors border"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center">
-                              <ClipboardCheck className="h-5 w-5 text-slate-500" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-slate-900">
-                                {format(new Date(inspection.scheduled_date), 'MMM d, yyyy')}
-                              </p>
-                              <div className="flex items-center gap-2 text-sm text-slate-500">
-                                <span className="capitalize">{inspection.type}</span>
-                                {inspection.assigned_to_name && (
-                                  <>
-                                    <span>•</span>
-                                    <span>{inspection.assigned_to_name}</span>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <StatusBadge status={inspection.status} />
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="tasks">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                     Follow-Ups
-                    </CardTitle>
-                  <Button 
-                    size="sm" 
-                    onClick={() => setShowAddTask(true)}
-                    className="bg-slate-900 hover:bg-slate-800 text-white"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add Follow-Up
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  {tasks.length === 0 ? (
-                    <EmptyState
-                      icon={FileText}
-                      title="No follow-ups"
-                      description="No follow-ups assigned to this property"
+                      title="No visits"
+                      description="Schedule your first visit for this property"
                     />
                   ) : (
                     <div className="space-y-6">
-                       {/* Open */}
-                       {tasksByStatus.open.length > 0 && (
-                         <div>
-                           <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                             <AlertCircle className="h-4 w-4 text-amber-600" />
-                             Open ({tasksByStatus.open.length})
-                           </h4>
-                           <div className="space-y-2">
-                             {tasksByStatus.open.map((task) => (
-                               <div key={task.id} className="p-3 rounded-lg border border-amber-200 bg-amber-50">
-                                 <div className="flex items-start justify-between">
-                                   <div className="flex-1">
-                                     <p className="font-medium text-slate-900">{task.title}</p>
-                                     {task.description && (
-                                       <p className="text-sm text-slate-600 mt-1">{task.description}</p>
-                                     )}
-                                     <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
-                                       <span className="px-2 py-1 rounded-full bg-amber-100 text-amber-700 font-medium">Open</span>
-                                       {task.priority && (
-                                         <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-700 capitalize">{task.priority}</span>
-                                       )}
-                                       {task.due_date && (
-                                         <span className="flex items-center gap-1 text-slate-600">
-                                           <Calendar className="h-3 w-3" />
-                                           {format(new Date(task.due_date), 'MMM d')}
-                                         </span>
-                                       )}
-                                       {task.assigned_to_name && (
-                                         <span className="text-slate-600">Assigned: {task.assigned_to_name}</span>
-                                       )}
-                                     </div>
-                                   </div>
-                                 </div>
-                               </div>
-                             ))}
-                           </div>
-                         </div>
-                       )}
-
-                       {/* In Progress */}
-                       {tasksByStatus.in_progress.length > 0 && (
-                         <div>
-                           <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                             <Clock className="h-4 w-4 text-blue-600" />
-                             In Progress ({tasksByStatus.in_progress.length})
-                           </h4>
-                           <div className="space-y-2">
-                             {tasksByStatus.in_progress.map((task) => (
-                               <div key={task.id} className="p-3 rounded-lg border border-blue-200 bg-blue-50">
-                                 <div className="flex items-start justify-between">
-                                   <div className="flex-1">
-                                     <p className="font-medium text-slate-900">{task.title}</p>
-                                     {task.description && (
-                                       <p className="text-sm text-slate-600 mt-1">{task.description}</p>
-                                     )}
-                                     <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
-                                       <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">In Progress</span>
-                                       {task.priority && (
-                                         <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-700 capitalize">{task.priority}</span>
-                                       )}
-                                       {task.due_date && (
-                                         <span className="flex items-center gap-1 text-slate-600">
-                                           <Calendar className="h-3 w-3" />
-                                           {format(new Date(task.due_date), 'MMM d')}
-                                         </span>
-                                       )}
-                                       {task.assigned_to_name && (
-                                         <span className="text-slate-600">Assigned: {task.assigned_to_name}</span>
-                                       )}
-                                     </div>
-                                   </div>
-                                 </div>
-                               </div>
-                             ))}
-                           </div>
-                         </div>
-                       )}
-
-                      {/* Completed */}
-                      {tasksByStatus.completed.length > 0 && (
+                      {visitsByType.inspection.length > 0 && (
                         <div>
                           <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                            Completed ({tasksByStatus.completed.length})
+                            <ClipboardCheck className="h-4 w-4 text-blue-600" />
+                            Inspections ({visitsByType.inspection.length})
                           </h4>
                           <div className="space-y-2">
-                            {tasksByStatus.completed.map((task) => (
-                              <div key={task.id} className="p-3 rounded-lg border border-emerald-200 bg-emerald-50">
+                            {visitsByType.inspection.map((visit) => (
+                              <Link
+                                key={visit.id}
+                                to={createPageUrl('InspectionDetail') + `?id=${visit.id}`}
+                                className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors border"
+                              >
+                                <div className="flex items-center gap-3 flex-1">
+                                  <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center">
+                                    <ClipboardCheck className="h-5 w-5 text-slate-500" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <p className="font-medium text-slate-900">
+                                      {format(new Date(visit.scheduled_date), 'MMM d, yyyy')}
+                                    </p>
+                                    <div className="flex items-center gap-2 text-sm text-slate-500">
+                                      <span className="capitalize">{visit.inspection_type || 'routine'}</span>
+                                      {visit.assigned_to_name && (
+                                        <>
+                                          <span>•</span>
+                                          <span>{visit.assigned_to_name}</span>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <StatusBadge status={visit.status} />
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {visitsByType.followup.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-amber-600" />
+                            Follow-Ups ({visitsByType.followup.length})
+                          </h4>
+                          <div className="space-y-2">
+                            {visitsByType.followup.map((visit) => (
+                              <div key={visit.id} className="p-3 rounded-lg border border-amber-200 bg-amber-50">
                                 <div className="flex items-start justify-between">
                                   <div className="flex-1">
-                                    <p className="font-medium text-slate-900 line-through text-slate-600">{task.title}</p>
+                                    <p className="font-medium text-slate-900">{visit.title}</p>
+                                    {visit.description && (
+                                      <p className="text-sm text-slate-600 mt-1">{visit.description}</p>
+                                    )}
                                     <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
-                                      <span className="px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-medium">Completed</span>
-                                      {task.completed_at && (
+                                      <StatusBadge status={visit.status} />
+                                      {visit.priority && (
+                                        <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-700 capitalize">{visit.priority}</span>
+                                      )}
+                                      {visit.scheduled_date && (
                                         <span className="flex items-center gap-1 text-slate-600">
                                           <Calendar className="h-3 w-3" />
-                                          {format(new Date(task.completed_at), 'MMM d')}
+                                          {format(new Date(visit.scheduled_date), 'MMM d')}
                                         </span>
+                                      )}
+                                      {visit.assigned_to_name && (
+                                        <span className="text-slate-600">Assigned: {visit.assigned_to_name}</span>
                                       )}
                                     </div>
                                   </div>
