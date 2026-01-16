@@ -419,7 +419,8 @@ export default function Inspections() {
         followup_title: '',
         followup_description: '',
         followup_due_date: format(new Date(), 'yyyy-MM-dd'),
-        followup_due_time: ''
+        followup_due_time: '',
+        estimated_hours: ''
       });
       setCreating(false);
       loadData();
