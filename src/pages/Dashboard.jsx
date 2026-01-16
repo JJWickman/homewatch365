@@ -31,6 +31,19 @@ export default function Dashboard() {
   const [todayInspections, setTodayInspections] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    title: '',
+    description: '',
+    items: [],
+    type: null
+  });
+  const [allData, setAllData] = useState({
+    clients: [],
+    properties: [],
+    inspections: [],
+    followUps: []
+  });
 
   useEffect(() => {
     loadDashboardData();
