@@ -37,12 +37,12 @@ const baseItems = [
   { name: 'Inspections', icon: ClipboardCheck, page: 'Inspections' },
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
   { name: 'Follow-Ups', icon: FileText, page: 'FollowUps' },
+  { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
 ];
 
-// Only show Contractors and Marketing for Enterprise plan
+// Only show Marketing for Enterprise plan
 if (subscriptionPlan === 'enterprise') {
   baseItems.push(
-    { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
     { name: 'Marketing', icon: Megaphone, page: 'Marketing' }
   );
 }
