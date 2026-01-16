@@ -179,7 +179,7 @@ export default function ClientForm() {
         </div>
       </PageHeader>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form id="client-form" onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}
         <Card>
           <CardHeader>
@@ -393,7 +393,7 @@ export default function ClientForm() {
           </Button>
           <Button type="submit" disabled={saving} className="bg-slate-900 hover:bg-slate-800">
             <Save className="h-4 w-4 mr-2" />
-            {saving ? 'Saving...' : (clientId ? 'Update Client' : 'Create Client')}
+            {saving ? 'Saving...' : 'Save'}
           </Button>
         </div>
       </form>
