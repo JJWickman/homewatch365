@@ -161,15 +161,15 @@ export default function MobileInspectionView({
 
                     {/* Flag for Follow-up */}
                     <button
-                      onClick={() => toggleFlagItem(`category-${category.id}`)}
+                      onClick={() => handleFlagClick(`category-${category.id}`, category.name)}
                       className={`w-full p-2 rounded-lg border-2 transition-colors flex items-center gap-2 text-sm font-medium ${
-                        flaggedItems.has(`category-${category.id}`)
+                        Array.from(flaggedItems).some(f => f.startsWith(`category-${category.id}|`))
                           ? 'border-red-500 bg-red-50 text-red-700'
                           : 'border-slate-300 bg-white text-slate-600 hover:border-red-300 hover:bg-red-50'
                       }`}
                     >
                       <AlertCircle className="h-4 w-4" />
-                      {flaggedItems.has(`category-${category.id}`) ? 'Requires Follow-up ✓' : 'Flag for Follow-up'}
+                      {Array.from(flaggedItems).some(f => f.startsWith(`category-${category.id}|`)) ? 'Requires Follow-up ✓' : 'Flag for Follow-up'}
                     </button>
 
                     {/* Photos */}
@@ -277,15 +277,15 @@ export default function MobileInspectionView({
 
                         {/* Flag for Follow-up */}
                         <button
-                          onClick={() => toggleFlagItem(`custom-${item.id}`)}
+                          onClick={() => handleFlagClick(`custom-${item.id}`, item.name)}
                           className={`w-full p-1.5 rounded-lg border-2 transition-colors flex items-center justify-center gap-2 text-xs font-medium mb-3 ${
-                            flaggedItems.has(`custom-${item.id}`)
+                            Array.from(flaggedItems).some(f => f.startsWith(`custom-${item.id}|`))
                               ? 'border-red-500 bg-red-50 text-red-700'
                               : 'border-slate-300 bg-white text-slate-600 hover:border-red-300 hover:bg-red-50'
                           }`}
                         >
                           <AlertCircle className="h-3 w-3" />
-                          {flaggedItems.has(`custom-${item.id}`) ? 'Follow-up Needed ✓' : 'Flag for Follow-up'}
+                          {Array.from(flaggedItems).some(f => f.startsWith(`custom-${item.id}|`)) ? 'Follow-up Needed ✓' : 'Flag for Follow-up'}
                         </button>
 
                         {/* Photos */}
