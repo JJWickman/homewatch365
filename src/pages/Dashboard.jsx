@@ -6,12 +6,18 @@ import { format, startOfWeek, endOfWeek, isToday, parseISO } from 'date-fns';
 import { 
   ClipboardCheck, Building2, Users, AlertTriangle, 
   Calendar, ArrowRight, Clock, MapPin, CheckCircle2,
-  TrendingUp, FileWarning, CloudRain
+  TrendingUp, FileWarning, CloudRain, ChevronDown
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import StatsCard from '@/components/shared/StatsCard';
 import StatusBadge from '@/components/shared/StatusBadge';
 import StatsDetailModal from '@/components/dashboard/StatsDetailModal';
