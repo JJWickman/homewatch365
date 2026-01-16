@@ -713,7 +713,7 @@ export default function Inspections() {
              template_id: '',
              scheduled_date: format(new Date(), 'yyyy-MM-dd'),
              scheduled_time: '',
-             type: 'routine',
+             inspection_type: 'routine',
              assigned_to: '',
              is_recurring: false,
              recurrence_frequency: 'weekly',
@@ -726,7 +726,8 @@ export default function Inspections() {
              followup_title: '',
              followup_description: '',
              followup_due_date: format(new Date(), 'yyyy-MM-dd'),
-             followup_due_time: ''
+             followup_due_time: '',
+             estimated_hours: ''
            });
          }
        }}>
