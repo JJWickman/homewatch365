@@ -49,6 +49,18 @@ export default function Dashboard() {
     loadDashboardData();
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+    
+    const unsubscribe = base44.entities.User.subscribe((event) => {
+      if (event.type === 'update' && event.id === user.id) {
+        setUser(event.data);
+      }
+    });
+    
+    return unsubscribe;
+  }, [user?.id]);
+
   const loadDashboardData = async () => {
     try {
       const currentUser = await base44.auth.me();
