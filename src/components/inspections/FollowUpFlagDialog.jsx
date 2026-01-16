@@ -31,6 +31,12 @@ const PRIORITIES = [
   { value: 'urgent', label: 'Urgent' },
 ];
 
+const TIMEFRAMES = [
+  { value: 'asap', label: 'ASAP' },
+  { value: 'within_week', label: 'Within the Week' },
+  { value: 'when_convenient', label: 'When Convenient' },
+];
+
 export default function FollowUpFlagDialog({
   isOpen,
   onOpenChange,
@@ -39,15 +45,18 @@ export default function FollowUpFlagDialog({
 }) {
   const [followUpType, setFollowUpType] = useState('issue');
   const [priority, setPriority] = useState('medium');
+  const [timeframe, setTimeframe] = useState('within_week');
 
   const handleConfirm = () => {
     onConfirm({
       type: followUpType,
       priority: priority,
+      timeframe: timeframe,
     });
     onOpenChange(false);
     setFollowUpType('issue');
     setPriority('medium');
+    setTimeframe('within_week');
   };
 
   return (
@@ -89,6 +98,22 @@ export default function FollowUpFlagDialog({
                 {PRIORITIES.map((p) => (
                   <SelectItem key={p.value} value={p.value}>
                     {p.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="timeframe">Timeframe</Label>
+            <Select value={timeframe} onValueChange={setTimeframe}>
+              <SelectTrigger id="timeframe">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TIMEFRAMES.map((tf) => (
+                  <SelectItem key={tf.value} value={tf.value}>
+                    {tf.label}
                   </SelectItem>
                 ))}
               </SelectContent>
