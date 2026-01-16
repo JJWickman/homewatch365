@@ -200,89 +200,126 @@ export default function Inspections() {
   };
 
   const handleCreateInspection = async () => {
-    if (!companyId || !newInspection.property_id) return;
-    
-    // Check for scheduled inspection in same week for stop-by
-    if (!editingInspectionId && checkForScheduledInspection()) {
-      return;
-    }
+    if (!companyId || !newVisit.property_id) return;
     
     setCreating(true);
 
-    const property = getProperty(newInspection.property_id);
-    const staffMember = staff.find(s => s.user_email === newInspection.assigned_to);
+    try {
+      if (visitType === 'inspection') {
+        // Check for scheduled inspection in same week for stop-by
+        if (!editingId && checkForScheduledInspection()) {
+          return;
+        }
 
-    const isFlexibleType = ['other', 'custom_client_request', 'drop_in'].includes(newInspection.type);
-    
-    const baseData = {
-      company_id: companyId,
-      property_id: newInspection.property_id,
-      client_id: property?.client_id,
-      template_id: !isFlexibleType ? (newInspection.template_id || null) : null,
-      scheduled_time: newInspection.scheduled_time || null,
-      type: newInspection.type,
-      assigned_to: newInspection.assigned_to || null,
-      assigned_to_name: staffMember?.user_name || null,
-      status: isFlexibleType ? 'completed' : 'scheduled',
-      completed_at: isFlexibleType ? new Date().toISOString() : null,
-      ...(isFlexibleType && { summary_notes: newInspection.inspection_details || '' }),
-      ...(newInspection.custom_name && { custom_inspection_name: newInspection.custom_name })
-    };
+        const property = getProperty(newVisit.property_id);
+        const staffMember = staff.find(s => s.user_email === newVisit.assigned_to);
 
-    if (editingInspectionId) {
-      // Update existing inspection
-      await base44.entities.Inspection.update(editingInspectionId, baseData);
-    } else {
-      // Generate inspection dates
-      const dates = [newInspection.scheduled_date];
-      
-      if (newInspection.is_recurring && newInspection.recurrence_end_date) {
-        let currentDate = parseISO(newInspection.scheduled_date);
-        const endDate = parseISO(newInspection.recurrence_end_date);
+        const isFlexibleType = ['other', 'custom_client_request', 'drop_in'].includes(newVisit.type);
         
-        while (currentDate < endDate) {
-          if (newInspection.recurrence_frequency === 'daily') {
-            currentDate = addDays(currentDate, 1);
-          } else if (newInspection.recurrence_frequency === 'weekly') {
-            currentDate = addWeeks(currentDate, 1);
-          } else if (newInspection.recurrence_frequency === 'bi_weekly') {
-            currentDate = addWeeks(currentDate, 2);
-          } else if (newInspection.recurrence_frequency === 'monthly') {
-            currentDate = addMonths(currentDate, 1);
-          }
+        const baseData = {
+          company_id: companyId,
+          property_id: newVisit.property_id,
+          client_id: property?.client_id,
+          template_id: !isFlexibleType ? (newVisit.template_id || null) : null,
+          scheduled_time: newVisit.scheduled_time || null,
+          type: newVisit.type,
+          assigned_to: newVisit.assigned_to || null,
+          assigned_to_name: staffMember?.user_name || null,
+          status: isFlexibleType ? 'completed' : 'scheduled',
+          completed_at: isFlexibleType ? new Date().toISOString() : null,
+          ...(isFlexibleType && { summary_notes: newVisit.inspection_details || '' }),
+          ...(newVisit.custom_name && { custom_inspection_name: newVisit.custom_name })
+        };
+
+        if (editingId) {
+          await base44.entities.Inspection.update(editingId, baseData);
+        } else {
+          const dates = [newVisit.scheduled_date];
           
-          if (currentDate <= endDate) {
-            dates.push(format(currentDate, 'yyyy-MM-dd'));
+          if (newVisit.is_recurring && newVisit.recurrence_end_date) {
+            let currentDate = parseISO(newVisit.scheduled_date);
+            const endDate = parseISO(newVisit.recurrence_end_date);
+            
+            while (currentDate < endDate) {
+              if (newVisit.recurrence_frequency === 'daily') {
+                currentDate = addDays(currentDate, 1);
+              } else if (newVisit.recurrence_frequency === 'weekly') {
+                currentDate = addWeeks(currentDate, 1);
+              } else if (newVisit.recurrence_frequency === 'bi_weekly') {
+                currentDate = addWeeks(currentDate, 2);
+              } else if (newVisit.recurrence_frequency === 'monthly') {
+                currentDate = addMonths(currentDate, 1);
+              }
+              
+              if (currentDate <= endDate) {
+                dates.push(format(currentDate, 'yyyy-MM-dd'));
+              }
+            }
           }
+
+          const inspectionsToCreate = dates.map(date => ({
+            ...baseData,
+            scheduled_date: date
+          }));
+
+          await base44.entities.Inspection.bulkCreate(inspectionsToCreate);
+        }
+      } else {
+        // Create follow-up
+        const property = getProperty(newVisit.property_id);
+        const staffMember = staff.find(s => s.user_email === newVisit.assigned_to);
+
+        const followupData = {
+          company_id: companyId,
+          property_id: newVisit.property_id,
+          client_id: property?.client_id,
+          title: newVisit.followup_title,
+          description: newVisit.followup_description,
+          type: newVisit.followup_type,
+          priority: newVisit.followup_priority,
+          category: newVisit.followup_category,
+          status: 'open',
+          due_date: newVisit.followup_due_date,
+          due_time: newVisit.followup_due_time || null,
+          assigned_to: newVisit.assigned_to || null,
+          assigned_to_name: staffMember?.user_name || null
+        };
+
+        if (editingId) {
+          await base44.entities.FollowUp.update(editingId, followupData);
+        } else {
+          await base44.entities.FollowUp.create(followupData);
         }
       }
-
-      // Create all inspections
-      const inspectionsToCreate = dates.map(date => ({
-        ...baseData,
-        scheduled_date: date
-      }));
-
-      await base44.entities.Inspection.bulkCreate(inspectionsToCreate);
+    } catch (error) {
+      console.error('Error creating visit:', error);
+    } finally {
+      setShowNewDialog(false);
+      setEditingId(null);
+      setVisitType('inspection');
+      setNewVisit({
+        property_id: '',
+        template_id: '',
+        scheduled_date: format(new Date(), 'yyyy-MM-dd'),
+        scheduled_time: '',
+        type: 'routine',
+        assigned_to: '',
+        is_recurring: false,
+        recurrence_frequency: 'weekly',
+        recurrence_end_date: '',
+        custom_name: '',
+        inspection_details: '',
+        followup_type: 'issue',
+        followup_category: 'general',
+        followup_priority: 'medium',
+        followup_title: '',
+        followup_description: '',
+        followup_due_date: format(new Date(), 'yyyy-MM-dd'),
+        followup_due_time: ''
+      });
+      setCreating(false);
+      loadData();
     }
-    
-    setShowNewDialog(false);
-    setEditingInspectionId(null);
-    setNewInspection({
-      property_id: '',
-      template_id: '',
-      scheduled_date: format(new Date(), 'yyyy-MM-dd'),
-      scheduled_time: '',
-      type: 'routine',
-      assigned_to: '',
-      is_recurring: false,
-      recurrence_frequency: 'weekly',
-      recurrence_end_date: '',
-      custom_name: '',
-      inspection_details: ''
-    });
-    setCreating(false);
-    loadData();
   };
 
   const handleEditInspection = (inspection) => {
