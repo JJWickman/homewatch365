@@ -208,7 +208,7 @@ export default function Schedule() {
       <Card className="mb-6">
         <CardContent className="py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" onClick={navigatePrev}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -221,8 +221,6 @@ export default function Schedule() {
               <Button variant="outline" size="icon" onClick={navigateNext}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
-            </div>
-            <div className="flex items-center gap-4">
               <Button 
                 variant="outline" 
                 size="sm"
@@ -230,8 +228,10 @@ export default function Schedule() {
               >
                 Today
               </Button>
+            </div>
+            <div className="flex items-center gap-3">
               <Select value={selectedUser} onValueChange={setSelectedUser}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
