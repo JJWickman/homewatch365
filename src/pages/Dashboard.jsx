@@ -227,7 +227,7 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div onClick={() => openModal('properties')} className="cursor-pointer">
+        <div onClick={() => openModal('properties')} className="cursor-pointer h-full">
           <StatsCard
             title="Total Properties"
             value={stats.totalProperties}
@@ -236,7 +236,7 @@ export default function Dashboard() {
             iconBg="bg-blue-50"
           />
         </div>
-        <div onClick={() => openModal('clients')} className="cursor-pointer">
+        <div onClick={() => openModal('clients')} className="cursor-pointer h-full">
           <StatsCard
             title="Active Clients"
             value={stats.totalClients}
@@ -245,7 +245,7 @@ export default function Dashboard() {
             iconBg="bg-emerald-50"
           />
         </div>
-        <div onClick={() => openModal('week')} className="cursor-pointer">
+        <div onClick={() => openModal('week')} className="cursor-pointer h-full">
           <StatsCard
             title="This Week"
             value={`${stats.completedThisWeek}/${stats.inspectionsThisWeek}`}
@@ -254,7 +254,7 @@ export default function Dashboard() {
             iconBg="bg-amber-50"
           />
         </div>
-        <div onClick={() => openModal('followups')} className="cursor-pointer">
+        <div onClick={() => openModal('followups')} className="cursor-pointer h-full">
           <StatsCard
             title="Pending Follow-Ups"
             value={stats.pendingTasks}
