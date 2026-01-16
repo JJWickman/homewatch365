@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Camera, CheckCircle2, Loader2, Plus, X } from 'lucide-react';
+import { Camera, CheckCircle2, Loader2, Plus, X, AlertCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,6 +28,7 @@ export default function MobileInspectionView({
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [customItems, setCustomItems] = useState([]);
   const [newCustomName, setNewCustomName] = useState('');
+  const [flaggedItems, setFlaggedItems] = useState(new Set());
 
   const updateCategory = (categoryId, field, value) => {
     setCategories(prev => 
@@ -73,6 +74,18 @@ export default function MobileInspectionView({
       if (file) handlePhotoUpload(`custom-${itemId}`, null, e);
     };
     input.click();
+  };
+
+  const toggleFlagItem = (itemKey) => {
+    setFlaggedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemKey)) {
+        newSet.delete(itemKey);
+      } else {
+        newSet.add(itemKey);
+      }
+      return newSet;
+    });
   };
 
   return (
