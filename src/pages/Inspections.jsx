@@ -675,6 +675,31 @@ export default function Inspections() {
              </DialogDescription>
            </DialogHeader>
 
+           {!editingId && (
+             <div className="flex gap-2 mb-4">
+               <Button
+                 variant={scheduleMode === 'manual' ? 'default' : 'outline'}
+                 onClick={() => {
+                   setScheduleMode('manual');
+                   setSearchResults([]);
+                 }}
+                 className="flex-1"
+               >
+                 Manual Schedule
+               </Button>
+               <Button
+                 variant={scheduleMode === 'search' ? 'default' : 'outline'}
+                 onClick={() => {
+                   setScheduleMode('search');
+                   setSearchResults([]);
+                 }}
+                 className="flex-1"
+               >
+                 Find Available
+               </Button>
+             </div>
+           )}
+
            <div className="space-y-4 py-4">
              {/* Visit Type Selector */}
              <div>
