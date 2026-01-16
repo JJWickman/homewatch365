@@ -59,6 +59,8 @@ export default function Settings() {
   const [userPhone, setUserPhone] = useState('');
   const [userRole, setUserRole] = useState('');
   const [userTimezone, setUserTimezone] = useState('America/New_York');
+  const [baseHqAddress, setBaseHqAddress] = useState({ address: '', city: '', state: '', zip: '' });
+  const [homeAddress, setHomeAddress] = useState({ address: '', city: '', state: '', zip: '' });
 
   const [companyForm, setCompanyForm] = useState({
     name: '',
@@ -112,6 +114,8 @@ export default function Settings() {
       setUserEmail(currentUser.email || '');
       setUserPhone(currentUser.phone || '');
       setUserTimezone(currentUser.timezone || 'America/New_York');
+      setBaseHqAddress(currentUser.base_hq_address || { address: '', city: '', state: '', zip: '' });
+      setHomeAddress(currentUser.home_address || { address: '', city: '', state: '', zip: '' });
       
       // Load company member info
        const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
@@ -205,7 +209,9 @@ export default function Settings() {
       await base44.auth.updateMe({ 
         full_name: fullName,
         phone: userPhone,
-        timezone: userTimezone
+        timezone: userTimezone,
+        base_hq_address: baseHqAddress,
+        home_address: homeAddress
       });
 
       // Update full name and role in CompanyMember
@@ -231,7 +237,9 @@ export default function Settings() {
         ...user, 
         full_name: fullName,
         phone: userPhone,
-        timezone: userTimezone
+        timezone: userTimezone,
+        base_hq_address: baseHqAddress,
+        home_address: homeAddress
       });
       // Refresh page to show updated data in layout
       window.location.reload();
@@ -685,6 +693,73 @@ ${company.name}
                      </SelectContent>
                    </Select>
                  </div>
+                 </div>
+                 <div className="border-t pt-4">
+                   <h3 className="text-lg font-semibold mb-4">Addresses for Route Optimization</h3>
+                   
+                   {/* Base HQ Address */}
+                   <div className="mb-6">
+                     <Label className="text-sm font-medium">Base HQ Address</Label>
+                     <p className="text-xs text-slate-500 mb-3">Your main office location for route optimization</p>
+                     <div className="space-y-3">
+                       <Input
+                         placeholder="Street address"
+                         value={baseHqAddress.address}
+                         onChange={(e) => setBaseHqAddress({ ...baseHqAddress, address: e.target.value })}
+                         className="mt-1"
+                       />
+                       <div className="grid grid-cols-2 gap-3">
+                         <Input
+                           placeholder="City"
+                           value={baseHqAddress.city}
+                           onChange={(e) => setBaseHqAddress({ ...baseHqAddress, city: e.target.value })}
+                         />
+                         <Input
+                           placeholder="State"
+                           value={baseHqAddress.state}
+                           onChange={(e) => setBaseHqAddress({ ...baseHqAddress, state: e.target.value })}
+                           maxLength="2"
+                         />
+                       </div>
+                       <Input
+                         placeholder="ZIP code"
+                         value={baseHqAddress.zip}
+                         onChange={(e) => setBaseHqAddress({ ...baseHqAddress, zip: e.target.value })}
+                       />
+                     </div>
+                   </div>
+
+                   {/* Home Address */}
+                   <div>
+                     <Label className="text-sm font-medium">Home Address</Label>
+                     <p className="text-xs text-slate-500 mb-3">Your home address for starting routes from home</p>
+                     <div className="space-y-3">
+                       <Input
+                         placeholder="Street address"
+                         value={homeAddress.address}
+                         onChange={(e) => setHomeAddress({ ...homeAddress, address: e.target.value })}
+                         className="mt-1"
+                       />
+                       <div className="grid grid-cols-2 gap-3">
+                         <Input
+                           placeholder="City"
+                           value={homeAddress.city}
+                           onChange={(e) => setHomeAddress({ ...homeAddress, city: e.target.value })}
+                         />
+                         <Input
+                           placeholder="State"
+                           value={homeAddress.state}
+                           onChange={(e) => setHomeAddress({ ...homeAddress, state: e.target.value })}
+                           maxLength="2"
+                         />
+                       </div>
+                       <Input
+                         placeholder="ZIP code"
+                         value={homeAddress.zip}
+                         onChange={(e) => setHomeAddress({ ...homeAddress, zip: e.target.value })}
+                       />
+                     </div>
+                   </div>
                    {companyMember && (
                      <div>
                        <Label className="text-sm text-slate-500">Role</Label>
