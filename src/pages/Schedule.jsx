@@ -225,6 +225,24 @@ export default function Schedule() {
                 <Route className="h-4 w-4 mr-2" />
                 Optimize Route
               </Button>
+              <div className="flex items-center gap-2 border rounded-lg p-1">
+                <Button
+                  variant={filterMode === 'my' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setFilterMode('my')}
+                  className="h-7"
+                >
+                  My Schedule
+                </Button>
+                <Button
+                  variant={filterMode === 'all' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setFilterMode('all')}
+                  className="h-7"
+                >
+                  Everyone
+                </Button>
+              </div>
               <Tabs value={view} onValueChange={setView}>
                 <TabsList>
                   <TabsTrigger value="week">Week</TabsTrigger>
