@@ -637,6 +637,19 @@ export default function PropertyForm() {
     }));
   };
 
+  const updateEmergencyContact = (index, field, value) => {
+    const contacts = [...formData.emergency_contacts];
+    contacts[index] = { ...contacts[index], [field]: value };
+    setFormData(prev => ({ ...prev, emergency_contacts: contacts }));
+  };
+
+  const removeEmergencyContact = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      emergency_contacts: prev.emergency_contacts.filter((_, i) => i !== index)
+    }));
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
