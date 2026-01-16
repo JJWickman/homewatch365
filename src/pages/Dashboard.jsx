@@ -227,35 +227,52 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard
-          title="Total Properties"
-          value={stats.totalProperties}
-          icon={Building2}
-          iconColor="text-blue-600"
-          iconBg="bg-blue-50"
-        />
-        <StatsCard
-          title="Active Clients"
-          value={stats.totalClients}
-          icon={Users}
-          iconColor="text-emerald-600"
-          iconBg="bg-emerald-50"
-        />
-        <StatsCard
-          title="This Week"
-          value={`${stats.completedThisWeek}/${stats.inspectionsThisWeek}`}
-          icon={ClipboardCheck}
-          iconColor="text-amber-600"
-          iconBg="bg-amber-50"
-        />
-        <StatsCard
-          title="Pending Follow-Ups"
-          value={stats.pendingTasks}
-          icon={FileWarning}
-          iconColor="text-slate-600"
-          iconBg="bg-slate-100"
-        />
+        <div onClick={() => openModal('properties')} className="cursor-pointer">
+          <StatsCard
+            title="Total Properties"
+            value={stats.totalProperties}
+            icon={Building2}
+            iconColor="text-blue-600"
+            iconBg="bg-blue-50"
+          />
+        </div>
+        <div onClick={() => openModal('clients')} className="cursor-pointer">
+          <StatsCard
+            title="Active Clients"
+            value={stats.totalClients}
+            icon={Users}
+            iconColor="text-emerald-600"
+            iconBg="bg-emerald-50"
+          />
+        </div>
+        <div onClick={() => openModal('week')} className="cursor-pointer">
+          <StatsCard
+            title="This Week"
+            value={`${stats.completedThisWeek}/${stats.inspectionsThisWeek}`}
+            icon={ClipboardCheck}
+            iconColor="text-amber-600"
+            iconBg="bg-amber-50"
+          />
+        </div>
+        <div onClick={() => openModal('followups')} className="cursor-pointer">
+          <StatsCard
+            title="Pending Follow-Ups"
+            value={stats.pendingTasks}
+            icon={FileWarning}
+            iconColor="text-slate-600"
+            iconBg="bg-slate-100"
+          />
+        </div>
       </div>
+
+      {/* Modal */}
+      <StatsDetailModal 
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        title={modalState.title}
+        description={modalState.description}
+        items={modalState.items}
+      />
 
       {/* Today's Inspections - Full Width */}
       <Card>
