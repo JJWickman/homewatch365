@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
 Property: ${property?.name || 'Unknown'} at ${property?.address}, ${property?.city}, ${property?.state}
 Client: ${client?.first_name} ${client?.last_name}
 Date: ${new Date(inspection.scheduled_date).toLocaleDateString()}
-Inspection Type: ${inspection.type === 'standard' ? 'Standard' : inspection.type.replace(/_/g, ' ')}
+Inspection Type: ${inspection.type === 'routine' ? 'Routine' : inspection.type.replace(/_/g, ' ')}
 
 Categories Inspected:
 ${categories.map(cat => `

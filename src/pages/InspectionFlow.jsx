@@ -97,7 +97,7 @@ export default function InspectionFlow() {
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   
   const isFlexibleType = inspection && ['other', 'custom_client_request', 'drop_in'].includes(inspection.type);
-  const isStandardType = inspection && ['standard', 'pre_storm', 'post_storm'].includes(inspection.type);
+  const isStandardType = inspection && ['routine', 'pre_storm', 'post_storm'].includes(inspection.type);
 
   useEffect(() => {
     loadInspection();
@@ -126,7 +126,7 @@ export default function InspectionFlow() {
          if (propertyData.length > 0) setProperty(propertyData[0]);
 
          const isFlexible = ['other', 'custom_client_request', 'drop_in'].includes(insp.type);
-         const isStandard = ['standard', 'pre_storm', 'post_storm'].includes(insp.type);
+         const isStandard = ['routine', 'pre_storm', 'post_storm'].includes(insp.type);
 
          if (isStandard) {
            // Initialize mobile categories
