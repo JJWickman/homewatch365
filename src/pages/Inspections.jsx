@@ -902,7 +902,7 @@ export default function Inspections() {
               Cancel
             </Button>
             <Button 
-              onClick={handleCreateInspection}
+              onClick={handleCreateVisit}
               disabled={
                 !newVisit.property_id ||
                 (visitType === 'inspection' && !newVisit.scheduled_date) ||
@@ -910,7 +910,7 @@ export default function Inspections() {
                 (visitType === 'followup' && !newVisit.followup_title) ||
                 creating ||
                 (visitType === 'inspection' && newVisit.is_recurring && !newVisit.recurrence_end_date) ||
-                (visitType === 'inspection' && ['other', 'custom_client_request'].includes(newVisit.type) && !newVisit.inspection_details)
+                (visitType === 'inspection' && ['other', 'custom_client_request'].includes(newVisit.inspection_type) && !newVisit.inspection_details)
               }
               className="bg-slate-900 hover:bg-slate-800"
             >
