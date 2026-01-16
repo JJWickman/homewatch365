@@ -645,6 +645,8 @@ export default function Inspections() {
          if (!open) {
            setEditingId(null);
            setVisitType('inspection');
+           setScheduleMode('manual');
+           setSearchResults([]);
            setNewVisit({
              property_id: '',
              template_id: '',
