@@ -20,7 +20,7 @@ import PageHeader from '@/components/shared/PageHeader';
 export default function Schedule() {
   const navigate = useNavigate();
   const [inspections, setInspections] = useState([]);
-  const [tasks, setTasks] = useState([]);
+  const [followUps, setFollowUps] = useState([]);
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -40,14 +40,14 @@ export default function Schedule() {
         const cId = members[0].company_id;
         setCompanyId(cId);
         
-        const [inspectionsData, tasksData, propertiesData] = await Promise.all([
+        const [inspectionsData, followUpsData, propertiesData] = await Promise.all([
           base44.entities.Inspection.filter({ company_id: cId }),
-          base44.entities.Task.filter({ company_id: cId }),
+          base44.entities.FollowUp.filter({ company_id: cId }),
           base44.entities.Property.filter({ company_id: cId })
         ]);
         
         setInspections(inspectionsData);
-        setTasks(tasksData);
+        setFollowUps(followUpsData);
         setProperties(propertiesData);
       }
     } catch (error) {
@@ -86,9 +86,9 @@ export default function Schedule() {
 
   const getItemsForDate = (date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
-    const dayInspections = inspections.filter(i => i.scheduled_date === dateStr);
-    const dayTasks = tasks.filter(t => t.due_date === dateStr);
-    return { inspections: dayInspections, tasks: dayTasks };
+    const dayInspections = inspections.filter(i => i.scheduled_date === dateStr && i.status !== 'cancelled');
+    const dayFollowUps = followUps.filter(f => f.due_date === dateStr && f.status !== 'completed' && f.status !== 'cancelled');
+    return { inspections: dayInspections, followUps: dayFollowUps };
   };
 
   const navigatePrev = () => {
@@ -108,7 +108,7 @@ export default function Schedule() {
   };
 
   const DayCard = ({ date, compact = false }) => {
-    const { inspections: dayInspections, tasks: dayTasks } = getItemsForDate(date);
+    const { inspections: dayInspections, followUps: dayFollowUps } = getItemsForDate(date);
     const isCurrentDay = isToday(date);
     
     return (
@@ -145,19 +145,19 @@ export default function Schedule() {
               </Link>
             );
           })}
-          {dayTasks.map((task) => (
+          {dayFollowUps.map((followUp) => (
             <Link
-              key={task.id}
-              to={createPageUrl('Tasks')}
+              key={followUp.id}
+              to={createPageUrl('FollowUpDetail') + `?id=${followUp.id}`}
               className={`block p-1.5 rounded text-xs ${
-                task.status === 'completed'
-                  ? 'bg-slate-100 text-slate-600 line-through'
-                  : task.priority === 'urgent'
-                    ? 'bg-red-100 text-red-800'
+                followUp.priority === 'urgent'
+                  ? 'bg-red-100 text-red-800'
+                  : followUp.priority === 'high'
+                    ? 'bg-amber-100 text-amber-800'
                     : 'bg-purple-100 text-purple-800'
               } hover:opacity-80 transition-opacity`}
             >
-              <div className="font-medium truncate">{task.title}</div>
+              <div className="font-medium truncate">{followUp.title}</div>
             </Link>
           ))}
         </div>
@@ -260,27 +260,40 @@ export default function Schedule() {
                     <span className="text-sm">{format(date, 'd')}</span>
                   </div>
                   <div className="px-1 space-y-0.5">
-                    {getItemsForDate(date).inspections.slice(0, 3).map((inspection) => {
-                      const property = getProperty(inspection.property_id);
-                      return (
-                        <Link
-                          key={inspection.id}
-                          to={createPageUrl('InspectionDetail') + `?id=${inspection.id}`}
-                          className={`block px-1 py-0.5 rounded text-[10px] truncate ${
-                            inspection.status === 'completed' 
-                              ? 'bg-emerald-100 text-emerald-800' 
-                              : 'bg-blue-100 text-blue-800'
-                          }`}
-                        >
-                          {property?.name || property?.address?.slice(0, 10)}
-                        </Link>
-                      );
-                    })}
-                    {getItemsForDate(date).inspections.length > 3 && (
-                      <div className="text-[10px] text-slate-500 px-1">
-                        +{getItemsForDate(date).inspections.length - 3} more
-                      </div>
-                    )}
+                    {getItemsForDate(date).inspections.slice(0, 2).map((inspection) => {
+                       const property = getProperty(inspection.property_id);
+                       return (
+                         <Link
+                           key={inspection.id}
+                           to={createPageUrl('InspectionDetail') + `?id=${inspection.id}`}
+                           className={`block px-1 py-0.5 rounded text-[10px] truncate ${
+                             inspection.status === 'completed' 
+                               ? 'bg-emerald-100 text-emerald-800' 
+                               : 'bg-blue-100 text-blue-800'
+                           }`}
+                         >
+                           {property?.name || property?.address?.slice(0, 10)}
+                         </Link>
+                       );
+                     })}
+                     {getItemsForDate(date).followUps.slice(0, 1).map((followUp) => (
+                       <Link
+                         key={followUp.id}
+                         to={createPageUrl('FollowUpDetail') + `?id=${followUp.id}`}
+                         className={`block px-1 py-0.5 rounded text-[10px] truncate ${
+                           followUp.priority === 'urgent'
+                             ? 'bg-red-100 text-red-800'
+                             : 'bg-purple-100 text-purple-800'
+                         }`}
+                       >
+                         {followUp.title.slice(0, 10)}
+                       </Link>
+                     ))}
+                     {(getItemsForDate(date).inspections.length + getItemsForDate(date).followUps.length) > 3 && (
+                       <div className="text-[10px] text-slate-500 px-1">
+                         +{(getItemsForDate(date).inspections.length + getItemsForDate(date).followUps.length) - 3} more
+                       </div>
+                     )}
                   </div>
                 </div>
               );
