@@ -796,10 +796,55 @@ export default function Inspections() {
              </div>
 
              {scheduleMode === 'search' && !editingId && (
-              <div>
+              <div className="space-y-4">
+                {visitType === 'inspection' && (
+                  <div>
+                    <Label>Inspection Type *</Label>
+                    <Select
+                      value={newVisit.inspection_type}
+                      onValueChange={(value) => setNewVisit(prev => ({ ...prev, inspection_type: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="routine">Routine</SelectItem>
+                        <SelectItem value="pre_storm">Pre-Storm</SelectItem>
+                        <SelectItem value="post_storm">Post-Storm</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="custom_client_request">Custom Client Request</SelectItem>
+                        <SelectItem value="drop_in">Drop-In</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {visitType === 'followup' && (
+                  <div>
+                    <Label>Follow-Up Type *</Label>
+                    <Input
+                      placeholder="e.g., Roof repair, HVAC maintenance"
+                      value={newVisit.followup_type}
+                      onChange={(e) => setNewVisit(prev => ({ ...prev, followup_type: e.target.value }))}
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <Label>Estimated Hours *</Label>
+                  <Input
+                    type="number"
+                    min="0.5"
+                    step="0.5"
+                    placeholder="e.g., 2"
+                    value={newVisit.estimated_hours || ''}
+                    onChange={(e) => setNewVisit(prev => ({ ...prev, estimated_hours: parseFloat(e.target.value) || '' }))}
+                  />
+                </div>
+
                 <Button 
                   onClick={findAvailableSlots}
-                  disabled={!newVisit.property_id || !newVisit.assigned_to}
+                  disabled={!newVisit.property_id || !newVisit.assigned_to || !newVisit.estimated_hours || (visitType === 'inspection' && !newVisit.inspection_type) || (visitType === 'followup' && !newVisit.followup_type)}
                   className="w-full bg-blue-600 hover:bg-blue-700"
                 >
                   Search Available Times
