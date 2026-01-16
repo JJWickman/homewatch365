@@ -5,12 +5,12 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (!user || user.role !== 'admin') {
-      return Response.json({ error: 'Admin access required' }, { status: 403 });
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get company members to find the company_id
-    const members = await base44.asServiceRole.entities.CompanyMember.filter({ user_email: user.email });
+    const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
     if (members.length === 0) {
       return Response.json({ error: 'No company found' }, { status: 400 });
     }
@@ -18,10 +18,8 @@ Deno.serve(async (req) => {
     const companyId = members[0].company_id;
 
     // Fetch all inspections and follow-ups
-    const [inspections, followUps] = await Promise.all([
-      base44.asServiceRole.entities.Inspection.filter({ company_id: companyId }),
-      base44.asServiceRole.entities.FollowUp.filter({ company_id: companyId })
-    ]);
+    const inspections = await base44.entities.Inspection.filter({ company_id: companyId }) || [];
+    const followUps = await base44.entities.FollowUp.filter({ company_id: companyId }) || [];
 
     const visitsToCreate = [];
 
