@@ -138,6 +138,7 @@ export default function RouteOptimizer() {
         ...result,
         start_address: startAddress
       });
+      setShowOptimizedRoute(true);
     } catch (error) {
       console.error('Error optimizing route:', error);
     } finally {
