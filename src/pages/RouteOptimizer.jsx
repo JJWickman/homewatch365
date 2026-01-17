@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PageHeader from '@/components/shared/PageHeader';
 import RouteMap from '@/components/route/RouteMap';
+import StaticRouteMap from '@/components/route/StaticRouteMap';
 import { createPageUrl } from '@/utils';
 
 export default function RouteOptimizer() {
