@@ -68,12 +68,23 @@ export default function StaticRouteMap({ stops = [], startAddress }) {
   }
 
   return (
-    <div className="w-full h-full rounded-lg overflow-hidden bg-slate-50">
+    <div className="w-full h-full rounded-lg overflow-hidden bg-slate-50 relative">
       <img
         src={mapUrl}
         alt="Route map"
         className="w-full h-full object-cover"
       />
+      <div className="absolute top-3 right-3">
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={generateStaticMapUrl}
+          disabled={loading}
+          className="bg-white hover:bg-slate-100 shadow"
+        >
+          <RotateCcw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+        </Button>
+      </div>
     </div>
   );
 }
