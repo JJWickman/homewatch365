@@ -166,10 +166,15 @@ export default function TestGoogleMapsAPI() {
         
         // Set result to trigger map rendering
         setResult({
-          lat: property.latitude,
-          lon: property.longitude,
-          address: `${property.address}, ${property.city}, ${property.state} ${property.zip}`,
-          aerialView: `https://www.google.com/maps/@${property.latitude},${property.longitude},100m/data=!3m1!1e3`
+          validation: {
+            isValid: true,
+            status: 'OK',
+            formattedAddress: `${property.address}, ${property.city}, ${property.state} ${property.zip}`
+          },
+          coordinates: {
+            lat: property.latitude,
+            lng: property.longitude
+          }
         });
         
         // Initialize map if needed
