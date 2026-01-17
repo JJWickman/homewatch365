@@ -218,7 +218,9 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
     // Fit bounds to show all markers
     const bounds = new window.google.maps.LatLngBounds();
     validStops.forEach(stop => {
-      bounds.extend({ lat: stop.lat, lng: stop.lng });
+      const lat = parseFloat(stop.lat || stop.latitude);
+      const lng = parseFloat(stop.lng || stop.longitude);
+      bounds.extend({ lat, lng });
     });
     map.fitBounds(bounds);
 
