@@ -216,12 +216,12 @@ export default function Contractors() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this contractor?')) {
+    if (window.confirm('Are you sure you want to deactivate this contractor?')) {
       try {
-        await base44.entities.Contractor.delete(id);
+        await base44.entities.Contractor.update(id, { is_active: false });
         await loadData();
       } catch (error) {
-        console.error('Error deleting contractor:', error);
+        console.error('Error deactivating contractor:', error);
       }
     }
   };
@@ -319,7 +319,7 @@ export default function Contractors() {
                         className="text-red-600"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
+                        Deactivate
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
