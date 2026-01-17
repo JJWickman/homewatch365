@@ -48,9 +48,9 @@ export default function Inspections() {
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('scheduled,open');
   const [visitTypeFilter, setVisitTypeFilter] = useState('all');
-  const [assignedFilter, setAssignedFilter] = useState('all');
+  const [assignedFilter, setAssignedFilter] = useState('me');
   const [propertyFilter, setPropertyFilter] = useState('all');
   const [companyId, setCompanyId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
@@ -297,9 +297,9 @@ export default function Inspections() {
       property?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       property?.address?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesStatus = statusFilter === 'all' || visit.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' || statusFilter.split(',').includes(visit.status);
     const matchesVisitType = visitTypeFilter === 'all' || visit.visit_type === visitTypeFilter;
-    const matchesAssigned = assignedFilter === 'all' || visit.assigned_to === assignedFilter;
+    const matchesAssigned = assignedFilter === 'all' || (assignedFilter === 'me' ? visit.assigned_to === currentUser?.email : visit.assigned_to === assignedFilter);
     const matchesProperty = propertyFilter === 'all' || visit.property_id === propertyFilter;
     
     // Check for week filter from URL
@@ -677,7 +677,9 @@ export default function Inspections() {
              </SelectTrigger>
              <SelectContent>
                <SelectItem value="all">All Status</SelectItem>
+               <SelectItem value="scheduled,open">Open/Scheduled</SelectItem>
                <SelectItem value="scheduled">Scheduled</SelectItem>
+               <SelectItem value="open">Open</SelectItem>
                <SelectItem value="in_progress">In Progress</SelectItem>
                <SelectItem value="completed">Completed</SelectItem>
                <SelectItem value="cancelled">Cancelled</SelectItem>
@@ -699,6 +701,7 @@ export default function Inspections() {
              </SelectTrigger>
              <SelectContent>
                <SelectItem value="all">All Staff</SelectItem>
+               <SelectItem value="me">My Visits</SelectItem>
                {staff.map((member) => (
                  <SelectItem key={member.id} value={member.user_email}>
                    {member.user_name || member.user_email}
