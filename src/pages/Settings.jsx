@@ -396,7 +396,7 @@ ${company.name}
       monthlyPrice: 199,
       annualPrice: 159,
       popular: true,
-      features: ['Everything in Solopreneur', 'Up to 5 Field Inspectors', '1 Admin User', 'Team Collaboration'],
+      features: ['Everything in Solopreneur', 'Up to 5 Field Inspectors', '1 Admin User', 'Team Collaboration', 'Route Optimization'],
       limits: { users: 5, admins: 1 }
     },
     {
@@ -405,7 +405,7 @@ ${company.name}
       icon: Briefcase,
       monthlyPrice: 249,
       annualPrice: 199,
-      features: ['Everything in Growth', 'Up to 10 Team Members', '2 Admin Users', 'Priority Support'],
+      features: ['Everything in Growth', 'Up to 10 Team Members', '2 Admin Users', 'Priority Support', 'Route Optimization'],
       limits: { users: 10, admins: 2 }
     },
     {
