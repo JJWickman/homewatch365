@@ -1157,6 +1157,8 @@ export default function PropertyForm() {
                    {formData.contractors.map((contractorId) => {
                      const contractor = contractors.find(c => c.id === contractorId);
                      if (!contractor) return null;
+                     const availableReplacements = contractors.filter(c => !formData.contractors.includes(c.id));
+                     
                      return (
                        <div key={contractorId} className="flex items-start justify-between p-3 bg-amber-50 border border-amber-200 rounded-lg">
                          <div className="flex-1">
@@ -1169,18 +1171,45 @@ export default function PropertyForm() {
                              {contractor.email && <p>📧 {contractor.email}</p>}
                            </div>
                          </div>
-                         <Button
-                           type="button"
-                           variant="ghost"
-                           size="sm"
-                           onClick={() => setFormData(prev => ({
-                             ...prev,
-                             contractors: prev.contractors.filter(id => id !== contractorId)
-                           }))}
-                           className="text-red-600 hover:bg-red-50 ml-2 shrink-0"
-                         >
-                           <Trash2 className="h-4 w-4" />
-                         </Button>
+                         <div className="flex gap-1 ml-2 shrink-0">
+                           {availableReplacements.length > 0 && (
+                             <DropdownMenu>
+                               <DropdownMenuTrigger asChild>
+                                 <Button type="button" variant="ghost" size="sm" className="text-slate-600 hover:bg-amber-100">
+                                   <ArrowRightLeft className="h-4 w-4" />
+                                 </Button>
+                               </DropdownMenuTrigger>
+                               <DropdownMenuContent align="end" className="w-56">
+                                 {availableReplacements.map((replacement) => (
+                                   <DropdownMenuItem
+                                     key={replacement.id}
+                                     onClick={() => setFormData(prev => ({
+                                       ...prev,
+                                       contractors: prev.contractors.map(id => id === contractorId ? replacement.id : id)
+                                     }))}
+                                   >
+                                     <div className="flex flex-col gap-1">
+                                       <span className="font-medium text-sm">{replacement.business_name}</span>
+                                       <span className="text-xs text-slate-500 capitalize">{replacement.contractor_type.replace('_', ' ')}</span>
+                                     </div>
+                                   </DropdownMenuItem>
+                                 ))}
+                               </DropdownMenuContent>
+                             </DropdownMenu>
+                           )}
+                           <Button
+                             type="button"
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => setFormData(prev => ({
+                               ...prev,
+                               contractors: prev.contractors.filter(id => id !== contractorId)
+                             }))}
+                             className="text-red-600 hover:bg-red-50"
+                           >
+                             <Trash2 className="h-4 w-4" />
+                           </Button>
+                         </div>
                        </div>
                      );
                    })}
