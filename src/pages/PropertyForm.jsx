@@ -5,7 +5,7 @@ import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { 
   Building2, MapPin, Key, Wifi, Phone, Calendar,
-  Save, X, Upload, Plus, Trash2, User, MapPinCheckInside, Loader
+  Save, X, Upload, Plus, Trash2, User, MapPinCheckInside, Loader, ArrowRightLeft, ChevronDown
 } from 'lucide-react';
 import {
   Dialog,
@@ -26,6 +26,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import PageHeader from '@/components/shared/PageHeader';
 import { useAutoSave } from '@/components/shared/useAutoSave';
 import { Clock } from 'lucide-react';
