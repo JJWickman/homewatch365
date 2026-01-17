@@ -32,6 +32,7 @@ export default function RouteOptimizer() {
   const [loading, setLoading] = useState(true);
   const [optimizing, setOptimizing] = useState(false);
   const [startAddress, setStartAddress] = useState('');
+  const [company, setCompany] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -55,13 +56,17 @@ export default function RouteOptimizer() {
         const cId = members[0].company_id;
         setCompanyId(cId);
         
-        const [propertiesData, teamMembersData] = await Promise.all([
+        const [propertiesData, teamMembersData, companyData] = await Promise.all([
           base44.entities.Property.filter({ company_id: cId }),
-          base44.entities.CompanyMember.filter({ company_id: cId, is_active: true })
+          base44.entities.CompanyMember.filter({ company_id: cId, is_active: true }),
+          base44.entities.Company.filter({ id: cId })
         ]);
         
         setProperties(propertiesData);
         setTeamMembers(teamMembersData);
+        if (companyData.length > 0) {
+          setCompany(companyData[0]);
+        }
         
         // Use user's Base HQ address if available, otherwise fall back to company address
         if (user.base_hq_address && user.base_hq_address.address) {
@@ -169,6 +174,35 @@ export default function RouteOptimizer() {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+      </div>
+    );
+  }
+
+  // Check if user has Professional or Enterprise plan
+  const hasAccess = company?.subscription_plan === 'professional' || company?.subscription_plan === 'enterprise';
+
+  if (!hasAccess) {
+    return (
+      <div>
+        <PageHeader
+          title="Route Optimizer"
+          subtitle="Plan the most efficient route for your inspections"
+          backLink="Schedule"
+          backLabel="Back to Schedule"
+        />
+        <Card className="border-amber-200 bg-amber-50">
+          <CardContent className="pt-6">
+            <div className="text-center py-8">
+              <h3 className="text-lg font-semibold text-amber-900 mb-2">Professional Plan Required</h3>
+              <p className="text-sm text-amber-800 mb-4">
+                Route Optimization is available on Professional and Enterprise plans. Upgrade your subscription to unlock this feature.
+              </p>
+              <a href={createPageUrl('Pricing')} className="inline-block">
+                <Button className="bg-amber-600 hover:bg-amber-700">View Pricing Plans</Button>
+              </a>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
