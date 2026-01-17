@@ -31,7 +31,7 @@ export default function ViewToggle({ view, onViewChange, isMobile }) {
         size="sm"
         variant={view === 'list' ? 'default' : 'ghost'}
         onClick={() => onViewChange('list')}
-        className={`gap-2 ${view !== 'list' ? 'text-white hover:text-white hover:bg-slate-800' : ''}`}
+        className={`gap-2 ${view === 'list' ? 'text-white bg-slate-900' : 'text-white hover:text-white hover:bg-slate-800'}`}
       >
         <List className="h-4 w-4" />
         <span className="hidden sm:inline">List</span>
@@ -40,7 +40,7 @@ export default function ViewToggle({ view, onViewChange, isMobile }) {
         size="sm"
         variant={view === 'large-tiles' ? 'default' : 'ghost'}
         onClick={() => onViewChange('large-tiles')}
-        className={`gap-2 ${view !== 'large-tiles' ? 'text-white hover:text-white hover:bg-slate-800' : ''}`}
+        className={`gap-2 ${view === 'large-tiles' ? 'text-white bg-slate-900' : 'text-white hover:text-white hover:bg-slate-800'}`}
       >
         <Grid2X2 className="h-4 w-4" />
         <span className="hidden sm:inline">Large</span>
@@ -49,7 +49,7 @@ export default function ViewToggle({ view, onViewChange, isMobile }) {
         size="sm"
         variant={view === 'small-tiles' ? 'default' : 'ghost'}
         onClick={() => onViewChange('small-tiles')}
-        className={`gap-2 ${view !== 'small-tiles' ? 'text-white hover:text-white hover:bg-slate-800' : ''}`}
+        className={`gap-2 ${view === 'small-tiles' ? 'text-white bg-slate-900' : 'text-white hover:text-white hover:bg-slate-800'}`}
       >
         <Grid3X3 className="h-4 w-4" />
         <span className="hidden sm:inline">Small</span>
