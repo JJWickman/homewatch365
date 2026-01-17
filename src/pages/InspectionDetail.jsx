@@ -63,7 +63,7 @@ export default function InspectionDetail() {
     }
 
     try {
-      const inspectionData = await base44.entities.Inspection.filter({ id });
+      const inspectionData = await base44.entities.Visit.filter({ id });
       
       if (inspectionData.length > 0) {
         const insp = inspectionData[0];
@@ -71,7 +71,7 @@ export default function InspectionDetail() {
         setEditData({
           scheduled_date: insp.scheduled_date,
           scheduled_time: insp.scheduled_time || '',
-          type: insp.type,
+          type: insp.visit_type === 'inspection' ? insp.inspection_type : insp.followup_type,
           assigned_to: insp.assigned_to || ''
         });
         
@@ -98,13 +98,20 @@ export default function InspectionDetail() {
     setUpdating(true);
     try {
       const staffMember = staff.find(s => s.user_email === editData.assigned_to);
-      await base44.entities.Inspection.update(inspection.id, {
+      const updateData = {
         scheduled_date: editData.scheduled_date,
         scheduled_time: editData.scheduled_time || null,
-        type: editData.type,
         assigned_to: editData.assigned_to || null,
         assigned_to_name: staffMember?.user_name || null
-      });
+      };
+      
+      if (inspection.visit_type === 'inspection') {
+        updateData.inspection_type = editData.type;
+      } else {
+        updateData.followup_type = editData.type;
+      }
+      
+      await base44.entities.Visit.update(inspection.id, updateData);
       
       setShowEditDialog(false);
       loadInspection();
@@ -140,7 +147,7 @@ Your Property Management Team
       `.trim()
     });
 
-    await base44.entities.Inspection.update(inspection.id, {
+    await base44.entities.Visit.update(inspection.id, {
       client_notified: true,
       client_notified_at: new Date().toISOString()
     });
@@ -282,7 +289,7 @@ Your Property Management Team
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-500">Type</span>
-                <StatusBadge status={inspection.type} />
+                <StatusBadge status={inspection.visit_type === 'inspection' ? inspection.inspection_type : inspection.followup_type} />
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-500">Scheduled</span>
@@ -295,7 +302,7 @@ Your Property Management Team
                       if (editData.scheduled_date !== inspection.scheduled_date) {
                         setUpdating(true);
                         try {
-                          await base44.entities.Inspection.update(inspection.id, {
+                          await base44.entities.Visit.update(inspection.id, {
                             scheduled_date: editData.scheduled_date
                           });
                           setInspection(prev => ({ ...prev, scheduled_date: editData.scheduled_date }));
