@@ -362,12 +362,36 @@ export default function PropertyForm() {
     toast.success('Image approved and saved');
   };
 
+  const autocorrectCity = async (city, state) => {
+    if (!city || !state || city.length < 2) return city;
+
+    try {
+      // Use Google Places autocomplete to get properly formatted city name
+      if (autocompleteServiceRef.current) {
+        const predictions = await autocompleteServiceRef.current.getPlacePredictions({
+          input: `${city}, ${state}`,
+          types: ['(cities)'],
+          componentRestrictions: { country: 'us' }
+        });
+
+        if (predictions.predictions && predictions.predictions.length > 0) {
+          // Extract city from the first prediction
+          const mainText = predictions.predictions[0].main_text;
+          return mainText;
+        }
+      }
+    } catch (error) {
+      console.error('Autocorrect error:', error);
+    }
+    return city;
+  };
+
   const handleAddressChange = (field, value) => {
     handleChange(field, value);
 
     if (field === 'address' && value.length > 2) {
       setShowAutocomplete(true);
-      
+
       if (validateTimeoutRef.current) {
         clearTimeout(validateTimeoutRef.current);
       }
@@ -385,6 +409,17 @@ export default function PropertyForm() {
           }
         }
       }, 300);
+    } else if (field === 'city') {
+      // Auto-correct city when user leaves the field (on blur will trigger)
+      if (formData.state && value.length > 2) {
+        if (validateTimeoutRef.current) clearTimeout(validateTimeoutRef.current);
+        validateTimeoutRef.current = setTimeout(async () => {
+          const correctedCity = await autocorrectCity(value, formData.state);
+          if (correctedCity !== value) {
+            setFormData(prev => ({ ...prev, city: correctedCity }));
+          }
+        }, 500);
+      }
     } else if (field !== 'address') {
       // For city/state/zip, validate when all three are filled
       const updatedForm = { ...formData, [field]: value };
