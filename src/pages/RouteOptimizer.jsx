@@ -126,12 +126,6 @@ export default function RouteOptimizer() {
           time = i.due_time;
         }
         
-        console.log('Property coordinates:', {
-          name: property?.name,
-          lat: property?.latitude,
-          lng: property?.longitude
-        });
-        
         return {
           id: i.id,
           type: i.type,
@@ -141,72 +135,21 @@ export default function RouteOptimizer() {
           lat: property?.latitude,
           lng: property?.longitude
         };
-      }).filter(s => s.address);
+      }).filter(s => s.address && s.lat && s.lng);
       
-      console.log('Stops before optimization:', stops);
+      console.log('Stops for optimization:', stops);
 
-      const prompt = `
-You are a route optimization assistant. Given the following inspection stops for ${selectedDate}, 
-optimize the route considering:
-1. Minimize total driving time and distance
-2. Consider typical traffic patterns for this time of day
-3. Group nearby locations together
-4. If scheduled times exist, try to respect them
-
-Starting location: ${startAddress || 'Not specified'}
-
-Stops to visit:
-${stops.map((s, i) => `${i + 1}. ${s.name} - ${s.address}${s.scheduled_time ? ` (scheduled: ${s.scheduled_time})` : ''}`).join('\n')}
-
-Return the optimized order with estimated times and any weather/traffic considerations.
-`;
-
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        add_context_from_internet: true,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            optimized_stops: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  original_index: { type: "number" },
-                  name: { type: "string" },
-                  address: { type: "string" },
-                  estimated_arrival: { type: "string" },
-                  drive_time_minutes: { type: "number" },
-                  distance_miles: { type: "number" }
-                }
-              }
-            },
-            total_distance_miles: { type: "number" },
-            total_drive_time_minutes: { type: "number" },
-            weather_advisory: { type: "string" },
-            traffic_notes: { type: "string" },
-            recommendations: { type: "string" }
-          }
-        }
+      const response = await base44.functions.invoke('optimizeRoute', {
+        stops,
+        startAddress
       });
 
-      // Map back to our inspection data
-      const optimizedStops = result.optimized_stops.map((stop, index) => {
-        const originalStop = stops[stop.original_index - 1] || stops.find(s => s.name === stop.name || s.address.includes(stop.address));
-        return {
-          ...stop,
-          order: index + 1,
-          inspection_id: originalStop?.id,
-          lat: originalStop?.lat,
-          lng: originalStop?.lng
-        };
-      });
+      const result = response.data;
       
-      console.log('Optimized stops with coordinates:', optimizedStops);
+      console.log('Optimized route:', result);
 
       setOptimizedRoute({
         ...result,
-        optimized_stops: optimizedStops,
         start_address: startAddress
       });
     } catch (error) {
