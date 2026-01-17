@@ -50,10 +50,11 @@ export default function Inspections() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('scheduled,open');
   const [visitTypeFilter, setVisitTypeFilter] = useState('all');
-  const [assignedFilter, setAssignedFilter] = useState('me');
+  const [assignedFilter, setAssignedFilter] = useState('all');
   const [propertyFilter, setPropertyFilter] = useState('all');
   const [companyId, setCompanyId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [currentMember, setCurrentMember] = useState(null);
   
   // New visit dialog (inspection or follow-up)
   const [showNewDialog, setShowNewDialog] = useState(false);
@@ -114,8 +115,15 @@ export default function Inspections() {
       const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
       
       if (members.length > 0) {
-        const cId = members[0].company_id;
+        const member = members[0];
+        setCurrentMember(member);
+        const cId = member.company_id;
         setCompanyId(cId);
+        
+        // Set default filter based on role
+        if (member.role === 'field_inspector') {
+          setAssignedFilter('me');
+        }
         
         const [visitsData, propertiesData, clientsData, templatesData, staffData] = await Promise.all([
           base44.entities.Visit.filter({ company_id: cId }, '-scheduled_date'),
