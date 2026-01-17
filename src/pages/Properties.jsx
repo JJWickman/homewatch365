@@ -36,6 +36,7 @@ export default function Properties() {
   const [companyId, setCompanyId] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [visits, setVisits] = useState([]);
 
   useEffect(() => {
     loadProperties();
