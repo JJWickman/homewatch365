@@ -289,7 +289,7 @@ Return the optimized order with estimated times and any weather/traffic consider
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Route Settings</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs">Date</Label>
@@ -310,25 +310,29 @@ Return the optimized order with estimated times and any weather/traffic consider
                 />
               </div>
             </div>
-            <Button 
-              onClick={optimizeRoute} 
-              disabled={inspections.length === 0 || optimizing}
-              className="w-full bg-slate-900 hover:bg-slate-800 h-9"
-            >
-              {optimizing ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Optimizing...
-                </>
-              ) : (
-                <>
-                  <Route className="h-4 w-4 mr-2" />
-                  Optimize Route
-                </>
-              )}
-            </Button>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Optimize Button */}
+      <div className="mb-4">
+        <Button 
+          onClick={optimizeRoute} 
+          disabled={inspections.length === 0 || optimizing}
+          className="bg-slate-900 hover:bg-slate-800"
+        >
+          {optimizing ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Optimizing...
+            </>
+          ) : (
+            <>
+              <Route className="h-4 w-4 mr-2" />
+              Optimize Route
+            </>
+          )}
+        </Button>
       </div>
 
       {/* Full Width Map */}
