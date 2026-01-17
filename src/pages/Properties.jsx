@@ -69,6 +69,7 @@ export default function Properties() {
         
         setProperties(propertiesData);
         setClients(clientsData);
+        setVisits(visitsData);
       }
     } catch (error) {
       console.error('Error loading properties:', error);
