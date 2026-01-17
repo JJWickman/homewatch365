@@ -11,6 +11,9 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
   const [error, setError] = useState(null);
   const [mapReady, setMapReady] = useState(false);
 
+  const validStops = stops.filter(s => s.lat && s.lng);
+  const hasValidData = validStops.length > 0 && isOptimized;
+
   useEffect(() => {
     if (mapInstanceRef.current && stops.length > 0) {
       updateMap();
@@ -163,6 +166,19 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
     map.fitBounds(bounds, padding);
   };
 
+  // Show placeholder if no valid data
+  if (!hasValidData) {
+    return (
+      <div className="h-full flex items-center justify-center bg-slate-100 rounded-lg">
+        <div className="text-center text-slate-500">
+          <MapPin className="h-12 w-12 mx-auto mb-3 opacity-50" />
+          <p className="font-medium">Map will appear here</p>
+          <p className="text-sm">Select a user, date, and optimize the route first</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!mapReady && !loading && !error) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-slate-50 rounded-lg">
@@ -197,18 +213,6 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
         <div className="text-center text-red-600">
           <p className="font-medium">{error}</p>
           <p className="text-sm mt-1">Please check your Google Maps API configuration</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (stops.filter(s => s.lat && s.lng).length === 0) {
-    return (
-      <div className="h-full flex items-center justify-center bg-slate-100 rounded-lg">
-        <div className="text-center text-slate-500">
-          <MapPin className="h-12 w-12 mx-auto mb-3 opacity-50" />
-          <p className="font-medium">No locations to display</p>
-          <p className="text-sm">Select a date with scheduled visits</p>
         </div>
       </div>
     );
