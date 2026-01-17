@@ -15,10 +15,10 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
   const hasValidData = validStops.length > 0;
 
   useEffect(() => {
-    if (!mapReady && hasValidData && !loading && !error) {
+    if (!mapReady && hasValidData && !loading && !error && mapRef.current) {
       loadGoogleMaps();
     }
-  }, [hasValidData]);
+  }, [hasValidData, mapReady]);
 
   useEffect(() => {
     if (mapInstanceRef.current && stops.length > 0) {
@@ -33,7 +33,7 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
     try {
       // Check if already loaded
       if (window.google?.maps) {
-        initializeMap();
+        setTimeout(initializeMap, 100);
         return;
       }
 
@@ -44,6 +44,20 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
       if (!apiKey) {
         throw new Error('Google Maps API key not found');
       }
+
+      // Check if script already exists
+      const existingScript = document.querySelector(`script[src*="maps.googleapis.com"]`);
+      if (existingScript) {
+        // Script exists but library may not be loaded yet
+        const checkInterval = setInterval(() => {
+          if (window.google?.maps) {
+            clearInterval(checkInterval);
+            setTimeout(initializeMap, 100);
+          }
+        }, 100);
+        setLoading(false);
+        return;
+      }
       
       // Load Google Maps script
       const script = document.createElement('script');
@@ -51,7 +65,7 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
       script.async = true;
       script.defer = true;
       script.onload = () => {
-        initializeMap();
+        setTimeout(initializeMap, 100);
       };
       script.onerror = () => {
         setError('Failed to load Google Maps');
@@ -66,26 +80,40 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
   };
 
   const initializeMap = () => {
-    if (!mapRef.current || !window.google) return;
+    if (!mapRef.current) {
+      console.warn('Map ref not available');
+      return;
+    }
+    
+    if (!window.google?.maps) {
+      console.warn('Google Maps not loaded');
+      return;
+    }
 
-    mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
-      zoom: 10,
-      center: { lat: 39.8283, lng: -98.5795 }, // Center of US
-      mapTypeControl: true,
-      streetViewControl: false,
-      fullscreenControl: true,
-      styles: [
-        {
-          featureType: 'poi',
-          elementType: 'labels',
-          stylers: [{ visibility: 'off' }]
-        }
-      ]
-    });
+    try {
+      mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
+        zoom: 10,
+        center: { lat: 39.8283, lng: -98.5795 }, // Center of US
+        mapTypeControl: true,
+        streetViewControl: false,
+        fullscreenControl: true,
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          }
+        ]
+      });
 
-    setLoading(false);
-    setMapReady(true);
-    updateMap();
+      setLoading(false);
+      setMapReady(true);
+      updateMap();
+    } catch (err) {
+      console.error('Error initializing map:', err);
+      setError('Failed to initialize map');
+      setLoading(false);
+    }
   };
 
   const updateMap = () => {
