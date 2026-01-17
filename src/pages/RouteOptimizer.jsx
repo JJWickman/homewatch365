@@ -346,11 +346,18 @@ export default function RouteOptimizer() {
             </div>
           </CardHeader>
           <CardContent className="p-0 h-[500px]">
-            <RouteMap
-              stops={showOptimized ? optimizedRoute.optimized_stops : mapStops}
-              startAddress={startAddress}
-              isOptimized={showOptimized}
-            />
+            {showOptimized ? (
+              <RouteMap
+                stops={optimizedRoute.optimized_stops}
+                startAddress={startAddress}
+                isOptimized={true}
+              />
+            ) : (
+              <StaticRouteMap
+                stops={mapStops}
+                startAddress={startAddress}
+              />
+            )}
           </CardContent>
         </Card>
       )}
