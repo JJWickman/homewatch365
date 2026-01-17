@@ -11,14 +11,18 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
   const [error, setError] = useState(null);
   const [mapReady, setMapReady] = useState(false);
 
-  const validStops = stops.filter(s => s.lat && s.lng);
+  const validStops = stops.filter(s => {
+    const lat = parseFloat(s.lat || s.latitude);
+    const lng = parseFloat(s.lng || s.longitude);
+    return !isNaN(lat) && !isNaN(lng);
+  });
   const hasValidData = validStops.length > 0;
 
   useEffect(() => {
     if (!mapReady && hasValidData && !loading && !error && mapRef.current) {
       loadGoogleMaps();
     }
-  }, [hasValidData, mapReady]);
+  }, [hasValidData, mapReady, stops]);
 
   useEffect(() => {
     if (mapInstanceRef.current && stops.length > 0) {
