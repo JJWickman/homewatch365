@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Search, MapPin, Star, Loader2, Phone } from 'lucide-react';
+import { Search, MapPin, Star, Loader2, Phone, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -19,13 +20,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function ContractorSearchDialog({ 
   open, 
   onOpenChange, 
   onSelect,
   properties = [],
-  companyId
+  companyId,
+  currentProperty = null
 }) {
   const [searchType, setSearchType] = useState('');
   const [selectedProperty, setSelectedProperty] = useState('');
@@ -34,6 +37,29 @@ export default function ContractorSearchDialog({
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [selectedContractors, setSelectedContractors] = useState(new Set());
+  const [activeTab, setActiveTab] = useState('search');
+  const [manualForm, setManualForm] = useState({
+    business_name: '',
+    contact_name: '',
+    contractor_type: 'other',
+    email: '',
+    phone: '',
+    secondary_phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zip: '',
+    license_number: '',
+    insurance_info: '',
+    hourly_rate: '',
+    notes: ''
+  });
+
+  useEffect(() => {
+    if (open && currentProperty) {
+      setSelectedProperty(currentProperty.id);
+    }
+  }, [open, currentProperty]);
 
   const handleSearch = async () => {
     if (!searchType || !selectedProperty) {
