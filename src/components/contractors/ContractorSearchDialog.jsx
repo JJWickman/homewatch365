@@ -349,7 +349,172 @@ export default function ContractorSearchDialog({
               </Button>
             </div>
           </div>
-        )}
+          )}
+          </TabsContent>
+
+          <TabsContent value="manual" className="space-y-4">
+            <div className="grid gap-4">
+              <div>
+                <Label>Business Name *</Label>
+                <Input
+                  placeholder="Contractor business name"
+                  value={manualForm.business_name}
+                  onChange={(e) => setManualForm({ ...manualForm, business_name: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <Label>Contact Name</Label>
+                <Input
+                  placeholder="Primary contact person"
+                  value={manualForm.contact_name}
+                  onChange={(e) => setManualForm({ ...manualForm, contact_name: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <Label>Contractor Type *</Label>
+                <Select value={manualForm.contractor_type} onValueChange={(value) => setManualForm({ ...manualForm, contractor_type: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="electrician">Electrician</SelectItem>
+                    <SelectItem value="hvac">HVAC</SelectItem>
+                    <SelectItem value="plumber">Plumber</SelectItem>
+                    <SelectItem value="roofer">Roofer</SelectItem>
+                    <SelectItem value="pool_service">Pool Service</SelectItem>
+                    <SelectItem value="landscaping">Landscaping</SelectItem>
+                    <SelectItem value="painter">Painter</SelectItem>
+                    <SelectItem value="carpenter">Carpenter</SelectItem>
+                    <SelectItem value="general_contractor">General Contractor</SelectItem>
+                    <SelectItem value="pest_control">Pest Control</SelectItem>
+                    <SelectItem value="cleaning">Cleaning</SelectItem>
+                    <SelectItem value="security">Security</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Email</Label>
+                  <Input
+                    type="email"
+                    placeholder="email@example.com"
+                    value={manualForm.email}
+                    onChange={(e) => setManualForm({ ...manualForm, email: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Phone</Label>
+                  <Input
+                    placeholder="(555) 123-4567"
+                    value={manualForm.phone}
+                    onChange={(e) => setManualForm({ ...manualForm, phone: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label>Secondary Phone</Label>
+                <Input
+                  placeholder="(555) 987-6543"
+                  value={manualForm.secondary_phone}
+                  onChange={(e) => setManualForm({ ...manualForm, secondary_phone: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <Label>Address</Label>
+                <Input
+                  placeholder="Street address"
+                  value={manualForm.address}
+                  onChange={(e) => setManualForm({ ...manualForm, address: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <Label>City</Label>
+                  <Input
+                    placeholder="City"
+                    value={manualForm.city}
+                    onChange={(e) => setManualForm({ ...manualForm, city: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>State</Label>
+                  <Input
+                    placeholder="State"
+                    value={manualForm.state}
+                    onChange={(e) => setManualForm({ ...manualForm, state: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>ZIP</Label>
+                  <Input
+                    placeholder="ZIP"
+                    value={manualForm.zip}
+                    onChange={(e) => setManualForm({ ...manualForm, zip: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>License Number</Label>
+                  <Input
+                    placeholder="License #"
+                    value={manualForm.license_number}
+                    onChange={(e) => setManualForm({ ...manualForm, license_number: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Hourly Rate</Label>
+                  <Input
+                    type="number"
+                    placeholder="$0.00"
+                    value={manualForm.hourly_rate}
+                    onChange={(e) => setManualForm({ ...manualForm, hourly_rate: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label>Insurance Info</Label>
+                <Input
+                  placeholder="Insurance details"
+                  value={manualForm.insurance_info}
+                  onChange={(e) => setManualForm({ ...manualForm, insurance_info: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <Label>Notes</Label>
+                <Input
+                  placeholder="Additional notes"
+                  value={manualForm.notes}
+                  onChange={(e) => setManualForm({ ...manualForm, notes: e.target.value })}
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end pt-2">
+                <Button variant="outline" onClick={() => onOpenChange(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleAddManual}
+                  disabled={!manualForm.business_name || !manualForm.contractor_type}
+                  className="bg-slate-900 hover:bg-slate-800"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Contractor
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
