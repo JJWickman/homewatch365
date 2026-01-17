@@ -521,25 +521,26 @@ export default function Inspections() {
   const handleReplaceScheduled = async (replace) => {
     setCreating(true);
     
-    const property = getProperty(newInspection.property_id);
-    const staffMember = staff.find(s => s.user_email === newInspection.assigned_to);
+    const property = getProperty(newVisit.property_id);
+    const staffMember = staff.find(s => s.user_email === newVisit.assigned_to);
     
-    const isFlexibleType = ['other', 'custom_client_request', 'drop_in'].includes(newInspection.type);
+    const isFlexibleType = ['other', 'custom_client_request', 'drop_in'].includes(newVisit.inspection_type);
     
     const inspectionData = {
       company_id: companyId,
-      property_id: newInspection.property_id,
+      property_id: newVisit.property_id,
       client_id: property?.client_id,
-      template_id: !isFlexibleType ? (newInspection.template_id || null) : null,
-      scheduled_date: newInspection.scheduled_date,
-      scheduled_time: newInspection.scheduled_time || null,
-      type: newInspection.type,
-      assigned_to: newInspection.assigned_to || null,
+      visit_type: 'inspection',
+      template_id: !isFlexibleType ? (newVisit.template_id || null) : null,
+      scheduled_date: newVisit.scheduled_date,
+      scheduled_time: newVisit.scheduled_time || null,
+      inspection_type: newVisit.inspection_type,
+      assigned_to: newVisit.assigned_to || null,
       assigned_to_name: staffMember?.user_name || null,
       status: 'completed',
       completed_at: new Date().toISOString(),
-      ...(isFlexibleType && { summary_notes: newInspection.inspection_details || '' }),
-      ...(newInspection.custom_name && { custom_inspection_name: newInspection.custom_name })
+      ...(isFlexibleType && { summary_notes: newVisit.inspection_details || '' }),
+      ...(newVisit.custom_name && { custom_inspection_name: newVisit.custom_name })
     };
     
     if (replace && scheduledInspectionToReplace) {
