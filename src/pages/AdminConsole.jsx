@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Trash2, Edit, AlertCircle, Loader2, Palette, Upload, Building, Save } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Plus, Trash2, Edit, AlertCircle, Loader2, Palette, Upload, Building, Save, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -34,6 +36,7 @@ const DEFAULT_CONTRACTOR_TYPES = [
 ];
 
 export default function AdminConsole() {
+  const navigate = useNavigate();
   const [companyId, setCompanyId] = useState(null);
   const [user, setUser] = useState(null);
   const [companyMember, setCompanyMember] = useState(null);
@@ -252,6 +255,9 @@ export default function AdminConsole() {
       <PageHeader
         title="Admin Console"
         subtitle="Manage system-wide settings and customizations"
+        action={() => navigate(createPageUrl('Inspections') + '?action=new')}
+        actionLabel="New Visit"
+        actionIcon={Calendar}
       />
 
       <Tabs defaultValue="contractor-types" className="space-y-4">
