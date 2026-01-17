@@ -121,54 +121,6 @@ export default function Dashboard() {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  const openModal = (type) => {
-    let title = '';
-    let description = '';
-    let items = [];
-
-    if (type === 'properties') {
-      title = 'Total Properties';
-      description = `You have ${allData.properties.length} active properties`;
-      items = allData.properties.map(p => ({
-        label: p.name || p.address,
-        value: `${p.city}, ${p.state}`
-      }));
-    } else if (type === 'clients') {
-      title = 'Active Clients';
-      description = `You have ${allData.clients.length} active clients`;
-      items = allData.clients.map(c => ({
-        label: `${c.first_name} ${c.last_name}`,
-        value: c.email
-      }));
-    } else if (type === 'week') {
-      title = 'This Week Inspections';
-      description = `${stats.completedThisWeek} of ${stats.inspectionsThisWeek} inspections completed`;
-      items = allData.inspections.map(i => ({
-        label: i.property?.name || 'Property',
-        value: `${i.status === 'completed' ? 'Completed' : 'Scheduled'} - ${format(new Date(i.scheduled_date), 'MMM d')}`
-      }));
-    } else if (type === 'followups') {
-      title = 'Pending Follow-Ups';
-      description = `You have ${allData.followUps.length} pending follow-ups`;
-      items = allData.followUps.map(f => ({
-        label: f.title,
-        value: `${f.type} - Priority: ${f.priority}`
-      }));
-    }
-
-    setModalState({
-      isOpen: true,
-      title,
-      description,
-      items,
-      type
-    });
-  };
-
-  const closeModal = () => {
-    setModalState(prev => ({ ...prev, isOpen: false }));
-  };
-
   if (loading) {
     return (
       <div className="space-y-6">
