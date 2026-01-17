@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,9 @@ export default function TestGoogleMapsAPI() {
   const [zip, setZip] = useState('48118');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const markerRef = useRef(null);
 
   const getLatLon = async () => {
     setLoading(true);
@@ -56,12 +59,79 @@ export default function TestGoogleMapsAPI() {
       });
       
       setResult(response.data);
+      
+      if (response.data?.coordinates) {
+        setLatitude(response.data.coordinates.lat);
+        setLongitude(response.data.coordinates.lng);
+      }
     } catch (err) {
       setError(err?.response?.data?.error || err.message);
     } finally {
       setLoading(false);
     }
   };
+
+  const loadGoogleMaps = async () => {
+    try {
+      if (window.google?.maps) {
+        initializeMap();
+        return;
+      }
+
+      const response = await base44.functions.invoke('googleMapsConfig');
+      const apiKey = response.data.apiKey;
+      
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => initializeMap();
+      document.head.appendChild(script);
+    } catch (err) {
+      console.error('Error loading Google Maps:', err);
+    }
+  };
+
+  const initializeMap = () => {
+    if (!mapRef.current || !window.google) return;
+
+    mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
+      zoom: 15,
+      center: { lat: 42.0, lng: -83.5 },
+      mapTypeControl: true,
+      streetViewControl: true,
+      fullscreenControl: true,
+    });
+  };
+
+  const updateMapMarker = (lat, lng) => {
+    if (!mapInstanceRef.current || !window.google) return;
+
+    if (markerRef.current) {
+      markerRef.current.setMap(null);
+    }
+
+    const position = { lat: parseFloat(lat), lng: parseFloat(lng) };
+    
+    markerRef.current = new window.google.maps.Marker({
+      position,
+      map: mapInstanceRef.current,
+      title: `${address}, ${city}, ${state}`,
+    });
+
+    mapInstanceRef.current.setCenter(position);
+    mapInstanceRef.current.setZoom(18);
+  };
+
+  useEffect(() => {
+    loadGoogleMaps();
+  }, []);
+
+  useEffect(() => {
+    if (latitude && longitude && mapInstanceRef.current) {
+      updateMapMarker(latitude, longitude);
+    }
+  }, [latitude, longitude]);
 
   return (
     <div className="max-w-2xl mx-auto p-6">
@@ -192,6 +262,14 @@ export default function TestGoogleMapsAPI() {
             </Card>
           )}
 
+          <Card>
+            <CardHeader>
+              <CardTitle>Map View</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div ref={mapRef} className="w-full h-[400px] rounded-lg border" />
+            </CardContent>
+          </Card>
 
         </div>
       )}
