@@ -1234,18 +1234,46 @@ export default function PropertyForm() {
                            {contractor.email && <p>📧 {contractor.email}</p>}
                          </div>
                        </div>
-                       <Button
-                         type="button"
-                         variant="ghost"
-                         size="sm"
-                         onClick={() => setFormData(prev => ({
-                           ...prev,
-                           contractors: [...prev.contractors, contractor.id]
-                         }))}
-                         className="text-green-600 hover:bg-green-50 ml-2 shrink-0"
-                       >
-                         <Plus className="h-4 w-4" />
-                       </Button>
+                       <DropdownMenu>
+                         <DropdownMenuTrigger asChild>
+                           <Button type="button" variant="ghost" size="sm" className="ml-2 shrink-0">
+                             <ChevronDown className="h-4 w-4" />
+                           </Button>
+                         </DropdownMenuTrigger>
+                         <DropdownMenuContent align="end" className="w-48">
+                           <DropdownMenuItem
+                             onClick={() => setFormData(prev => ({
+                               ...prev,
+                               contractors: [...prev.contractors, contractor.id]
+                             }))}
+                           >
+                             <Plus className="h-4 w-4 mr-2" />
+                             Add to Property
+                           </DropdownMenuItem>
+                           {formData.contractors.length > 0 && (
+                             <>
+                               <DropdownMenuSeparator />
+                               <div className="px-2 py-1.5 text-xs font-medium text-slate-600">Replace</div>
+                               {formData.contractors.map((contractorId) => {
+                                 const existingContractor = contractors.find(c => c.id === contractorId);
+                                 return (
+                                   <DropdownMenuItem
+                                     key={contractorId}
+                                     onClick={() => setFormData(prev => ({
+                                       ...prev,
+                                       contractors: prev.contractors.map(id => id === contractorId ? contractor.id : id)
+                                     }))}
+                                     className="text-xs"
+                                   >
+                                     <ArrowRightLeft className="h-3 w-3 mr-2" />
+                                     {existingContractor?.business_name}
+                                   </DropdownMenuItem>
+                                 );
+                               })}
+                             </>
+                           )}
+                         </DropdownMenuContent>
+                       </DropdownMenu>
                      </div>
                    ))}
                  </div>
