@@ -12,7 +12,7 @@ export default function PageHeader({
   actionIcon: ActionIcon = Plus,
   backLink,
   backLabel = 'Back',
-  actionClassName = 'bg-slate-900 hover:bg-slate-800',
+  actionClassName = 'bg-black text-white hover:bg-slate-900',
   children 
 }) {
   return (
