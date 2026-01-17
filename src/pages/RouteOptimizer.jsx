@@ -295,59 +295,55 @@ export default function RouteOptimizer() {
                 No visits scheduled for this date
               </p>
             ) : optimizedRoute ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              <div className="space-y-2">
                 {optimizedRoute.optimized_stops.map((stop, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
-                    <div className="h-7 w-7 rounded-full bg-slate-900 text-white flex items-center justify-center text-sm font-medium shrink-0">
+                  <div key={index} className="flex items-center gap-4 p-3 rounded-lg bg-slate-50 border border-slate-200">
+                    <div className="h-8 w-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-sm font-medium shrink-0">
                       {stop.order}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{stop.name}</p>
-                      <p className="text-xs text-slate-500 truncate">{stop.address}</p>
-                      {stop.estimated_arrival && (
-                        <p className="text-xs text-blue-600 mt-1.5 flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {stop.estimated_arrival}
-                        </p>
-                      )}
-                      {stop.drive_time_minutes && (
-                        <div className="flex items-center gap-2 mt-1 text-xs text-slate-600">
-                          <span>{stop.drive_time_minutes} min</span>
-                          {stop.distance_miles && <span>• {stop.distance_miles} mi</span>}
-                        </div>
-                      )}
+                      <p className="font-medium text-sm">{stop.name}</p>
+                      <p className="text-xs text-slate-500">{stop.address}</p>
                     </div>
+                    {stop.estimated_arrival && (
+                      <div className="flex items-center gap-1 text-xs text-blue-600 shrink-0">
+                        <Clock className="h-3 w-3" />
+                        <span>{stop.estimated_arrival}</span>
+                      </div>
+                    )}
+                    {stop.drive_time_minutes && (
+                      <div className="flex items-center gap-3 text-xs text-slate-600 shrink-0">
+                        <span>{stop.drive_time_minutes} min</span>
+                        {stop.distance_miles && <span>{stop.distance_miles} mi</span>}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              <div className="space-y-2">
                 {inspections.map((item, index) => {
                   const property = getProperty(item.property_id);
                   const time = item.type === 'inspection' ? item.scheduled_time : item.due_time;
                   const label = item.type === 'inspection' ? 'Inspection' : 'Follow-Up';
                   return (
-                    <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg border">
-                      <div className="h-7 w-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-sm font-medium shrink-0">
+                    <div key={item.id} className="flex items-center gap-4 p-3 rounded-lg border">
+                      <div className="h-8 w-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-sm font-medium shrink-0">
                         {index + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex flex-col gap-1">
-                          <p className="font-medium text-sm truncate">{property?.name || property?.address}</p>
-                          <Badge variant="outline" className="text-xs w-fit">
-                            {label}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-slate-500 truncate mt-1">
-                          {property?.address}, {property?.city}
-                        </p>
-                        {time && (
-                          <p className="text-xs text-slate-600 mt-1.5 flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {time}
-                          </p>
-                        )}
+                        <p className="font-medium text-sm">{property?.name || property?.address}</p>
+                        <p className="text-xs text-slate-500">{property?.address}, {property?.city}</p>
                       </div>
+                      <Badge variant="outline" className="text-xs shrink-0">
+                        {label}
+                      </Badge>
+                      {time && (
+                        <div className="flex items-center gap-1 text-xs text-slate-600 shrink-0">
+                          <Clock className="h-3 w-3" />
+                          <span>{time}</span>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
