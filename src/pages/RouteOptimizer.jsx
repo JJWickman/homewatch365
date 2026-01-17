@@ -81,28 +81,14 @@ export default function RouteOptimizer() {
   };
 
   const loadInspectionsForDate = async () => {
-    const [inspectionsData, followUpsData] = await Promise.all([
-      base44.entities.Inspection.filter({ 
-        company_id: companyId, 
-        scheduled_date: selectedDate,
-        assigned_to: selectedUser,
-        status: { $in: ['scheduled', 'in_progress'] }
-      }),
-      base44.entities.FollowUp.filter({
-        company_id: companyId,
-        assigned_to: selectedUser,
-        due_date: selectedDate,
-        status: { $in: ['open', 'in_progress'] }
-      })
-    ]);
+    const visitsData = await base44.entities.Visit.filter({ 
+      company_id: companyId, 
+      scheduled_date: selectedDate,
+      assigned_to: selectedUser,
+      status: { $in: ['scheduled', 'in_progress', 'open'] }
+    });
     
-    // Combine inspections and follow-ups into a single list
-    const combined = [
-      ...inspectionsData.map(i => ({ ...i, type: 'inspection' })),
-      ...followUpsData.map(f => ({ ...f, type: 'followup' }))
-    ];
-    
-    setInspections(combined);
+    setInspections(visitsData);
     setOptimizedRoute(null);
   };
 
@@ -113,22 +99,14 @@ export default function RouteOptimizer() {
     
     setOptimizing(true);
     try {
-      const stops = inspections.map(i => {
-        let property, address, time;
-        
-        if (i.type === 'inspection') {
-          property = getProperty(i.property_id);
-          address = `${property?.address}, ${property?.city}, ${property?.state} ${property?.zip}`;
-          time = i.scheduled_time;
-        } else {
-          property = getProperty(i.property_id);
-          address = `${property?.address}, ${property?.city}, ${property?.state} ${property?.zip}`;
-          time = i.due_time;
-        }
+      const stops = inspections.map(visit => {
+        const property = getProperty(visit.property_id);
+        const address = `${property?.address}, ${property?.city}, ${property?.state} ${property?.zip}`;
+        const time = visit.scheduled_time;
         
         return {
-          id: i.id,
-          type: i.type,
+          id: visit.id,
+          type: visit.visit_type,
           name: property?.name || property?.address,
           address,
           scheduled_time: time,
@@ -322,12 +300,12 @@ export default function RouteOptimizer() {
               </div>
             ) : (
               <div className="space-y-2">
-                {inspections.map((item, index) => {
-                  const property = getProperty(item.property_id);
-                  const time = item.type === 'inspection' ? item.scheduled_time : item.due_time;
-                  const label = item.type === 'inspection' ? 'Inspection' : 'Follow-Up';
+                {inspections.map((visit, index) => {
+                  const property = getProperty(visit.property_id);
+                  const time = visit.scheduled_time;
+                  const label = visit.visit_type === 'inspection' ? 'Inspection' : 'Follow-Up';
                   return (
-                    <div key={item.id} className="flex items-center gap-4 p-3 rounded-lg border">
+                    <div key={visit.id} className="flex items-center gap-4 p-3 rounded-lg border">
                       <div className="h-8 w-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-sm font-medium shrink-0">
                         {index + 1}
                       </div>
@@ -442,8 +420,8 @@ export default function RouteOptimizer() {
       <Card>
         <CardContent className="p-0 h-[500px]">
           <RouteMap
-            stops={optimizedRoute?.optimized_stops || inspections.map((i, idx) => {
-              const property = getProperty(i.property_id);
+            stops={optimizedRoute?.optimized_stops || inspections.map((visit, idx) => {
+              const property = getProperty(visit.property_id);
               return {
                 order: idx + 1,
                 name: property?.name || property?.address,
