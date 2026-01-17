@@ -240,7 +240,7 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div onClick={() => openModal('properties')} className="cursor-pointer h-full">
+        <Link to={createPageUrl('Properties')} className="cursor-pointer h-full">
           <StatsCard
             title="Total Properties"
             value={stats.totalProperties}
@@ -248,8 +248,8 @@ export default function Dashboard() {
             iconColor="text-blue-600"
             iconBg="bg-blue-50"
           />
-        </div>
-        <div onClick={() => openModal('clients')} className="cursor-pointer h-full">
+        </Link>
+        <Link to={createPageUrl('Clients')} className="cursor-pointer h-full">
           <StatsCard
             title="Active Clients"
             value={stats.totalClients}
@@ -257,8 +257,8 @@ export default function Dashboard() {
             iconColor="text-emerald-600"
             iconBg="bg-emerald-50"
           />
-        </div>
-        <div onClick={() => openModal('week')} className="cursor-pointer h-full">
+        </Link>
+        <Link to={createPageUrl('Inspections')} className="cursor-pointer h-full">
           <StatsCard
             title="This Week"
             value={`${stats.completedThisWeek}/${stats.inspectionsThisWeek}`}
@@ -267,8 +267,8 @@ export default function Dashboard() {
             iconBg="bg-amber-50"
             className="[&_p.text-2xl]:mt-10"
           />
-        </div>
-        <div onClick={() => openModal('followups')} className="cursor-pointer h-full">
+        </Link>
+        <Link to={createPageUrl('Inspections')} className="cursor-pointer h-full">
           <StatsCard
             title="Pending Visits"
             value={stats.pendingTasks}
@@ -276,17 +276,8 @@ export default function Dashboard() {
             iconColor="text-slate-600"
             iconBg="bg-slate-100"
           />
-        </div>
+        </Link>
       </div>
-
-      {/* Modal */}
-      <StatsDetailModal 
-        isOpen={modalState.isOpen}
-        onClose={closeModal}
-        title={modalState.title}
-        description={modalState.description}
-        items={modalState.items}
-      />
 
       {/* Today's Inspections - Full Width */}
       <Card>
