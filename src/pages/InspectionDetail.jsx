@@ -646,8 +646,8 @@ Your Property Management Team
                   <SelectValue placeholder="Select staff member" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={null}>Unassigned</SelectItem>
-                  {staff.map((member) => (
+                   <SelectItem value={null}>Unassigned</SelectItem>
+                   {staff.map((member) => (
                     <SelectItem key={member.id} value={member.user_email}>
                       {member.user_name || member.user_email}
                     </SelectItem>
