@@ -544,30 +544,37 @@ export default function Inspections() {
     };
     
     if (replace && scheduledInspectionToReplace) {
-      await base44.entities.Inspection.update(scheduledInspectionToReplace.id, {
+      await base44.entities.Visit.update(scheduledInspectionToReplace.id, {
         status: 'completed',
-        completed_at: new Date().toISOString(),
-        related_drop_in_id: undefined
+        completed_at: new Date().toISOString()
       });
     }
     
-    await base44.entities.Inspection.create(inspectionData);
+    await base44.entities.Visit.create(inspectionData);
     
     setShowReplaceDialog(false);
     setScheduledInspectionToReplace(null);
     setShowNewDialog(false);
-    setNewInspection({
+    setNewVisit({
       property_id: '',
       template_id: '',
       scheduled_date: format(new Date(), 'yyyy-MM-dd'),
       scheduled_time: '',
-      type: 'routine',
+      inspection_type: 'routine',
       assigned_to: '',
       is_recurring: false,
       recurrence_frequency: 'weekly',
       recurrence_end_date: '',
       custom_name: '',
-      inspection_details: ''
+      inspection_details: '',
+      followup_type: 'issue',
+      followup_category: 'general',
+      followup_priority: 'medium',
+      followup_title: '',
+      followup_description: '',
+      followup_due_date: format(new Date(), 'yyyy-MM-dd'),
+      followup_due_time: '',
+      estimated_hours: ''
     });
     setCreating(false);
     loadData();
