@@ -60,9 +60,10 @@ export default function Properties() {
         const cId = members[0].company_id;
         setCompanyId(cId);
         
-        const [propertiesData, clientsData] = await Promise.all([
+        const [propertiesData, clientsData, visitsData] = await Promise.all([
           base44.entities.Property.filter({ company_id: cId, is_active: true }, '-created_date'),
-          base44.entities.Client.filter({ company_id: cId })
+          base44.entities.Client.filter({ company_id: cId }),
+          base44.entities.Visit.filter({ company_id: cId })
         ]);
         
         setProperties(propertiesData);
