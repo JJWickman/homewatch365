@@ -7,12 +7,9 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
   const polylineRef = useRef(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    loadGoogleMaps();
-  }, []);
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
     if (mapInstanceRef.current && stops.length > 0) {
@@ -21,6 +18,9 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
   }, [stops, startAddress, isOptimized]);
 
   const loadGoogleMaps = async () => {
+    setLoading(true);
+    setError(null);
+    
     try {
       // Check if already loaded
       if (window.google?.maps) {
@@ -75,6 +75,7 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
     });
 
     setLoading(false);
+    setMapReady(true);
     updateMap();
   };
 
@@ -161,6 +162,23 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
     const padding = { top: 50, right: 50, bottom: 50, left: 50 };
     map.fitBounds(bounds, padding);
   };
+
+  if (!mapReady && !loading && !error) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-slate-50 rounded-lg">
+        <div className="text-center">
+          <MapPin className="h-12 w-12 mx-auto mb-3 text-slate-400" />
+          <p className="text-sm text-slate-600 mb-3">Ready to view your route on the map</p>
+          <button
+            onClick={loadGoogleMaps}
+            className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium"
+          >
+            Load Map
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
