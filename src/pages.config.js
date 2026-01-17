@@ -17,11 +17,11 @@ import Pricing from './pages/Pricing';
 import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
 import PropertyForm from './pages/PropertyForm';
-import RouteOptimizer from './pages/RouteOptimizer';
 import Schedule from './pages/Schedule';
 import Settings from './pages/Settings';
 import StripeSetup from './pages/StripeSetup';
 import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
+import RouteOptimizer from './pages/RouteOptimizer';
 import __Layout from './Layout.jsx';
 
 
@@ -45,11 +45,11 @@ export const PAGES = {
     "Properties": Properties,
     "PropertyDetail": PropertyDetail,
     "PropertyForm": PropertyForm,
-    "RouteOptimizer": RouteOptimizer,
     "Schedule": Schedule,
     "Settings": Settings,
     "StripeSetup": StripeSetup,
     "TestGoogleMapsAPI": TestGoogleMapsAPI,
+    "RouteOptimizer": RouteOptimizer,
 }
 
 export const pagesConfig = {
