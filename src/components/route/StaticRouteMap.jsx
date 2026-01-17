@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 import { MapPin, Loader2 } from 'lucide-react';
 
 export default function StaticRouteMap({ stops = [], startAddress }) {
@@ -20,45 +21,10 @@ export default function StaticRouteMap({ stops = [], startAddress }) {
   const generateStaticMapUrl = async () => {
     setLoading(true);
     try {
-      // Get API key from backend
-      const response = await fetch('/api/base44Client/functions/googleMapsConfig');
-      const data = await response.json();
-      const apiKey = data.apiKey;
-
-      if (!apiKey) {
-        console.error('Google Maps API key not found');
-        setLoading(false);
-        return;
-      }
-
-      // Build markers for static map
-      const markers = validStops
-        .map((stop, idx) => {
-          const lat = parseFloat(stop.lat || stop.latitude);
-          const lng = parseFloat(stop.lng || stop.longitude);
-          const color = idx === 0 ? '0x1e293b' : '0x64748b';
-          const label = String(stop.order || idx + 1);
-          return `color:${color}|label:${label}|${lat},${lng}`;
-        })
-        .join('&markers=');
-
-      // Calculate center and zoom based on bounds
-      const lats = validStops.map(s => parseFloat(s.lat || s.latitude));
-      const lngs = validStops.map(s => parseFloat(s.lng || s.longitude));
-      const centerLat = (Math.max(...lats) + Math.min(...lats)) / 2;
-      const centerLng = (Math.max(...lngs) + Math.min(...lngs)) / 2;
-
-      // Build the static map URL
-      const url = `https://maps.googleapis.com/maps/api/staticmap?` +
-        `center=${centerLat},${centerLng}` +
-        `&zoom=11` +
-        `&size=1200x500` +
-        `&scale=2` +
-        `&markers=${markers}` +
-        `&style=feature:poi|element:labels|visibility:off` +
-        `&key=${apiKey}`;
-
-      setMapUrl(url);
+      const response = await base44.functions.invoke('generateStaticMapUrl', {
+        stops: validStops
+      });
+      setMapUrl(response.data.mapUrl);
     } catch (error) {
       console.error('Error generating static map:', error);
     } finally {
