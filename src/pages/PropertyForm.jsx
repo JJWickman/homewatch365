@@ -36,6 +36,7 @@ import {
 import PageHeader from '@/components/shared/PageHeader';
 import { useAutoSave } from '@/components/shared/useAutoSave';
 import { Clock } from 'lucide-react';
+import ContractorSearchDialog from '@/components/contractors/ContractorSearchDialog';
 
 export default function PropertyForm() {
   const navigate = useNavigate();
@@ -62,6 +63,7 @@ export default function PropertyForm() {
   const [showCreateClientDialog, setShowCreateClientDialog] = useState(false);
   const [newClientData, setNewClientData] = useState({ first_name: '', last_name: '', email: '' });
   const [creatingClient, setCreatingClient] = useState(false);
+  const [showContractorSearch, setShowContractorSearch] = useState(false);
   
   const validateTimeoutRef = React.useRef(null);
   const autocompleteServiceRef = React.useRef(null);
@@ -1158,16 +1160,7 @@ export default function PropertyForm() {
                 type="button" 
                 variant="outline" 
                 size="sm"
-                onClick={() => {
-                  const availableContractors = contractors.filter(c => !formData.contractors.includes(c.id));
-                  if (availableContractors.length > 0) {
-                    setFormData(prev => ({
-                      ...prev,
-                      contractors: [...prev.contractors, availableContractors[0].id]
-                    }));
-                  }
-                }}
-                disabled={contractors.length === formData.contractors.length}
+                onClick={() => setShowContractorSearch(true)}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Contractor
@@ -1335,6 +1328,45 @@ export default function PropertyForm() {
           </Button>
         </div>
       </form>
+
+      {/* Contractor Search Dialog */}
+      <ContractorSearchDialog 
+        open={showContractorSearch}
+        onOpenChange={setShowContractorSearch}
+        onSelect={(newContractor) => {
+          // Create the new contractor
+          base44.entities.Contractor.create({
+            company_id: companyId,
+            business_name: newContractor.business_name,
+            contact_name: newContractor.contact_name || '',
+            contractor_type: newContractor.contractor_type || 'other',
+            email: newContractor.email || '',
+            phone: newContractor.phone || '',
+            secondary_phone: newContractor.secondary_phone || '',
+            address: newContractor.address || '',
+            city: newContractor.city || '',
+            state: newContractor.state || '',
+            zip: newContractor.zip || '',
+            license_number: newContractor.license_number || '',
+            insurance_info: newContractor.insurance_info || '',
+            hourly_rate: newContractor.hourly_rate || null,
+            notes: newContractor.notes || '',
+            is_active: true
+          }).then((createdContractor) => {
+            // Add the newly created contractor to the contractors list
+            setContractors(prev => [...prev, createdContractor]);
+            // Add to property's contractors
+            setFormData(prev => ({
+              ...prev,
+              contractors: [...prev.contractors, createdContractor.id]
+            }));
+            toast.success('Contractor added to property');
+          }).catch(() => {
+            toast.error('Error adding contractor');
+          });
+        }}
+        companyId={companyId}
+      />
 
       {/* Create Client Dialog */}
       <Dialog open={showCreateClientDialog} onOpenChange={setShowCreateClientDialog}>
