@@ -64,12 +64,11 @@ export default function Dashboard() {
       setCompanyMember(members[0]);
       const companyId = members[0].company_id;
       
-      const [companies, clients, properties, inspections, followUps, activities] = await Promise.all([
+      const [companies, clients, properties, visits, activities] = await Promise.all([
         base44.entities.Company.filter({ id: companyId }),
         base44.entities.Client.filter({ company_id: companyId, is_active: true }),
         base44.entities.Property.filter({ company_id: companyId, is_active: true }),
-        base44.entities.Inspection.filter({ company_id: companyId }),
-        base44.entities.FollowUp.filter({ company_id: companyId, status: 'open' }),
+        base44.entities.Visit.filter({ company_id: companyId }),
         base44.entities.ActivityLog.filter({ company_id: companyId }, '-created_date', 10)
       ]);
 
@@ -81,36 +80,39 @@ export default function Dashboard() {
       const weekStart = format(startOfWeek(new Date()), 'yyyy-MM-dd');
       const weekEnd = format(endOfWeek(new Date()), 'yyyy-MM-dd');
 
-      // Filter inspections based on user role
+      // Filter visits based on user role
       const isFieldInspector = members[0].role === 'field_inspector' || members[0].role === 'technician';
-      const weekInspections = inspections.filter(i => {
-        const date = i.scheduled_date;
+      const weekVisits = visits.filter(v => {
+        const date = v.scheduled_date;
         const matchesDate = date >= weekStart && date <= weekEnd;
-        const matchesAssignment = !isFieldInspector || i.assigned_to === currentUser.email;
+        const matchesAssignment = !isFieldInspector || v.assigned_to === currentUser.email;
         return matchesDate && matchesAssignment;
       });
 
-      const completedThisWeek = weekInspections.filter(i => i.status === 'completed').length;
-      const issuesFound = followUps.filter(f => f.type === 'issue' && (f.priority === 'high' || f.priority === 'urgent')).length;
+      const completedThisWeek = weekVisits.filter(v => v.status === 'completed').length;
+      const highPriorityVisits = visits.filter(v => 
+        (v.status === 'open' || v.status === 'scheduled') && 
+        (v.priority === 'high' || v.priority === 'urgent')
+      ).length;
 
       setStats({
         totalClients: clients.length,
         totalProperties: properties.length,
-        inspectionsThisWeek: weekInspections.length,
+        inspectionsThisWeek: weekVisits.length,
         completedThisWeek,
-        pendingTasks: followUps.length,
-        issuesFound
+        pendingTasks: 0,
+        issuesFound: highPriorityVisits
       });
 
-      const todayScheduled = inspections.filter(i => i.scheduled_date === today && i.status !== 'cancelled');
+      const todayScheduled = visits.filter(v => v.scheduled_date === today && v.status !== 'cancelled');
       
       // Enrich with property data
-      const enrichedInspections = await Promise.all(todayScheduled.map(async (inspection) => {
-        const props = await base44.entities.Property.filter({ id: inspection.property_id, company_id: companyId });
-        return { ...inspection, property: props[0] };
+      const enrichedVisits = await Promise.all(todayScheduled.map(async (visit) => {
+        const props = await base44.entities.Property.filter({ id: visit.property_id, company_id: companyId });
+        return { ...visit, property: props[0] };
       }));
       
-      setTodayInspections(enrichedInspections.slice(0, 5));
+      setTodayInspections(enrichedVisits.slice(0, 5));
       setRecentActivity(activities);
 
     } catch (error) {
