@@ -65,6 +65,7 @@ const PRICING_TIERS = [
       { name: '2 Admin Users', included: true },
       { name: 'Priority Support', included: true },
       { name: 'Custom Branding', included: true },
+      { name: 'Route Optimization', included: true },
       { name: 'Contractor Management', included: false },
       { name: 'Marketing Tools', included: false },
     ],
@@ -338,17 +339,29 @@ export default function Pricing() {
                   ))}
                 </tr>
                 <tr className="border-b">
-                  <td className="py-3 px-4 text-sm">Marketing Tools</td>
-                  {PRICING_TIERS.map(tier => (
-                    <td key={tier.id} className="text-center py-3 px-4">
-                      {tier.id === 'enterprise' ? (
-                        <Check className="h-5 w-5 text-green-600 mx-auto" />
-                      ) : (
-                        <X className="h-5 w-5 text-slate-300 mx-auto" />
-                      )}
-                    </td>
-                  ))}
-                </tr>
+                   <td className="py-3 px-4 text-sm">Route Optimization</td>
+                   {PRICING_TIERS.map(tier => (
+                     <td key={tier.id} className="text-center py-3 px-4">
+                       {tier.id === 'professional' || tier.id === 'enterprise' ? (
+                         <Check className="h-5 w-5 text-green-600 mx-auto" />
+                       ) : (
+                         <X className="h-5 w-5 text-slate-300 mx-auto" />
+                       )}
+                     </td>
+                   ))}
+                 </tr>
+                 <tr className="border-b">
+                   <td className="py-3 px-4 text-sm">Marketing Tools</td>
+                   {PRICING_TIERS.map(tier => (
+                     <td key={tier.id} className="text-center py-3 px-4">
+                       {tier.id === 'enterprise' ? (
+                         <Check className="h-5 w-5 text-green-600 mx-auto" />
+                       ) : (
+                         <X className="h-5 w-5 text-slate-300 mx-auto" />
+                       )}
+                     </td>
+                   ))}
+                 </tr>
               </tbody>
             </table>
           </div>

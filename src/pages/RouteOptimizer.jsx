@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import PageHeader from '@/components/shared/PageHeader';
 import RouteMap from '@/components/route/RouteMap';
+import { createPageUrl } from '@/utils';
 
 export default function RouteOptimizer() {
   const [companyId, setCompanyId] = useState(null);
