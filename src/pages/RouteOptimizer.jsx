@@ -276,8 +276,176 @@ export default function RouteOptimizer() {
         </Button>
       </div>
 
+      {/* Visits & Route Summary */}
+      <div className="mb-6 space-y-6">
+
+        {/* Visits List - Full Width */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center justify-between">
+              <span>Visits ({inspections.length})</span>
+              {optimizedRoute && (
+                <Badge variant="outline" className="bg-emerald-50 text-emerald-700">
+                  Optimized
+                </Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {inspections.length === 0 ? (
+              <p className="text-sm text-slate-500 text-center py-8">
+                No visits scheduled for this date
+              </p>
+            ) : optimizedRoute ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {optimizedRoute.optimized_stops.map((stop, index) => (
+                  <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
+                    <div className="h-7 w-7 rounded-full bg-slate-900 text-white flex items-center justify-center text-sm font-medium shrink-0">
+                      {stop.order}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{stop.name}</p>
+                      <p className="text-xs text-slate-500 truncate">{stop.address}</p>
+                      {stop.estimated_arrival && (
+                        <p className="text-xs text-blue-600 mt-1.5 flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {stop.estimated_arrival}
+                        </p>
+                      )}
+                      {stop.drive_time_minutes && (
+                        <div className="flex items-center gap-2 mt-1 text-xs text-slate-600">
+                          <span>{stop.drive_time_minutes} min</span>
+                          {stop.distance_miles && <span>• {stop.distance_miles} mi</span>}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {inspections.map((item, index) => {
+                  const property = getProperty(item.property_id);
+                  const time = item.type === 'inspection' ? item.scheduled_time : item.due_time;
+                  const label = item.type === 'inspection' ? 'Inspection' : 'Follow-Up';
+                  return (
+                    <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg border">
+                      <div className="h-7 w-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-sm font-medium shrink-0">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col gap-1">
+                          <p className="font-medium text-sm truncate">{property?.name || property?.address}</p>
+                          <Badge variant="outline" className="text-xs w-fit">
+                            {label}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-slate-500 truncate mt-1">
+                          {property?.address}, {property?.city}
+                        </p>
+                        {time && (
+                          <p className="text-xs text-slate-600 mt-1.5 flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {time}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Route Summary - Full Width */}
+        {optimizedRoute && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Route Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-4 bg-slate-50 rounded-lg text-center">
+                  <p className="text-3xl font-bold text-slate-900">
+                    {optimizedRoute.total_distance_miles || '—'}
+                  </p>
+                  <p className="text-sm text-slate-500 mt-1">Total Miles</p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-lg text-center">
+                  <p className="text-3xl font-bold text-slate-900">
+                    {optimizedRoute.total_drive_time_minutes || '—'}
+                  </p>
+                  <p className="text-sm text-slate-500 mt-1">Total Minutes</p>
+                </div>
+
+                {optimizedRoute.weather_advisory && (
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-blue-700 mb-2">
+                      <Cloud className="h-5 w-5" />
+                      <span className="font-medium text-sm">Weather</span>
+                    </div>
+                    <p className="text-xs text-blue-600">{optimizedRoute.weather_advisory}</p>
+                  </div>
+                )}
+
+                {optimizedRoute.traffic_notes && (
+                  <div className="p-4 bg-amber-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-amber-700 mb-2">
+                      <Car className="h-5 w-5" />
+                      <span className="font-medium text-sm">Traffic</span>
+                    </div>
+                    <p className="text-xs text-amber-600">{optimizedRoute.traffic_notes}</p>
+                  </div>
+                )}
+
+                {optimizedRoute.recommendations && (
+                  <div className="p-4 bg-slate-50 rounded-lg lg:col-span-2">
+                    <p className="font-medium text-sm mb-2">Recommendations</p>
+                    <p className="text-xs text-slate-600">{optimizedRoute.recommendations}</p>
+                  </div>
+                )}
+
+                <div className="p-4 border rounded-lg lg:col-span-2">
+                  <p className="text-sm font-medium mb-3">Open in Navigation App</p>
+                  <div className="grid grid-cols-3 gap-3">
+                    <a
+                      href={generateNavigationUrl('google')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center gap-2 p-3 border rounded-lg hover:bg-slate-50 transition-colors"
+                    >
+                      <img src="https://www.google.com/images/branding/product/2x/maps_96dp.png" alt="Google Maps" className="h-8 w-8" />
+                      <span className="text-xs font-medium">Google</span>
+                    </a>
+                    <a
+                      href={generateNavigationUrl('waze')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center gap-2 p-3 border rounded-lg hover:bg-slate-50 transition-colors"
+                    >
+                      <img src="https://www.waze.com/favicon.ico" alt="Waze" className="h-8 w-8" />
+                      <span className="text-xs font-medium">Waze</span>
+                    </a>
+                    <a
+                      href={generateNavigationUrl('apple')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center gap-2 p-3 border rounded-lg hover:bg-slate-50 transition-colors"
+                    >
+                      <img src="https://www.apple.com/favicon.ico" alt="Apple Maps" className="h-8 w-8" />
+                      <span className="text-xs font-medium">Apple</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
       {/* Full Width Map */}
-      <Card className="mb-6">
+      <Card>
         <CardContent className="p-0 h-[500px]">
           <RouteMap
             stops={optimizedRoute?.optimized_stops || inspections.map((i, idx) => {
@@ -295,174 +463,6 @@ export default function RouteOptimizer() {
           />
         </CardContent>
       </Card>
-
-      {/* Bottom Row - Route Details */}
-      <div className="grid lg:grid-cols-2 gap-6">
-
-        {/* Inspections List */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center justify-between">
-              <span>Inspections ({inspections.length})</span>
-              {optimizedRoute && (
-                <Badge variant="outline" className="bg-emerald-50 text-emerald-700">
-                  Optimized
-                </Badge>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {inspections.length === 0 ? (
-              <p className="text-sm text-slate-500 text-center py-4">
-                No inspections scheduled for this date
-              </p>
-            ) : optimizedRoute ? (
-              <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                {optimizedRoute.optimized_stops.map((stop, index) => (
-                  <div key={index} className="flex items-start gap-3 p-2 rounded-lg bg-slate-50">
-                    <div className="h-6 w-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-medium shrink-0">
-                      {stop.order}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{stop.name}</p>
-                      <p className="text-xs text-slate-500 truncate">{stop.address}</p>
-                      {stop.estimated_arrival && (
-                        <p className="text-xs text-blue-600 mt-1">
-                          <Clock className="h-3 w-3 inline mr-1" />
-                          ETA: {stop.estimated_arrival}
-                        </p>
-                      )}
-                    </div>
-                    {stop.drive_time_minutes && (
-                      <div className="text-right text-xs text-slate-500 shrink-0">
-                        <p>{stop.drive_time_minutes} min</p>
-                        {stop.distance_miles && <p>{stop.distance_miles} mi</p>}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                {inspections.map((item, index) => {
-                  const property = getProperty(item.property_id);
-                  const time = item.type === 'inspection' ? item.scheduled_time : item.due_time;
-                  const label = item.type === 'inspection' ? 'Inspection' : 'Follow-Up';
-                  return (
-                    <div key={item.id} className="flex items-start gap-3 p-2 rounded-lg border">
-                      <div className="h-6 w-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-medium shrink-0">
-                        {index + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-sm truncate">{property?.name || property?.address}</p>
-                          <Badge variant="outline" className="text-xs shrink-0">
-                            {label}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-slate-500 truncate">
-                          {property?.address}, {property?.city}
-                        </p>
-                        {time && (
-                          <p className="text-xs text-slate-600 mt-1">
-                            <Clock className="h-3 w-3 inline mr-1" />
-                            {time}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Route Summary & Export */}
-        {optimizedRoute && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Route Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-slate-50 rounded-lg text-center">
-                  <p className="text-2xl font-bold text-slate-900">
-                    {optimizedRoute.total_distance_miles || '—'}
-                  </p>
-                  <p className="text-xs text-slate-500">Total Miles</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg text-center">
-                  <p className="text-2xl font-bold text-slate-900">
-                    {optimizedRoute.total_drive_time_minutes || '—'}
-                  </p>
-                  <p className="text-xs text-slate-500">Total Minutes</p>
-                </div>
-              </div>
-
-              {optimizedRoute.weather_advisory && (
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <div className="flex items-center gap-2 text-blue-700 mb-1">
-                    <Cloud className="h-4 w-4" />
-                    <span className="font-medium text-sm">Weather</span>
-                  </div>
-                  <p className="text-xs text-blue-600">{optimizedRoute.weather_advisory}</p>
-                </div>
-              )}
-
-              {optimizedRoute.traffic_notes && (
-                <div className="p-3 bg-amber-50 rounded-lg">
-                  <div className="flex items-center gap-2 text-amber-700 mb-1">
-                    <Car className="h-4 w-4" />
-                    <span className="font-medium text-sm">Traffic</span>
-                  </div>
-                  <p className="text-xs text-amber-600">{optimizedRoute.traffic_notes}</p>
-                </div>
-              )}
-
-              {optimizedRoute.recommendations && (
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="font-medium text-sm mb-1">Recommendations</p>
-                  <p className="text-xs text-slate-600">{optimizedRoute.recommendations}</p>
-                </div>
-              )}
-
-              <div className="pt-2 border-t">
-                <p className="text-sm font-medium mb-3">Open in Navigation App</p>
-                <div className="grid grid-cols-3 gap-2">
-                  <a
-                    href={generateNavigationUrl('google')}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex flex-col items-center gap-1 p-3 border rounded-lg hover:bg-slate-50 transition-colors"
-                  >
-                    <img src="https://www.google.com/images/branding/product/2x/maps_96dp.png" alt="Google Maps" className="h-8 w-8" />
-                    <span className="text-xs">Google</span>
-                  </a>
-                  <a
-                    href={generateNavigationUrl('waze')}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex flex-col items-center gap-1 p-3 border rounded-lg hover:bg-slate-50 transition-colors"
-                  >
-                    <img src="https://www.waze.com/favicon.ico" alt="Waze" className="h-8 w-8" />
-                    <span className="text-xs">Waze</span>
-                  </a>
-                  <a
-                    href={generateNavigationUrl('apple')}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex flex-col items-center gap-1 p-3 border rounded-lg hover:bg-slate-50 transition-colors"
-                  >
-                    <img src="https://www.apple.com/favicon.ico" alt="Apple Maps" className="h-8 w-8" />
-                    <span className="text-xs">Apple</span>
-                  </a>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
     </div>
   );
 }
