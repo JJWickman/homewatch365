@@ -149,15 +149,18 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
 
     // Add markers for each stop
     validStops.forEach((stop, index) => {
+      const lat = parseFloat(stop.lat || stop.latitude);
+      const lng = parseFloat(stop.lng || stop.longitude);
+      
       console.log(`RouteMap - Adding marker ${index + 1}:`, {
         name: stop.name,
-        lat: stop.lat,
-        lng: stop.lng,
+        lat,
+        lng,
         order: stop.order
       });
       
       const marker = new window.google.maps.Marker({
-        position: { lat: parseFloat(stop.lat), lng: parseFloat(stop.lng) },
+        position: { lat, lng },
         map,
         label: {
           text: String(stop.order || index + 1),
