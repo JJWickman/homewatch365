@@ -467,21 +467,54 @@ export default function Inspections() {
     }
   };
 
-  const handleEditInspection = (inspection) => {
-    setEditingInspectionId(inspection.id);
-    setNewInspection({
-      property_id: inspection.property_id,
-      template_id: inspection.template_id || '',
-      scheduled_date: inspection.scheduled_date,
-      scheduled_time: inspection.scheduled_time || '',
-      type: inspection.type,
-      assigned_to: inspection.assigned_to || '',
-      is_recurring: false,
-      recurrence_frequency: 'weekly',
-      recurrence_end_date: '',
-      custom_name: inspection.custom_inspection_name || '',
-      inspection_details: inspection.summary_notes || ''
-    });
+  const handleEditVisit = (visit) => {
+    setEditingId(visit.id);
+    setVisitType(visit.visit_type);
+    if (visit.visit_type === 'inspection') {
+      setNewVisit({
+        property_id: visit.property_id,
+        template_id: visit.template_id || '',
+        scheduled_date: visit.scheduled_date,
+        scheduled_time: visit.scheduled_time || '',
+        inspection_type: visit.inspection_type,
+        assigned_to: visit.assigned_to || '',
+        is_recurring: false,
+        recurrence_frequency: 'weekly',
+        recurrence_end_date: '',
+        custom_name: visit.custom_inspection_name || '',
+        inspection_details: visit.summary_notes || '',
+        followup_type: 'issue',
+        followup_category: 'general',
+        followup_priority: 'medium',
+        followup_title: '',
+        followup_description: '',
+        followup_due_date: format(new Date(), 'yyyy-MM-dd'),
+        followup_due_time: '',
+        estimated_hours: ''
+      });
+    } else {
+      setNewVisit({
+        property_id: visit.property_id,
+        template_id: '',
+        scheduled_date: format(new Date(), 'yyyy-MM-dd'),
+        scheduled_time: '',
+        inspection_type: 'routine',
+        assigned_to: visit.assigned_to || '',
+        is_recurring: false,
+        recurrence_frequency: 'weekly',
+        recurrence_end_date: '',
+        custom_name: '',
+        inspection_details: '',
+        followup_type: visit.followup_type,
+        followup_category: visit.followup_category,
+        followup_priority: visit.priority,
+        followup_title: visit.title,
+        followup_description: visit.description,
+        followup_due_date: visit.scheduled_date,
+        followup_due_time: visit.scheduled_time || '',
+        estimated_hours: ''
+      });
+    }
     setShowNewDialog(true);
   };
 
