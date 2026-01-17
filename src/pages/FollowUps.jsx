@@ -94,7 +94,8 @@ export default function FollowUps() {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = base44.entities.FollowUp.subscribe((event) => {
+    const unsubscribe = base44.entities.Visit.subscribe((event) => {
+      if (event.data.visit_type !== 'followup') return;
       if (event.type === 'create') {
         setFollowUps(prev => [event.data, ...prev]);
       } else if (event.type === 'update') {
@@ -116,15 +117,15 @@ export default function FollowUps() {
         const cId = members[0].company_id;
         setCompanyId(cId);
         
-        const [followUpsData, propertiesData, clientsData, staffData, contractorsData] = await Promise.all([
-          base44.entities.FollowUp.filter({ company_id: cId }, '-created_date'),
+        const [visitsData, propertiesData, clientsData, staffData, contractorsData] = await Promise.all([
+          base44.entities.Visit.filter({ company_id: cId, visit_type: 'followup' }, '-created_date'),
           base44.entities.Property.filter({ company_id: cId, is_active: true }),
           base44.entities.Client.filter({ company_id: cId }),
           base44.entities.CompanyMember.filter({ company_id: cId, is_active: true }),
           base44.entities.Contractor.filter({ company_id: cId, is_active: true })
         ]);
         
-        setFollowUps(followUpsData);
+        setFollowUps(visitsData);
         setProperties(propertiesData);
         setClients(clientsData);
         setStaff(staffData);
@@ -144,12 +145,12 @@ export default function FollowUps() {
     const matchesSearch = item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           item.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
-    const matchesType = typeFilter === 'all' || item.type === typeFilter;
+    const matchesType = typeFilter === 'all' || item.followup_type === typeFilter;
     const matchesPriority = priorityFilter === 'all' || item.priority === priorityFilter;
     const matchesTab = activeTab === 'all' || 
-                       (activeTab === 'issues' && item.type === 'issue') ||
-                       (activeTab === 'appointments' && item.type === 'contractor_appointment') ||
-                       (activeTab === 'tasks' && !['issue', 'contractor_appointment'].includes(item.type));
+                       (activeTab === 'issues' && item.followup_type === 'issue') ||
+                       (activeTab === 'appointments' && item.followup_type === 'contractor_appointment') ||
+                       (activeTab === 'tasks' && !['issue', 'contractor_appointment'].includes(item.followup_type));
     return matchesSearch && matchesStatus && matchesType && matchesPriority && matchesTab;
   });
 
@@ -180,18 +181,19 @@ export default function FollowUps() {
       property_id: newItem.property_id || null,
       client_id: property?.client_id || null,
       contractor_id: newItem.contractor_id || null,
+      visit_type: 'followup',
       title: newItem.title,
       description: newItem.description,
       priority: newItem.priority,
-      type: newItem.type,
-      follow_up_category: newItem.follow_up_category,
-      due_date: newItem.due_date || null,
+      followup_type: newItem.type,
+      followup_category: newItem.follow_up_category,
+      scheduled_date: newItem.due_date || null,
       assigned_to: newItem.assigned_to || null,
       assigned_to_name: staffMember?.user_name || null,
       status: 'open'
     };
 
-    await base44.entities.FollowUp.create(data);
+    await base44.entities.Visit.create(data);
     setShowNewDialog(false);
     setShowAssignmentDialog(false);
     setShowContractorDialog(false);
@@ -210,14 +212,14 @@ export default function FollowUps() {
 
   const toggleComplete = async (item) => {
     const newStatus = item.status === 'completed' ? 'open' : 'completed';
-    await base44.entities.FollowUp.update(item.id, { 
+    await base44.entities.Visit.update(item.id, { 
       status: newStatus,
       completed_at: newStatus === 'completed' ? new Date().toISOString() : null
     });
   };
 
   const handleStatusChange = async (item, newStatus) => {
-    await base44.entities.FollowUp.update(item.id, { status: newStatus });
+    await base44.entities.Visit.update(item.id, { status: newStatus });
   };
 
   const handleReassign = (item) => {
@@ -230,7 +232,7 @@ export default function FollowUps() {
     if (!reassignItem) return;
     
     const staffMember = staff.find(s => s.user_email === reassignTo);
-    await base44.entities.FollowUp.update(reassignItem.id, {
+    await base44.entities.Visit.update(reassignItem.id, {
       assigned_to: reassignTo || null,
       assigned_to_name: staffMember?.user_name || null
     });
@@ -241,8 +243,8 @@ export default function FollowUps() {
   };
 
   const isOverdue = (item) => {
-    if (!item.due_date || item.status === 'completed') return false;
-    return isPast(parseISO(item.due_date)) && !isToday(parseISO(item.due_date));
+    if (!item.scheduled_date || item.status === 'completed') return false;
+    return isPast(parseISO(item.scheduled_date)) && !isToday(parseISO(item.scheduled_date));
   };
 
   const getDueDateLabel = (dateStr) => {
@@ -254,8 +256,8 @@ export default function FollowUps() {
   };
 
   const openCount = followUps.filter(f => f.status === 'open').length;
-  const issueCount = followUps.filter(f => f.type === 'issue' && f.status !== 'completed').length;
-  const appointmentCount = followUps.filter(f => f.type === 'contractor_appointment' && f.status !== 'completed').length;
+  const issueCount = followUps.filter(f => f.followup_type === 'issue' && f.status !== 'completed').length;
+  const appointmentCount = followUps.filter(f => f.followup_type === 'contractor_appointment' && f.status !== 'completed').length;
 
   if (loading) {
     return (
@@ -346,7 +348,7 @@ export default function FollowUps() {
             const property = getProperty(item.property_id);
             const contractor = getContractor(item.contractor_id);
             const overdue = isOverdue(item);
-            const config = typeConfig[item.type] || typeConfig.other;
+            const config = typeConfig[item.followup_type] || typeConfig.other;
             const TypeIcon = config.icon;
             
             return (
@@ -426,11 +428,11 @@ export default function FollowUps() {
                             {contractor.business_name}
                           </div>
                         )}
-                        {item.due_date && (
+                        {item.scheduled_date && (
                           <div className={`flex items-center gap-1 ${overdue ? 'text-red-600 font-medium' : ''}`}>
                             {overdue && <AlertTriangle className="h-3.5 w-3.5" />}
                             <Calendar className="h-3.5 w-3.5" />
-                            {getDueDateLabel(item.due_date)}
+                            {getDueDateLabel(item.scheduled_date)}
                           </div>
                         )}
                         {item.assigned_to_name && (
