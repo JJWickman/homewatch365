@@ -135,6 +135,8 @@ export default function PropertyForm() {
       square_feet: data.square_feet ? parseFloat(data.square_feet) : null,
       bedrooms: data.bedrooms ? parseInt(data.bedrooms) : null,
       bathrooms: data.bathrooms ? parseFloat(data.bathrooms) : null,
+      latitude: data.latitude ? parseFloat(data.latitude) : null,
+      longitude: data.longitude ? parseFloat(data.longitude) : null,
       is_active: true
     };
     await base44.entities.Property.update(propertyId, saveData);
@@ -310,13 +312,15 @@ export default function PropertyForm() {
         const validation = response.data.validation;
         setAddressValidation(validation);
         
-        // Populate blank fields from validation
+        // Populate blank fields from validation and store lat/lng
         setFormData(prev => ({
           ...prev,
           address: prev.address || validation.street || '',
           city: prev.city || validation.city || '',
           state: prev.state || validation.state || '',
-          zip: prev.zip || validation.zip || ''
+          zip: prev.zip || validation.zip || '',
+          latitude: validation.latitude,
+          longitude: validation.longitude
         }));
         
         if (response.data.aerialViewUrl) {
@@ -388,7 +392,7 @@ export default function PropertyForm() {
     try {
       // Get details for the selected place
       const service = new window.google.maps.places.PlacesService(document.createElement('div'));
-      service.getDetails({ placeId: prediction.place_id }, (place, status) => {
+      service.getDetails({ placeId: prediction.place_id }, async (place, status) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK && place) {
           let address = '';
           let city = '';
@@ -415,17 +419,20 @@ export default function PropertyForm() {
             }
           });
 
+          const lat = place.geometry.location.lat();
+          const lng = place.geometry.location.lng();
+
           setFormData(prev => ({
             ...prev,
             address: address.trim(),
             city,
             state,
             zip,
-            latitude: place.geometry.location.lat(),
-            longitude: place.geometry.location.lng()
+            latitude: lat,
+            longitude: lng
           }));
 
-          validateAndFetchGoogleImage(address.trim(), city, state, zip);
+          await validateAndFetchGoogleImage(address.trim(), city, state, zip, lat, lng);
         }
       });
     } catch (error) {
@@ -562,7 +569,7 @@ export default function PropertyForm() {
     }
   };
 
-  const validateAndFetchGoogleImage = async (address, city, state, zip) => {
+  const validateAndFetchGoogleImage = async (address, city, state, zip, providedLat = null, providedLng = null) => {
     if (!address || !city || !state) return;
     
     setValidatingAddress(true);
@@ -578,13 +585,19 @@ export default function PropertyForm() {
         const validation = response.data.validation;
         setAddressValidation(validation);
         
-        // Populate blank fields from validation
+        // Use provided coordinates or validation coordinates
+        const lat = providedLat || validation.latitude;
+        const lng = providedLng || validation.longitude;
+        
+        // Populate fields from validation and add lat/lng
         setFormData(prev => ({
           ...prev,
           address: prev.address || validation.street || '',
           city: prev.city || validation.city || '',
           state: prev.state || validation.state || '',
-          zip: prev.zip || validation.zip || ''
+          zip: prev.zip || validation.zip || '',
+          latitude: lat,
+          longitude: lng
         }));
         
         if (response.data.aerialViewUrl) {
@@ -629,6 +642,8 @@ export default function PropertyForm() {
         square_feet: formData.square_feet ? parseFloat(formData.square_feet) : null,
         bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
         bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
+        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+        longitude: formData.longitude ? parseFloat(formData.longitude) : null,
         is_active: true
       };
 
