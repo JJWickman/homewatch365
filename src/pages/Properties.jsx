@@ -292,6 +292,19 @@ export default function Properties() {
       ) : viewMode === 'list' ? (
         <Card>
           <div className="divide-y">
+            {/* Header Row */}
+            <div className="p-4 flex items-center justify-between bg-slate-50 border-b border-slate-200">
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Property</p>
+              </div>
+              <div className="w-32">
+                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Status</p>
+              </div>
+              <div className="w-16">
+                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Actions</p>
+              </div>
+            </div>
+            {/* Data Rows */}
             {filteredProperties.map((property) => (
               <div 
                 key={property.id}
@@ -306,18 +319,21 @@ export default function Properties() {
                     {property.city}, {property.state} • {getClientName(property.client_id)}
                   </p>
                 </div>
-                <StatusBadge status={property.status} />
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(createPageUrl('PropertyForm') + `?id=${property.id}`);
-                  }}
-                  className="ml-4"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
+                <div className="w-32">
+                  <StatusBadge status={property.status} />
+                </div>
+                <div className="w-16">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(createPageUrl('PropertyForm') + `?id=${property.id}`);
+                    }}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
