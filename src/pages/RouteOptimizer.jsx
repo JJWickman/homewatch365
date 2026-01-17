@@ -126,6 +126,12 @@ export default function RouteOptimizer() {
           time = i.due_time;
         }
         
+        console.log('Property coordinates:', {
+          name: property?.name,
+          lat: property?.latitude,
+          lng: property?.longitude
+        });
+        
         return {
           id: i.id,
           type: i.type,
@@ -136,6 +142,8 @@ export default function RouteOptimizer() {
           lng: property?.longitude
         };
       }).filter(s => s.address);
+      
+      console.log('Stops before optimization:', stops);
 
       const prompt = `
 You are a route optimization assistant. Given the following inspection stops for ${selectedDate}, 
@@ -193,6 +201,8 @@ Return the optimized order with estimated times and any weather/traffic consider
           lng: originalStop?.lng
         };
       });
+      
+      console.log('Optimized stops with coordinates:', optimizedStops);
 
       setOptimizedRoute({
         ...result,
