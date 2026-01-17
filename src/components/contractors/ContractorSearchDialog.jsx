@@ -66,7 +66,10 @@ export default function ContractorSearchDialog({
       return;
     }
 
-    const property = properties.find(p => p.id === selectedProperty);
+    const property = currentProperty && currentProperty.id === selectedProperty 
+      ? currentProperty 
+      : properties.find(p => p.id === selectedProperty);
+    
     if (!property) {
       return;
     }
@@ -180,6 +183,11 @@ export default function ContractorSearchDialog({
                     <SelectValue placeholder="Select a property" />
                   </SelectTrigger>
                   <SelectContent>
+                    {currentProperty && (
+                      <SelectItem value={currentProperty.id}>
+                        {currentProperty.name || currentProperty.address} - {currentProperty.city}, {currentProperty.state}
+                      </SelectItem>
+                    )}
                     {properties.map(prop => (
                       <SelectItem key={prop.id} value={prop.id}>
                         {prop.name || prop.address} - {prop.city}, {prop.state}
