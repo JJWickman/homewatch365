@@ -15,6 +15,12 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
   const hasValidData = validStops.length > 0;
 
   useEffect(() => {
+    if (!mapReady && hasValidData && !loading && !error) {
+      loadGoogleMaps();
+    }
+  }, [hasValidData]);
+
+  useEffect(() => {
     if (mapInstanceRef.current && stops.length > 0) {
       updateMap();
     }
@@ -192,12 +198,11 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
   }
 
   if (!mapReady && !loading && !error) {
-    loadGoogleMaps();
     return (
       <div className="w-full h-full flex items-center justify-center bg-slate-50 rounded-lg">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-slate-400 mx-auto mb-2" />
-          <p className="text-sm text-slate-500">Loading map...</p>
+          <p className="text-sm text-slate-500">Initializing map...</p>
         </div>
       </div>
     );
