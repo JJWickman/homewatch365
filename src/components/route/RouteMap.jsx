@@ -121,21 +121,25 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
   };
 
   const updateMap = () => {
-    const map = mapInstanceRef.current;
-    if (!map || !window.google) return;
+   const map = mapInstanceRef.current;
+   if (!map || !window.google) return;
 
-    // Clear existing markers
-    markersRef.current.forEach(marker => marker.setMap(null));
-    markersRef.current = [];
+   // Clear existing markers
+   markersRef.current.forEach(marker => marker.setMap(null));
+   markersRef.current = [];
 
-    // Clear existing polyline
-    if (polylineRef.current) {
-      polylineRef.current.setMap(null);
-      polylineRef.current = null;
-    }
+   // Clear existing polyline
+   if (polylineRef.current) {
+     polylineRef.current.setMap(null);
+     polylineRef.current = null;
+   }
 
-    // Filter stops with valid coordinates
-    const validStops = stops.filter(stop => stop.lat && stop.lng);
+   // Filter stops with valid coordinates
+   const validStops = stops.filter(stop => {
+     const lat = parseFloat(stop.lat || stop.latitude);
+     const lng = parseFloat(stop.lng || stop.longitude);
+     return !isNaN(lat) && !isNaN(lng);
+   });
     console.log('RouteMap - Updating map with stops:', validStops);
     
     if (validStops.length === 0) {
