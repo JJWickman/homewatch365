@@ -255,41 +255,39 @@ export default function RouteOptimizer() {
         </Card>
       </div>
 
-      {/* Optimize Button */}
-      <div className="mb-4">
-        <Button 
-          onClick={optimizeRoute} 
-          disabled={inspections.length === 0 || optimizing}
-          className="bg-slate-900 hover:bg-slate-800"
-        >
-          {optimizing ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Optimizing...
-            </>
-          ) : (
-            <>
-              <Route className="h-4 w-4 mr-2" />
-              Optimize Route
-            </>
-          )}
-        </Button>
-      </div>
-
       {/* Visits & Route Summary */}
       <div className="mb-6 space-y-6">
 
         {/* Visits List - Full Width */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center justify-between">
-              <span>Visits ({inspections.length})</span>
-              {optimizedRoute && (
-                <Badge variant="outline" className="bg-emerald-50 text-emerald-700">
-                  Optimized
-                </Badge>
-              )}
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2">
+                <span>Visits ({inspections.length})</span>
+                {optimizedRoute && (
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-700">
+                    Optimized
+                  </Badge>
+                )}
+              </CardTitle>
+              <Button 
+                onClick={optimizeRoute} 
+                disabled={inspections.length === 0 || optimizing}
+                className="bg-slate-900 hover:bg-slate-800"
+              >
+                {optimizing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Optimizing...
+                  </>
+                ) : (
+                  <>
+                    <Route className="h-4 w-4 mr-2" />
+                    Optimize Route
+                  </>
+                )}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {inspections.length === 0 ? (
