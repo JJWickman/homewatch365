@@ -98,12 +98,24 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
 
     // Filter stops with valid coordinates
     const validStops = stops.filter(stop => stop.lat && stop.lng);
-    if (validStops.length === 0) return;
+    console.log('RouteMap - Updating map with stops:', validStops);
+    
+    if (validStops.length === 0) {
+      console.log('RouteMap - No valid stops to display');
+      return;
+    }
 
     // Add markers for each stop
     validStops.forEach((stop, index) => {
+      console.log(`RouteMap - Adding marker ${index + 1}:`, {
+        name: stop.name,
+        lat: stop.lat,
+        lng: stop.lng,
+        order: stop.order
+      });
+      
       const marker = new window.google.maps.Marker({
-        position: { lat: stop.lat, lng: stop.lng },
+        position: { lat: parseFloat(stop.lat), lng: parseFloat(stop.lng) },
         map,
         label: {
           text: String(stop.order || index + 1),
