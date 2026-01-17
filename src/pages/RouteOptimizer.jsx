@@ -97,6 +97,7 @@ export default function RouteOptimizer() {
     
     setInspections(visitsData);
     setOptimizedRoute(null);
+    setShowOptimizedRoute(false);
   };
 
   const getProperty = (propertyId) => properties.find(p => p.id === propertyId);
