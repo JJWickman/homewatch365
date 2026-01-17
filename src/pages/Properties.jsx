@@ -25,6 +25,8 @@ import {
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
+import ViewToggle from '@/components/shared/ViewToggle';
+import { useViewMode } from '@/components/shared/useViewMode';
 
 export default function Properties() {
   const navigate = useNavigate();
@@ -37,6 +39,7 @@ export default function Properties() {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [visits, setVisits] = useState([]);
+  const [viewMode, setViewMode] = useViewMode('properties', 'large-tiles');
 
   useEffect(() => {
     loadProperties();
@@ -116,25 +119,25 @@ export default function Properties() {
     };
   };
 
-  const PropertyCard = ({ property }) => {
+  const PropertyCard = ({ property, compact = false }) => {
     const statuses = getVisitStatuses(property.id);
 
     return (
       <Card 
         className="overflow-hidden hover:shadow-md transition-shadow group flex flex-col"
       >
-        <div className="aspect-video bg-slate-100 relative cursor-pointer" onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${property.id}`)}>
-          {property.primary_photo_url ? (
-            <img 
-              src={property.primary_photo_url} 
-              alt={property.name || property.address}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Building2 className="h-12 w-12 text-slate-300" />
-            </div>
-          )}
+        <div className={`${compact ? 'aspect-square' : 'aspect-video'} bg-slate-100 relative cursor-pointer`} onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${property.id}`)}>
+           {property.primary_photo_url ? (
+             <img 
+               src={property.primary_photo_url} 
+               alt={property.name || property.address}
+               className="w-full h-full object-cover"
+             />
+           ) : (
+             <div className="w-full h-full flex items-center justify-center">
+               <Building2 className={`${compact ? 'h-8 w-8' : 'h-12 w-12'} text-slate-300`} />
+             </div>
+           )}
           <div className="absolute top-3 right-3 flex gap-2">
             <StatusBadge status={property.status} />
             <DropdownMenu>
@@ -168,50 +171,56 @@ export default function Properties() {
             </DropdownMenu>
           </div>
         </div>
-        <div className="p-4 flex-1 flex flex-col">
-          <div className="cursor-pointer hover:opacity-80 transition-opacity mb-3" onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${property.id}`)}>
-            <h3 className="font-semibold text-slate-900 truncate">
-              {property.name || property.address}
-            </h3>
-            <div className="flex items-center gap-1 text-sm text-slate-500 mt-1">
-              <MapPin className="h-3.5 w-3.5" />
-              {property.city}, {property.state}
-            </div>
-            <div className="flex items-center gap-1 text-sm text-slate-500 mt-1">
-              <User className="h-3.5 w-3.5" />
-              {getClientName(property.client_id)}
-            </div>
-            <div className="flex items-center gap-1 text-sm text-slate-500 mt-1">
-              <Calendar className="h-3.5 w-3.5" />
-              <span className="capitalize">{property.inspection_frequency?.replace('_', '-') || 'Weekly'}</span>
-            </div>
-          </div>
+        <div className={`flex-1 flex flex-col ${compact ? 'p-3' : 'p-4'}`}>
+           <div className="cursor-pointer hover:opacity-80 transition-opacity mb-3" onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${property.id}`)}>
+             <h3 className={`font-semibold text-slate-900 truncate ${compact ? 'text-sm' : ''}`}>
+               {property.name || property.address}
+             </h3>
+             {!compact && (
+               <>
+                 <div className="flex items-center gap-1 text-sm text-slate-500 mt-1">
+                   <MapPin className="h-3.5 w-3.5" />
+                   {property.city}, {property.state}
+                 </div>
+                 <div className="flex items-center gap-1 text-sm text-slate-500 mt-1">
+                   <User className="h-3.5 w-3.5" />
+                   {getClientName(property.client_id)}
+                 </div>
+                 <div className="flex items-center gap-1 text-sm text-slate-500 mt-1">
+                   <Calendar className="h-3.5 w-3.5" />
+                   <span className="capitalize">{property.inspection_frequency?.replace('_', '-') || 'Weekly'}</span>
+                 </div>
+               </>
+             )}
+           </div>
 
-          {/* Visit Status Badges */}
-          <div className="flex gap-2 flex-wrap pt-3 border-t border-slate-100">
-            {statuses.open > 0 && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium">
-                <Clock className="h-3 w-3" />
-                {statuses.open} Open
-              </div>
-            )}
-            {statuses.pending > 0 && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-yellow-50 text-yellow-700 text-xs font-medium">
-                <AlertCircle className="h-3 w-3" />
-                {statuses.pending} Pending
-              </div>
-            )}
-            {statuses.completed > 0 && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-green-50 text-green-700 text-xs font-medium">
-                <CheckCircle2 className="h-3 w-3" />
-                {statuses.completed} Completed
-              </div>
-            )}
-            {statuses.open === 0 && statuses.pending === 0 && statuses.completed === 0 && (
-              <div className="text-xs text-slate-400 py-1">No visits</div>
-            )}
-          </div>
-        </div>
+           {/* Visit Status Badges */}
+           {!compact && (
+             <div className="flex gap-2 flex-wrap pt-3 border-t border-slate-100">
+               {statuses.open > 0 && (
+                 <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium">
+                   <Clock className="h-3 w-3" />
+                   {statuses.open} Open
+                 </div>
+               )}
+               {statuses.pending > 0 && (
+                 <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-yellow-50 text-yellow-700 text-xs font-medium">
+                   <AlertCircle className="h-3 w-3" />
+                   {statuses.pending} Pending
+                 </div>
+               )}
+               {statuses.completed > 0 && (
+                 <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-green-50 text-green-700 text-xs font-medium">
+                   <CheckCircle2 className="h-3 w-3" />
+                   {statuses.completed} Completed
+                 </div>
+               )}
+               {statuses.open === 0 && statuses.pending === 0 && statuses.completed === 0 && (
+                 <div className="text-xs text-slate-400 py-1">No visits</div>
+               )}
+             </div>
+           )}
+         </div>
       </Card>
     );
   };
@@ -227,7 +236,7 @@ export default function Properties() {
 
       {/* Filters */}
       <Card className="mb-6 p-4">
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
@@ -249,6 +258,7 @@ export default function Properties() {
               <SelectItem value="for_sale">For Sale</SelectItem>
             </SelectContent>
           </Select>
+          <ViewToggle view={viewMode} onViewChange={setViewMode} isMobile={false} />
         </div>
       </Card>
 
@@ -279,10 +289,47 @@ export default function Properties() {
         <Card className="p-8 text-center text-slate-500">
           No properties match your search
         </Card>
+      ) : viewMode === 'list' ? (
+        <Card>
+          <div className="divide-y">
+            {filteredProperties.map((property) => (
+              <div 
+                key={property.id}
+                className="p-4 flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors"
+                onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${property.id}`)}
+              >
+                <div className="flex-1">
+                  <h3 className="font-semibold text-slate-900">
+                    {property.name || property.address}
+                  </h3>
+                  <p className="text-sm text-slate-500">
+                    {property.city}, {property.state} • {getClientName(property.client_id)}
+                  </p>
+                </div>
+                <StatusBadge status={property.status} />
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(createPageUrl('PropertyForm') + `?id=${property.id}`);
+                  }}
+                  className="ml-4"
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </Card>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={`grid gap-6 ${
+          viewMode === 'large-tiles' 
+            ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
+            : 'grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+        }`}>
           {filteredProperties.map((property) => (
-            <PropertyCard key={property.id} property={property} />
+            <PropertyCard key={property.id} property={property} compact={viewMode === 'small-tiles'} />
           ))}
         </div>
       )}
