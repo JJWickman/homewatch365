@@ -34,6 +34,7 @@ export default function RouteOptimizer() {
   const [optimizing, setOptimizing] = useState(false);
   const [startAddress, setStartAddress] = useState('');
   const [company, setCompany] = useState(null);
+  const [showOptimizedRoute, setShowOptimizedRoute] = useState(false);
 
   useEffect(() => {
     loadData();
