@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from 'lucide-react';
 
 export default function TestGoogleMapsAPI() {
@@ -19,6 +20,8 @@ export default function TestGoogleMapsAPI() {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
+  const [properties, setProperties] = useState([]);
+  const [selectedProperty, setSelectedProperty] = useState('');
 
   const getLatLon = async () => {
     setLoading(true);
@@ -125,7 +128,39 @@ export default function TestGoogleMapsAPI() {
 
   useEffect(() => {
     loadGoogleMaps();
+    loadProperties();
   }, []);
+
+  const loadProperties = async () => {
+    try {
+      const user = await base44.auth.me();
+      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
+      
+      if (members.length > 0) {
+        const props = await base44.entities.Property.filter({ company_id: members[0].company_id });
+        setProperties(props);
+      }
+    } catch (err) {
+      console.error('Error loading properties:', err);
+    }
+  };
+
+  const handlePropertySelect = (propertyId) => {
+    setSelectedProperty(propertyId);
+    const property = properties.find(p => p.id === propertyId);
+    
+    if (property) {
+      setAddress(property.address || '');
+      setCity(property.city || '');
+      setState(property.state || '');
+      setZip(property.zip || '');
+      
+      if (property.latitude && property.longitude) {
+        setLatitude(property.latitude);
+        setLongitude(property.longitude);
+      }
+    }
+  };
 
   useEffect(() => {
     if (latitude && longitude && mapInstanceRef.current) {
@@ -139,9 +174,32 @@ export default function TestGoogleMapsAPI() {
       
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Enter Address</CardTitle>
+          <CardTitle>Select Property or Enter Address</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="property-select">Select Property</Label>
+            <Select value={selectedProperty} onValueChange={handlePropertySelect}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choose a property..." />
+              </SelectTrigger>
+              <SelectContent>
+                {properties.map((property) => (
+                  <SelectItem key={property.id} value={property.id}>
+                    {property.name || property.address} - {property.city}, {property.state}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-slate-500">Or enter manually</span>
+            </div>
+          </div>
           <div>
             <Label htmlFor="address">Street Address</Label>
             <Input
