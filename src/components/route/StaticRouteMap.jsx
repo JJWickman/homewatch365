@@ -16,7 +16,7 @@ export default function StaticRouteMap({ stops = [], startAddress }) {
     if (validStops.length > 0) {
       generateStaticMapUrl();
     }
-  }, [stops]);
+  }, [validStops.length, JSON.stringify(validStops)]);
 
   const generateStaticMapUrl = async () => {
     setLoading(true);
