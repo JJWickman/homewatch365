@@ -164,8 +164,7 @@ export default function Inspections() {
 
     const findAvailableSlots = async () => {
     const propertyId = newVisit.property_id;
-    const staffEmail = newVisit.assigned_to;
-    if (!propertyId || !staffEmail) return;
+    if (!propertyId) return;
 
     const selectedProperty = getProperty(propertyId);
     if (!selectedProperty?.address) {
@@ -175,6 +174,11 @@ export default function Inspections() {
 
     const results = [];
     let currentDate = new Date();
+    
+    // Get all field staff members
+    const availableStaff = staff.filter(m => 
+      m.role === 'field_inspector' || m.role === 'dispatcher' || m.role === 'administrator'
+    );
 
     // Search for available slots in the next 30 days
     for (let i = 0; i < 30; i++) {
@@ -187,34 +191,51 @@ export default function Inspections() {
         continue;
       }
 
-      // Get all visits for this staff member on this date
-      const staffVisitsOnDate = visits.filter(v => 
-        v.assigned_to === staffEmail && 
-        v.scheduled_date === dateStr &&
-        v.status !== 'cancelled'
-      );
+      // Check each staff member for availability
+      for (const staffMember of availableStaff) {
+        // Get all visits for this staff member on this date
+        const staffVisitsOnDate = visits.filter(v => 
+          v.assigned_to === staffMember.user_email && 
+          v.scheduled_date === dateStr &&
+          v.status !== 'cancelled'
+        );
 
-      // Check morning availability (8am-12pm)
-      const canDoMorning = await checkTimeSlotFeasibility(
-        selectedProperty, 
-        staffVisitsOnDate, 
-        'morning',
-        dateStr
-      );
+        // Check morning availability (8am-12pm)
+        const canDoMorning = await checkTimeSlotFeasibility(
+          selectedProperty, 
+          staffVisitsOnDate, 
+          'morning',
+          dateStr
+        );
 
-      // Check afternoon availability (12pm-4pm)
-      const canDoAfternoon = await checkTimeSlotFeasibility(
-        selectedProperty, 
-        staffVisitsOnDate, 
-        'afternoon',
-        dateStr
-      );
+        // Check afternoon availability (12pm-4pm)
+        const canDoAfternoon = await checkTimeSlotFeasibility(
+          selectedProperty, 
+          staffVisitsOnDate, 
+          'afternoon',
+          dateStr
+        );
 
-      if (canDoMorning) {
-        results.push({ date: dateStr, time: 'morning', label: `${getDateLabel(dateStr)} - Morning (8am-12pm)` });
-      }
-      if (canDoAfternoon) {
-        results.push({ date: dateStr, time: 'afternoon', label: `${getDateLabel(dateStr)} - Afternoon (12pm-4pm)` });
+        if (canDoMorning) {
+          results.push({ 
+            date: dateStr, 
+            time: 'morning', 
+            staffEmail: staffMember.user_email,
+            staffName: staffMember.user_name || staffMember.user_email,
+            label: `${getDateLabel(dateStr)} - Morning (8am-12pm) - ${staffMember.user_name || staffMember.user_email}` 
+          });
+        }
+        if (canDoAfternoon) {
+          results.push({ 
+            date: dateStr, 
+            time: 'afternoon', 
+            staffEmail: staffMember.user_email,
+            staffName: staffMember.user_name || staffMember.user_email,
+            label: `${getDateLabel(dateStr)} - Afternoon (12pm-4pm) - ${staffMember.user_name || staffMember.user_email}` 
+          });
+        }
+
+        if (results.length >= 5) break;
       }
 
       if (results.length >= 5) break;
@@ -860,7 +881,7 @@ export default function Inspections() {
 
                 <Button 
                   onClick={findAvailableSlots}
-                  disabled={!newVisit.property_id || !newVisit.assigned_to || !newVisit.estimated_hours || (visitType === 'inspection' && !newVisit.inspection_type) || (visitType === 'followup' && !newVisit.followup_type)}
+                  disabled={!newVisit.property_id}
                   className="w-full bg-blue-600 hover:bg-blue-700"
                 >
                   Find First Available
@@ -875,13 +896,15 @@ export default function Inspections() {
                             setNewVisit(prev => ({
                               ...prev,
                               scheduled_date: result.date,
-                              scheduled_time: result.time
+                              scheduled_time: result.time,
+                              assigned_to: result.staffEmail
                             }));
                           } else {
                             setNewVisit(prev => ({
                               ...prev,
                               followup_due_date: result.date,
-                              followup_due_time: result.time
+                              followup_due_time: result.time,
+                              assigned_to: result.staffEmail
                             }));
                           }
                           setScheduleMode('manual');
