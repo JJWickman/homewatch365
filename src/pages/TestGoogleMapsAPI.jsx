@@ -150,7 +150,7 @@ export default function TestGoogleMapsAPI() {
     }
   };
 
-  const handlePropertySelect = (propertyId) => {
+  const handlePropertySelect = async (propertyId) => {
     setSelectedProperty(propertyId);
     const property = properties.find(p => p.id === propertyId);
     
@@ -163,6 +163,24 @@ export default function TestGoogleMapsAPI() {
       if (property.latitude && property.longitude) {
         setLatitude(property.latitude);
         setLongitude(property.longitude);
+        
+        // Set result to trigger map rendering
+        setResult({
+          lat: property.latitude,
+          lon: property.longitude,
+          address: `${property.address}, ${property.city}, ${property.state} ${property.zip}`,
+          aerialView: `https://www.google.com/maps/@${property.latitude},${property.longitude},100m/data=!3m1!1e3`
+        });
+        
+        // Initialize map if needed
+        if (!mapInstanceRef.current) {
+          await loadGoogleMaps();
+        }
+        
+        // Update map marker
+        if (mapInstanceRef.current) {
+          updateMapMarker(property.latitude, property.longitude);
+        }
       }
     }
   };
