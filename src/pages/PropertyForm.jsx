@@ -1141,60 +1141,95 @@ export default function PropertyForm() {
         </Card>
 
         {/* Contractors */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Contractors
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <Label>Select Contractors</Label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {contractors.map((contractor) => (
-                  <label
-                    key={contractor.id}
-                    className="flex items-start gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.contractors.includes(contractor.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setFormData(prev => ({
-                            ...prev,
-                            contractors: [...prev.contractors, contractor.id]
-                          }));
-                        } else {
-                          setFormData(prev => ({
-                            ...prev,
-                            contractors: prev.contractors.filter(id => id !== contractor.id)
-                          }));
-                        }
-                      }}
-                      className="mt-1"
-                    />
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{contractor.business_name}</p>
-                      <p className="text-xs text-amber-600 capitalize">
-                        {contractor.contractor_type.replace('_', ' ')}
-                      </p>
-                      {contractor.phone && (
-                        <p className="text-xs text-slate-500 mt-1">{contractor.phone}</p>
-                      )}
-                    </div>
-                  </label>
-                ))}
-              </div>
-              {contractors.length === 0 && (
-                <p className="text-sm text-slate-500 text-center py-4">
-                  No contractors available. Add contractors from Settings.
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+         <Card>
+           <CardHeader>
+             <CardTitle className="text-lg flex items-center gap-2">
+               <User className="h-5 w-5" />
+               Assigned Contractors ({formData.contractors.length})
+             </CardTitle>
+           </CardHeader>
+           <CardContent className="space-y-4">
+             {/* Assigned Contractors List */}
+             {formData.contractors.length > 0 && (
+               <div className="space-y-2">
+                 <Label className="text-sm font-medium">Assigned</Label>
+                 <div className="space-y-2">
+                   {formData.contractors.map((contractorId) => {
+                     const contractor = contractors.find(c => c.id === contractorId);
+                     if (!contractor) return null;
+                     return (
+                       <div key={contractorId} className="flex items-start justify-between p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                         <div className="flex-1">
+                           <p className="font-medium text-sm text-slate-900">{contractor.business_name}</p>
+                           <p className="text-xs text-amber-600 capitalize mt-0.5">
+                             {contractor.contractor_type.replace('_', ' ')}
+                           </p>
+                           <div className="flex flex-col gap-1 mt-2 text-xs text-slate-600">
+                             {contractor.phone && <p>📞 {contractor.phone}</p>}
+                             {contractor.email && <p>📧 {contractor.email}</p>}
+                           </div>
+                         </div>
+                         <Button
+                           type="button"
+                           variant="ghost"
+                           size="sm"
+                           onClick={() => setFormData(prev => ({
+                             ...prev,
+                             contractors: prev.contractors.filter(id => id !== contractorId)
+                           }))}
+                           className="text-red-600 hover:bg-red-50 ml-2 shrink-0"
+                         >
+                           <Trash2 className="h-4 w-4" />
+                         </Button>
+                       </div>
+                     );
+                   })}
+                 </div>
+               </div>
+             )}
+
+             {/* Available Contractors */}
+             {contractors.length > 0 && (
+               <div className="space-y-2">
+                 <Label className="text-sm font-medium">Available</Label>
+                 <div className="space-y-2">
+                   {contractors.filter(c => !formData.contractors.includes(c.id)).map((contractor) => (
+                     <div key={contractor.id} className="flex items-start justify-between p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                       <div className="flex-1">
+                         <p className="font-medium text-sm text-slate-900">{contractor.business_name}</p>
+                         <p className="text-xs text-slate-600 capitalize mt-0.5">
+                           {contractor.contractor_type.replace('_', ' ')}
+                         </p>
+                         <div className="flex flex-col gap-1 mt-2 text-xs text-slate-600">
+                           {contractor.phone && <p>📞 {contractor.phone}</p>}
+                           {contractor.email && <p>📧 {contractor.email}</p>}
+                         </div>
+                       </div>
+                       <Button
+                         type="button"
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => setFormData(prev => ({
+                           ...prev,
+                           contractors: [...prev.contractors, contractor.id]
+                         }))}
+                         className="text-green-600 hover:bg-green-50 ml-2 shrink-0"
+                       >
+                         <Plus className="h-4 w-4" />
+                       </Button>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+             )}
+
+             {contractors.length === 0 && (
+               <p className="text-sm text-slate-500 text-center py-4">
+                 No contractors available. Add contractors from Settings.
+               </p>
+             )}
+           </CardContent>
+         </Card>
 
         {/* Emergency Contacts */}
         <Card>
