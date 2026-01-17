@@ -201,7 +201,8 @@ export default function Schedule() {
         title="Schedule"
         subtitle="View and manage inspections and tasks"
         action={() => navigate(createPageUrl('Inspections') + '?action=new')}
-        actionLabel="New Inspection"
+        actionLabel="New Visit"
+        actionClassName="bg-black text-white hover:bg-slate-900"
       />
 
       {/* Calendar Controls */}
