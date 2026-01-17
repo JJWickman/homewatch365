@@ -1,127 +1,200 @@
-import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
-import { MapPin, Navigation } from 'lucide-react';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-
-// Fix default marker icon issue
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-// Custom numbered marker
-const createNumberedIcon = (number, isOptimized) => {
-  return L.divIcon({
-    className: 'custom-numbered-marker',
-    html: `<div style="
-      background: ${isOptimized ? '#1e293b' : '#64748b'};
-      color: white;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: bold;
-      border: 2px solid white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    ">${number}</div>`,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
-    popupAnchor: [0, -14]
-  });
-};
-
-// Component to fit bounds
-function FitBounds({ stops }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (stops.length > 0) {
-      const validStops = stops.filter(s => s.lat && s.lng);
-      if (validStops.length > 0) {
-        const bounds = L.latLngBounds(validStops.map(s => [s.lat, s.lng]));
-        map.fitBounds(bounds, { padding: [50, 50] });
-      }
-    }
-  }, [stops, map]);
-  
-  return null;
-}
+import React, { useEffect, useRef, useState } from 'react';
+import { Loader2, MapPin } from 'lucide-react';
 
 export default function RouteMap({ stops = [], startAddress, isOptimized }) {
-  const [center, setCenter] = useState([39.8283, -98.5795]); // Center of US
-  const [zoom, setZoom] = useState(4);
-  
-  const validStops = stops.filter(s => s.lat && s.lng);
-  
-  // Generate route line coordinates
-  const routeCoordinates = validStops.map(s => [s.lat, s.lng]);
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const markersRef = useRef([]);
+  const polylineRef = useRef(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (validStops.length === 0) {
+  useEffect(() => {
+    loadGoogleMaps();
+  }, []);
+
+  useEffect(() => {
+    if (mapInstanceRef.current && stops.length > 0) {
+      updateMap();
+    }
+  }, [stops, startAddress, isOptimized]);
+
+  const loadGoogleMaps = async () => {
+    try {
+      // Check if already loaded
+      if (window.google?.maps) {
+        initializeMap();
+        return;
+      }
+
+      // Get API key from backend
+      const apiKey = await fetch('/api/functions/googleMapsConfig')
+        .then(res => res.json())
+        .then(data => data.apiKey);
+      
+      if (!apiKey) {
+        throw new Error('Google Maps API key not found');
+      }
+      
+      // Load Google Maps script
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry`;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        initializeMap();
+      };
+      script.onerror = () => {
+        setError('Failed to load Google Maps');
+        setLoading(false);
+      };
+      document.head.appendChild(script);
+    } catch (err) {
+      console.error('Error loading Google Maps:', err);
+      setError('Failed to load map');
+      setLoading(false);
+    }
+  };
+
+  const initializeMap = () => {
+    if (!mapRef.current || !window.google) return;
+
+    mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
+      zoom: 10,
+      center: { lat: 39.8283, lng: -98.5795 }, // Center of US
+      mapTypeControl: true,
+      streetViewControl: false,
+      fullscreenControl: true,
+      styles: [
+        {
+          featureType: 'poi',
+          elementType: 'labels',
+          stylers: [{ visibility: 'off' }]
+        }
+      ]
+    });
+
+    setLoading(false);
+    updateMap();
+  };
+
+  const updateMap = () => {
+    const map = mapInstanceRef.current;
+    if (!map || !window.google) return;
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.setMap(null));
+    markersRef.current = [];
+
+    // Clear existing polyline
+    if (polylineRef.current) {
+      polylineRef.current.setMap(null);
+      polylineRef.current = null;
+    }
+
+    // Filter stops with valid coordinates
+    const validStops = stops.filter(stop => stop.lat && stop.lng);
+    if (validStops.length === 0) return;
+
+    // Add markers for each stop
+    validStops.forEach((stop, index) => {
+      const marker = new window.google.maps.Marker({
+        position: { lat: stop.lat, lng: stop.lng },
+        map,
+        label: {
+          text: String(stop.order || index + 1),
+          color: 'white',
+          fontWeight: 'bold',
+          fontSize: '12px'
+        },
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 14,
+          fillColor: isOptimized ? '#1e293b' : '#64748b',
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 2,
+        },
+        title: stop.name
+      });
+
+      // Add info window
+      const infoWindow = new window.google.maps.InfoWindow({
+        content: `
+          <div style="padding: 8px;">
+            <h3 style="font-weight: 600; margin: 0 0 4px 0;">${stop.order ? `Stop ${stop.order}: ` : ''}${stop.name}</h3>
+            <p style="margin: 0; font-size: 12px; color: #666;">${stop.address || ''}</p>
+            ${stop.estimated_arrival ? `<p style="margin: 4px 0 0 0; font-size: 12px; color: #0066cc;">ETA: ${stop.estimated_arrival}</p>` : ''}
+          </div>
+        `
+      });
+
+      marker.addListener('click', () => {
+        infoWindow.open(map, marker);
+      });
+
+      markersRef.current.push(marker);
+    });
+
+    // Draw route line if optimized
+    if (isOptimized && validStops.length > 1) {
+      const routePath = validStops.map(stop => ({ lat: stop.lat, lng: stop.lng }));
+      
+      polylineRef.current = new window.google.maps.Polyline({
+        path: routePath,
+        geodesic: true,
+        strokeColor: '#1e293b',
+        strokeOpacity: 0.8,
+        strokeWeight: 3,
+        map
+      });
+    }
+
+    // Fit bounds to show all markers
+    const bounds = new window.google.maps.LatLngBounds();
+    validStops.forEach(stop => {
+      bounds.extend({ lat: stop.lat, lng: stop.lng });
+    });
+    map.fitBounds(bounds);
+
+    // Add slight padding
+    const padding = { top: 50, right: 50, bottom: 50, left: 50 };
+    map.fitBounds(bounds, padding);
+  };
+
+  if (loading) {
     return (
-      <div className="h-full flex items-center justify-center bg-slate-100 rounded-lg">
-        <div className="text-center text-slate-500">
-          <MapPin className="h-12 w-12 mx-auto mb-3 opacity-50" />
-          <p className="font-medium">No locations to display</p>
-          <p className="text-sm">Select a date with scheduled inspections</p>
+      <div className="w-full h-full flex items-center justify-center bg-slate-50 rounded-lg">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-slate-400 mx-auto mb-2" />
+          <p className="text-sm text-slate-500">Loading map...</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <MapContainer
-      center={validStops.length > 0 ? [validStops[0].lat, validStops[0].lng] : center}
-      zoom={zoom}
-      className="h-full w-full rounded-lg"
-      style={{ minHeight: '400px' }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      
-      <FitBounds stops={validStops} />
-      
-      {/* Route line */}
-      {isOptimized && routeCoordinates.length > 1 && (
-        <Polyline
-          positions={routeCoordinates}
-          color="#1e293b"
-          weight={3}
-          opacity={0.7}
-          dashArray="10, 10"
-        />
-      )}
-      
-      {/* Stop markers */}
-      {validStops.map((stop, index) => (
-        <Marker
-          key={index}
-          position={[stop.lat, stop.lng]}
-          icon={createNumberedIcon(stop.order || index + 1, isOptimized)}
-        >
-          <Popup>
-            <div className="min-w-[150px]">
-              <p className="font-semibold">{stop.name}</p>
-              <p className="text-sm text-slate-600">{stop.address}</p>
-              {stop.estimated_arrival && (
-                <p className="text-sm text-blue-600 mt-1">ETA: {stop.estimated_arrival}</p>
-              )}
-              {stop.drive_time_minutes && (
-                <p className="text-xs text-slate-500">
-                  {stop.drive_time_minutes} min • {stop.distance_miles} mi
-                </p>
-              )}
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
-  );
+  if (error) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-slate-50 rounded-lg">
+        <div className="text-center text-red-600">
+          <p className="font-medium">{error}</p>
+          <p className="text-sm mt-1">Please check your Google Maps API configuration</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (stops.filter(s => s.lat && s.lng).length === 0) {
+    return (
+      <div className="h-full flex items-center justify-center bg-slate-100 rounded-lg">
+        <div className="text-center text-slate-500">
+          <MapPin className="h-12 w-12 mx-auto mb-3 opacity-50" />
+          <p className="font-medium">No locations to display</p>
+          <p className="text-sm">Select a date with scheduled visits</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <div ref={mapRef} className="w-full h-full rounded-lg" />;
 }
