@@ -107,74 +107,114 @@ export default function Properties() {
     return matchesSearch && matchesStatus;
   });
 
-  const PropertyCard = ({ property }) => (
-    <Card 
-      className="overflow-hidden hover:shadow-md transition-shadow group"
-    >
-      <div className="aspect-video bg-slate-100 relative cursor-pointer" onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${property.id}`)}>
-        {property.primary_photo_url ? (
-          <img 
-            src={property.primary_photo_url} 
-            alt={property.name || property.address}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Building2 className="h-12 w-12 text-slate-300" />
+  const getVisitStatuses = (propertyId) => {
+    const propertyVisits = visits.filter(v => v.property_id === propertyId);
+    return {
+      open: propertyVisits.filter(v => v.status === 'open' || v.status === 'scheduled').length,
+      pending: propertyVisits.filter(v => v.status === 'in_progress').length,
+      completed: propertyVisits.filter(v => v.status === 'completed').length
+    };
+  };
+
+  const PropertyCard = ({ property }) => {
+    const statuses = getVisitStatuses(property.id);
+
+    return (
+      <Card 
+        className="overflow-hidden hover:shadow-md transition-shadow group flex flex-col"
+      >
+        <div className="aspect-video bg-slate-100 relative cursor-pointer" onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${property.id}`)}>
+          {property.primary_photo_url ? (
+            <img 
+              src={property.primary_photo_url} 
+              alt={property.name || property.address}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Building2 className="h-12 w-12 text-slate-300" />
+            </div>
+          )}
+          <div className="absolute top-3 right-3 flex gap-2">
+            <StatusBadge status={property.status} />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 bg-white/90 hover:bg-white text-slate-700"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem 
+                  onClick={() => navigate(createPageUrl('PropertyForm') + `?id=${property.id}`)}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteConfirm(property.id);
+                  }}
+                  className="text-red-600"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        )}
-        <div className="absolute top-3 right-3 flex gap-2">
-          <StatusBadge status={property.status} />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 bg-white/90 hover:bg-white text-slate-700"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem 
-                onClick={() => navigate(createPageUrl('PropertyForm') + `?id=${property.id}`)}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-               onClick={(e) => {
-                 e.stopPropagation();
-                 setDeleteConfirm(property.id);
-               }}
-               className="text-red-600"
-              >
-               <Trash2 className="h-4 w-4 mr-2" />
-               Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
-      </div>
-      <div className="p-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${property.id}`)}>
-        <h3 className="font-semibold text-slate-900 truncate">
-          {property.name || property.address}
-        </h3>
-        <div className="flex items-center gap-1 text-sm text-slate-500 mt-1">
-          <MapPin className="h-3.5 w-3.5" />
-          {property.city}, {property.state}
+        <div className="p-4 flex-1 flex flex-col">
+          <div className="cursor-pointer hover:opacity-80 transition-opacity mb-3" onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${property.id}`)}>
+            <h3 className="font-semibold text-slate-900 truncate">
+              {property.name || property.address}
+            </h3>
+            <div className="flex items-center gap-1 text-sm text-slate-500 mt-1">
+              <MapPin className="h-3.5 w-3.5" />
+              {property.city}, {property.state}
+            </div>
+            <div className="flex items-center gap-1 text-sm text-slate-500 mt-1">
+              <User className="h-3.5 w-3.5" />
+              {getClientName(property.client_id)}
+            </div>
+            <div className="flex items-center gap-1 text-sm text-slate-500 mt-1">
+              <Calendar className="h-3.5 w-3.5" />
+              <span className="capitalize">{property.inspection_frequency?.replace('_', '-') || 'Weekly'}</span>
+            </div>
+          </div>
+
+          {/* Visit Status Badges */}
+          <div className="flex gap-2 flex-wrap pt-3 border-t border-slate-100">
+            {statuses.open > 0 && (
+              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium">
+                <Clock className="h-3 w-3" />
+                {statuses.open} Open
+              </div>
+            )}
+            {statuses.pending > 0 && (
+              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-yellow-50 text-yellow-700 text-xs font-medium">
+                <AlertCircle className="h-3 w-3" />
+                {statuses.pending} Pending
+              </div>
+            )}
+            {statuses.completed > 0 && (
+              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-green-50 text-green-700 text-xs font-medium">
+                <CheckCircle2 className="h-3 w-3" />
+                {statuses.completed} Completed
+              </div>
+            )}
+            {statuses.open === 0 && statuses.pending === 0 && statuses.completed === 0 && (
+              <div className="text-xs text-slate-400 py-1">No visits</div>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-1 text-sm text-slate-500 mt-1">
-          <User className="h-3.5 w-3.5" />
-          {getClientName(property.client_id)}
-        </div>
-        <div className="flex items-center gap-1 text-sm text-slate-500 mt-1">
-          <Calendar className="h-3.5 w-3.5" />
-          <span className="capitalize">{property.inspection_frequency?.replace('_', '-') || 'Weekly'}</span>
-        </div>
-      </div>
-    </Card>
-  );
+      </Card>
+    );
+  };
 
   return (
     <div>
