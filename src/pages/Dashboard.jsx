@@ -81,9 +81,13 @@ export default function Dashboard() {
       const weekStart = format(startOfWeek(new Date()), 'yyyy-MM-dd');
       const weekEnd = format(endOfWeek(new Date()), 'yyyy-MM-dd');
 
+      // Filter inspections based on user role
+      const isFieldInspector = members[0].role === 'field_inspector' || members[0].role === 'technician';
       const weekInspections = inspections.filter(i => {
         const date = i.scheduled_date;
-        return date >= weekStart && date <= weekEnd;
+        const matchesDate = date >= weekStart && date <= weekEnd;
+        const matchesAssignment = !isFieldInspector || i.assigned_to === currentUser.email;
+        return matchesDate && matchesAssignment;
       });
 
       const completedThisWeek = weekInspections.filter(i => i.status === 'completed').length;
