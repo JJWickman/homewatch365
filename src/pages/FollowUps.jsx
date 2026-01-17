@@ -363,10 +363,7 @@ export default function FollowUps() {
                   <div className="flex items-start gap-4">
                     <Checkbox
                       checked={item.status === 'completed'}
-                      onCheckedChange={(e) => {
-                        e.stopPropagation();
-                        toggleComplete(item);
-                      }}
+                      onCheckedChange={() => toggleComplete(item)}
                       onClick={(e) => e.stopPropagation()}
                       className="mt-1"
                     />
