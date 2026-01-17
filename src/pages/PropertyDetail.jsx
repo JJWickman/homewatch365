@@ -474,9 +474,9 @@ export default function PropertyDetail() {
                   <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{completedInspections}</p>
-                  <p className="text-sm text-slate-500">Completed</p>
-                </div>
+                   <p className="text-2xl font-bold">{completedVisits}</p>
+                   <p className="text-sm text-slate-500">Completed</p>
+                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-lg bg-amber-50 flex items-center justify-center">
