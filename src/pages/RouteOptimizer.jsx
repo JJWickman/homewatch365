@@ -34,8 +34,18 @@ export default function RouteOptimizer() {
   useEffect(() => {
     if (companyId && selectedUser) {
       loadVisits();
+      loadSelectedUserStartLocation();
     }
   }, [selectedDate, selectedUser, companyId]);
+
+  const loadSelectedUserStartLocation = async () => {
+    const selectedUserMember = teamMembers.find(m => m.user_email === selectedUser);
+    if (selectedUserMember?.start_location) {
+      setStartAddress(selectedUserMember.start_location);
+    } else if (company?.address) {
+      setStartAddress(`${company.address}, ${company.city}, ${company.state}`);
+    }
+  };
 
   const loadInitialData = async () => {
     try {
