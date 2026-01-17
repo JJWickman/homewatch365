@@ -91,6 +91,7 @@ export default function Dashboard() {
 
       const completedThisWeek = weekVisits.filter(v => v.status === 'completed').length;
       const highPriorityVisits = visits.filter(v => 
+        v.visit_type === 'followup' &&
         (v.status === 'open' || v.status === 'scheduled') && 
         (v.priority === 'high' || v.priority === 'urgent')
       ).length;
