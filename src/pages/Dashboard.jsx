@@ -14,7 +14,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import StatsCard from '@/components/shared/StatsCard';
 import StatusBadge from '@/components/shared/StatusBadge';
-import StatsDetailModal from '@/components/dashboard/StatsDetailModal';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
