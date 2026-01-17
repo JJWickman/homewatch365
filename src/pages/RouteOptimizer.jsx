@@ -289,26 +289,24 @@ Return the optimized order with estimated times and any weather/traffic consider
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Route Settings</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs">Date</Label>
-                <Input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="h-9"
-                />
-              </div>
-              <div>
-                <Label className="text-xs">Starting Location</Label>
-                <Input
-                  value={startAddress}
-                  onChange={(e) => setStartAddress(e.target.value)}
-                  placeholder="Enter address"
-                  className="h-9"
-                />
-              </div>
+          <CardContent className="space-y-3">
+            <div>
+              <Label className="text-xs">Date</Label>
+              <Input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="h-9"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Starting Location</Label>
+              <Input
+                value={startAddress}
+                onChange={(e) => setStartAddress(e.target.value)}
+                placeholder="Enter address"
+                className="h-9"
+              />
             </div>
           </CardContent>
         </Card>
