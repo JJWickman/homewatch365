@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Trash2, Edit, AlertCircle, Loader2, Palette, Upload, Building, Save } from 'lucide-react';
+import { Plus, Trash2, Edit, AlertCircle, Loader2, Palette, Upload, Building, Save, Trash } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+<parameter name="import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -47,6 +48,7 @@ export default function AdminConsole() {
   const [saving, setSaving] = useState(false);
   const [extractingBranding, setExtractingBranding] = useState(false);
   const [extractWebsiteUrl, setExtractWebsiteUrl] = useState('');
+  const [selectedTypes, setSelectedTypes] = useState([]);
   const [companyForm, setCompanyForm] = useState({
     name: '',
     primary_color: '#1e3a5f',
@@ -163,6 +165,33 @@ export default function AdminConsole() {
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedTypes.length === 0) return;
+    if (window.confirm(`Are you sure you want to delete ${selectedTypes.length} contractor type(s)?`)) {
+      try {
+        await Promise.all(selectedTypes.map(id => base44.entities.CustomContractorType.delete(id)));
+        setSelectedTypes([]);
+        await loadData();
+      } catch (error) {
+        console.error('Error deleting contractor types:', error);
+      }
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedTypes.length === customTypes.length) {
+      setSelectedTypes([]);
+    } else {
+      setSelectedTypes(customTypes.map(t => t.id));
+    }
+  };
+
+  const toggleSelectType = (id) => {
+    setSelectedTypes(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -269,13 +298,25 @@ export default function AdminConsole() {
                   <CardTitle>Contractor Types</CardTitle>
                   <CardDescription>Manage custom contractor types for your company</CardDescription>
                 </div>
-                <Button 
-                  onClick={handleAddType}
-                  className="bg-slate-900 hover:bg-slate-800"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Type
-                </Button>
+                <div className="flex items-center gap-2">
+                  {selectedTypes.length > 0 && (
+                    <Button 
+                      onClick={handleBulkDelete}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      <Trash className="h-4 w-4 mr-2" />
+                      Delete ({selectedTypes.length})
+                    </Button>
+                  )}
+                  <Button 
+                    onClick={handleAddType}
+                    className="bg-slate-900 hover:bg-slate-800"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Type
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -295,10 +336,25 @@ export default function AdminConsole() {
                 {/* Custom Types */}
                 {customTypes.length > 0 ? (
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Custom Types ({customTypes.length})</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-slate-700">Custom Types ({customTypes.length})</p>
+                      {customTypes.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            checked={selectedTypes.length === customTypes.length}
+                            onCheckedChange={toggleSelectAll}
+                          />
+                          <span className="text-xs text-slate-500">Select All</span>
+                        </div>
+                      )}
+                    </div>
                     <div className="grid gap-2">
                       {customTypes.map(type => (
-                        <div key={type.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50 transition-colors">
+                        <div key={type.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-slate-50 transition-colors">
+                          <Checkbox
+                            checked={selectedTypes.includes(type.id)}
+                            onCheckedChange={() => toggleSelectType(type.id)}
+                          />
                           <div className="flex-1">
                             <p className="font-medium text-sm">{type.name}</p>
                             {type.description && (
