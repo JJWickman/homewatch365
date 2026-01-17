@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Loader2, MapPin } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 export default function RouteMap({ stops = [], startAddress, isOptimized }) {
   const mapRef = useRef(null);
@@ -28,9 +29,8 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
       }
 
       // Get API key from backend
-      const apiKey = await fetch('/api/functions/googleMapsConfig')
-        .then(res => res.json())
-        .then(data => data.apiKey);
+      const response = await base44.functions.invoke('googleMapsConfig');
+      const apiKey = response.data.apiKey;
       
       if (!apiKey) {
         throw new Error('Google Maps API key not found');
