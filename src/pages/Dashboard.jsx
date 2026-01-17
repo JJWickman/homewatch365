@@ -98,13 +98,6 @@ export default function Dashboard() {
         issuesFound
       });
 
-      setAllData({
-        clients,
-        properties,
-        inspections: weekInspections,
-        followUps
-      });
-
       const todayScheduled = inspections.filter(i => i.scheduled_date === today && i.status !== 'cancelled');
       
       // Enrich with property data
