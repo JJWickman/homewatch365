@@ -12,7 +12,7 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
   const [mapReady, setMapReady] = useState(false);
 
   const validStops = stops.filter(s => s.lat && s.lng);
-  const hasValidData = validStops.length > 0 && isOptimized;
+  const hasValidData = validStops.length > 0;
 
   useEffect(() => {
     if (mapInstanceRef.current && stops.length > 0) {
@@ -185,24 +185,19 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
         <div className="text-center text-slate-500">
           <MapPin className="h-12 w-12 mx-auto mb-3 opacity-50" />
           <p className="font-medium">Map will appear here</p>
-          <p className="text-sm">Select a user, date, and optimize the route first</p>
+          <p className="text-sm">Select a user and date to view visit locations</p>
         </div>
       </div>
     );
   }
 
   if (!mapReady && !loading && !error) {
+    loadGoogleMaps();
     return (
       <div className="w-full h-full flex items-center justify-center bg-slate-50 rounded-lg">
         <div className="text-center">
-          <MapPin className="h-12 w-12 mx-auto mb-3 text-slate-400" />
-          <p className="text-sm text-slate-600 mb-3">Ready to view your route on the map</p>
-          <button
-            onClick={loadGoogleMaps}
-            className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium"
-          >
-            Load Map
-          </button>
+          <Loader2 className="h-8 w-8 animate-spin text-slate-400 mx-auto mb-2" />
+          <p className="text-sm text-slate-500">Loading map...</p>
         </div>
       </div>
     );

@@ -250,7 +250,10 @@ export default function RouteOptimizer() {
               </CardTitle>
               <Button 
                 onClick={optimizeRoute} 
-                disabled={inspections.length === 0 || optimizing}
+                disabled={inspections.length === 0 || optimizing || !inspections.every(v => {
+                  const prop = getProperty(v.property_id);
+                  return prop?.latitude && prop?.longitude;
+                })}
                 className="bg-slate-900 hover:bg-slate-800"
               >
                 {optimizing ? (
