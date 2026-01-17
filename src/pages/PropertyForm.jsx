@@ -1366,6 +1366,7 @@ export default function PropertyForm() {
           });
         }}
         companyId={companyId}
+        currentProperty={propertyId ? { id: propertyId, ...formData } : null}
       />
 
       {/* Create Client Dialog */}
