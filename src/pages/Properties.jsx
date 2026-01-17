@@ -155,15 +155,15 @@ export default function Properties() {
                   Edit
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteConfirm(property.id);
-                  }}
-                  className="text-red-600"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       setDeleteConfirm(property.id);
+                     }}
+                     className="text-red-600"
+                   >
+                     <Trash2 className="h-4 w-4 mr-2" />
+                     Deactivate
+                   </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -287,14 +287,14 @@ export default function Properties() {
         </div>
       )}
 
-      {/* Delete Confirmation Dialog */}
+      {/* Deactivate Confirmation Dialog */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <Card className="w-full max-w-sm mx-4">
             <div className="p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-2">Delete Property?</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-2">Deactivate Property?</h2>
               <p className="text-sm text-slate-600 mb-6">
-                This property will be removed from your list. This action cannot be undone.
+                This property will be hidden from active views. All data and history will be preserved.
               </p>
               <div className="flex gap-3 justify-end">
                 <Button
@@ -309,7 +309,7 @@ export default function Properties() {
                   onClick={() => handleDeleteProperty(deleteConfirm)}
                   disabled={deleting}
                 >
-                  {deleting ? 'Deleting...' : 'Delete'}
+                  {deleting ? 'Deactivating...' : 'Deactivate'}
                 </Button>
               </div>
             </div>
