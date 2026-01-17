@@ -44,6 +44,7 @@ const PRICING_TIERS = [
       { name: '1 Admin User', included: true },
       { name: 'Team Collaboration', included: true },
       { name: 'Advanced Reporting', included: true },
+      { name: 'Route Optimization', included: true },
       { name: 'Contractor Management', included: false },
       { name: 'Marketing Tools', included: false },
     ],
@@ -342,7 +343,7 @@ export default function Pricing() {
                    <td className="py-3 px-4 text-sm">Route Optimization</td>
                    {PRICING_TIERS.map(tier => (
                      <td key={tier.id} className="text-center py-3 px-4">
-                       {tier.id === 'professional' || tier.id === 'enterprise' ? (
+                       {tier.id === 'growth' || tier.id === 'professional' || tier.id === 'enterprise' ? (
                          <Check className="h-5 w-5 text-green-600 mx-auto" />
                        ) : (
                          <X className="h-5 w-5 text-slate-300 mx-auto" />

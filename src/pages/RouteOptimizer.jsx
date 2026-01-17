@@ -179,8 +179,8 @@ export default function RouteOptimizer() {
     );
   }
 
-  // Check if user has Professional or Enterprise plan
-  const hasAccess = company?.subscription_plan === 'professional' || company?.subscription_plan === 'enterprise';
+  // Check if user has Growth, Professional, or Enterprise plan
+  const hasAccess = company?.subscription_plan === 'growth' || company?.subscription_plan === 'professional' || company?.subscription_plan === 'enterprise';
 
   if (!hasAccess) {
     return (
@@ -196,7 +196,7 @@ export default function RouteOptimizer() {
             <div className="text-center py-8">
               <h3 className="text-lg font-semibold text-amber-900 mb-2">Professional Plan Required</h3>
               <p className="text-sm text-amber-800 mb-4">
-                Route Optimization is available on Professional and Enterprise plans. Upgrade your subscription to unlock this feature.
+                Route Optimization is available on Growth, Professional, and Enterprise plans. Upgrade your subscription to unlock this feature.
               </p>
               <a href={createPageUrl('Pricing')} className="inline-block">
                 <Button className="bg-amber-600 hover:bg-amber-700">View Pricing Plans</Button>
