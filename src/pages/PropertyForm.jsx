@@ -1277,8 +1277,12 @@ export default function PropertyForm() {
                                    </DropdownMenuItem>
                                  );
                                })}
+                             </>
+                           )}
+                           {formData.contractors.length > 0 && (
+                             <>
                                <DropdownMenuSeparator />
-                               <div className="px-2 py-1.5 text-xs font-medium text-slate-600 text-red-600">Remove from Property</div>
+                               <div className="px-2 py-1.5 text-xs font-medium text-red-600">Remove Contractor</div>
                                {formData.contractors.map((contractorId) => {
                                  const existingContractor = contractors.find(c => c.id === contractorId);
                                  return (
