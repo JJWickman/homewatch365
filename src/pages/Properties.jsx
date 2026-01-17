@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
   Building2, Search, Plus, MapPin, User, 
-  MoreVertical, Edit, Trash2, Eye, Calendar
+  MoreVertical, Edit, Trash2, Eye, Calendar, CheckCircle2, Clock, AlertCircle
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
