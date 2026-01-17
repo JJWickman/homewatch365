@@ -55,11 +55,17 @@ export default function RouteOptimizer() {
 
         setProperties(propsData);
         setTeamMembers(teamData);
+        
+        // Set start location from selected user's settings
+        const selectedUserMember = teamData.find(m => m.user_email === user.email);
+        if (selectedUserMember?.start_location) {
+          setStartAddress(selectedUserMember.start_location);
+        } else if (companyData.length > 0 && companyData[0].address) {
+          setStartAddress(`${companyData[0].address}, ${companyData[0].city}, ${companyData[0].state}`);
+        }
+        
         if (companyData.length > 0) {
           setCompany(companyData[0]);
-          if (companyData[0].address) {
-            setStartAddress(`${companyData[0].address}, ${companyData[0].city}, ${companyData[0].state}`);
-          }
         }
       }
     } catch (error) {
