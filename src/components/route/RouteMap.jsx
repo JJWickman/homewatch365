@@ -199,7 +199,11 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
 
     // Draw route line if optimized
     if (isOptimized && validStops.length > 1) {
-      const routePath = validStops.map(stop => ({ lat: stop.lat, lng: stop.lng }));
+      const routePath = validStops.map(stop => {
+        const lat = parseFloat(stop.lat || stop.latitude);
+        const lng = parseFloat(stop.lng || stop.longitude);
+        return { lat, lng };
+      });
       
       polylineRef.current = new window.google.maps.Polyline({
         path: routePath,
