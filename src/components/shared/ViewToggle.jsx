@@ -26,7 +26,7 @@ export default function ViewToggle({ view, onViewChange, isMobile }) {
   }
 
   return (
-    <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
+    <div className="flex gap-1 bg-black rounded-lg p-1">
       <Button
         size="sm"
         variant={view === 'list' ? 'default' : 'ghost'}
