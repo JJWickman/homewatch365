@@ -258,5 +258,5 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
     );
   }
 
-  return <div ref={mapRef} className="w-full h-full rounded-lg" />;
+  return <div ref={mapRef} className="w-full h-full rounded-lg" style={{ minHeight: '500px' }} />;
 }
