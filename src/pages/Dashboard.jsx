@@ -189,7 +189,7 @@ export default function Dashboard() {
             iconBg="bg-emerald-50"
           />
         </Link>
-        <Link to={createPageUrl('Inspections')} className="cursor-pointer h-full">
+        <Link to={createPageUrl('Inspections') + '?filter=week'} className="cursor-pointer h-full">
           <StatsCard
             title="This Week"
             value={`${stats.completedThisWeek}/${stats.inspectionsThisWeek}`}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { format, parseISO, isToday, isTomorrow, isPast, addDays, addWeeks, addMonths } from 'date-fns';
+import { format, parseISO, isToday, isTomorrow, isPast, addDays, addWeeks, addMonths, startOfWeek, endOfWeek } from 'date-fns';
 import { 
   ClipboardCheck, Search, Plus, Building2, Calendar,
   Filter, Eye, Play, MoreVertical, User, MapPin, Clock
@@ -98,6 +98,11 @@ export default function Inspections() {
         setNewInspection(prev => ({ ...prev, property_id: propertyId }));
       }
       setShowNewDialog(true);
+    }
+    
+    // Check for filter parameter
+    if (params.get('filter') === 'week') {
+      // Filter will be applied in filteredVisits
     }
   }, []);
 
@@ -276,7 +281,13 @@ export default function Inspections() {
     const matchesAssigned = assignedFilter === 'all' || visit.assigned_to === assignedFilter;
     const matchesProperty = propertyFilter === 'all' || visit.property_id === propertyFilter;
     
-    return matchesSearch && matchesStatus && matchesVisitType && matchesAssigned && matchesProperty;
+    // Check for week filter from URL
+    const params = new URLSearchParams(window.location.search);
+    const weekStart = format(startOfWeek(new Date()), 'yyyy-MM-dd');
+    const weekEnd = format(endOfWeek(new Date()), 'yyyy-MM-dd');
+    const matchesWeek = params.get('filter') !== 'week' || (visit.scheduled_date >= weekStart && visit.scheduled_date <= weekEnd);
+    
+    return matchesSearch && matchesStatus && matchesVisitType && matchesAssigned && matchesProperty && matchesWeek;
   });
 
   const checkForScheduledInspection = () => {
