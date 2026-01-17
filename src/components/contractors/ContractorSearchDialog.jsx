@@ -118,17 +118,49 @@ export default function ContractorSearchDialog({
     onOpenChange(false);
   };
 
+  const handleAddManual = () => {
+    if (!manualForm.business_name || !manualForm.contractor_type) {
+      return;
+    }
+    onSelect(manualForm);
+    setManualForm({
+      business_name: '',
+      contact_name: '',
+      contractor_type: 'other',
+      email: '',
+      phone: '',
+      secondary_phone: '',
+      address: '',
+      city: '',
+      state: '',
+      zip: '',
+      license_number: '',
+      insurance_info: '',
+      hourly_rate: '',
+      notes: ''
+    });
+    setActiveTab('search');
+    onOpenChange(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Search for Contractors</DialogTitle>
+          <DialogTitle>Add Contractor</DialogTitle>
           <DialogDescription>
-            Search Google Business, Facebook, and Yelp for contractors near a property
+            Search for contractors or add one manually
           </DialogDescription>
         </DialogHeader>
 
-        {results.length === 0 ? (
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="search">Search</TabsTrigger>
+            <TabsTrigger value="manual">Add Manually</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="search" className="space-y-4">
+            {results.length === 0 ? (
           <div className="space-y-4">
             {/* Search Form */}
             <div className="grid gap-4 border-b pb-4">
