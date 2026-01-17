@@ -203,13 +203,13 @@ export default function Dashboard() {
             className="[&_p.text-2xl]:mt-10"
           />
         </Link>
-        <Link to={createPageUrl('Inspections')} className="cursor-pointer h-full">
+        <Link to={createPageUrl('FollowUps') + '?priority=high,urgent'} className="cursor-pointer h-full">
           <StatsCard
-            title="Pending Visits"
-            value={stats.pendingTasks}
-            icon={FileWarning}
-            iconColor="text-slate-600"
-            iconBg="bg-slate-100"
+            title="Urgent Issues"
+            value={stats.issuesFound}
+            icon={AlertTriangle}
+            iconColor="text-red-600"
+            iconBg="bg-red-50"
           />
         </Link>
       </div>
