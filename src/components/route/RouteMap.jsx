@@ -19,10 +19,10 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
   const hasValidData = validStops.length > 0;
 
   useEffect(() => {
-    if (!mapReady && hasValidData && !loading && !error && mapRef.current) {
+    if (mapRef.current && hasValidData && !mapReady && !loading) {
       loadGoogleMaps();
     }
-  }, [hasValidData, mapReady, stops]);
+  }, [hasValidData, mapReady, loading]);
 
   useEffect(() => {
     if (mapInstanceRef.current && stops.length > 0) {
