@@ -1260,7 +1260,7 @@ export default function PropertyForm() {
                            {formData.contractors.length > 0 && (
                              <>
                                <DropdownMenuSeparator />
-                               <div className="px-2 py-1.5 text-xs font-medium text-slate-600">Replace</div>
+                               <div className="px-2 py-1.5 text-xs font-medium text-slate-600">Replace Contractor</div>
                                {formData.contractors.map((contractorId) => {
                                  const existingContractor = contractors.find(c => c.id === contractorId);
                                  return (
@@ -1273,7 +1273,25 @@ export default function PropertyForm() {
                                      className="text-xs"
                                    >
                                      <ArrowRightLeft className="h-3 w-3 mr-2" />
-                                     {existingContractor?.business_name}
+                                     Replace {existingContractor?.business_name}
+                                   </DropdownMenuItem>
+                                 );
+                               })}
+                               <DropdownMenuSeparator />
+                               <div className="px-2 py-1.5 text-xs font-medium text-slate-600 text-red-600">Remove from Property</div>
+                               {formData.contractors.map((contractorId) => {
+                                 const existingContractor = contractors.find(c => c.id === contractorId);
+                                 return (
+                                   <DropdownMenuItem
+                                     key={`remove-${contractorId}`}
+                                     onClick={() => setFormData(prev => ({
+                                       ...prev,
+                                       contractors: prev.contractors.filter(id => id !== contractorId)
+                                     }))}
+                                     className="text-xs text-red-600"
+                                   >
+                                     <Trash2 className="h-3 w-3 mr-2" />
+                                     Remove {existingContractor?.business_name}
                                    </DropdownMenuItem>
                                  );
                                })}
