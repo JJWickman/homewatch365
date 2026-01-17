@@ -127,9 +127,14 @@ export default function TestGoogleMapsAPI() {
   };
 
   useEffect(() => {
-    loadGoogleMaps();
     loadProperties();
   }, []);
+
+  useEffect(() => {
+    if (result && !mapInstanceRef.current) {
+      loadGoogleMaps();
+    }
+  }, [result]);
 
   const loadProperties = async () => {
     try {
