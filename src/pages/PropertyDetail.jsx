@@ -598,22 +598,32 @@ export default function PropertyDetail() {
 
                   {/* Static Map */}
                   {property.latitude && property.longitude && (
-                   <div>
-                     <div className="flex items-center gap-2 mb-3">
-                       <MapPin className="h-4 w-4 text-slate-500" />
-                       <h4 className="text-sm font-medium text-slate-500">Location</h4>
-                     </div>
-                     <div className="rounded-lg overflow-hidden border border-slate-200">
-                       <img
-                         src={`https://maps.googleapis.com/maps/api/staticmap?center=${property.latitude},${property.longitude}&zoom=16&size=600x300&markers=color:red%7C${property.latitude},${property.longitude}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY || 'AIzaSyBPbLVxQ6d5dBkDX_5MHQ9dHJZECXX'}`}
-                         alt="Property Location"
-                         className="w-full h-64 object-cover"
-                       />
-                     </div>
-                     <p className="text-xs text-slate-500 mt-2">
-                       Use this map to verify you're at the correct location
-                     </p>
-                   </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <MapPin className="h-4 w-4 text-slate-500" />
+                        <h4 className="text-sm font-medium text-slate-500">Location</h4>
+                      </div>
+                      <div className="rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
+                        {loadingMap ? (
+                          <div className="w-full h-64 flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+                          </div>
+                        ) : mapUrl ? (
+                          <img
+                            src={mapUrl}
+                            alt="Property Location"
+                            className="w-full h-64 object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-64 flex items-center justify-center text-slate-400">
+                            Map unavailable
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-2">
+                        Use this map to verify you're at the correct location
+                      </p>
+                    </div>
                   )}
                   </CardContent>
                   </Card>
