@@ -216,6 +216,8 @@ export default function PropertyForm() {
             city: p.city || '',
             state: p.state || '',
             zip: p.zip || '',
+            latitude: p.latitude || null,
+            longitude: p.longitude || null,
             property_type: p.property_type || 'single_family',
             status: p.status || 'seasonal',
             square_feet: p.square_feet || '',
