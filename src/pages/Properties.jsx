@@ -27,6 +27,7 @@ import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
 import ViewToggle from '@/components/shared/ViewToggle';
 import { useViewMode } from '@/components/shared/useViewMode';
+import StaticRouteMap from '@/components/route/StaticRouteMap';
 
 export default function Properties() {
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ export default function Properties() {
   const [deleting, setDeleting] = useState(false);
   const [visits, setVisits] = useState([]);
   const [viewMode, setViewMode] = useViewMode('properties', 'large-tiles');
+  const [showMap, setShowMap] = useState(false);
 
   useEffect(() => {
     loadProperties();
@@ -258,9 +260,66 @@ export default function Properties() {
               <SelectItem value="for_sale">For Sale</SelectItem>
             </SelectContent>
           </Select>
-          <ViewToggle view={viewMode} onViewChange={setViewMode} isMobile={false} />
+          <div className="flex items-center gap-2">
+            <Button
+              variant={showMap ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowMap(!showMap)}
+              className={showMap ? "bg-slate-900 hover:bg-slate-800" : ""}
+            >
+              <MapPin className="h-4 w-4 mr-2" />
+              Map View
+            </Button>
+            <ViewToggle view={viewMode} onViewChange={setViewMode} isMobile={false} />
+          </div>
         </div>
       </Card>
+
+      {/* Map View */}
+      {showMap && filteredProperties.length > 0 && (
+        <div className="mb-6 space-y-4">
+          <StaticRouteMap 
+            stops={filteredProperties
+              .filter(p => p.latitude && p.longitude)
+              .map(p => ({
+                latitude: p.latitude,
+                longitude: p.longitude,
+                label: p.name?.substring(0, 1).toUpperCase() || 'P'
+              }))}
+          />
+          <Card className="p-4">
+            <h3 className="font-semibold text-slate-900 mb-3">Properties on Map</h3>
+            <div className="space-y-2">
+              {filteredProperties
+                .filter(p => p.latitude && p.longitude)
+                .map((property, index) => (
+                  <div 
+                    key={property.id}
+                    className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors"
+                    onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${property.id}`)}
+                  >
+                    <div className="h-8 w-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-sm font-medium">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-slate-900">{property.name || property.address}</p>
+                      <p className="text-sm text-slate-500">{property.city}, {property.state}</p>
+                    </div>
+                    <StatusBadge status={property.status} />
+                  </div>
+                ))}
+            </div>
+            {filteredProperties.filter(p => !p.latitude || !p.longitude).length > 0 && (
+              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <p className="text-sm text-amber-800">
+                  <strong>{filteredProperties.filter(p => !p.latitude || !p.longitude).length} properties</strong> are missing GPS coordinates and won't appear on the map. 
+                  Use Settings → Admin → Geocode All to fix this.
+                </p>
+              </div>
+            )}
+          </Card>
+        </div>
+      )}
 
       {/* Properties Grid / Empty State */}
       {properties.length === 0 && !loading ? (
