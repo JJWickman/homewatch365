@@ -71,7 +71,7 @@ export default function PropertyDetail() {
     }
   }, [property?.latitude, property?.longitude]);
 
-  const loadMapUrl = async (userLocation = null) => {
+  const loadMapUrl = async (userLocation = null, zoom = mapZoom) => {
     if (!property?.latitude || !property?.longitude) return;
     
     setLoadingMap(true);
@@ -95,7 +95,8 @@ export default function PropertyDetail() {
       }
 
       const response = await base44.functions.invoke('generateStaticMapUrl', {
-        stops
+        stops,
+        zoom
       });
       
       if (response.data?.mapUrl) {
@@ -105,6 +106,22 @@ export default function PropertyDetail() {
       console.error('Error loading map:', error);
     } finally {
       setLoadingMap(false);
+    }
+  };
+
+  const handleZoomIn = () => {
+    if (mapZoom < 20) {
+      const newZoom = mapZoom + 1;
+      setMapZoom(newZoom);
+      loadMapUrl(showingUserLocation ? { latitude: property.latitude, longitude: property.longitude } : null, newZoom);
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (mapZoom > 10) {
+      const newZoom = mapZoom - 1;
+      setMapZoom(newZoom);
+      loadMapUrl(showingUserLocation ? { latitude: property.latitude, longitude: property.longitude } : null, newZoom);
     }
   };
 
