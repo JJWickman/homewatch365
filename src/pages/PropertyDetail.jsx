@@ -659,9 +659,20 @@ export default function PropertyDetail() {
                           </div>
                         )}
                       </div>
-                      <p className="text-xs text-slate-500 mt-2">
-                        Use this map to verify you're at the correct location
-                      </p>
+                      <div className="flex items-center justify-between mt-3">
+                        <p className="text-xs text-slate-500">
+                          Use this map to verify you're at the correct location
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleShowMyLocation}
+                          disabled={gettingLocation || showingUserLocation}
+                        >
+                          <MapPin className="h-4 w-4 mr-2" />
+                          {gettingLocation ? 'Getting location...' : showingUserLocation ? 'Location shown' : 'Show My Location'}
+                        </Button>
+                      </div>
                     </div>
                   )}
                   </CardContent>
