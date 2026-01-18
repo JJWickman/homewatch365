@@ -61,6 +61,35 @@ export default function PropertyDetail() {
   }, []);
 
   useEffect(() => {
+    if (property?.latitude && property?.longitude) {
+      loadMapUrl();
+    }
+  }, [property?.latitude, property?.longitude]);
+
+  const loadMapUrl = async () => {
+    if (!property?.latitude || !property?.longitude) return;
+    
+    setLoadingMap(true);
+    try {
+      const response = await base44.functions.invoke('generateStaticMapUrl', {
+        stops: [{
+          latitude: property.latitude,
+          longitude: property.longitude,
+          order: 1
+        }]
+      });
+      
+      if (response.data?.mapUrl) {
+        setMapUrl(response.data.mapUrl);
+      }
+    } catch (error) {
+      console.error('Error loading map:', error);
+    } finally {
+      setLoadingMap(false);
+    }
+  };
+
+  useEffect(() => {
     if (!property?.id) return;
     const unsubscribe = base44.entities.Visit.subscribe((event) => {
       if (event.property_id === property.id) {
