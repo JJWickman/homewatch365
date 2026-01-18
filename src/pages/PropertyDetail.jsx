@@ -59,6 +59,7 @@ export default function PropertyDetail() {
   const [showingUserLocation, setShowingUserLocation] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
   const [isNearProperty, setIsNearProperty] = useState(false);
+  const [mapZoom, setMapZoom] = useState(17);
 
   useEffect(() => {
     loadProperty();
