@@ -211,11 +211,11 @@ export default function RouteOptimizer() {
   const exportToWaze = () => {
     if (!optimizedRoute?.optimized_stops || optimizedRoute.optimized_stops.length === 0) return;
     
-    const finalStartAddress = startType === 'home' ? startAddress : customStartAddress;
     const firstStop = optimizedRoute.optimized_stops[0];
     
-    // Navigate from start to first stop
-    const url = `https://waze.com/ul?ll=${firstStop.lat},${firstStop.lng}&navigate=yes&from=${encodeURIComponent(finalStartAddress)}`;
+    // Waze doesn't support custom start locations via URL - it uses current location
+    // Navigate to first stop
+    const url = `https://waze.com/ul?ll=${firstStop.lat},${firstStop.lng}&navigate=yes`;
     window.open(url, '_blank');
   };
 
