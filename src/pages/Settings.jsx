@@ -97,6 +97,7 @@ export default function Settings() {
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [stripePrices, setStripePrices] = useState({});
   const [loadingCheckout, setLoadingCheckout] = useState(false);
+  const [geocoding, setGeocoding] = useState(false);
 
   // Helper function to check if user is admin (backward compatible)
   const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'owner';
@@ -535,6 +536,30 @@ ${company.name}
     navigator.clipboard.writeText(getCalendarUrl());
     setCalendarUrlCopied(true);
     setTimeout(() => setCalendarUrlCopied(false), 2000);
+  };
+
+  const handleGeocodeAll = async () => {
+    if (!window.confirm('This will add GPS coordinates to all properties that are missing them. This may take a few minutes. Continue?')) {
+      return;
+    }
+
+    setGeocoding(true);
+    try {
+      const response = await base44.functions.invoke('geocodeAllProperties');
+      if (response.data.results) {
+        const { success, failed, total } = response.data.results;
+        if (failed > 0) {
+          alert(`Geocoding complete!\n${success} properties updated successfully\n${failed} properties failed (check console for details)`);
+        } else {
+          alert(`Successfully geocoded ${success} properties!`);
+        }
+      }
+    } catch (error) {
+      console.error('Error geocoding properties:', error);
+      alert('Failed to geocode properties. Please try again.');
+    } finally {
+      setGeocoding(false);
+    }
   };
 
   if (loading) {
@@ -1412,6 +1437,63 @@ ${company.name}
         </TabsContent>
 
         <TabsContent value="admin" className="space-y-6">
+          {/* Geocoding Tool */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Property Geocoding
+              </CardTitle>
+              <CardDescription>Add GPS coordinates to properties for maps and route optimization</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex gap-3">
+                  <AlertIcon className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-blue-900">What is geocoding?</p>
+                    <p className="text-blue-700 mt-1">Geocoding converts property addresses into GPS coordinates (latitude/longitude). This enables:</p>
+                    <ul className="list-disc list-inside mt-2 space-y-1 text-blue-700">
+                      <li>Property location maps</li>
+                      <li>Route optimization for field inspectors</li>
+                      <li>Distance calculations and proximity features</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <p className="font-medium">Geocode All Properties</p>
+                  <p className="text-sm text-slate-500 mt-1">
+                    Automatically add GPS coordinates to all properties that don't have them
+                  </p>
+                </div>
+                <Button
+                  onClick={handleGeocodeAll}
+                  disabled={geocoding}
+                  className="bg-slate-900 hover:bg-slate-800"
+                >
+                  {geocoding ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Geocoding...
+                    </>
+                  ) : (
+                    <>
+                      <MapPin className="h-4 w-4 mr-2" />
+                      Geocode All
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              <p className="text-xs text-slate-500">
+                Note: New properties are automatically geocoded when created. This tool is for existing properties that may be missing coordinates.
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Branding */}
           <Card>
             <CardHeader>
