@@ -53,6 +53,8 @@ export default function PropertyDetail() {
   const [newContact, setNewContact] = useState({ name: '', relationship: '', phone: '', email: '' });
   const [savingTask, setSavingTask] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
+  const [mapUrl, setMapUrl] = useState(null);
+  const [loadingMap, setLoadingMap] = useState(false);
 
   useEffect(() => {
     loadProperty();
