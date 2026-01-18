@@ -55,6 +55,8 @@ export default function PropertyDetail() {
   const [savingContact, setSavingContact] = useState(false);
   const [mapUrl, setMapUrl] = useState(null);
   const [loadingMap, setLoadingMap] = useState(false);
+  const [showingUserLocation, setShowingUserLocation] = useState(false);
+  const [gettingLocation, setGettingLocation] = useState(false);
 
   useEffect(() => {
     loadProperty();
