@@ -17,7 +17,7 @@ export default function StaticRouteMap({ stops = [], startAddress }) {
     if (validStops.length > 0) {
       generateStaticMapUrl();
     }
-  }, [validStops.length, JSON.stringify(validStops)]);
+  }, [validStops.length]);
 
   const generateStaticMapUrl = async () => {
     setLoading(true);
@@ -45,12 +45,12 @@ export default function StaticRouteMap({ stops = [], startAddress }) {
     );
   }
 
-  if (loading) {
+  if (loading && !mapUrl) {
     return (
       <div className="h-full flex items-center justify-center bg-slate-50 rounded-lg">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-slate-400 mx-auto mb-2" />
-          <p className="text-sm text-slate-500">Loading map...</p>
+          <p className="text-sm text-slate-500">Initializing map...</p>
         </div>
       </div>
     );
