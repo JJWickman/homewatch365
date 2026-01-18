@@ -694,17 +694,40 @@ export default function PropertyDetail() {
                         <MapPin className="h-4 w-4 text-slate-500" />
                         <h4 className="text-sm font-medium text-slate-500">Location</h4>
                       </div>
-                      <div className="rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
+                      <div className="rounded-lg overflow-hidden border border-slate-200 bg-slate-50 relative">
                         {loadingMap ? (
                           <div className="w-full h-64 flex items-center justify-center">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
                           </div>
                         ) : mapUrl ? (
-                          <img
-                            src={mapUrl}
-                            alt="Property Location"
-                            className="w-full h-64 object-cover"
-                          />
+                          <>
+                            <img
+                              src={mapUrl}
+                              alt="Property Location"
+                              className="w-full h-64 object-cover"
+                            />
+                            <div className="absolute top-3 right-3 flex flex-col gap-1 bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={handleZoomIn}
+                                disabled={mapZoom >= 20 || loadingMap}
+                                className="h-8 w-8 rounded-none hover:bg-slate-100"
+                              >
+                                <ZoomIn className="h-4 w-4" />
+                              </Button>
+                              <div className="h-px bg-slate-200" />
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={handleZoomOut}
+                                disabled={mapZoom <= 10 || loadingMap}
+                                className="h-8 w-8 rounded-none hover:bg-slate-100"
+                              >
+                                <ZoomOut className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </>
                         ) : (
                           <div className="w-full h-64 flex items-center justify-center text-slate-400">
                             Map unavailable
