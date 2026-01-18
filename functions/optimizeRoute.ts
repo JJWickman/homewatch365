@@ -16,50 +16,21 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Google Maps API key not configured' }, { status: 500 });
     }
 
-    // Build shipments for Route Optimization API
-    const shipments = stops.map((stop, index) => ({
-      deliveries: [{
-        arrivalLocation: {
-          latitude: stop.lat,
-          longitude: stop.lng
-        },
-        duration: '600s' // 10 minutes per stop
-      }],
-      label: stop.name
-    }));
+    // Build waypoints for Directions API with optimization
+    const waypoints = stops.map(stop => `${stop.lat},${stop.lng}`).join('|');
 
-    // Call Google Route Optimization API
-    const response = await fetch('https://routeoptimization.googleapis.com/v1:optimizeTours', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': apiKey
-      },
-      body: JSON.stringify({
-        parent: 'projects/YOUR_PROJECT',
-        model: {
-          shipments,
-          vehicles: [{
-            startLocation: {
-              latitude: null, // Will be geocoded from address
-              longitude: null
-            },
-            endLocation: {
-              latitude: null,
-              longitude: null
-            },
-            startAddress: startAddress,
-            endAddress: startAddress
-          }],
-          globalStartTime: new Date().toISOString(),
-          globalEndTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-        }
-      })
-    });
+    // Call Google Directions API with waypoint optimization
+    const url = new URL('https://maps.googleapis.com/maps/api/directions/json');
+    url.searchParams.set('origin', startAddress);
+    url.searchParams.set('destination', startAddress);
+    url.searchParams.set('waypoints', `optimize:true|${waypoints}`);
+    url.searchParams.set('key', apiKey);
+
+    const response = await fetch(url.toString());
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Route Optimization API error:', errorText);
+      console.error('Directions API error:', errorText);
       return Response.json({ 
         error: 'Failed to optimize route', 
         details: errorText 
@@ -68,32 +39,35 @@ Deno.serve(async (req) => {
 
     const data = await response.json();
     
-    if (!data.routes || data.routes.length === 0) {
-      return Response.json({ error: 'No optimized route found' }, { status: 404 });
+    if (data.status !== 'OK' || !data.routes || data.routes.length === 0) {
+      console.error('API Response:', data);
+      return Response.json({ 
+        error: 'No route found', 
+        details: data.error_message || data.status 
+      }, { status: 404 });
     }
 
-    const optimizedRoute = data.routes[0];
-    const visits = optimizedRoute.visits || [];
+    const route = data.routes[0];
+    const waypointOrder = route.waypoint_order || [];
     
-    // Build optimized stops from visits
+    // Build optimized stops using waypoint order
     const optimizedStops = [];
     let cumulativeTime = 0;
     
-    visits.forEach((visit, index) => {
-      if (!visit.shipmentIndex && visit.shipmentIndex !== 0) return;
+    waypointOrder.forEach((waypointIndex, order) => {
+      const stop = stops[waypointIndex];
+      const leg = route.legs[order];
       
-      const stop = stops[visit.shipmentIndex];
-      const startTimeSecs = parseInt(visit.startTime?.seconds || 0);
-      const eta = new Date(startTimeSecs * 1000);
+      const driveMinutes = Math.round(leg.duration.value / 60);
+      const distanceMiles = (leg.distance.value / 1609.34).toFixed(1);
       
-      // Calculate drive time from transitions
-      const transition = optimizedRoute.transitions?.[index];
-      const driveMinutes = transition ? Math.round(parseInt(transition.travelDuration?.replace('s', '') || 0) / 60) : 0;
-      const distanceMiles = transition ? (transition.travelDistanceMeters / 1609.34).toFixed(1) : '0.0';
+      cumulativeTime += driveMinutes;
+      const eta = new Date();
+      eta.setMinutes(eta.getMinutes() + cumulativeTime);
       
       optimizedStops.push({
-        original_index: visit.shipmentIndex + 1,
-        order: index + 1,
+        original_index: waypointIndex + 1,
+        order: order + 1,
         name: stop.name,
         address: stop.address,
         lat: stop.lat,
@@ -105,17 +79,17 @@ Deno.serve(async (req) => {
       });
     });
 
-    // Calculate total metrics
-    const metrics = optimizedRoute.metrics || {};
-    const totalDuration = Math.round(parseInt(metrics.totalDuration?.replace('s', '') || 0) / 60);
-    const totalDistance = ((metrics.travelDistanceMeters || 0) / 1609.34).toFixed(1);
+    // Calculate totals
+    const totalDuration = route.legs.reduce((sum, leg) => sum + Math.round(leg.duration.value / 60), 0);
+    const totalDistance = route.legs.reduce((sum, leg) => sum + leg.distance.value, 0) / 1609.34;
 
     return Response.json({
       optimized_stops: optimizedStops,
-      total_distance_miles: parseFloat(totalDistance),
+      total_distance_miles: parseFloat(totalDistance.toFixed(1)),
       total_drive_time_minutes: totalDuration,
-      traffic_notes: 'Route optimized for efficiency',
-      recommendations: 'Follow the optimized order for best results'
+      polyline: route.overview_polyline?.points,
+      traffic_notes: 'Route optimized for shortest distance',
+      recommendations: 'Follow the optimized order for best efficiency'
     });
 
   } catch (error) {
