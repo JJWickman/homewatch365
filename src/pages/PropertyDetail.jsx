@@ -7,7 +7,7 @@ import {
   Building2, MapPin, User, Key, Wifi, Phone, 
   Edit, ClipboardCheck, Calendar, Clock, 
   AlertTriangle, CheckCircle2, FileText, Upload, Image, 
-  AlertCircle, Circle, Plus
+  AlertCircle, Circle, Plus, ZoomIn, ZoomOut
 } from 'lucide-react';
 import {
   Select,
