@@ -26,8 +26,7 @@ import PageHeader from '@/components/shared/PageHeader';
 
 export default function Schedule() {
   const navigate = useNavigate();
-  const [inspections, setInspections] = useState([]);
-  const [followUps, setFollowUps] = useState([]);
+  const [visits, setVisits] = useState([]);
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -51,15 +50,13 @@ export default function Schedule() {
         const cId = members[0].company_id;
         setCompanyId(cId);
         
-        const [inspectionsData, followUpsData, propertiesData, staffData] = await Promise.all([
-          base44.entities.Inspection.filter({ company_id: cId }),
-          base44.entities.FollowUp.filter({ company_id: cId }),
+        const [visitsData, propertiesData, staffData] = await Promise.all([
+          base44.entities.Visit.filter({ company_id: cId }),
           base44.entities.Property.filter({ company_id: cId }),
           base44.entities.CompanyMember.filter({ company_id: cId, is_active: true })
         ]);
         
-        setInspections(inspectionsData);
-        setFollowUps(followUpsData);
+        setVisits(visitsData);
         setProperties(propertiesData);
         setStaffMembers(staffData);
       }
@@ -99,18 +96,15 @@ export default function Schedule() {
 
   const getItemsForDate = (date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
-    let dayInspections = inspections.filter(i => i.scheduled_date === dateStr && i.status !== 'cancelled');
-    let dayFollowUps = followUps.filter(f => f.due_date === dateStr && f.status !== 'completed' && f.status !== 'cancelled');
+    let dayVisits = visits.filter(v => v.scheduled_date === dateStr && v.status !== 'cancelled');
     
     if (selectedUser === 'my' && userEmail) {
-      dayInspections = dayInspections.filter(i => i.assigned_to === userEmail);
-      dayFollowUps = dayFollowUps.filter(f => f.assigned_to === userEmail);
+      dayVisits = dayVisits.filter(v => v.assigned_to === userEmail);
     } else if (selectedUser !== 'all') {
-      dayInspections = dayInspections.filter(i => i.assigned_to === selectedUser);
-      dayFollowUps = dayFollowUps.filter(f => f.assigned_to === selectedUser);
+      dayVisits = dayVisits.filter(v => v.assigned_to === selectedUser);
     }
     
-    return { inspections: dayInspections, followUps: dayFollowUps };
+    return dayVisits;
   };
 
   const navigatePrev = () => {
@@ -130,7 +124,7 @@ export default function Schedule() {
   };
 
   const DayCard = ({ date, compact = false }) => {
-    const { inspections: dayInspections, followUps: dayFollowUps } = getItemsForDate(date);
+    const dayVisits = getItemsForDate(date);
     const isCurrentDay = isToday(date);
     
     return (
@@ -146,42 +140,36 @@ export default function Schedule() {
           </p>
         </div>
         <div className="p-1 space-y-1 max-h-[200px] overflow-y-auto">
-          {dayInspections.map((inspection) => {
-            const property = getProperty(inspection.property_id);
+          {dayVisits.map((visit) => {
+            const property = getProperty(visit.property_id);
+            const isInspection = visit.visit_type === 'inspection';
+            const isFollowUp = visit.visit_type === 'followup';
+            
             return (
               <Link
-                key={inspection.id}
-                to={createPageUrl('InspectionDetail') + `?id=${inspection.id}`}
+                key={visit.id}
+                to={createPageUrl(isInspection ? 'InspectionDetail' : 'FollowUpDetail') + `?id=${visit.id}`}
                 className={`block p-1.5 rounded text-xs ${
-                  inspection.status === 'completed' 
+                  visit.status === 'completed' 
                     ? 'bg-emerald-100 text-emerald-800' 
-                    : inspection.status === 'in_progress'
+                    : visit.status === 'in_progress'
                       ? 'bg-amber-100 text-amber-800'
-                      : 'bg-blue-100 text-blue-800'
+                      : isFollowUp && visit.priority === 'urgent'
+                        ? 'bg-red-100 text-red-800'
+                        : isFollowUp
+                          ? 'bg-purple-100 text-purple-800'
+                          : 'bg-blue-100 text-blue-800'
                 } hover:opacity-80 transition-opacity`}
               >
-                <div className="font-medium truncate">{property?.name || property?.address?.slice(0, 15)}</div>
-                {inspection.scheduled_time && (
-                  <div className="text-[10px] opacity-75">{inspection.scheduled_time}</div>
+                <div className="font-medium truncate">
+                  {isInspection ? (property?.name || property?.address?.slice(0, 15)) : visit.title}
+                </div>
+                {visit.scheduled_time && (
+                  <div className="text-[10px] opacity-75">{visit.scheduled_time}</div>
                 )}
               </Link>
             );
           })}
-          {dayFollowUps.map((followUp) => (
-            <Link
-              key={followUp.id}
-              to={createPageUrl('FollowUpDetail') + `?id=${followUp.id}`}
-              className={`block p-1.5 rounded text-xs ${
-                followUp.priority === 'urgent'
-                  ? 'bg-red-100 text-red-800'
-                  : followUp.priority === 'high'
-                    ? 'bg-amber-100 text-amber-800'
-                    : 'bg-purple-100 text-purple-800'
-              } hover:opacity-80 transition-opacity`}
-            >
-              <div className="font-medium truncate">{followUp.title}</div>
-            </Link>
-          ))}
         </div>
       </div>
     );
@@ -289,38 +277,32 @@ export default function Schedule() {
                     <span className="text-sm">{format(date, 'd')}</span>
                   </div>
                   <div className="px-1 space-y-0.5">
-                    {getItemsForDate(date).inspections.slice(0, 2).map((inspection) => {
-                       const property = getProperty(inspection.property_id);
+                    {getItemsForDate(date).slice(0, 3).map((visit) => {
+                       const property = getProperty(visit.property_id);
+                       const isInspection = visit.visit_type === 'inspection';
+                       const isFollowUp = visit.visit_type === 'followup';
+                       
                        return (
                          <Link
-                           key={inspection.id}
-                           to={createPageUrl('InspectionDetail') + `?id=${inspection.id}`}
+                           key={visit.id}
+                           to={createPageUrl(isInspection ? 'InspectionDetail' : 'FollowUpDetail') + `?id=${visit.id}`}
                            className={`block px-1 py-0.5 rounded text-[10px] truncate ${
-                             inspection.status === 'completed' 
+                             visit.status === 'completed' 
                                ? 'bg-emerald-100 text-emerald-800' 
-                               : 'bg-blue-100 text-blue-800'
+                               : isFollowUp && visit.priority === 'urgent'
+                                 ? 'bg-red-100 text-red-800'
+                                 : isFollowUp
+                                   ? 'bg-purple-100 text-purple-800'
+                                   : 'bg-blue-100 text-blue-800'
                            }`}
                          >
-                           {property?.name || property?.address?.slice(0, 10)}
+                           {isInspection ? (property?.name || property?.address?.slice(0, 10)) : visit.title?.slice(0, 10)}
                          </Link>
                        );
                      })}
-                     {getItemsForDate(date).followUps.slice(0, 1).map((followUp) => (
-                       <Link
-                         key={followUp.id}
-                         to={createPageUrl('FollowUpDetail') + `?id=${followUp.id}`}
-                         className={`block px-1 py-0.5 rounded text-[10px] truncate ${
-                           followUp.priority === 'urgent'
-                             ? 'bg-red-100 text-red-800'
-                             : 'bg-purple-100 text-purple-800'
-                         }`}
-                       >
-                         {followUp.title.slice(0, 10)}
-                       </Link>
-                     ))}
-                     {(getItemsForDate(date).inspections.length + getItemsForDate(date).followUps.length) > 3 && (
+                     {getItemsForDate(date).length > 3 && (
                        <div className="text-[10px] text-slate-500 px-1">
-                         +{(getItemsForDate(date).inspections.length + getItemsForDate(date).followUps.length) - 3} more
+                         +{getItemsForDate(date).length - 3} more
                        </div>
                      )}
                   </div>
@@ -335,7 +317,7 @@ export default function Schedule() {
        <div className="flex flex-wrap gap-4 mt-4 text-sm">
          <div className="flex items-center gap-2">
            <div className="h-3 w-3 rounded bg-blue-100 border border-blue-200" />
-           <span className="text-slate-600">Scheduled Inspection</span>
+           <span className="text-slate-600">Scheduled Visit</span>
          </div>
          <div className="flex items-center gap-2">
            <div className="h-3 w-3 rounded bg-amber-100 border border-amber-200" />
@@ -348,6 +330,10 @@ export default function Schedule() {
          <div className="flex items-center gap-2">
            <div className="h-3 w-3 rounded bg-purple-100 border border-purple-200" />
            <span className="text-slate-600">Follow-Up</span>
+         </div>
+         <div className="flex items-center gap-2">
+           <div className="h-3 w-3 rounded bg-red-100 border border-red-200" />
+           <span className="text-slate-600">Urgent</span>
          </div>
        </div>
     </div>
