@@ -20,9 +20,12 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
 
   useEffect(() => {
     if (mapRef.current && hasValidData && !mapReady && !loading) {
-      loadGoogleMaps();
+      const timer = setTimeout(() => {
+        loadGoogleMaps();
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [hasValidData, mapReady, loading]);
+  }, [hasValidData]);
 
   useEffect(() => {
     if (mapInstanceRef.current && stops.length > 0) {
@@ -53,13 +56,18 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
       const existingScript = document.querySelector(`script[src*="maps.googleapis.com"]`);
       if (existingScript) {
         // Script exists but library may not be loaded yet
+        let attempts = 0;
         const checkInterval = setInterval(() => {
+          attempts++;
           if (window.google?.maps) {
             clearInterval(checkInterval);
             setTimeout(initializeMap, 100);
+          } else if (attempts > 50) {
+            clearInterval(checkInterval);
+            setError('Map took too long to load');
+            setLoading(false);
           }
         }, 100);
-        setLoading(false);
         return;
       }
       
@@ -242,16 +250,7 @@ export default function RouteMap({ stops = [], startAddress, isOptimized }) {
     );
   }
 
-  if (!mapReady && !loading && !error) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-slate-50 rounded-lg">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-slate-400 mx-auto mb-2" />
-          <p className="text-sm text-slate-500">Initializing map...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   if (loading) {
     return (
