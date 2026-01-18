@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { stops } = await req.json();
+    const { stops, zoom: customZoom } = await req.json();
     
     if (!stops || stops.length === 0) {
       return Response.json({ error: 'No stops provided' }, { status: 400 });
