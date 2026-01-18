@@ -16,72 +16,83 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Google Maps API key not configured' }, { status: 500 });
     }
 
-    // Build waypoints for Routes API
-    const waypoints = stops.map(stop => ({
-      location: {
-        latLng: {
+    // Build shipments for Route Optimization API
+    const shipments = stops.map((stop, index) => ({
+      deliveries: [{
+        arrivalLocation: {
           latitude: stop.lat,
           longitude: stop.lng
-        }
-      }
+        },
+        duration: '600s' // 10 minutes per stop
+      }],
+      label: stop.name
     }));
 
-    // Call Google Maps Routes API (Compute Routes)
-    const response = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
+    // Call Google Route Optimization API
+    const response = await fetch('https://routeoptimization.googleapis.com/v1:optimizeTours', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Goog-Api-Key': apiKey,
-        'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline,routes.legs'
+        'X-Goog-Api-Key': apiKey
       },
       body: JSON.stringify({
-        origin: {
-          address: startAddress
-        },
-        destination: waypoints[waypoints.length - 1].location,
-        intermediates: waypoints.slice(0, -1),
-        travelMode: 'DRIVE',
-        routingPreference: 'TRAFFIC_AWARE',
-        computeAlternativeRoutes: false,
-        routeModifiers: {
-          avoidTolls: false,
-          avoidHighways: false,
-          avoidFerries: false
-        },
-        languageCode: 'en-US',
-        units: 'IMPERIAL'
+        parent: 'projects/YOUR_PROJECT',
+        model: {
+          shipments,
+          vehicles: [{
+            startLocation: {
+              latitude: null, // Will be geocoded from address
+              longitude: null
+            },
+            endLocation: {
+              latitude: null,
+              longitude: null
+            },
+            startAddress: startAddress,
+            endAddress: startAddress
+          }],
+          globalStartTime: new Date().toISOString(),
+          globalEndTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+        }
       })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Google Routes API error:', errorText);
-      return Response.json({ error: 'Failed to compute route' }, { status: 500 });
+      console.error('Route Optimization API error:', errorText);
+      return Response.json({ 
+        error: 'Failed to optimize route', 
+        details: errorText 
+      }, { status: 500 });
     }
 
     const data = await response.json();
     
     if (!data.routes || data.routes.length === 0) {
-      return Response.json({ error: 'No route found' }, { status: 404 });
+      return Response.json({ error: 'No optimized route found' }, { status: 404 });
     }
 
-    const route = data.routes[0];
+    const optimizedRoute = data.routes[0];
+    const visits = optimizedRoute.visits || [];
     
-    // Build optimized stops from route legs
+    // Build optimized stops from visits
     const optimizedStops = [];
     let cumulativeTime = 0;
     
-    route.legs.forEach((leg, index) => {
-      const stop = stops[index];
-      const driveMinutes = Math.round(parseInt(leg.duration?.replace('s', '') || 0) / 60);
-      const distanceMiles = (leg.distanceMeters / 1609.34).toFixed(1);
+    visits.forEach((visit, index) => {
+      if (!visit.shipmentIndex && visit.shipmentIndex !== 0) return;
       
-      cumulativeTime += driveMinutes;
-      const eta = new Date();
-      eta.setMinutes(eta.getMinutes() + cumulativeTime);
+      const stop = stops[visit.shipmentIndex];
+      const startTimeSecs = parseInt(visit.startTime?.seconds || 0);
+      const eta = new Date(startTimeSecs * 1000);
+      
+      // Calculate drive time from transitions
+      const transition = optimizedRoute.transitions?.[index];
+      const driveMinutes = transition ? Math.round(parseInt(transition.travelDuration?.replace('s', '') || 0) / 60) : 0;
+      const distanceMiles = transition ? (transition.travelDistanceMeters / 1609.34).toFixed(1) : '0.0';
       
       optimizedStops.push({
-        original_index: index + 1,
+        original_index: visit.shipmentIndex + 1,
         order: index + 1,
         name: stop.name,
         address: stop.address,
@@ -94,16 +105,17 @@ Deno.serve(async (req) => {
       });
     });
 
-    const totalDuration = Math.round(parseInt(route.duration?.replace('s', '') || 0) / 60);
-    const totalDistance = (route.distanceMeters / 1609.34).toFixed(1);
+    // Calculate total metrics
+    const metrics = optimizedRoute.metrics || {};
+    const totalDuration = Math.round(parseInt(metrics.totalDuration?.replace('s', '') || 0) / 60);
+    const totalDistance = ((metrics.travelDistanceMeters || 0) / 1609.34).toFixed(1);
 
     return Response.json({
       optimized_stops: optimizedStops,
       total_distance_miles: parseFloat(totalDistance),
       total_drive_time_minutes: totalDuration,
-      polyline: route.polyline?.encodedPolyline,
-      traffic_notes: 'Route optimized for current traffic conditions',
-      recommendations: 'Follow the route in order for best efficiency'
+      traffic_notes: 'Route optimized for efficiency',
+      recommendations: 'Follow the optimized order for best results'
     });
 
   } catch (error) {
