@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
-import { Route, Loader2, Clock, MapPin, Navigation } from 'lucide-react';
+import { Route, Loader2, Clock, MapPin, Navigation, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -313,7 +313,7 @@ export default function RouteOptimizer() {
               <div>
                 <CardTitle className="text-sm">Optimized Route</CardTitle>
                 <CardDescription className="text-xs mt-1">
-                  Best route based on location and distance
+                  Optimized based on scheduled times and locations
                 </CardDescription>
               </div>
               <div className="flex gap-2">
@@ -346,10 +346,10 @@ export default function RouteOptimizer() {
                     <p className="font-medium text-sm">{stop.name}</p>
                     <p className="text-xs text-slate-500">{stop.address}</p>
                   </div>
-                  {stop.estimated_arrival && (
-                    <div className="flex items-center gap-1 text-xs text-blue-600 shrink-0">
+                  {stop.scheduled_time && (
+                    <div className="flex items-center gap-1 text-xs text-slate-600 shrink-0">
                       <Clock className="h-3 w-3" />
-                      ETA: {stop.estimated_arrival}
+                      {stop.scheduled_time}
                     </div>
                   )}
                 </div>
@@ -366,14 +366,33 @@ export default function RouteOptimizer() {
             <CardTitle className="text-sm">Route Summary</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-4 gap-4">
+            <div className="grid md:grid-cols-3 gap-4">
               <div className="p-3 bg-slate-50 rounded-lg text-center">
                 <p className="text-2xl font-bold">{optimizedRoute.total_distance_miles || '—'}</p>
-                <p className="text-xs text-slate-500 mt-1">Miles</p>
+                <p className="text-xs text-slate-500 mt-1">Total Miles</p>
               </div>
               <div className="p-3 bg-slate-50 rounded-lg text-center">
-                <p className="text-2xl font-bold">{optimizedRoute.total_drive_time_minutes || '—'}</p>
-                <p className="text-xs text-slate-500 mt-1">Minutes</p>
+                <p className="text-2xl font-bold">{optimizedRoute.optimized_stops?.length || 0}</p>
+                <p className="text-xs text-slate-500 mt-1">Stops</p>
+              </div>
+              <div className={`p-3 rounded-lg text-center ${
+                optimizedRoute.fits_in_business_hours 
+                  ? 'bg-green-50 border border-green-200' 
+                  : 'bg-amber-50 border border-amber-200'
+              }`}>
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  {optimizedRoute.fits_in_business_hours ? (
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 text-amber-600" />
+                  )}
+                  <p className={`text-sm font-semibold ${
+                    optimizedRoute.fits_in_business_hours ? 'text-green-900' : 'text-amber-900'
+                  }`}>
+                    {optimizedRoute.fits_in_business_hours ? 'On Schedule' : 'Over Schedule'}
+                  </p>
+                </div>
+                <p className="text-xs text-slate-600">8am - 5pm window</p>
               </div>
             </div>
           </CardContent>
