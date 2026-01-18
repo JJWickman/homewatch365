@@ -48,8 +48,8 @@ Deno.serve(async (req) => {
     const centerLat = (Math.max(...lats) + Math.min(...lats)) / 2;
     const centerLng = (Math.max(...lngs) + Math.min(...lngs)) / 2;
 
-    // Use higher zoom for single location to show cross-roads
-    const zoom = validStops.length === 1 ? 17 : 11;
+    // Use custom zoom if provided, otherwise default based on number of stops
+    const zoom = customZoom || (validStops.length === 1 ? 17 : 11);
 
     // Build the static map URL
     const url = `https://maps.googleapis.com/maps/api/staticmap?` +
