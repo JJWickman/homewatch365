@@ -692,6 +692,16 @@ export default function PropertyDetail() {
                           </div>
                         )}
                       </div>
+                      
+                      {isNearProperty && showingUserLocation && (
+                        <Alert className="mt-3 bg-green-50 border-green-200">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          <AlertDescription className="text-green-900">
+                            <strong>You are in the right location!</strong> You are within 100 feet of the correct property location.
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
                       <div className="flex items-center justify-between mt-3">
                         <p className="text-xs text-slate-500">
                           Use this map to verify you're at the correct location
