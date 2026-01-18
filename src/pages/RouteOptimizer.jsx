@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
-import { Route, Loader2, Clock, MapPin } from 'lucide-react';
+import { Route, Loader2, Clock, MapPin, Navigation, ExternalLink } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,8 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import PageHeader from '@/components/shared/PageHeader';
-import RouteMap from '@/components/route/RouteMap';
-import StaticRouteMap from '@/components/route/StaticRouteMap';
 import { createPageUrl } from '@/utils';
 
 export default function RouteOptimizer() {
@@ -196,16 +194,25 @@ export default function RouteOptimizer() {
     );
   }
 
-  const mapStops = visits.map((visit, idx) => {
-    const property = getProperty(visit.property_id);
-    return {
-      order: idx + 1,
-      name: property?.name || property?.address,
-      address: `${property?.address}, ${property?.city}`,
-      lat: property?.latitude,
-      lng: property?.longitude
-    };
-  });
+  const exportToGoogleMaps = () => {
+    if (!optimizedRoute?.optimized_stops) return;
+    
+    const waypoints = optimizedRoute.optimized_stops
+      .map(stop => `${stop.lat},${stop.lng}`)
+      .join('/');
+    
+    const url = `https://www.google.com/maps/dir/${waypoints}`;
+    window.open(url, '_blank');
+  };
+
+  const exportToWaze = () => {
+    if (!optimizedRoute?.optimized_stops || optimizedRoute.optimized_stops.length === 0) return;
+    
+    // Waze only supports single destination, so navigate to first stop
+    const firstStop = optimizedRoute.optimized_stops[0];
+    const url = `https://waze.com/ul?ll=${firstStop.lat},${firstStop.lng}&navigate=yes`;
+    window.open(url, '_blank');
+  };
 
   return (
     <div>
@@ -253,108 +260,117 @@ export default function RouteOptimizer() {
         </Card>
       </div>
 
-      {/* Map and Route */}
+      {/* Scheduled Visits */}
       {visits.length > 0 && (
-        <>
-          {/* Map */}
-          <Card className="mb-6">
-            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        <Card className="mb-6">
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <CardTitle className="text-sm">Scheduled Visits ({visits.length})</CardTitle>
+            <Button
+              onClick={handleOptimizeRoute}
+              disabled={optimizing}
+              className="bg-slate-900 hover:bg-slate-800"
+              size="sm"
+            >
+              {optimizing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Optimizing...
+                </>
+              ) : (
+                <>
+                  <Route className="h-4 w-4 mr-2" />
+                  Optimize Route
+                </>
+              )}
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {visits.map((visit, idx) => {
+                const property = getProperty(visit.property_id);
+                return (
+                  <div key={idx} className="flex items-center gap-4 p-3 rounded-lg bg-slate-50 border">
+                    <div className="h-8 w-8 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-sm font-semibold shrink-0">
+                      {idx + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm">{property?.name || property?.address}</p>
+                      <p className="text-xs text-slate-500">{property?.address}, {property?.city}</p>
+                    </div>
+                    {visit.scheduled_time && (
+                      <div className="flex items-center gap-1 text-xs text-slate-600 shrink-0">
+                        <Clock className="h-3 w-3" />
+                        {visit.scheduled_time}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Optimized Route */}
+      {showOptimized && optimizedRoute && (
+        <Card className="mb-6 border-slate-900">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-sm">
-                  {showOptimized ? 'Optimized Route Map' : 'Properties Map'}
-                </CardTitle>
+                <CardTitle className="text-sm">Optimized Route</CardTitle>
                 <CardDescription className="text-xs mt-1">
-                  {showOptimized ? 'Best route based on location and time' : 'All properties for selected date'}
+                  Best route based on location and distance
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-2">
-                {showOptimized && (
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowOptimized(false)}
-                    size="sm"
-                  >
-                    Reset
-                  </Button>
-                )}
+              <div className="flex gap-2">
                 <Button
-                  onClick={handleOptimizeRoute}
-                  disabled={optimizing}
-                  className="bg-slate-900 hover:bg-slate-800"
+                  variant="outline"
+                  size="sm"
+                  onClick={exportToGoogleMaps}
+                >
+                  <Navigation className="h-4 w-4 mr-2" />
+                  Google Maps
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={exportToWaze}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Waze
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowOptimized(false)}
                   size="sm"
                 >
-                  {optimizing ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Optimizing...
-                    </>
-                  ) : (
-                    <>
-                      <Route className="h-4 w-4 mr-2" />
-                      Optimize Route
-                    </>
-                  )}
+                  Reset
                 </Button>
               </div>
-            </CardHeader>
-            <CardContent className="p-0 h-[400px]">
-              {showOptimized && optimizedRoute ? (
-                <RouteMap
-                  stops={optimizedRoute.optimized_stops}
-                  startAddress={startAddress}
-                  isOptimized={true}
-                />
-              ) : (
-                <StaticRouteMap
-                  stops={mapStops.filter(s => s.lat && s.lng)}
-                  startAddress={startAddress}
-                />
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Route List */}
-          <Card className="mb-6">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">
-                {showOptimized ? 'Optimized Route' : `Scheduled Visits (${visits.length})`}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {(showOptimized && optimizedRoute ? optimizedRoute.optimized_stops : visits).map((item, idx) => {
-                  const visit = showOptimized ? null : item;
-                  const stop = showOptimized ? item : null;
-                  const property = visit ? getProperty(visit.property_id) : null;
-
-                  return (
-                    <div key={idx} className="flex items-center gap-4 p-3 rounded-lg bg-slate-50 border">
-                      <div className="h-8 w-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-sm font-semibold shrink-0">
-                        {stop ? stop.order : idx + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">{stop ? stop.name : property?.name || property?.address}</p>
-                        <p className="text-xs text-slate-500">{stop ? stop.address : `${property?.address}, ${property?.city}`}</p>
-                      </div>
-                      {visit?.scheduled_time && (
-                        <div className="flex items-center gap-1 text-xs text-slate-600 shrink-0">
-                          <Clock className="h-3 w-3" />
-                          {visit.scheduled_time}
-                        </div>
-                      )}
-                      {stop?.estimated_arrival && (
-                        <div className="flex items-center gap-1 text-xs text-blue-600 shrink-0">
-                          <Clock className="h-3 w-3" />
-                          ETA: {stop.estimated_arrival}
-                        </div>
-                      )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {optimizedRoute.optimized_stops.map((stop, idx) => (
+                <div key={idx} className="flex items-center gap-4 p-3 rounded-lg bg-slate-50 border border-slate-900">
+                  <div className="h-8 w-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-sm font-semibold shrink-0">
+                    {stop.order}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm">{stop.name}</p>
+                    <p className="text-xs text-slate-500">{stop.address}</p>
+                  </div>
+                  {stop.estimated_arrival && (
+                    <div className="flex items-center gap-1 text-xs text-blue-600 shrink-0">
+                      <Clock className="h-3 w-3" />
+                      ETA: {stop.estimated_arrival}
                     </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Summary Stats - Only show when optimized */}
