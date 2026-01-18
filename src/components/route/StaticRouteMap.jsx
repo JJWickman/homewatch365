@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 export default function StaticRouteMap({ stops = [], startAddress }) {
   const [mapUrl, setMapUrl] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const validStops = stops.filter(s => {
     const lat = parseFloat(s.lat || s.latitude);
@@ -16,18 +17,31 @@ export default function StaticRouteMap({ stops = [], startAddress }) {
   useEffect(() => {
     if (validStops.length > 0) {
       generateStaticMapUrl();
+    } else {
+      setMapUrl(null);
+      setError(null);
     }
-  }, [validStops.length]);
+  }, [stops.length]);
 
   const generateStaticMapUrl = async () => {
+    if (loading) return;
+    
     setLoading(true);
+    setError(null);
+    
     try {
       const response = await base44.functions.invoke('generateStaticMapUrl', {
         stops: validStops
       });
-      setMapUrl(response.data.mapUrl);
+      
+      if (response.data?.mapUrl) {
+        setMapUrl(response.data.mapUrl);
+      } else {
+        setError('No map URL received');
+      }
     } catch (error) {
       console.error('Error generating static map:', error);
+      setError(error.message || 'Failed to load map');
     } finally {
       setLoading(false);
     }
@@ -56,12 +70,38 @@ export default function StaticRouteMap({ stops = [], startAddress }) {
     );
   }
 
-  if (!mapUrl) {
+  if (error) {
     return (
       <div className="h-full flex items-center justify-center bg-slate-100 rounded-lg">
         <div className="text-center text-slate-500">
           <p className="font-medium">Unable to load map</p>
-          <p className="text-sm">Please check your configuration</p>
+          <p className="text-sm">{error}</p>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={generateStaticMapUrl}
+            className="mt-3"
+          >
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!mapUrl && !loading) {
+    return (
+      <div className="h-full flex items-center justify-center bg-slate-100 rounded-lg">
+        <div className="text-center text-slate-500">
+          <p className="font-medium">Map not loaded</p>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={generateStaticMapUrl}
+            className="mt-3"
+          >
+            Load Map
+          </Button>
         </div>
       </div>
     );
