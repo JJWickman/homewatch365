@@ -68,17 +68,31 @@ export default function PropertyDetail() {
     }
   }, [property?.latitude, property?.longitude]);
 
-  const loadMapUrl = async () => {
+  const loadMapUrl = async (userLocation = null) => {
     if (!property?.latitude || !property?.longitude) return;
     
     setLoadingMap(true);
     try {
+      const stops = [{
+        latitude: property.latitude,
+        longitude: property.longitude,
+        order: 1,
+        color: 'red',
+        label: 'P'
+      }];
+
+      if (userLocation) {
+        stops.push({
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          order: 2,
+          color: 'blue',
+          label: 'Y'
+        });
+      }
+
       const response = await base44.functions.invoke('generateStaticMapUrl', {
-        stops: [{
-          latitude: property.latitude,
-          longitude: property.longitude,
-          order: 1
-        }]
+        stops
       });
       
       if (response.data?.mapUrl) {
@@ -88,6 +102,29 @@ export default function PropertyDetail() {
       console.error('Error loading map:', error);
     } finally {
       setLoadingMap(false);
+    }
+  };
+
+  const handleShowMyLocation = async () => {
+    setGettingLocation(true);
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+
+      const userLocation = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
+      };
+
+      setShowingUserLocation(true);
+      await loadMapUrl(userLocation);
+      toast.success('Your location added to map');
+    } catch (error) {
+      console.error('Error getting location:', error);
+      toast.error('Unable to get your location. Please enable location services.');
+    } finally {
+      setGettingLocation(false);
     }
   };
 
