@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import PageHeader from '@/components/shared/PageHeader';
 import RouteMap from '@/components/route/RouteMap';
 import StaticRouteMap from '@/components/route/StaticRouteMap';
@@ -26,6 +27,9 @@ export default function RouteOptimizer() {
   const [optimizing, setOptimizing] = useState(false);
   const [startAddress, setStartAddress] = useState('');
   const [company, setCompany] = useState(null);
+  const [showStartDialog, setShowStartDialog] = useState(false);
+  const [startType, setStartType] = useState('home');
+  const [customStartAddress, setCustomStartAddress] = useState('');
 
   useEffect(() => {
     loadInitialData();
@@ -103,9 +107,20 @@ export default function RouteOptimizer() {
 
   const getProperty = (propertyId) => properties.find(p => p.id === propertyId);
 
-  const handleOptimizeRoute = async () => {
+  const handleOptimizeRoute = () => {
     if (visits.length === 0) return;
+    setShowStartDialog(true);
+  };
 
+  const confirmOptimizeRoute = async () => {
+    const finalStartAddress = startType === 'home' ? startAddress : customStartAddress;
+    
+    if (!finalStartAddress) {
+      alert('Please enter a start address');
+      return;
+    }
+
+    setShowStartDialog(false);
     setOptimizing(true);
     try {
       const stops = visits
@@ -132,7 +147,7 @@ export default function RouteOptimizer() {
 
       const response = await base44.functions.invoke('optimizeRoute', {
         stops,
-        startAddress
+        startAddress: finalStartAddress
       });
 
       setOptimizedRoute(response.data);
@@ -202,7 +217,7 @@ export default function RouteOptimizer() {
       />
 
       {/* Controls */}
-      <div className="grid md:grid-cols-3 gap-4 mb-6">
+      <div className="grid md:grid-cols-2 gap-4 mb-6">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">Staff Member</CardTitle>
@@ -232,20 +247,6 @@ export default function RouteOptimizer() {
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="h-9"
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Start Location</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Input
-              value={startAddress}
-              onChange={(e) => setStartAddress(e.target.value)}
-              placeholder="Enter address"
               className="h-9"
             />
           </CardContent>
@@ -388,6 +389,84 @@ export default function RouteOptimizer() {
           </CardContent>
         </Card>
       )}
+
+      {/* Start Location Dialog */}
+      <Dialog open={showStartDialog} onOpenChange={setShowStartDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select Start Location</DialogTitle>
+            <DialogDescription>
+              Where will you be starting your route from?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              <div
+                onClick={() => setStartType('home')}
+                className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                  startType === 'home' ? 'border-slate-900 bg-slate-50' : 'border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`h-5 w-5 rounded-full border-2 ${
+                    startType === 'home' ? 'border-slate-900 bg-slate-900' : 'border-slate-300'
+                  } flex items-center justify-center`}>
+                    {startType === 'home' && <div className="h-2 w-2 rounded-full bg-white" />}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-900">Home Address</p>
+                    <p className="text-sm text-slate-500">{startAddress || 'Your default start location'}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                onClick={() => setStartType('other')}
+                className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                  startType === 'other' ? 'border-slate-900 bg-slate-50' : 'border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`h-5 w-5 rounded-full border-2 ${
+                    startType === 'other' ? 'border-slate-900 bg-slate-900' : 'border-slate-300'
+                  } flex items-center justify-center`}>
+                    {startType === 'other' && <div className="h-2 w-2 rounded-full bg-white" />}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-900">Other Location</p>
+                    <p className="text-sm text-slate-500">Enter a custom start address</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {startType === 'other' && (
+              <div className="space-y-2">
+                <Label>Start Address</Label>
+                <Input
+                  value={customStartAddress}
+                  onChange={(e) => setCustomStartAddress(e.target.value)}
+                  placeholder="Enter address"
+                />
+              </div>
+            )}
+          </div>
+          <div className="flex gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setShowStartDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmOptimizeRoute}
+              className="bg-slate-900 hover:bg-slate-800"
+            >
+              Optimize Route
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
