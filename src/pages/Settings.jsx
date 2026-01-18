@@ -6,7 +6,7 @@ import {
   Settings as SettingsIcon, Building, Users, FileText, 
   Palette, Save, Upload, Plus, Trash2, User, Mail, Edit2, MoreVertical, Camera,
   Calendar, Copy, Check, ExternalLink, Link2, Unlink, Shield, Edit, AlertCircle as AlertIcon, Loader2,
-  CreditCard, TrendingUp, Briefcase, Zap, X, Star, MessageCircle
+  CreditCard, TrendingUp, Briefcase, Zap, X, Star, MessageCircle, MapPin
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
