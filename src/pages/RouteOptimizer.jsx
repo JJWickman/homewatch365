@@ -197,20 +197,25 @@ export default function RouteOptimizer() {
   const exportToGoogleMaps = () => {
     if (!optimizedRoute?.optimized_stops) return;
     
+    const finalStartAddress = startType === 'home' ? startAddress : customStartAddress;
+    const encodedStart = encodeURIComponent(finalStartAddress);
+    
     const waypoints = optimizedRoute.optimized_stops
-      .map(stop => `${stop.lat},${stop.lng}`)
+      .map(stop => encodeURIComponent(`${stop.lat},${stop.lng}`))
       .join('/');
     
-    const url = `https://www.google.com/maps/dir/${waypoints}`;
+    const url = `https://www.google.com/maps/dir/${encodedStart}/${waypoints}`;
     window.open(url, '_blank');
   };
 
   const exportToWaze = () => {
     if (!optimizedRoute?.optimized_stops || optimizedRoute.optimized_stops.length === 0) return;
     
-    // Waze only supports single destination, so navigate to first stop
+    const finalStartAddress = startType === 'home' ? startAddress : customStartAddress;
     const firstStop = optimizedRoute.optimized_stops[0];
-    const url = `https://waze.com/ul?ll=${firstStop.lat},${firstStop.lng}&navigate=yes`;
+    
+    // Navigate from start to first stop
+    const url = `https://waze.com/ul?ll=${firstStop.lat},${firstStop.lng}&navigate=yes&from=${encodeURIComponent(finalStartAddress)}`;
     window.open(url, '_blank');
   };
 
