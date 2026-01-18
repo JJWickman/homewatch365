@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
-import { Route, Loader2, Clock, MapPin, Navigation, ExternalLink } from 'lucide-react';
+import { Route, Loader2, Clock, MapPin, Navigation } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -208,17 +208,6 @@ export default function RouteOptimizer() {
     window.open(url, '_blank');
   };
 
-  const exportToWaze = () => {
-    if (!optimizedRoute?.optimized_stops || optimizedRoute.optimized_stops.length === 0) return;
-    
-    const firstStop = optimizedRoute.optimized_stops[0];
-    
-    // Waze doesn't support custom start locations via URL - it uses current location
-    // Navigate to first stop
-    const url = `https://waze.com/ul?ll=${firstStop.lat},${firstStop.lng}&navigate=yes`;
-    window.open(url, '_blank');
-  };
-
   return (
     <div>
       <PageHeader
@@ -334,15 +323,7 @@ export default function RouteOptimizer() {
                   onClick={exportToGoogleMaps}
                 >
                   <Navigation className="h-4 w-4 mr-2" />
-                  Google Maps
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={exportToWaze}
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Waze
+                  Open in Google Maps
                 </Button>
                 <Button
                   variant="outline"
