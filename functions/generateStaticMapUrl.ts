@@ -36,8 +36,9 @@ Deno.serve(async (req) => {
       .map((stop, idx) => {
         const lat = parseFloat(stop.lat || stop.latitude);
         const lng = parseFloat(stop.lng || stop.longitude);
-        const label = String(stop.order || idx + 1);
-        return `color:0x64748b|label:${label}|${lat},${lng}`;
+        const label = stop.label || String(stop.order || idx + 1);
+        const color = stop.color || '0x64748b';
+        return `color:${color}|label:${label}|${lat},${lng}`;
       })
       .join('&markers=');
 
