@@ -434,12 +434,15 @@ export default function CompanyOnboarding() {
                   <p className="text-slate-600">Your company, first client, and property have been created. Let's get started managing properties.</p>
                 </div>
                 <Button 
-                  onClick={() => navigate(createPageUrl('Dashboard'))}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
-                  size="lg"
-                >
-                  Take me to the Dashboard
-                </Button>
+                    onClick={() => {
+                      // Force page reload to ensure fresh data
+                      window.location.href = createPageUrl('Dashboard');
+                    }}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                    size="lg"
+                  >
+                    Take me to the Dashboard
+                  </Button>
               </CardContent>
             </>
           )}
