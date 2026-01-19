@@ -136,9 +136,9 @@ export default function Home() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-3">
               <img 
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/80aa6ec76_NewEstateIQLogo.png" 
-                alt="Estate IQ" 
-                className="h-16 w-auto object-contain" 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/c534cf318_NewEstateWatchLogo.png" 
+                alt="Estate Watch 365" 
+                className="h-12 w-auto object-contain" 
               />
             </div>
             <div className="flex items-center gap-4">
@@ -162,10 +162,10 @@ export default function Home() {
               Estate Management Software
             </Badge>
             <h1 className="text-4xl sm:text-6xl font-bold mb-6">
-              The Complete Estate Watch Platform
+              The Complete Estate Watch 365 Platform
             </h1>
             <p className="text-xl text-blue-50 mb-8">
-              All-in-one platform for estate watch and property management companies. Streamline inspections, scheduling, client management, and field operations.
+              All-in-one platform for estate watch and property management companies. Streamline inspections, scheduling, client management, and field operations - 365 days a year.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
@@ -312,7 +312,7 @@ export default function Home() {
             Ready to Transform Your Property Management?
           </h2>
           <p className="text-xl text-blue-50 mb-8">
-            Join hundreds of property managers who trust Estate IQ
+            Join hundreds of property managers who trust Estate Watch 365
           </p>
           <Button 
             size="lg" 
@@ -427,9 +427,9 @@ export default function Home() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-3">
               <img 
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/80aa6ec76_NewEstateIQLogo.png" 
-                alt="Estate IQ" 
-                className="h-12 w-auto object-contain" 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/c534cf318_NewEstateWatchLogo.png" 
+                alt="Estate Watch 365" 
+                className="h-10 w-auto object-contain" 
               />
             </div>
             <div className="flex gap-8 text-sm text-slate-600">
@@ -444,7 +444,7 @@ export default function Home() {
               </button>
             </div>
             <div className="text-sm text-slate-600">
-              © 2026 Estate IQ. All rights reserved.
+              © 2026 Estate Watch 365. All rights reserved.
             </div>
           </div>
         </div>
