@@ -40,7 +40,8 @@ export default function ClientForm() {
     city: '',
     state: '',
     zip: '',
-    selected_products: [],
+    service_subscription_id: '',
+    additional_products: [],
     monthly_rate: '',
     billing_frequency: 'monthly',
     portal_access: true,
@@ -48,6 +49,7 @@ export default function ClientForm() {
     is_active: true
   });
   
+  const [availableServices, setAvailableServices] = useState([]);
   const [availableProducts, setAvailableProducts] = useState([]);
   
   const autoSaveFunction = async (data) => {
@@ -81,11 +83,14 @@ export default function ClientForm() {
         setCompanyId(compId);
         
         // Load available products/services
-        const products = await base44.entities.ProductService.filter({ 
+        const allItems = await base44.entities.ProductService.filter({ 
           company_id: compId,
           is_active: true 
         });
-        setAvailableProducts(products);
+        
+        // Separate services and products
+        setAvailableServices(allItems.filter(item => item.type === 'service'));
+        setAvailableProducts(allItems.filter(item => item.type === 'product'));
       }
 
       // Check if editing existing client
@@ -107,7 +112,8 @@ export default function ClientForm() {
             city: client.city || '',
             state: client.state || '',
             zip: client.zip || '',
-            selected_products: client.selected_products || [],
+            service_subscription_id: client.service_subscription_id || '',
+            additional_products: client.additional_products || [],
             monthly_rate: client.monthly_rate || '',
             billing_frequency: client.billing_frequency || 'monthly',
             portal_access: client.portal_access !== false,
@@ -315,26 +321,57 @@ export default function ClientForm() {
               Service & Billing
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
+            {/* Service Subscription */}
             <div>
-              <Label className="flex items-center gap-2 mb-3">
+              <Label className="flex items-center gap-2 mb-3 text-base">
+                <CreditCard className="h-4 w-4" />
+                Service Subscription
+              </Label>
+              {availableServices.length === 0 ? (
+                <p className="text-sm text-slate-500">No service subscriptions available. Add them in Settings → Products & Services.</p>
+              ) : (
+                <Select
+                  value={formData.service_subscription_id}
+                  onValueChange={(value) => handleChange('service_subscription_id', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a service subscription..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableServices.map((service) => (
+                      <SelectItem key={service.id} value={service.id}>
+                        <div className="flex items-center justify-between w-full">
+                          <span>{service.name}</span>
+                          <span className="ml-4 text-slate-500">${service.price}/{service.billing_frequency}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
+            {/* Additional Products */}
+            <div>
+              <Label className="flex items-center gap-2 mb-3 text-base">
                 <Package className="h-4 w-4" />
-                Selected Products & Services
+                Additional Products & Services
               </Label>
               {availableProducts.length === 0 ? (
-                <p className="text-sm text-slate-500">No products/services available. Add them in Settings → Products & Services.</p>
+                <p className="text-sm text-slate-500">No additional products available.</p>
               ) : (
                 <div className="space-y-2 border rounded-lg p-4 max-h-60 overflow-y-auto">
                   {availableProducts.map((product) => (
                     <div key={product.id} className="flex items-start gap-3">
                       <Checkbox
                         id={product.id}
-                        checked={formData.selected_products.includes(product.id)}
+                        checked={formData.additional_products.includes(product.id)}
                         onCheckedChange={(checked) => {
                           const updated = checked
-                            ? [...formData.selected_products, product.id]
-                            : formData.selected_products.filter(id => id !== product.id);
-                          handleChange('selected_products', updated);
+                            ? [...formData.additional_products, product.id]
+                            : formData.additional_products.filter(id => id !== product.id);
+                          handleChange('additional_products', updated);
                         }}
                       />
                       <label htmlFor={product.id} className="flex-1 cursor-pointer">
