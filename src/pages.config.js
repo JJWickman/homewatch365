@@ -8,7 +8,7 @@ import CompanyOnboarding from './pages/CompanyOnboarding';
 import Contractors from './pages/Contractors';
 import Dashboard from './pages/Dashboard';
 import FollowUpDetail from './pages/FollowUpDetail';
-import FollowUps from './pages/FollowUps';
+import Home from './pages/Home';
 import InspectionDetail from './pages/InspectionDetail';
 import InspectionFlow from './pages/InspectionFlow';
 import Inspections from './pages/Inspections';
@@ -22,7 +22,6 @@ import Schedule from './pages/Schedule';
 import Settings from './pages/Settings';
 import StripeSetup from './pages/StripeSetup';
 import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
-import Home from './pages/Home';
 import __Layout from './Layout.jsx';
 
 
@@ -37,7 +36,7 @@ export const PAGES = {
     "Contractors": Contractors,
     "Dashboard": Dashboard,
     "FollowUpDetail": FollowUpDetail,
-    "FollowUps": FollowUps,
+    "Home": Home,
     "InspectionDetail": InspectionDetail,
     "InspectionFlow": InspectionFlow,
     "Inspections": Inspections,
@@ -51,7 +50,6 @@ export const PAGES = {
     "Settings": Settings,
     "StripeSetup": StripeSetup,
     "TestGoogleMapsAPI": TestGoogleMapsAPI,
-    "Home": Home,
 }
 
 export const pagesConfig = {
