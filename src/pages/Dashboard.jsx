@@ -83,9 +83,21 @@ export default function Dashboard() {
         base44.entities.ActivityLog.filter({ company_id: companyId }, '-created_date', 10)
       ]);
 
-      if (companies.length > 0) {
-        setCompany(companies[0]);
+      if (companies.length === 0 || !companies[0].name) {
+        // Company doesn't exist or has no name - redirect to onboarding
+        setCheckingOnboarding(false);
+        navigate(createPageUrl('CompanyOnboarding'));
+        return;
       }
+
+      if (!freshUser.onboarding_completed) {
+        // User hasn't completed onboarding - show it again
+        setCheckingOnboarding(false);
+        navigate(createPageUrl('CompanyOnboarding'));
+        return;
+      }
+
+      setCompany(companies[0]);
 
       const today = format(new Date(), 'yyyy-MM-dd');
       const weekStart = format(startOfWeek(new Date()), 'yyyy-MM-dd');
