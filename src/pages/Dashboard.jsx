@@ -66,15 +66,7 @@ export default function Dashboard() {
           }
 
           if (members.length === 0) {
-            // New user - redirect to onboarding
-            setCheckingOnboarding(false);
-            navigate(createPageUrl('CompanyOnboarding'));
-            return;
-          }
-
-          // Check if user has completed onboarding and wants to skip it
-          if (!freshUser.onboarding_completed) {
-            // User hasn't disabled onboarding, show it
+            // New user with no company - redirect to onboarding
             setCheckingOnboarding(false);
             navigate(createPageUrl('CompanyOnboarding'));
             return;
