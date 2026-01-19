@@ -86,6 +86,23 @@ export default function Layout({ children, currentPageName }) {
     }
   }, [companyMember?.company_id]);
 
+  useEffect(() => {
+    // Verify user still exists every 30 seconds
+    if (!user) return;
+
+    const verifyUserExists = async () => {
+      try {
+        await base44.auth.me();
+      } catch (error) {
+        // User has been deleted, log them out
+        base44.auth.logout();
+      }
+    };
+
+    const interval = setInterval(verifyUserExists, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+
   const loadUserData = async () => {
     try {
       const currentUser = await base44.auth.me();
