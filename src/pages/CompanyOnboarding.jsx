@@ -235,69 +235,275 @@ export default function CompanyOnboarding() {
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Create Your Company</CardTitle>
-            <CardDescription>
-              Set up your estate concierge business in just a few steps
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="companyName">Company Name *</Label>
-              <Input
-                id="companyName"
-                value={formData.companyName}
-                onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
-                placeholder="Your Company Name"
-              />
-            </div>
+          {/* Company Step */}
+          {step === 'company' && (
+            <>
+              <CardHeader>
+                <CardTitle>Step 1: Create Your Company</CardTitle>
+                <CardDescription>
+                  Set up your estate management business
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="companyName">Company Name *</Label>
+                  <Input
+                    id="companyName"
+                    value={companyData.companyName}
+                    onChange={(e) => setCompanyData(prev => ({ ...prev, companyName: e.target.value }))}
+                    placeholder="Your Company Name"
+                  />
+                </div>
 
-            <div>
-              <Label htmlFor="phone">Business Phone</Label>
-              <Input
-                id="phone"
-                value={formData.phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                placeholder="(555) 123-4567"
-              />
-            </div>
+                <div>
+                  <Label htmlFor="email">Company Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={companyData.email}
+                    onChange={(e) => setCompanyData(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="info@company.com"
+                  />
+                </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="state">State</Label>
-                <Input
-                  id="state"
-                  value={formData.state}
-                  onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
-                />
-              </div>
-            </div>
+                <div>
+                  <Label htmlFor="phone">Business Phone</Label>
+                  <Input
+                    id="phone"
+                    value={companyData.phone}
+                    onChange={(e) => setCompanyData(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
 
-            <Button 
-              onClick={handleSubmit}
-              disabled={loading || !formData.companyName}
-              className="w-full bg-slate-900 hover:bg-slate-800"
-            >
-              {loading ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Check className="h-4 w-4 mr-2" />
-              )}
-              {loading ? 'Creating...' : 'Create Company'}
-            </Button>
+                <div>
+                  <Label htmlFor="address">Address</Label>
+                  <Input
+                    id="address"
+                    value={companyData.address}
+                    onChange={(e) => setCompanyData(prev => ({ ...prev, address: e.target.value }))}
+                    placeholder="123 Main St"
+                  />
+                </div>
 
-            <p className="text-xs text-center text-slate-500">
-              Start your 14-day free trial. No credit card required.
-            </p>
-          </CardContent>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label htmlFor="city">City</Label>
+                    <Input
+                      id="city"
+                      value={companyData.city}
+                      onChange={(e) => setCompanyData(prev => ({ ...prev, city: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="state">State</Label>
+                    <Input
+                      id="state"
+                      value={companyData.state}
+                      onChange={(e) => setCompanyData(prev => ({ ...prev, state: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="zip">ZIP</Label>
+                    <Input
+                      id="zip"
+                      value={companyData.zip}
+                      onChange={(e) => setCompanyData(prev => ({ ...prev, zip: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={handleCreateCompany}
+                  disabled={loading || !companyData.companyName || !companyData.email}
+                  className="w-full bg-slate-900 hover:bg-slate-800"
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <ArrowRight className="h-4 w-4 mr-2" />
+                  )}
+                  {loading ? 'Creating...' : 'Continue'}
+                </Button>
+              </CardContent>
+            </>
+          )}
+
+          {/* Client Step */}
+          {step === 'client' && (
+            <>
+              <CardHeader>
+                <CardTitle>Step 2: Create Your First Client</CardTitle>
+                <CardDescription>
+                  Add a client to your system
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    value={clientData.firstName}
+                    onChange={(e) => setClientData(prev => ({ ...prev, firstName: e.target.value }))}
+                    placeholder="John"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    value={clientData.lastName}
+                    onChange={(e) => setClientData(prev => ({ ...prev, lastName: e.target.value }))}
+                    placeholder="Smith"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="clientEmail">Email *</Label>
+                  <Input
+                    id="clientEmail"
+                    type="email"
+                    value={clientData.email}
+                    onChange={(e) => setClientData(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="john@example.com"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="clientPhone">Phone</Label>
+                  <Input
+                    id="clientPhone"
+                    value={clientData.phone}
+                    onChange={(e) => setClientData(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={() => setStep('company')}
+                    variant="outline"
+                    className="w-full"
+                    disabled={loading}
+                  >
+                    Back
+                  </Button>
+                  <Button 
+                    onClick={handleCreateClient}
+                    disabled={loading || !clientData.firstName || !clientData.lastName || !clientData.email}
+                    className="w-full bg-slate-900 hover:bg-slate-800"
+                  >
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <ArrowRight className="h-4 w-4 mr-2" />
+                    )}
+                    {loading ? 'Creating...' : 'Continue'}
+                  </Button>
+                </div>
+              </CardContent>
+            </>
+          )}
+
+          {/* Property Step */}
+          {step === 'property' && (
+            <>
+              <CardHeader>
+                <CardTitle>Step 3: Create Your First Property</CardTitle>
+                <CardDescription>
+                  Add a property for your client
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="propName">Property Name</Label>
+                  <Input
+                    id="propName"
+                    value={propertyData.name}
+                    onChange={(e) => setPropertyData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Beach House"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="propAddress">Address *</Label>
+                  <Input
+                    id="propAddress"
+                    value={propertyData.address}
+                    onChange={(e) => setPropertyData(prev => ({ ...prev, address: e.target.value }))}
+                    placeholder="123 Ocean Ave"
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label htmlFor="propCity">City *</Label>
+                    <Input
+                      id="propCity"
+                      value={propertyData.city}
+                      onChange={(e) => setPropertyData(prev => ({ ...prev, city: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="propState">State *</Label>
+                    <Input
+                      id="propState"
+                      value={propertyData.state}
+                      onChange={(e) => setPropertyData(prev => ({ ...prev, state: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="propZip">ZIP</Label>
+                    <Input
+                      id="propZip"
+                      value={propertyData.zip}
+                      onChange={(e) => setPropertyData(prev => ({ ...prev, zip: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="propType">Property Type</Label>
+                  <select
+                    id="propType"
+                    value={propertyData.propertyType}
+                    onChange={(e) => setPropertyData(prev => ({ ...prev, propertyType: e.target.value }))}
+                    className="w-full px-3 py-2 border rounded-md bg-white"
+                  >
+                    <option value="single_family">Single Family</option>
+                    <option value="condo">Condo</option>
+                    <option value="townhouse">Townhouse</option>
+                    <option value="estate">Estate</option>
+                    <option value="commercial">Commercial</option>
+                  </select>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={() => setStep('client')}
+                    variant="outline"
+                    className="w-full"
+                    disabled={loading}
+                  >
+                    Back
+                  </Button>
+                  <Button 
+                    onClick={handleCreateProperty}
+                    disabled={loading || !propertyData.address || !propertyData.city || !propertyData.state}
+                    className="w-full bg-slate-900 hover:bg-slate-800"
+                  >
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Check className="h-4 w-4 mr-2" />
+                    )}
+                    {loading ? 'Creating...' : 'Complete Onboarding'}
+                  </Button>
+                </div>
+              </CardContent>
+            </>
+          )}
         </Card>
 
         {/* Features */}
