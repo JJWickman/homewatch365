@@ -72,6 +72,10 @@ export default function CompanyOnboarding() {
   const handleCreateCompany = async () => {
     if (!user || !companyData.companyName || !companyData.email) return;
     
+    toast.loading('Setting up your account...\n\nWe\'ll walk you through a 3-step process to create your company, first client, and first property. This should take about 3 minutes.', {
+      duration: 5000
+    });
+    
     setLoading(true);
     try {
       const slug = companyData.companyName
