@@ -18,6 +18,7 @@ export default function Home() {
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [showRegistration, setShowRegistration] = useState(false);
   const [registering, setRegistering] = useState(false);
+  const [company, setCompany] = useState(null);
   const [formData, setFormData] = useState({
     companyName: '',
     fullName: '',
@@ -26,8 +27,21 @@ export default function Home() {
   });
 
   React.useEffect(() => {
-    setIsAuthenticating(false);
+    loadBranding();
   }, []);
+
+  const loadBranding = async () => {
+    try {
+      const companies = await base44.entities.Company.list('-created_date', 1);
+      if (companies.length > 0) {
+        setCompany(companies[0]);
+      }
+    } catch (error) {
+      console.error('Failed to load branding:', error);
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
 
   const handleGetStarted = () => {
     setShowRegistration(true);
@@ -145,10 +159,14 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-slate-900 flex items-center justify-center">
-                <Building className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-bold text-slate-900">Estate Watch</span>
+              {company?.logo_url ? (
+                <img src={company.logo_url} alt={company.name} className="h-10 w-10 rounded-lg object-contain" />
+              ) : (
+                <div className="h-10 w-10 rounded-lg bg-slate-900 flex items-center justify-center">
+                  <Building className="h-6 w-6 text-white" />
+                </div>
+              )}
+              <span className="text-xl font-bold text-slate-900">{company?.name || 'Estate Watch'}</span>
             </div>
             <div className="flex items-center gap-4">
               <Button variant="ghost" onClick={() => base44.auth.redirectToLogin()}>
@@ -435,10 +453,14 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-slate-900 flex items-center justify-center">
-                <Building className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-bold text-slate-900">Estate Watch</span>
+              {company?.logo_url ? (
+                <img src={company.logo_url} alt={company.name} className="h-10 w-10 rounded-lg object-contain" />
+              ) : (
+                <div className="h-10 w-10 rounded-lg bg-slate-900 flex items-center justify-center">
+                  <Building className="h-6 w-6 text-white" />
+                </div>
+              )}
+              <span className="text-xl font-bold text-slate-900">{company?.name || 'Estate Watch'}</span>
             </div>
             <div className="flex gap-8 text-sm text-slate-600">
               <button onClick={() => base44.auth.redirectToLogin()} className="hover:text-slate-900">
@@ -457,6 +479,13 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      <style>{`
+        :root {
+          --primary: ${company?.primary_color || '#1e3a5f'};
+          --accent: ${company?.accent_color || '#c9a962'};
+        }
+      `}</style>
     </div>
   );
 }
