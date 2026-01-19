@@ -314,15 +314,17 @@ export default function Settings() {
         });
         
         // Send invite email
+        const appUrl = window.location.origin;
         await base44.integrations.Core.SendEmail({
           to: inviteForm.email,
           subject: `You've been invited to join ${company.name}`,
           body: `
 Hello ${inviteForm.name || ''},
 
-You've been invited to join ${company.name} as a ${inviteForm.role}.
+You've been invited to join ${company.name} as a ${inviteForm.role === 'field_inspector' ? 'Field Inspector' : inviteForm.role === 'dispatcher' ? 'Dispatcher/Manager' : 'Administrator'}.
 
-Please log in to access your account.
+Click the link below to sign in:
+${appUrl}
 
 Best regards,
 ${company.name}
