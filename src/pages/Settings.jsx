@@ -338,7 +338,7 @@ export default function Settings() {
       const roleLabel = (inviteForm.role || memberToInvite.role) === 'field_inspector' ? 'Field Inspector' : 
                        (inviteForm.role || memberToInvite.role) === 'dispatcher' ? 'Dispatcher/Manager' : 'Administrator';
       
-      await base44.integrations.Core.SendEmail({
+      const emailResponse = await base44.integrations.Core.SendEmail({
         from_name: 'Estate Watch 365',
         to: inviteForm.email,
         subject: `You've been invited to join ${company.name}`,
@@ -354,6 +354,10 @@ Best regards,
 ${company.name}
         `.trim()
       });
+      
+      if (!emailResponse || emailResponse.error) {
+        throw new Error('Failed to send invitation email: ' + (emailResponse?.error || 'Unknown error'));
+      }
       
       setShowInviteDialog(false);
       setInviteForm({ email: '', name: '', role: 'field_inspector' });
