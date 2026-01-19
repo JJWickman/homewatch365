@@ -22,6 +22,7 @@ import Schedule from './pages/Schedule';
 import Settings from './pages/Settings';
 import StripeSetup from './pages/StripeSetup';
 import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
+import ClientLogin from './pages/ClientLogin';
 import __Layout from './Layout.jsx';
 
 
@@ -50,6 +51,7 @@ export const PAGES = {
     "Settings": Settings,
     "StripeSetup": StripeSetup,
     "TestGoogleMapsAPI": TestGoogleMapsAPI,
+    "ClientLogin": ClientLogin,
 }
 
 export const pagesConfig = {
