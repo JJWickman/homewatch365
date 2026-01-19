@@ -141,7 +141,7 @@ export default function Dashboard() {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  if (loading) {
+  if (loading || checkingOnboarding) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-64" />
@@ -150,23 +150,6 @@ export default function Dashboard() {
             <Skeleton key={i} className="h-32" />
           ))}
         </div>
-      </div>
-    );
-  }
-
-  if (!companyMember) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <Building2 className="h-16 w-16 text-slate-300 mb-4" />
-        <h2 className="text-xl font-semibold text-slate-900 mb-2">Welcome to Estate Watch 365</h2>
-        <p className="text-slate-500 text-center max-w-md mb-6">
-          You're not currently associated with any company. Please contact your administrator or create a new company.
-        </p>
-        <Link to={createPageUrl('CompanyOnboarding')}>
-          <Button className="bg-slate-900 hover:bg-slate-800">
-            Create Company
-          </Button>
-        </Link>
       </div>
     );
   }
