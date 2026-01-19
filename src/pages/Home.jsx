@@ -26,27 +26,8 @@ export default function Home() {
   });
 
   React.useEffect(() => {
-    checkAuth();
+    setIsAuthenticating(false);
   }, []);
-
-  const checkAuth = async () => {
-    try {
-      const user = await base44.auth.me();
-      if (user) {
-        // User is logged in, redirect to dashboard
-        const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
-        if (members.length > 0) {
-          navigate(createPageUrl('Dashboard'));
-        } else {
-          navigate(createPageUrl('CompanyOnboarding'));
-        }
-      }
-    } catch {
-      // Not logged in, show landing page
-    } finally {
-      setIsAuthenticating(false);
-    }
-  };
 
   const handleGetStarted = () => {
     setShowRegistration(true);
