@@ -3,8 +3,9 @@ import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
-  User, Mail, Phone, MapPin, CreditCard, Save, X, Package, Plus, Trash2, DollarSign
+  User, Mail, Phone, MapPin, CreditCard, Save, X, Package, Plus, Trash2, DollarSign, FileText
 } from 'lucide-react';
+import MonthlyStatementDialog from '../components/billing/MonthlyStatementDialog';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,6 +58,8 @@ export default function ClientForm() {
     amount: '',
     billing_month: new Date().toISOString().slice(0, 7)
   });
+  const [showStatementDialog, setShowStatementDialog] = useState(false);
+  const [currentBillingMonth, setCurrentBillingMonth] = useState(new Date().toISOString().slice(0, 7));
   
   const autoSaveFunction = async (data) => {
     if (!companyId || !clientId) return;
@@ -536,10 +539,89 @@ export default function ClientForm() {
                 </Button>
               </div>
 
+              {/* Current Month Summary */}
+              <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="text-sm font-medium">Current Month Bill Preview</Label>
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowStatementDialog(true)}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    View Full Statement
+                  </Button>
+                </div>
+                
+                <div className="space-y-2 text-sm">
+                  {/* Subscription Service */}
+                  {formData.service_subscription_id && (() => {
+                    const service = availableServices.find(s => s.id === formData.service_subscription_id);
+                    return service ? (
+                      <div className="flex justify-between">
+                        <span className="text-slate-700">{service.name} (Subscription)</span>
+                        <span className="font-medium">${service.price.toFixed(2)}</span>
+                      </div>
+                    ) : null;
+                  })()}
+                  
+                  {/* Additional Products */}
+                  {formData.additional_products?.map(productId => {
+                    const product = availableProducts.find(p => p.id === productId);
+                    return product ? (
+                      <div key={productId} className="flex justify-between">
+                        <span className="text-slate-700">{product.name}</span>
+                        <span className="font-medium">${product.price.toFixed(2)}</span>
+                      </div>
+                    ) : null;
+                  })}
+                  
+                  {/* Custom Transactions for current month */}
+                  {monthlyTransactions
+                    .filter(t => t.billing_month === currentBillingMonth)
+                    .map(transaction => (
+                      <div key={transaction.id} className="flex justify-between">
+                        <span className="text-slate-700">{transaction.description}</span>
+                        <span className="font-medium">${transaction.amount.toFixed(2)}</span>
+                      </div>
+                    ))
+                  }
+                  
+                  {/* Total */}
+                  <div className="flex justify-between pt-2 border-t border-blue-300 font-bold text-base">
+                    <span>Monthly Total:</span>
+                    <span className="text-blue-700">
+                      ${(() => {
+                        let total = 0;
+                        
+                        // Add subscription
+                        const service = availableServices.find(s => s.id === formData.service_subscription_id);
+                        if (service) total += service.price;
+                        
+                        // Add products
+                        formData.additional_products?.forEach(productId => {
+                          const product = availableProducts.find(p => p.id === productId);
+                          if (product) total += product.price;
+                        });
+                        
+                        // Add transactions
+                        monthlyTransactions
+                          .filter(t => t.billing_month === currentBillingMonth)
+                          .forEach(t => total += t.amount);
+                        
+                        return total.toFixed(2);
+                      })()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Transactions List */}
               <div className="space-y-2">
+                <Label className="text-sm font-medium">All Custom Billing Items</Label>
                 {monthlyTransactions.length === 0 ? (
-                  <p className="text-sm text-slate-500 text-center py-4">No billing items yet</p>
+                  <p className="text-sm text-slate-500 text-center py-4">No custom billing items yet</p>
                 ) : (
                   monthlyTransactions.map((transaction) => (
                     <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg bg-white">
@@ -600,6 +682,20 @@ export default function ClientForm() {
           </Button>
         </div>
       </form>
+
+      {/* Monthly Statement Dialog */}
+      <MonthlyStatementDialog
+        open={showStatementDialog}
+        onOpenChange={setShowStatementDialog}
+        clientId={clientId}
+        billingMonth={currentBillingMonth}
+        onStatementUpdated={() => {
+          // Reload transactions if needed
+          if (clientId) {
+            base44.entities.ClientTransaction.filter({ client_id: clientId }).then(setMonthlyTransactions);
+          }
+        }}
+      />
     </div>
   );
 }
