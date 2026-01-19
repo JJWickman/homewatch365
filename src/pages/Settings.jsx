@@ -40,6 +40,7 @@ import { Badge } from "@/components/ui/badge";
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import PaymentMethodCard from '@/components/billing/PaymentMethodCard';
+import FinancialManagement from '@/components/settings/FinancialManagement';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -583,6 +584,7 @@ ${company.name}
           <TabsTrigger value="company">Company</TabsTrigger>
           {isDispatcherOrAdmin && <TabsTrigger value="team">Team</TabsTrigger>}
           {(companyMember?.is_owner || companyMember?.role === 'owner') && <TabsTrigger value="billing">Billing</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="financial">Financial</TabsTrigger>}
           {isAdmin && <TabsTrigger value="reviews">Reviews</TabsTrigger>}
           {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
         </TabsList>
@@ -1299,6 +1301,10 @@ ${company.name}
               );
             })}
           </div>
+        </TabsContent>
+
+        <TabsContent value="financial">
+          <FinancialManagement companyId={company?.id} />
         </TabsContent>
 
         <TabsContent value="reviews" className="space-y-6">
