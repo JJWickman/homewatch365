@@ -435,8 +435,24 @@ export default function CompanyOnboarding() {
                   <p className="text-lg font-semibold text-slate-900">You're ready to go!</p>
                   <p className="text-slate-600">Your company, first client, and property have been created. Let's get started managing properties.</p>
                 </div>
+                <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 mb-4">
+                  <input
+                    type="checkbox"
+                    id="skipOnboarding"
+                    checked={skipFutureOnboarding}
+                    onChange={(e) => setSkipFutureOnboarding(e.target.checked)}
+                    className="h-4 w-4 rounded"
+                  />
+                  <label htmlFor="skipOnboarding" className="text-sm text-slate-700 cursor-pointer">
+                    Don't show onboarding on startup
+                  </label>
+                </div>
                 <Button 
-                    onClick={() => {
+                    onClick={async () => {
+                      // Save onboarding preference
+                      if (skipFutureOnboarding && user) {
+                        await base44.auth.updateMe({ onboarding_completed: true });
+                      }
                       // Force page reload to ensure fresh data
                       window.location.href = createPageUrl('Dashboard');
                     }}
