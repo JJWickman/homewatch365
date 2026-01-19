@@ -1,4 +1,4 @@
-import { Users, Building2, ClipboardCheck, Calendar, UserPlus, Home, FileText, Route, MapPin, Navigation } from 'lucide-react';
+import { Users, Building2, ClipboardCheck, Calendar, UserPlus, Home, FileText, Route, MapPin, Navigation, Briefcase, Phone, Shield } from 'lucide-react';
 
 export const tutorials = {
   createClient: {
@@ -190,6 +190,80 @@ export const tutorials = {
     ]
   },
 
+  createContractor: {
+    id: 'createContractor',
+    title: 'Adding a Contractor',
+    description: 'Learn how to add contractors to your network',
+    category: 'Getting Started',
+    duration: '3 min',
+    icon: Briefcase,
+    steps: [
+      {
+        title: 'Navigate to Contractors',
+        description: 'Click on "Contractors" in the sidebar to access your contractor management page.',
+        icon: Briefcase,
+        tips: [
+          'Contractors are service providers like electricians, plumbers, and HVAC technicians',
+          'You can assign contractors to specific properties',
+          'Keep a roster of trusted contractors for quick access'
+        ]
+      },
+      {
+        title: 'Click "Add Contractor"',
+        description: 'Look for the "Add Contractor" button in the top right corner and click it to open the contractor form.',
+        icon: UserPlus,
+        tips: [
+          'The form will open with all necessary fields',
+          'You can add multiple contractors at once',
+          'Save time by having contractor information ready'
+        ]
+      },
+      {
+        title: 'Enter Business Information',
+        description: 'Fill in the contractor\'s business name, contact person name, and select the type of service they provide.',
+        icon: Briefcase,
+        tips: [
+          'Business name is how they appear in your system',
+          'Contact person is your primary point of contact',
+          'Select the most appropriate contractor type from the list',
+          'You can create custom contractor types if needed'
+        ]
+      },
+      {
+        title: 'Add Contact Details',
+        description: 'Enter email, phone numbers, and business address. This information is used for communication and coordination.',
+        icon: Phone,
+        tips: [
+          'Email is required for contractor communications',
+          'Add both office and mobile numbers when available',
+          'Address helps with routing and service area identification'
+        ]
+      },
+      {
+        title: 'License and Insurance Info',
+        description: 'Record the contractor\'s license number, insurance details, and hourly rate for accurate record-keeping.',
+        icon: Shield,
+        tips: [
+          'Keep license numbers current for compliance',
+          'Store insurance policy information and expiration dates',
+          'Hourly rate helps with cost estimates',
+          'Update this information annually'
+        ]
+      },
+      {
+        title: 'Save Contractor',
+        description: 'Review all information and click "Save" to add the contractor to your network.',
+        icon: ClipboardCheck,
+        tips: [
+          'The contractor is now available for assignment',
+          'You can assign them to properties from the property page',
+          'Add notes about their work quality or specialties',
+          'Mark contractors as inactive if you no longer use them'
+        ]
+      }
+    ]
+  },
+
   optimizeRoute: {
     id: 'optimizeRoute',
     title: 'Optimizing Visit Routes',
@@ -277,7 +351,7 @@ export const tutorialCategories = [
   {
     name: 'Getting Started',
     description: 'Essential tutorials for new users',
-    tutorials: ['createClient', 'createProperty', 'createVisit']
+    tutorials: ['createClient', 'createProperty', 'createVisit', 'createContractor']
   },
   {
     name: 'Daily Operations',
