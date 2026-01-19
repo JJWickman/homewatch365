@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 export default function ClientLogin() {
   const navigate = useNavigate();
@@ -168,6 +169,11 @@ export default function ClientLogin() {
                 {loading ? 'Verifying...' : 'Continue'}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
+              <div className="text-center">
+                <Link to={createPageUrl('ForgotPassword')} className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                  Forgot password?
+                </Link>
+              </div>
             </form>
           )}
 
