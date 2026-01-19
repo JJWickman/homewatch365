@@ -22,6 +22,9 @@ export default function ClientPortal() {
   const [inspections, setInspections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingCheckout, setLoadingCheckout] = useState(false);
+  const [serviceSubscription, setServiceSubscription] = useState(null);
+  const [additionalProducts, setAdditionalProducts] = useState([]);
+  const [currentStatement, setCurrentStatement] = useState(null);
 
   useEffect(() => {
     loadPortalData();
@@ -56,6 +59,31 @@ export default function ClientPortal() {
       }
       setProperties(propertiesData);
       setInspections(inspectionsData);
+
+      // Load service subscription
+      if (clientData.service_subscription_id) {
+        const services = await base44.entities.ProductService.filter({ id: clientData.service_subscription_id });
+        if (services.length > 0) {
+          setServiceSubscription(services[0]);
+        }
+      }
+
+      // Load additional products
+      if (clientData.additional_products && clientData.additional_products.length > 0) {
+        const allProducts = await base44.entities.ProductService.list();
+        const selectedProducts = allProducts.filter(p => clientData.additional_products.includes(p.id));
+        setAdditionalProducts(selectedProducts);
+      }
+
+      // Load current month's statement
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      const statements = await base44.entities.MonthlyStatement.filter({
+        client_id: clientData.id,
+        billing_month: currentMonth
+      });
+      if (statements.length > 0) {
+        setCurrentStatement(statements[0]);
+      }
 
     } catch (error) {
       console.error('Error loading portal:', error);
@@ -164,54 +192,112 @@ export default function ClientPortal() {
           <p className="text-slate-500">View your property inspections and reports</p>
         </div>
 
-        {/* Subscription Card */}
-        {client.monthly_rate && client.billing_status !== 'active' && !client.stripe_customer_id && (
-          <Card className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-            <CardContent className="pt-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-4">
-                  <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                    <CreditCard className="h-6 w-6 text-blue-600" />
-                  </div>
+        {/* Service Details & Invoice */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Service Subscription */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Your Service Plan</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {serviceSubscription ? (
+                <>
                   <div>
-                    <h3 className="font-semibold text-slate-900 mb-1">
-                      Subscribe to Property Management Services
-                    </h3>
-                    <p className="text-sm text-slate-600 mb-3">
-                      ${client.monthly_rate}/month • {client.billing_frequency || 'Monthly'} billing
-                    </p>
-                    <p className="text-sm text-slate-500 mb-4">
-                      Secure payments via credit card, Apple Pay, or Google Pay
+                    <p className="text-sm text-slate-500 mb-1">Subscription</p>
+                    <p className="font-semibold text-lg">{serviceSubscription.name}</p>
+                    <p className="text-sm text-slate-600">{serviceSubscription.description}</p>
+                  </div>
+                  
+                  {additionalProducts.length > 0 && (
+                    <div className="border-t pt-3">
+                      <p className="text-sm text-slate-500 mb-2">Add-ons</p>
+                      <div className="space-y-2">
+                        {additionalProducts.map(product => (
+                          <div key={product.id} className="flex justify-between items-center">
+                            <span className="text-sm font-medium">{product.name}</span>
+                            <span className="text-sm text-slate-600">${product.price.toFixed(2)}/mo</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="border-t pt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold">Monthly Total</span>
+                      <span className="font-bold text-xl text-blue-600">
+                        ${(() => {
+                          let total = serviceSubscription?.price || 0;
+                          additionalProducts.forEach(p => total += p.price);
+                          return total.toFixed(2);
+                        })()}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1 capitalize">
+                      Billed {client.billing_frequency || 'monthly'}
                     </p>
                   </div>
-                </div>
-                <Button 
-                  onClick={handleSubscribe}
-                  disabled={loadingCheckout}
-                  className="bg-blue-600 hover:bg-blue-700 shrink-0"
-                >
-                  {loadingCheckout ? 'Loading...' : 'Subscribe Now'}
-                </Button>
-              </div>
+                </>
+              ) : (
+                <p className="text-slate-500 text-sm">No active subscription</p>
+              )}
             </CardContent>
           </Card>
-        )}
 
-        {client.billing_status === 'active' && (
-          <Card className="mb-8 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="h-6 w-6 text-green-600" />
-                <div>
-                  <p className="font-semibold text-slate-900">Active Subscription</p>
-                  <p className="text-sm text-slate-600">
-                    ${client.monthly_rate}/month • Next billing date: {format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'MMM d, yyyy')}
-                  </p>
+          {/* Current Invoice */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Current Month Statement</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {currentStatement ? (
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-sm text-slate-500">
+                    <span>Billing Period</span>
+                    <span>{format(new Date(currentStatement.billing_month + '-01'), 'MMMM yyyy')}</span>
+                  </div>
+                  
+                  <div className="space-y-2 border-t pt-3">
+                    {currentStatement.line_items?.map((item, index) => (
+                      <div key={index} className="flex justify-between items-center text-sm">
+                        <span className="text-slate-700">{item.description}</span>
+                        <span className="font-medium">${item.amount.toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="border-t pt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold">Total Due</span>
+                      <span className="font-bold text-xl text-slate-900">
+                        ${currentStatement.total.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-2">
+                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${
+                      currentStatement.status === 'paid' 
+                        ? 'bg-green-100 text-green-700'
+                        : currentStatement.status === 'sent'
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-slate-100 text-slate-700'
+                    }`}>
+                      {currentStatement.status === 'paid' && <CheckCircle2 className="h-3 w-3" />}
+                      <span className="capitalize">{currentStatement.status}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="h-8 w-8 mx-auto text-slate-300 mb-2" />
+                  <p className="text-slate-500 text-sm">No statement generated yet</p>
+                  <p className="text-slate-400 text-xs mt-1">Statements are generated at the end of each month</p>
+                </div>
+              )}
             </CardContent>
           </Card>
-        )}
+        </div>
 
         {/* Properties */}
         <section className="mb-8">
