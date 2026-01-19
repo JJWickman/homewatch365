@@ -50,27 +50,34 @@ export default function Dashboard() {
   }, [user?.id]);
 
   const loadDashboardData = async () => {
-    try {
-      const currentUser = await base44.auth.me();
-      // Fetch fresh user data to get full_name
-      const userList = await base44.entities.User.filter({ email: currentUser.email });
-      const freshUser = userList.length > 0 ? { ...currentUser, full_name: userList[0].full_name, id: userList[0].id } : currentUser;
-      setUser(freshUser);
+   try {
+     const currentUser = await base44.auth.me();
+     // Fetch fresh user data to get full_name and onboarding_completed
+     const userList = await base44.entities.User.filter({ email: currentUser.email });
+     const freshUser = userList.length > 0 ? { ...currentUser, full_name: userList[0].full_name, id: userList[0].id, onboarding_completed: userList[0].onboarding_completed } : currentUser;
+     setUser(freshUser);
 
-      let members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
+     let members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
 
-          // Retry once if not found (company might have just been created)
-          if (members.length === 0) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-          }
+         // Retry once if not found (company might have just been created)
+         if (members.length === 0) {
+           await new Promise(resolve => setTimeout(resolve, 1000));
+           members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
+         }
 
-          if (members.length === 0) {
-            // New user with no company - redirect to onboarding
-            setCheckingOnboarding(false);
-            navigate(createPageUrl('CompanyOnboarding'));
-            return;
-          }
+         if (members.length === 0) {
+           // New user with no company - redirect to onboarding
+           setCheckingOnboarding(false);
+           navigate(createPageUrl('CompanyOnboarding'));
+           return;
+         }
+
+         // User has company but may want to see onboarding again
+         if (!freshUser.onboarding_completed) {
+           setCheckingOnboarding(false);
+           navigate(createPageUrl('CompanyOnboarding'));
+           return;
+         }
       
       setCompanyMember(members[0]);
       const companyId = members[0].company_id;
