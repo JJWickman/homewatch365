@@ -423,12 +423,12 @@ export default function CompanyOnboarding() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex justify-center">
-                  <img 
-                    src="https://media.giphy.com/media/g9GUutsISw9STEM9IL/giphy.gif" 
-                    alt="Celebration" 
-                    className="w-full rounded-lg"
-                  />
-                </div>
+                                        <img 
+                                          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/1552114f9_CongratulationsLeomeme.jpg" 
+                                          alt="Congratulations" 
+                                          className="w-full rounded-lg"
+                                        />
+                                      </div>
                 <div className="text-center space-y-2">
                   <p className="text-lg font-semibold text-slate-900">You're ready to go!</p>
                   <p className="text-slate-600">Your company, first client, and property have been created. Let's get started managing properties.</p>
