@@ -658,7 +658,6 @@ ${company.name}
           {(companyMember?.is_owner || companyMember?.role === 'owner') && <TabsTrigger value="billing">Billing</TabsTrigger>}
           {isAdmin && <TabsTrigger value="financial">Products & Services</TabsTrigger>}
           {isAdmin && <TabsTrigger value="reviews">Reviews</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="users">Users</TabsTrigger>}
           {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
           </TabsList>
 
@@ -1393,11 +1392,7 @@ ${company.name}
            <FinancialManagement companyId={company?.id} />
          </TabsContent>
 
-         <TabsContent value="users">
-           <UserManagementSection staff={staff} company={company} />
-         </TabsContent>
-
-        <TabsContent value="reviews" className="space-y-6">
+         <TabsContent value="reviews" className="space-y-6">
           {/* Reviews Management */}
           <Card>
             <CardHeader>
