@@ -8,11 +8,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { base44 } from '@/api/base44Client';
 
 export default function Landing() {
   const navigate = useNavigate();
   const [isAuthenticating, setIsAuthenticating] = useState(true);
+  const [showRegistration, setShowRegistration] = useState(false);
+  const [registering, setRegistering] = useState(false);
+  const [formData, setFormData] = useState({
+    companyName: '',
+    fullName: '',
+    email: '',
+    phone: ''
+  });
 
   React.useEffect(() => {
     checkAuth();
@@ -38,7 +49,39 @@ export default function Landing() {
   };
 
   const handleGetStarted = () => {
-    base44.auth.redirectToLogin(createPageUrl('CompanyOnboarding'));
+    setShowRegistration(true);
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.companyName || !formData.fullName || !formData.email) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    setRegistering(true);
+    try {
+      const response = await base44.functions.invoke('registerCompany', {
+        companyName: formData.companyName,
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone
+      });
+
+      if (response.data.success) {
+        alert(`Registration successful! We've sent an invitation to ${formData.email}. Please check your email to complete registration and create your password.`);
+        setShowRegistration(false);
+        setFormData({ companyName: '', fullName: '', email: '', phone: '' });
+      } else {
+        alert(response.data.message || 'Registration failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      alert('Registration failed. Please try again or contact support.');
+    } finally {
+      setRegistering(false);
+    }
   };
 
   if (isAuthenticating) {
@@ -310,6 +353,101 @@ export default function Landing() {
           <p className="text-sm text-slate-400 mt-4">14 days free • No credit card required</p>
         </div>
       </section>
+
+      {/* Registration Dialog */}
+      <Dialog open={showRegistration} onOpenChange={setShowRegistration}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Start Your Free Trial</DialogTitle>
+            <DialogDescription>
+              Create your account and get started in minutes. No credit card required.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleRegister} className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="companyName">Company Name *</Label>
+              <Input
+                id="companyName"
+                value={formData.companyName}
+                onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                placeholder="Your Company LLC"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="fullName">Full Name *</Label>
+              <Input
+                id="fullName"
+                value={formData.fullName}
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                placeholder="John Smith"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="email">Email Address *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="john@company.com"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="+1 (555) 123-4567"
+              />
+            </div>
+
+            <div className="bg-slate-50 rounded-lg p-4 text-sm text-slate-600">
+              <ul className="space-y-1">
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-green-600" />
+                  14-day free trial
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-green-600" />
+                  No credit card required
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-green-600" />
+                  Cancel anytime
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowRegistration(false)}
+                className="flex-1"
+                disabled={registering}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1 bg-slate-900 hover:bg-slate-800"
+                disabled={registering}
+              >
+                {registering ? 'Creating Account...' : 'Start Free Trial'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Footer */}
       <footer className="border-t py-12 bg-white">
