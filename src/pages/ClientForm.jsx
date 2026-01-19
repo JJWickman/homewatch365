@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
-  User, Mail, Phone, MapPin, CreditCard, Save, X
+  User, Mail, Phone, MapPin, CreditCard, Save, X, Package
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import PageHeader from '@/components/shared/PageHeader';
 import { useAutoSave } from '@/components/shared/useAutoSave';
 import { Clock } from 'lucide-react';
@@ -39,13 +40,15 @@ export default function ClientForm() {
     city: '',
     state: '',
     zip: '',
-    service_tier: 'standard',
+    selected_products: [],
     monthly_rate: '',
     billing_frequency: 'monthly',
     portal_access: true,
     notes: '',
     is_active: true
   });
+  
+  const [availableProducts, setAvailableProducts] = useState([]);
   
   const autoSaveFunction = async (data) => {
     if (!companyId || !clientId) return;
@@ -74,7 +77,15 @@ export default function ClientForm() {
       const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
       
       if (members.length > 0) {
-        setCompanyId(members[0].company_id);
+        const compId = members[0].company_id;
+        setCompanyId(compId);
+        
+        // Load available products/services
+        const products = await base44.entities.ProductService.filter({ 
+          company_id: compId,
+          is_active: true 
+        });
+        setAvailableProducts(products);
       }
 
       // Check if editing existing client
@@ -96,7 +107,7 @@ export default function ClientForm() {
             city: client.city || '',
             state: client.state || '',
             zip: client.zip || '',
-            service_tier: client.service_tier || 'standard',
+            selected_products: client.selected_products || [],
             monthly_rate: client.monthly_rate || '',
             billing_frequency: client.billing_frequency || 'monthly',
             portal_access: client.portal_access !== false,
@@ -305,33 +316,55 @@ export default function ClientForm() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div>
+              <Label className="flex items-center gap-2 mb-3">
+                <Package className="h-4 w-4" />
+                Selected Products & Services
+              </Label>
+              {availableProducts.length === 0 ? (
+                <p className="text-sm text-slate-500">No products/services available. Add them in Settings → Products & Services.</p>
+              ) : (
+                <div className="space-y-2 border rounded-lg p-4 max-h-60 overflow-y-auto">
+                  {availableProducts.map((product) => (
+                    <div key={product.id} className="flex items-start gap-3">
+                      <Checkbox
+                        id={product.id}
+                        checked={formData.selected_products.includes(product.id)}
+                        onCheckedChange={(checked) => {
+                          const updated = checked
+                            ? [...formData.selected_products, product.id]
+                            : formData.selected_products.filter(id => id !== product.id);
+                          handleChange('selected_products', updated);
+                        }}
+                      />
+                      <label htmlFor={product.id} className="flex-1 cursor-pointer">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-sm">{product.name}</p>
+                            <p className="text-xs text-slate-500">{product.description}</p>
+                          </div>
+                          <div className="text-right ml-4">
+                            <p className="font-semibold text-sm">${product.price}</p>
+                            <p className="text-xs text-slate-500 capitalize">{product.billing_frequency.replace('_', ' ')}</p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="service_tier">Service Tier</Label>
-                <Select
-                  value={formData.service_tier}
-                  onValueChange={(value) => handleChange('service_tier', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="basic">Basic</SelectItem>
-                    <SelectItem value="standard">Standard</SelectItem>
-                    <SelectItem value="premium">Premium</SelectItem>
-                    <SelectItem value="custom">Custom</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="monthly_rate">Monthly Rate ($)</Label>
+                <Label htmlFor="monthly_rate">Custom Monthly Rate ($)</Label>
                 <Input
                   id="monthly_rate"
                   type="number"
                   step="0.01"
                   value={formData.monthly_rate}
                   onChange={(e) => handleChange('monthly_rate', e.target.value)}
-                  placeholder="0.00"
+                  placeholder="Leave empty to use product prices"
                 />
               </div>
             </div>
