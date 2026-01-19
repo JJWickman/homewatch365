@@ -127,18 +127,51 @@ export default function Pricing() {
     }
   };
 
-  const handleSelectPlan = async (tierId) => {
-    if (!company || companyMember?.role !== 'owner') return;
-    
+  const [loadingCheckout, setLoadingCheckout] = useState(false);
+  const [stripePrices, setStripePrices] = useState({});
+
+  useEffect(() => {
+    loadStripePrices();
+  }, []);
+
+  const loadStripePrices = async () => {
     try {
-      await base44.entities.Company.update(company.id, {
+      const response = await base44.functions.invoke('getStripePrices');
+      if (response.data.success) {
+        setStripePrices(response.data.prices);
+      }
+    } catch (error) {
+      console.error('Error loading Stripe prices:', error);
+    }
+  };
+
+  const handleSelectPlan = async (tierId) => {
+    if (!company || !companyMember?.is_owner) return;
+    
+    setLoadingCheckout(true);
+    try {
+      const priceId = stripePrices[tierId]?.[billingCycle];
+      
+      if (!priceId) {
+        alert('Stripe not configured. Please contact support or set up Stripe in Settings.');
+        return;
+      }
+
+      const response = await base44.functions.invoke('createCheckoutSession', {
+        price_id: priceId,
+        company_id: company.id,
         subscription_plan: tierId,
-        subscription_status: 'active'
+        billing_cycle: billingCycle
       });
       
-      setCompany({ ...company, subscription_plan: tierId, subscription_status: 'active' });
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      }
     } catch (error) {
-      console.error('Error updating plan:', error);
+      console.error('Error creating checkout:', error);
+      alert('Failed to start checkout. Please try again.');
+    } finally {
+      setLoadingCheckout(false);
     }
   };
 
@@ -261,11 +294,16 @@ export default function Pricing() {
                 {isOwner && (
                   <Button 
                     onClick={() => handleSelectPlan(tier.id)}
-                    disabled={isCurrentPlan}
+                    disabled={isCurrentPlan || loadingCheckout}
                     className={`w-full ${tier.popular ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-900 hover:bg-slate-800'}`}
                   >
-                    {isCurrentPlan ? 'Current Plan' : 'Select Plan'}
+                    {loadingCheckout ? 'Loading...' : (isCurrentPlan ? 'Current Plan' : company?.subscription_status === 'trial' ? 'Start 14-Day Trial' : 'Subscribe')}
                   </Button>
+                )}
+                {isOwner && company?.subscription_status === 'trial' && !isCurrentPlan && (
+                  <p className="text-xs text-center text-slate-500 mt-2">
+                    No credit card required for trial
+                  </p>
                 )}
               </CardContent>
             </Card>

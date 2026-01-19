@@ -19,6 +19,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from 'lucide-react';
+import TrialBanner from '@/components/subscription/TrialBanner';
 
 const getPageRestrictions = () => {
   return {
@@ -320,6 +321,7 @@ export default function Layout({ children, currentPageName }) {
 
         {/* Page content */}
         <main className="p-4 lg:p-6">
+          <TrialBanner company={company} companyMember={companyMember} />
           {isPageRestricted && isAdmin && (
             <Alert className="mb-6 bg-amber-50 border-amber-200">
               <AlertCircle className="h-4 w-4 text-amber-600" />
