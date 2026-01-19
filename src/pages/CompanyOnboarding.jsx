@@ -412,6 +412,38 @@ export default function CompanyOnboarding() {
             </>
           )}
 
+          {/* Success Step */}
+          {step === 'complete' && (
+            <>
+              <CardHeader>
+                <CardTitle className="text-center text-2xl">🎉 Congratulations!</CardTitle>
+                <CardDescription className="text-center">
+                  Your account is all set up
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex justify-center">
+                  <img 
+                    src="https://media.giphy.com/media/g9GUutsISw9STEM9IL/giphy.gif" 
+                    alt="Celebration" 
+                    className="w-full rounded-lg"
+                  />
+                </div>
+                <div className="text-center space-y-2">
+                  <p className="text-lg font-semibold text-slate-900">You're ready to go!</p>
+                  <p className="text-slate-600">Your company, first client, and property have been created. Let's get started managing properties.</p>
+                </div>
+                <Button 
+                  onClick={() => navigate(createPageUrl('Dashboard'))}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  size="lg"
+                >
+                  Take me to the Dashboard
+                </Button>
+              </CardContent>
+            </>
+          )}
+
           {/* Property Step */}
           {step === 'property' && (
             <>
