@@ -52,24 +52,33 @@ export default function CompanyOnboarding() {
   }, []);
 
   const checkExistingCompany = async () => {
-    try {
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
-      
-      // Check if user already has a company
-      const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-      if (members.length > 0) {
-        navigate(createPageUrl('Dashboard'));
-        return;
-      }
-    } catch (error) {
-      // User not logged in - redirect to login
-      base44.auth.redirectToLogin(createPageUrl('CompanyOnboarding'));
-      return;
-    } finally {
-      setCheckingUser(false);
-    }
-  };
+        try {
+          const currentUser = await base44.auth.me();
+          setUser(currentUser);
+
+          // Check if user already has a company
+          const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
+          if (members.length > 0) {
+            // User has a company - check if they want to skip onboarding
+            if (currentUser.onboarding_completed) {
+              navigate(createPageUrl('Dashboard'));
+              return;
+            }
+            // User has a company but hasn't opted out of onboarding - show success step
+            const companies = await base44.entities.Company.filter({ id: members[0].company_id });
+            if (companies.length > 0) {
+              setCompany(companies[0]);
+            }
+            setStep('complete');
+          }
+        } catch (error) {
+          // User not logged in - redirect to login
+          base44.auth.redirectToLogin(createPageUrl('CompanyOnboarding'));
+          return;
+        } finally {
+          setCheckingUser(false);
+        }
+      };
 
   const handleCreateCompany = async () => {
     if (!user || !companyData.companyName || !companyData.email) return;
