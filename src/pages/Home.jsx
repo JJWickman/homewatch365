@@ -136,7 +136,7 @@ export default function Home() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-3">
               <img 
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/55ddcfd0e_EstateIQLogo.png" 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/80aa6ec76_NewEstateIQLogo.png" 
                 alt="Estate IQ" 
                 className="h-16 w-auto object-contain" 
               />
@@ -427,7 +427,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-3">
               <img 
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/55ddcfd0e_EstateIQLogo.png" 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/80aa6ec76_NewEstateIQLogo.png" 
                 alt="Estate IQ" 
                 className="h-12 w-auto object-contain" 
               />

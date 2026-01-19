@@ -230,9 +230,9 @@ export default function Layout({ children, currentPageName }) {
                 className="flex items-center gap-2 hover:opacity-80 transition-opacity"
               >
                 <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/55ddcfd0e_EstateIQLogo.png" 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/80aa6ec76_NewEstateIQLogo.png" 
                   alt="Estate IQ" 
-                  className="h-10 w-10 object-contain" 
+                  className="h-10 w-auto object-contain" 
                 />
                 <div>
                   <p className="text-white font-semibold text-sm">Estate IQ</p>
