@@ -11,13 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2, FileText, Send } from 'lucide-react';
+import { Plus, Trash2, FileText, Send, Mail } from 'lucide-react';
 
 export default function MonthlyStatementDialog({ open, onOpenChange, clientId, billingMonth, onStatementUpdated }) {
   const [loading, setLoading] = useState(true);
   const [statement, setStatement] = useState(null);
   const [lineItems, setLineItems] = useState([]);
   const [newItem, setNewItem] = useState({ description: '', amount: '' });
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     if (open && clientId && billingMonth) {
@@ -167,6 +168,32 @@ export default function MonthlyStatementDialog({ open, onOpenChange, clientId, b
     onOpenChange(false);
   };
 
+  const handleSendEmail = async () => {
+    setSending(true);
+    try {
+      const response = await base44.functions.invoke('sendMonthlyStatement', {
+        statement_id: statement.id,
+        client_id: clientId
+      });
+
+      if (response.data.success) {
+        await base44.entities.MonthlyStatement.update(statement.id, {
+          status: 'sent',
+          sent_at: new Date().toISOString()
+        });
+        
+        alert('Statement sent successfully!');
+        if (onStatementUpdated) onStatementUpdated();
+        loadStatement(); // Reload to show updated status
+      }
+    } catch (error) {
+      console.error('Error sending statement:', error);
+      alert('Failed to send statement');
+    } finally {
+      setSending(false);
+    }
+  };
+
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -280,6 +307,12 @@ export default function MonthlyStatementDialog({ open, onOpenChange, clientId, b
               <Button onClick={handleFinalize}>
                 <Send className="h-4 w-4 mr-2" />
                 Finalize Statement
+              </Button>
+            )}
+            {(statement?.status === 'finalized' || statement?.status === 'sent') && (
+              <Button onClick={handleSendEmail} disabled={sending}>
+                <Mail className="h-4 w-4 mr-2" />
+                {sending ? 'Sending...' : statement?.status === 'sent' ? 'Resend Email' : 'Send Email'}
               </Button>
             )}
           </div>
