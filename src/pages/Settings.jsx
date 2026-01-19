@@ -322,13 +322,13 @@ export default function Settings() {
           });
         }
       } else {
-        // Create new member
+        // Create new member (inactive until they accept invitation)
         const created = await base44.entities.CompanyMember.create({
           company_id: company.id,
           user_email: inviteForm.email,
           user_name: inviteForm.name,
           role: inviteForm.role,
-          is_active: true
+          is_active: false
         });
         memberToInvite = Array.isArray(created) ? created[0] : created;
       }
