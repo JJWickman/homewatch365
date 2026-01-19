@@ -72,18 +72,11 @@ export default function Dashboard() {
            return;
          }
 
-         // User has company but may want to see onboarding again
-         if (!freshUser.onboarding_completed) {
-           setCheckingOnboarding(false);
-           navigate(createPageUrl('CompanyOnboarding'));
-           return;
-         }
-      
-      setCompanyMember(members[0]);
-      const companyId = members[0].company_id;
-      
-      const [companies, clients, properties, visits, activities] = await Promise.all([
-        base44.entities.Company.filter({ id: companyId }),
+     setCompanyMember(members[0]);
+     const companyId = members[0].company_id;
+
+     const [companies, clients, properties, visits, activities] = await Promise.all([
+       base44.entities.Company.filter({ id: companyId }),
         base44.entities.Client.filter({ company_id: companyId, is_active: true }),
         base44.entities.Property.filter({ company_id: companyId, is_active: true }),
         base44.entities.Visit.filter({ company_id: companyId }),
