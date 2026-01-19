@@ -16,6 +16,7 @@ import StatsCard from '@/components/shared/StatsCard';
 import StatusBadge from '@/components/shared/StatusBadge';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [companyMember, setCompanyMember] = useState(null);
   const [company, setCompany] = useState(null);
@@ -30,6 +31,7 @@ export default function Dashboard() {
   const [todayInspections, setTodayInspections] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
 
   useEffect(() => {
     loadDashboardData();
