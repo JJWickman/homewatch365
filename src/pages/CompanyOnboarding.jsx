@@ -51,6 +51,14 @@ export default function CompanyOnboarding() {
     checkExistingCompany();
   }, []);
 
+  useEffect(() => {
+    if (!checkingUser && step === 'company') {
+      toast.success('Welcome to Onboarding! Let\'s set up your account in 3 steps.', {
+        duration: 4000
+      });
+    }
+  }, [checkingUser, step]);
+
   const checkExistingCompany = async () => {
         try {
           const currentUser = await base44.auth.me();
