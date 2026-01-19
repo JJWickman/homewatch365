@@ -6,7 +6,7 @@ import {
   Settings as SettingsIcon, Building, Users, FileText, 
   Palette, Save, Upload, Plus, Trash2, User, Mail, Edit2, MoreVertical, Camera,
   Calendar, Copy, Check, ExternalLink, Link2, Unlink, Shield, Edit, AlertCircle as AlertIcon, Loader2,
-  CreditCard, TrendingUp, Briefcase, Zap, X, Star, MessageCircle, MapPin
+  CreditCard, TrendingUp, Briefcase, Zap, X, Star, MessageCircle, MapPin, Lock
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,8 @@ import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import PaymentMethodCard from '@/components/billing/PaymentMethodCard';
 import FinancialManagement from '@/components/settings/FinancialManagement';
+import PasswordResetDialog from '@/components/auth/PasswordResetDialog';
+import UserManagementSection from '@/components/settings/UserManagementSection';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -99,6 +101,7 @@ export default function Settings() {
   const [stripePrices, setStripePrices] = useState({});
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
 
   // Helper function to check if user is admin (backward compatible)
   const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'owner';
@@ -586,8 +589,9 @@ ${company.name}
           {(companyMember?.is_owner || companyMember?.role === 'owner') && <TabsTrigger value="billing">Billing</TabsTrigger>}
           {isAdmin && <TabsTrigger value="financial">Products & Services</TabsTrigger>}
           {isAdmin && <TabsTrigger value="reviews">Reviews</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="users">Users</TabsTrigger>}
           {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
-        </TabsList>
+          </TabsList>
 
         <TabsContent value="profile">
           <Card>
@@ -1304,8 +1308,12 @@ ${company.name}
         </TabsContent>
 
         <TabsContent value="financial">
-          <FinancialManagement companyId={company?.id} />
-        </TabsContent>
+           <FinancialManagement companyId={company?.id} />
+         </TabsContent>
+
+         <TabsContent value="users">
+           <UserManagementSection staff={staff} company={company} />
+         </TabsContent>
 
         <TabsContent value="reviews" className="space-y-6">
           {/* Reviews Management */}
@@ -1839,8 +1847,15 @@ ${company.name}
         </DialogContent>
       </Dialog>
 
-      {/* Delete Member Dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      {/* Password Reset Dialog */}
+       <PasswordResetDialog 
+         open={showPasswordReset} 
+         onOpenChange={setShowPasswordReset}
+         userEmail={user?.email}
+       />
+
+       {/* Delete Member Dialog */}
+       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Remove Team Member</DialogTitle>
