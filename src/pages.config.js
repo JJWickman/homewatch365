@@ -7,7 +7,6 @@ import Clients from './pages/Clients';
 import CompanyOnboarding from './pages/CompanyOnboarding';
 import Contractors from './pages/Contractors';
 import Dashboard from './pages/Dashboard';
-import FollowUpDetail from './pages/FollowUpDetail';
 import Home from './pages/Home';
 import InspectionDetail from './pages/InspectionDetail';
 import InspectionFlow from './pages/InspectionFlow';
@@ -35,7 +34,6 @@ export const PAGES = {
     "CompanyOnboarding": CompanyOnboarding,
     "Contractors": Contractors,
     "Dashboard": Dashboard,
-    "FollowUpDetail": FollowUpDetail,
     "Home": Home,
     "InspectionDetail": InspectionDetail,
     "InspectionFlow": InspectionFlow,
