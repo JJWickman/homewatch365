@@ -34,6 +34,8 @@ export default function ClientDetail() {
   const [showPortalDialog, setShowPortalDialog] = useState(false);
   const [portalEmail, setPortalEmail] = useState('');
   const [savingPortal, setSavingPortal] = useState(false);
+  const [serviceSubscription, setServiceSubscription] = useState(null);
+  const [additionalProducts, setAdditionalProducts] = useState([]);
 
   useEffect(() => {
     loadClient();
@@ -61,6 +63,21 @@ export default function ClientDetail() {
         setProperties(propertiesData);
         setInspections(inspectionsData);
         setPortalEmail(c.portal_user_email || '');
+
+        // Load service subscription details
+        if (c.service_subscription_id) {
+          const services = await base44.entities.ProductService.filter({ id: c.service_subscription_id });
+          if (services.length > 0) {
+            setServiceSubscription(services[0]);
+          }
+        }
+
+        // Load additional products
+        if (c.additional_products && c.additional_products.length > 0) {
+          const allProducts = await base44.entities.ProductService.list();
+          const selectedProducts = allProducts.filter(p => c.additional_products.includes(p.id));
+          setAdditionalProducts(selectedProducts);
+        }
       }
     } catch (error) {
       console.error('Error loading client:', error);
@@ -249,14 +266,32 @@ export default function ClientDetail() {
               <CardTitle className="text-sm font-medium text-slate-500">Service Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-500">Service Tier</span>
-                <span className="font-medium capitalize">{client.service_tier || 'Standard'}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-500">Monthly Rate</span>
+              <div>
+                <span className="text-sm text-slate-500 block mb-1">Subscription</span>
                 <span className="font-medium">
-                  {client.monthly_rate ? `$${client.monthly_rate.toFixed(2)}` : '—'}
+                  {serviceSubscription ? serviceSubscription.name : 'No subscription'}
+                </span>
+              </div>
+              {additionalProducts.length > 0 && (
+                <div>
+                  <span className="text-sm text-slate-500 block mb-1">Add-ons</span>
+                  <div className="space-y-1">
+                    {additionalProducts.map(product => (
+                      <div key={product.id} className="text-sm font-medium">
+                        {product.name}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="flex justify-between items-center pt-2 border-t">
+                <span className="text-sm text-slate-500">Monthly Rate</span>
+                <span className="font-semibold text-lg">
+                  ${(() => {
+                    let total = serviceSubscription?.price || 0;
+                    additionalProducts.forEach(p => total += p.price);
+                    return total.toFixed(2);
+                  })()}
                 </span>
               </div>
               <div className="flex justify-between items-center">
