@@ -454,13 +454,42 @@ export default function ClientPortal() {
 
       {/* Footer */}
       <footer className="border-t bg-white mt-12">
-        <div className="max-w-5xl mx-auto px-4 py-6 text-center text-sm text-slate-500">
-          <p>Powered by Estate Watch</p>
-          {company?.phone && (
-            <p className="mt-1">
-              Questions? Call {company.phone}
+        <div className="max-w-5xl mx-auto px-4 py-8">
+          <div className="flex flex-col items-center text-center space-y-4">
+            {company?.logo_url && (
+              <img 
+                src={company.logo_url} 
+                alt={company.name} 
+                className="h-12 w-auto object-contain"
+              />
+            )}
+            <div>
+              <p className="font-semibold text-slate-900">{company?.name}</p>
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mt-2 text-sm text-slate-600">
+                {company?.phone && (
+                  <a href={`tel:${company.phone}`} className="hover:text-slate-900">
+                    {company.phone}
+                  </a>
+                )}
+                {company?.email && (
+                  <>
+                    {company?.phone && <span className="hidden sm:inline">•</span>}
+                    <a href={`mailto:${company.email}`} className="hover:text-slate-900">
+                      {company.email}
+                    </a>
+                  </>
+                )}
+              </div>
+              {company?.address && (
+                <p className="text-xs text-slate-500 mt-2">
+                  {company.address}, {company.city}, {company.state} {company.zip}
+                </p>
+              )}
+            </div>
+            <p className="text-xs text-slate-400">
+              Powered by Estate IQ
             </p>
-          )}
+          </div>
         </div>
       </footer>
     </div>
