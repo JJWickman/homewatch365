@@ -102,6 +102,8 @@ export default function Settings() {
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [inviting, setInviting] = useState(false);
+  const [inviteError, setInviteError] = useState('');
 
   // Helper function to check if user is admin (backward compatible)
   const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'owner';
@@ -297,6 +299,9 @@ export default function Settings() {
   const handleInviteStaff = async () => {
     if (!company || !inviteForm.email) return;
 
+    setInviting(true);
+    setInviteError('');
+
     try {
       // Check if member already exists
       const existing = await base44.entities.CompanyMember.filter({ 
@@ -304,22 +309,27 @@ export default function Settings() {
         user_email: inviteForm.email 
       });
       
-      if (existing.length === 0) {
-        await base44.entities.CompanyMember.create({
-          company_id: company.id,
-          user_email: inviteForm.email,
-          user_name: inviteForm.name,
-          role: inviteForm.role,
-          is_active: true
-        });
-        
-        // Send invite email
-        const appUrl = window.location.origin;
-        await base44.integrations.Core.SendEmail({
-          from_name: 'Estate Watch 365',
-          to: inviteForm.email,
-          subject: `You've been invited to join ${company.name}`,
-          body: `
+      if (existing.length > 0) {
+        setInviteError('This user is already invited to the company');
+        setInviting(false);
+        return;
+      }
+
+      await base44.entities.CompanyMember.create({
+        company_id: company.id,
+        user_email: inviteForm.email,
+        user_name: inviteForm.name,
+        role: inviteForm.role,
+        is_active: true
+      });
+      
+      // Send invite email
+      const appUrl = window.location.origin;
+      await base44.integrations.Core.SendEmail({
+        from_name: 'Estate Watch 365',
+        to: inviteForm.email,
+        subject: `You've been invited to join ${company.name}`,
+        body: `
 Hello ${inviteForm.name || ''},
 
 You've been invited to join ${company.name} as a ${inviteForm.role === 'field_inspector' ? 'Field Inspector' : inviteForm.role === 'dispatcher' ? 'Dispatcher/Manager' : 'Administrator'}.
@@ -329,15 +339,18 @@ ${appUrl}
 
 Best regards,
 ${company.name}
-          `.trim()
-        });
-      }
+        `.trim()
+      });
       
       setShowInviteDialog(false);
       setInviteForm({ email: '', name: '', role: 'field_inspector' });
+      setInviteError('');
       loadData();
     } catch (error) {
       console.error('Error inviting staff:', error);
+      setInviteError(error.message || 'Failed to send invitation');
+    } finally {
+      setInviting(false);
     }
   };
 
@@ -1702,14 +1715,20 @@ ${company.name}
       {/* Invite Dialog */}
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Invite Team Member</DialogTitle>
-            <DialogDescription>
-              Send an invitation to join your company
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
+            <DialogHeader>
+              <DialogTitle>Invite Team Member</DialogTitle>
+              <DialogDescription>
+                Send an invitation to join your company
+              </DialogDescription>
+            </DialogHeader>
+
+            {inviteError && (
+              <Alert variant="destructive">
+                <AlertDescription>{inviteError}</AlertDescription>
+              </Alert>
+            )}
+
+            <div className="space-y-4 py-4">
             <div>
               <Label>Email *</Label>
               <Input
@@ -1746,16 +1765,25 @@ ${company.name}
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowInviteDialog(false)}>
+            <Button variant="outline" onClick={() => setShowInviteDialog(false)} disabled={inviting}>
               Cancel
             </Button>
             <Button 
               onClick={handleInviteStaff}
-              disabled={!inviteForm.email}
+              disabled={!inviteForm.email || inviting}
               className="bg-slate-900 hover:bg-slate-800"
             >
-              <Mail className="h-4 w-4 mr-2" />
-              Send Invite
+              {inviting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Invite
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
