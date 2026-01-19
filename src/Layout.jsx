@@ -157,20 +157,20 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Sidebar */}
       <aside className={`
-        fixed top-0 left-0 z-50 h-full w-64 bg-slate-900 transform transition-transform duration-200 ease-in-out
+        fixed top-0 left-0 z-50 h-full w-64 bg-gradient-to-b from-blue-900 to-blue-950 transform transition-transform duration-200 ease-in-out
         lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-slate-800">
-            <div className="flex items-center gap-3">
-              {company?.logo_url ? (
-                <img src={company.logo_url} alt={company.name} className="h-8 w-8 rounded" />
-              ) : (
-                <div className="h-8 w-8 rounded bg-amber-500 flex items-center justify-center">
-                  <Building className="h-5 w-5 text-white" />
-                </div>
-              )}
+          <div className="flex items-center justify-between h-16 px-4 border-b border-blue-800">
+          <div className="flex items-center gap-3">
+            {company?.logo_url ? (
+              <img src={company.logo_url} alt={company.name} className="h-8 w-8 rounded" />
+            ) : (
+              <div className="h-8 w-8 rounded bg-green-500 flex items-center justify-center">
+                <Building className="h-5 w-5 text-white" />
+              </div>
+            )}
               <span className="font-semibold text-white truncate">
                 {company?.name || 'Estate Watch'}
               </span>
@@ -192,8 +192,8 @@ export default function Layout({ children, currentPageName }) {
                   className={`
                     flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                     ${isActive 
-                      ? 'bg-amber-500/10 text-amber-500' 
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800'}
+                      ? 'bg-green-500/20 text-green-400' 
+                      : 'text-slate-300 hover:text-white hover:bg-blue-800'}
                   `}
                 >
                   <item.icon className="h-5 w-5" />
@@ -204,15 +204,15 @@ export default function Layout({ children, currentPageName }) {
           </nav>
 
           {/* Settings & User */}
-          <div className="p-3 border-t border-slate-800">
+          <div className="p-3 border-t border-blue-800">
             <Link
               to={createPageUrl('Settings')}
               onClick={() => setSidebarOpen(false)}
               className={`
                 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                 ${currentPageName === 'Settings' 
-                  ? 'bg-amber-500/10 text-amber-500' 
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'}
+                  ? 'bg-green-500/20 text-green-400' 
+                  : 'text-slate-300 hover:text-white hover:bg-blue-800'}
               `}
             >
               <Settings className="h-5 w-5" />
@@ -238,7 +238,7 @@ export default function Layout({ children, currentPageName }) {
             </div>
             <a
               href="#support"
-              className="flex items-center justify-center gap-2 text-xs text-slate-600 hover:text-amber-500 transition-colors"
+              className="flex items-center justify-center gap-2 text-xs text-slate-600 hover:text-green-600 transition-colors"
             >
               <span>Support</span>
               <span className="text-slate-400">→</span>
@@ -281,7 +281,7 @@ export default function Layout({ children, currentPageName }) {
                   <button className="flex items-center gap-2 hover:bg-slate-100 rounded-lg px-2 py-1.5 transition-colors">
                     <Avatar className="h-8 w-8">
                           <AvatarImage src={user?.avatar_url} alt={user?.full_name} />
-                          <AvatarFallback className="bg-slate-900 text-white text-xs">
+                          <AvatarFallback className="bg-blue-600 text-white text-xs">
                             {getInitials(user?.full_name)}
                           </AvatarFallback>
                         </Avatar>
@@ -319,11 +319,11 @@ export default function Layout({ children, currentPageName }) {
         <main className="p-4 lg:p-6">
           <TrialBanner company={company} companyMember={companyMember} />
           {isPageRestricted && isAdmin && (
-            <Alert className="mb-6 bg-amber-50 border-amber-200">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
-              <AlertDescription className="text-amber-900">
+            <Alert className="mb-6 bg-blue-50 border-blue-200">
+              <AlertCircle className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-900">
                 <strong>Demo Mode:</strong> This feature is for demonstration purposes only and requires an Enterprise subscription to be fully functional. 
-                <a href={createPageUrl('Settings')} className="underline ml-1 font-medium hover:text-amber-700">
+                <a href={createPageUrl('Settings')} className="underline ml-1 font-medium hover:text-blue-700">
                   Upgrade your plan
                 </a>
               </AlertDescription>
