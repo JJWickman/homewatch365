@@ -436,31 +436,74 @@ ${company.name}
     if (!company) return;
 
     try {
+      // Check for existing invitation
+      let invitation = null;
+      const existingInvitations = await base44.entities.Invitation.filter({
+        company_id: company.id,
+        invitee_email: member.user_email,
+        status: 'pending'
+      });
+
+      if (existingInvitations.length > 0) {
+        invitation = existingInvitations[0];
+      } else {
+        // Create new invitation if no pending one exists
+        const inviteToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
+        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+        invitation = await base44.entities.Invitation.create({
+          company_id: company.id,
+          invitee_email: member.user_email,
+          inviter_email: user.email,
+          token: inviteToken,
+          role: member.role,
+          status: 'pending',
+          expires_at: expiresAt.toISOString()
+        });
+      }
+
       const appUrl = window.location.origin;
       const roleLabel = member.role === 'field_inspector' ? 'Field Inspector' : 
                        member.role === 'dispatcher' ? 'Dispatcher/Manager' : 'Administrator';
-      
-      await base44.integrations.Core.SendEmail({
+
+      const invitationUrl = `${appUrl}${createPageUrl('InvitationAccept')}?token=${invitation.token}`;
+
+      const emailBody = `
+  Hello ${member.user_name || ''},
+
+  You've been invited to join ${company.name} as a ${roleLabel}.
+
+  Click the link below to accept the invitation and create your account:
+  ${invitationUrl}
+
+  This link will expire in 7 days.
+
+  Best regards,
+  ${company.name}
+      `.trim();
+
+      const emailResponse = await base44.integrations.Core.SendEmail({
         from_name: 'Estate Watch 365',
         to: member.user_email,
         subject: `You've been invited to join ${company.name}`,
-        body: `
-Hello ${member.user_name || ''},
+        body: emailBody
+      });
 
-You've been invited to join ${company.name} as a ${roleLabel}.
-
-Click the link below to sign in:
-${appUrl}
-
-Best regards,
-${company.name}
-        `.trim()
+      // Log the email to CommunicationLog
+      await base44.entities.CommunicationLog.create({
+        company_id: company.id,
+        type: 'email',
+        subject: `You've been invited to join ${company.name}`,
+        message: emailBody,
+        client_email: member.user_email,
+        status: emailResponse?.status === 'failed' ? 'failed' : 'sent',
+        sent_at: new Date().toISOString()
       });
 
       alert('Invitation sent to ' + member.user_email);
     } catch (error) {
       console.error('Error resending invite:', error);
-      alert('Failed to resend invitation');
+      alert('Failed to resend invitation: ' + error.message);
     }
   };
 
