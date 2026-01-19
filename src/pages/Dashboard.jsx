@@ -66,7 +66,9 @@ export default function Dashboard() {
       }
       
       if (members.length === 0) {
-        setLoading(false);
+        // New user - redirect to onboarding
+        setCheckingOnboarding(false);
+        navigate(createPageUrl('CompanyOnboarding'));
         return;
       }
       
