@@ -126,9 +126,11 @@ export default function Dashboard() {
       
       setTodayInspections(enrichedVisits.slice(0, 5));
       setRecentActivity(activities);
+      setCheckingOnboarding(false);
 
     } catch (error) {
       console.error('Error loading dashboard:', error);
+      setCheckingOnboarding(false);
     } finally {
       setLoading(false);
     }
