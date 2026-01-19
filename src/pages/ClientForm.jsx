@@ -46,6 +46,7 @@ export default function ClientForm() {
     monthly_rate: '',
     billing_frequency: 'monthly',
     portal_access: true,
+    portal_pin: '',
     notes: '',
     is_active: true
   });
@@ -130,6 +131,7 @@ export default function ClientForm() {
             monthly_rate: client.monthly_rate || '',
             billing_frequency: client.billing_frequency || 'monthly',
             portal_access: client.portal_access !== false,
+            portal_pin: client.portal_pin || '',
             notes: client.notes || '',
             is_active: client.is_active !== false
           });
@@ -492,6 +494,22 @@ export default function ClientForm() {
                 onCheckedChange={(checked) => handleChange('portal_access', checked)}
               />
             </div>
+
+            {formData.portal_access && (
+              <div>
+                <Label htmlFor="portal_pin">Portal PIN (6 digits) *</Label>
+                <Input
+                  id="portal_pin"
+                  type="password"
+                  maxLength={6}
+                  value={formData.portal_pin || ''}
+                  onChange={(e) => handleChange('portal_pin', e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  className="text-center text-lg tracking-widest"
+                />
+                <p className="text-xs text-slate-500 mt-1">Client will use this PIN to access the portal</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

@@ -32,11 +32,21 @@ export default function ClientPortal() {
 
   const loadPortalData = async () => {
     try {
+      // Check if user came from login (has session)
+      const params = new URLSearchParams(window.location.search);
+      const sessionEmail = sessionStorage.getItem('portal_client_email');
+      
+      if (!sessionEmail) {
+        // Not authenticated - redirect to login
+        navigate(createPageUrl('ClientLogin'));
+        return;
+      }
+
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
       // Find client record by portal email
-      const clients = await base44.entities.Client.filter({ portal_user_email: currentUser.email });
+      const clients = await base44.entities.Client.filter({ portal_user_email: sessionEmail });
       
       if (clients.length === 0) {
         // Not a client - might be staff

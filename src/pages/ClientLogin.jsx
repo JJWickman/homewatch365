@@ -67,7 +67,8 @@ export default function ClientLogin() {
         return;
       }
 
-      // Login successful - redirect to portal
+      // Login successful - store session and redirect to portal
+      sessionStorage.setItem('portal_client_email', clientData.portal_user_email);
       toast.success('Login successful!');
       navigate(createPageUrl('ClientPortal'));
     } catch (error) {
