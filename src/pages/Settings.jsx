@@ -1180,7 +1180,6 @@ ${company.name}
             <CardContent>
               <div className="space-y-4">
                 {staff.map((member) => (
-                  member.is_active && (
                   <div 
                     key={member.id}
                     className="flex items-center justify-between p-4 rounded-lg border"
@@ -1239,7 +1238,6 @@ ${company.name}
                       )}
                     </div>
                   </div>
-                  )
                 ))}
               </div>
             </CardContent>
