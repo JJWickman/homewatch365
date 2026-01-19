@@ -62,6 +62,7 @@ Deno.serve(async (req) => {
 
     // Send email to target user
     await base44.integrations.Core.SendEmail({
+      from_name: 'Estate Watch 365',
       to: targetUserEmail,
       subject: 'Password Reset Request from Administrator',
       body: `

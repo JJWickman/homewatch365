@@ -316,6 +316,7 @@ export default function Settings() {
         // Send invite email
         const appUrl = window.location.origin;
         await base44.integrations.Core.SendEmail({
+          from_name: 'Estate Watch 365',
           to: inviteForm.email,
           subject: `You've been invited to join ${company.name}`,
           body: `
