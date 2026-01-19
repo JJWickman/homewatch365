@@ -145,7 +145,7 @@ export default function Dashboard() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <Building2 className="h-16 w-16 text-slate-300 mb-4" />
-        <h2 className="text-xl font-semibold text-slate-900 mb-2">Welcome to Estate Watch</h2>
+        <h2 className="text-xl font-semibold text-slate-900 mb-2">Welcome to Estate Watch 365</h2>
         <p className="text-slate-500 text-center max-w-md mb-6">
           You're not currently associated with any company. Please contact your administrator or create a new company.
         </p>
