@@ -304,64 +304,69 @@ export default function Settings() {
     setInviteError('');
 
     try {
+      // Generate unique invitation token
+      const inviteToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
+
+      // Create invitation record
+      await base44.entities.Invitation.create({
+        company_id: company.id,
+        invitee_email: inviteForm.email,
+        inviter_email: user.email,
+        token: inviteToken,
+        role: inviteForm.role,
+        status: 'pending',
+        expires_at: expiresAt.toISOString()
+      });
+
       // Check if member already exists
       const existing = await base44.entities.CompanyMember.filter({ 
         company_id: company.id, 
         user_email: inviteForm.email 
       });
       
-      let memberToInvite;
-      
-      if (existing.length > 0) {
-        // Update existing member with new role/name if provided
-        memberToInvite = existing[0];
-        if (inviteForm.name || inviteForm.role) {
-          await base44.entities.CompanyMember.update(memberToInvite.id, {
-            user_name: inviteForm.name || memberToInvite.user_name,
-            role: inviteForm.role || memberToInvite.role
-          });
-        }
-      } else {
-        // Create new member (inactive until they accept invitation)
-        const created = await base44.entities.CompanyMember.create({
+      if (existing.length === 0) {
+        // Create new inactive member
+        await base44.entities.CompanyMember.create({
           company_id: company.id,
           user_email: inviteForm.email,
           user_name: inviteForm.name,
           role: inviteForm.role,
           is_active: false
         });
-        memberToInvite = Array.isArray(created) ? created[0] : created;
+      } else if (inviteForm.name || inviteForm.role) {
+        // Update existing member
+        await base44.entities.CompanyMember.update(existing[0].id, {
+          user_name: inviteForm.name || existing[0].user_name,
+          role: inviteForm.role || existing[0].role
+        });
       }
       
-      // Send invite email
+      // Send invite email with invitation link
       const appUrl = window.location.origin;
-      const roleLabel = (inviteForm.role || memberToInvite.role) === 'field_inspector' ? 'Field Inspector' : 
-                       (inviteForm.role || memberToInvite.role) === 'dispatcher' ? 'Dispatcher/Manager' : 'Administrator';
+      const roleLabel = inviteForm.role === 'field_inspector' ? 'Field Inspector' : 
+                       inviteForm.role === 'dispatcher' ? 'Dispatcher/Manager' : 'Administrator';
       
-      console.log('Sending email to:', inviteForm.email);
-      const emailResponse = await base44.integrations.Core.SendEmail({
+      const invitationUrl = `${appUrl}${createPageUrl('InvitationAccept')}?token=${inviteToken}`;
+      
+      await base44.integrations.Core.SendEmail({
         from_name: 'Estate Watch 365',
         to: inviteForm.email,
         subject: `You've been invited to join ${company.name}`,
         body: `
-Hello ${inviteForm.name || memberToInvite.user_name || ''},
+Hello ${inviteForm.name || ''},
 
 You've been invited to join ${company.name} as a ${roleLabel}.
 
-Click the link below to sign in:
-${appUrl}
+Click the link below to accept the invitation and create your account:
+${invitationUrl}
+
+This link will expire in 7 days.
 
 Best regards,
 ${company.name}
         `.trim()
       });
-      
-      console.log('Email response:', emailResponse);
-      
-      // Check if response indicates failure
-      if (emailResponse?.error || emailResponse?.status === 'failed') {
-        throw new Error('Failed to send invitation email: ' + (emailResponse?.error || 'Email delivery failed'));
-      }
       
       setShowInviteDialog(false);
       setInviteForm({ email: '', name: '', role: 'field_inspector' });
