@@ -310,30 +310,42 @@ export default function Settings() {
         user_email: inviteForm.email 
       });
       
+      let memberToInvite;
+      
       if (existing.length > 0) {
-        setInviteError('This user is already invited to the company');
-        setInviting(false);
-        return;
+        // Update existing member with new role/name if provided
+        memberToInvite = existing[0];
+        if (inviteForm.name || inviteForm.role) {
+          await base44.entities.CompanyMember.update(memberToInvite.id, {
+            user_name: inviteForm.name || memberToInvite.user_name,
+            role: inviteForm.role || memberToInvite.role
+          });
+        }
+      } else {
+        // Create new member
+        const newMember = await base44.entities.CompanyMember.create({
+          company_id: company.id,
+          user_email: inviteForm.email,
+          user_name: inviteForm.name,
+          role: inviteForm.role,
+          is_active: true
+        });
+        memberToInvite = newMember;
       }
-
-      await base44.entities.CompanyMember.create({
-        company_id: company.id,
-        user_email: inviteForm.email,
-        user_name: inviteForm.name,
-        role: inviteForm.role,
-        is_active: true
-      });
       
       // Send invite email
       const appUrl = window.location.origin;
+      const roleLabel = (inviteForm.role || memberToInvite.role) === 'field_inspector' ? 'Field Inspector' : 
+                       (inviteForm.role || memberToInvite.role) === 'dispatcher' ? 'Dispatcher/Manager' : 'Administrator';
+      
       await base44.integrations.Core.SendEmail({
         from_name: 'Estate Watch 365',
         to: inviteForm.email,
         subject: `You've been invited to join ${company.name}`,
         body: `
-Hello ${inviteForm.name || ''},
+Hello ${inviteForm.name || memberToInvite.user_name || ''},
 
-You've been invited to join ${company.name} as a ${inviteForm.role === 'field_inspector' ? 'Field Inspector' : inviteForm.role === 'dispatcher' ? 'Dispatcher/Manager' : 'Administrator'}.
+You've been invited to join ${company.name} as a ${roleLabel}.
 
 Click the link below to sign in:
 ${appUrl}
