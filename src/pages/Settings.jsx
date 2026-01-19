@@ -633,11 +633,20 @@ ${company.name}
                       <p className="text-xs text-slate-500 mt-2">JPG, PNG or GIF (Max 5MB)</p>
                     </div>
                   </div>
-                  <Button onClick={handleSaveProfile} disabled={savingProfile} className="bg-slate-900 hover:bg-slate-800 flex-shrink-0">
-                    <Save className="h-4 w-4 mr-2" />
-                    {savingProfile ? 'Saving...' : 'Save'}
-                  </Button>
-                </div>
+                  <div className="flex gap-2 flex-shrink-0">
+                    <Button 
+                      onClick={() => setShowPasswordReset(true)} 
+                      variant="outline"
+                    >
+                      <Lock className="h-4 w-4 mr-2" />
+                      Change Password
+                    </Button>
+                    <Button onClick={handleSaveProfile} disabled={savingProfile} className="bg-slate-900 hover:bg-slate-800">
+                      <Save className="h-4 w-4 mr-2" />
+                      {savingProfile ? 'Saving...' : 'Save'}
+                    </Button>
+                  </div>
+                  </div>
               </div>
               <div className="border-t pt-4">
                 {companyMember?.is_owner && (
