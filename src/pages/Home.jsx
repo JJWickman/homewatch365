@@ -138,9 +138,8 @@ export default function Home() {
               <img 
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/55ddcfd0e_EstateIQLogo.png" 
                 alt="Estate IQ" 
-                className="h-10 w-10 object-contain" 
+                className="h-16 w-auto object-contain" 
               />
-              <span className="text-xl font-bold text-slate-900">Estate IQ</span>
             </div>
             <div className="flex items-center gap-4">
               <Button variant="ghost" onClick={() => base44.auth.redirectToLogin()}>
@@ -430,9 +429,8 @@ export default function Home() {
               <img 
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/55ddcfd0e_EstateIQLogo.png" 
                 alt="Estate IQ" 
-                className="h-10 w-10 object-contain" 
+                className="h-12 w-auto object-contain" 
               />
-              <span className="text-xl font-bold text-slate-900">Estate IQ</span>
             </div>
             <div className="flex gap-8 text-sm text-slate-600">
               <button onClick={() => base44.auth.redirectToLogin()} className="hover:text-slate-900">
