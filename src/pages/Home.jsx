@@ -145,7 +145,7 @@ export default function Home() {
               <Button variant="ghost" onClick={() => base44.auth.redirectToLogin()}>
                 Sign In
               </Button>
-              <Button onClick={handleGetStarted} className="bg-slate-900 hover:bg-slate-800">
+              <Button onClick={handleGetStarted} className="bg-blue-600 hover:bg-blue-700">
                 Get Started
               </Button>
             </div>
@@ -154,24 +154,24 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
           <div className="text-center max-w-3xl mx-auto">
-            <Badge className="mb-6 bg-amber-500 text-white hover:bg-amber-600">
+            <Badge className="mb-6 bg-green-500 text-white hover:bg-green-600 border-0">
               Estate Management Software
             </Badge>
             <h1 className="text-4xl sm:text-6xl font-bold mb-6">
               The Complete Estate Watch Platform
             </h1>
-            <p className="text-xl text-slate-300 mb-8">
+            <p className="text-xl text-blue-50 mb-8">
               All-in-one platform for estate watch and property management companies. Streamline inspections, scheduling, client management, and field operations.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg" 
                 onClick={handleGetStarted}
-                className="bg-white text-slate-900 hover:bg-slate-100 text-lg px-8"
+                className="bg-green-500 hover:bg-green-600 text-white text-lg px-8 shadow-lg"
               >
                 Start 14-Day Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -180,35 +180,35 @@ export default function Home() {
                 size="lg" 
                 variant="outline"
                 onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-                className="border-white text-white hover:bg-white/10 text-lg px-8"
+                className="border-white text-white hover:bg-white hover:text-blue-700 text-lg px-8"
               >
                 View Pricing
               </Button>
             </div>
-            <p className="text-sm text-slate-400 mt-4">No credit card required • Free for 14 days</p>
+            <p className="text-sm text-blue-100 mt-4">No credit card required • Free for 14 days</p>
           </div>
         </div>
       </section>
 
       {/* Social Proof */}
-      <section className="border-b bg-slate-50 py-12">
+      <section className="border-b bg-gradient-to-r from-blue-50 to-green-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
             <div className="text-center">
-              <div className="text-3xl font-bold text-slate-900">500+</div>
+              <div className="text-3xl font-bold text-blue-700">500+</div>
               <div className="text-sm text-slate-600">Properties Managed</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-slate-900">10,000+</div>
+              <div className="text-3xl font-bold text-green-600">10,000+</div>
               <div className="text-sm text-slate-600">Inspections Completed</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-slate-900">98%</div>
+              <div className="text-3xl font-bold text-blue-700">98%</div>
               <div className="text-sm text-slate-600">Customer Satisfaction</div>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex">
-                {[1,2,3,4,5].map(i => <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />)}
+                {[1,2,3,4,5].map(i => <Star key={i} className="h-5 w-5 fill-green-500 text-green-500" />)}
               </div>
               <span className="text-sm font-medium text-slate-700">5.0 Rating</span>
             </div>
@@ -230,10 +230,10 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, idx) => (
-              <Card key={idx} className="border-2 hover:border-slate-900 transition-colors">
+              <Card key={idx} className="border-2 border-blue-100 hover:border-blue-400 hover:shadow-lg transition-all">
                 <CardHeader>
-                  <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center mb-4">
-                    <feature.icon className="h-6 w-6 text-slate-900" />
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center mb-4">
+                    <feature.icon className="h-6 w-6 text-white" />
                   </div>
                   <CardTitle className="text-xl">{feature.title}</CardTitle>
                 </CardHeader>
@@ -264,16 +264,16 @@ export default function Home() {
               return (
                 <Card 
                   key={plan.id}
-                  className={`relative ${plan.popular ? 'border-2 border-slate-900 shadow-xl' : ''}`}
+                  className={`relative ${plan.popular ? 'border-2 border-blue-600 shadow-xl bg-gradient-to-br from-blue-50 to-green-50' : ''}`}
                 >
                   {plan.popular && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-slate-900 text-white">Most Popular</Badge>
+                      <Badge className="bg-green-500 text-white">Most Popular</Badge>
                     </div>
                   )}
                   <CardHeader className="text-center pb-8">
-                    <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                      <Icon className="h-6 w-6 text-slate-900" />
+                    <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
+                      <Icon className="h-6 w-6 text-blue-700" />
                     </div>
                     <CardTitle className="text-xl mb-2">{plan.name}</CardTitle>
                     <div className="text-4xl font-bold text-slate-900">
@@ -292,7 +292,7 @@ export default function Home() {
                     </ul>
                     <Button 
                       onClick={handleGetStarted}
-                      className={`w-full ${plan.popular ? 'bg-slate-900 hover:bg-slate-800' : ''}`}
+                      className={`w-full ${plan.popular ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
                       variant={plan.popular ? 'default' : 'outline'}
                     >
                       Start Free Trial
@@ -306,23 +306,23 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+      <section className="py-24 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-6">
             Ready to Transform Your Property Management?
           </h2>
-          <p className="text-xl text-slate-300 mb-8">
-            Join hundreds of property managers who trust Estate Watch
+          <p className="text-xl text-blue-50 mb-8">
+            Join hundreds of property managers who trust Estate IQ
           </p>
           <Button 
             size="lg" 
             onClick={handleGetStarted}
-            className="bg-white text-slate-900 hover:bg-slate-100 text-lg px-8"
+            className="bg-green-500 hover:bg-green-600 text-white text-lg px-8 shadow-lg"
           >
             Start Your Free Trial
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
-          <p className="text-sm text-slate-400 mt-4">14 days free • No credit card required</p>
+          <p className="text-sm text-blue-100 mt-4">14 days free • No credit card required</p>
         </div>
       </section>
 
@@ -411,7 +411,7 @@ export default function Home() {
               </Button>
               <Button
                 type="submit"
-                className="flex-1 bg-slate-900 hover:bg-slate-800"
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
                 disabled={registering}
               >
                 {registering ? 'Creating Account...' : 'Start Free Trial'}
