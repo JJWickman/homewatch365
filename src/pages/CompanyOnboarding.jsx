@@ -37,13 +37,15 @@ export default function CompanyOnboarding() {
   });
 
   const [propertyData, setPropertyData] = useState({
-    name: '',
-    address: '',
-    city: '',
-    state: '',
-    zip: '',
-    propertyType: 'single_family'
-  });
+        name: '',
+        address: '',
+        city: '',
+        state: '',
+        zip: '',
+        propertyType: 'single_family'
+      });
+
+      const [skipFutureOnboarding, setSkipFutureOnboarding] = useState(false);
 
   useEffect(() => {
     checkExistingCompany();
