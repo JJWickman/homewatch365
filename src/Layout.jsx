@@ -221,18 +221,18 @@ export default function Layout({ children, currentPageName }) {
             </Link>
           </div>
 
-          {/* Estate IQ Footer */}
+          {/* Estate Watch 365 Footer */}
           <div className="p-4 border-t border-slate-200 bg-white">
             <div className="flex items-center justify-center mb-3">
               <a 
-                href="https://www.estateiq.com" 
+                href="https://www.estatewatch365.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="hover:opacity-80 transition-opacity"
               >
                 <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/80aa6ec76_NewEstateIQLogo.png" 
-                  alt="Estate IQ" 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/c534cf318_NewEstateWatchLogo.png" 
+                  alt="Estate Watch 365" 
                   className="h-12 w-auto object-contain" 
                 />
               </a>

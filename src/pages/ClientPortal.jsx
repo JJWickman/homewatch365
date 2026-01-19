@@ -496,9 +496,11 @@ export default function ClientPortal() {
                 </p>
               )}
             </div>
-            <p className="text-xs text-slate-400">
-              Powered by Estate IQ
-            </p>
+            <img 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/c534cf318_NewEstateWatchLogo.png" 
+              alt="Estate Watch 365" 
+              className="h-8 w-auto object-contain opacity-60" 
+            />
           </div>
         </div>
       </footer>
