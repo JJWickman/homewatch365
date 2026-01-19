@@ -349,11 +349,7 @@ export default function Settings() {
       
       const invitationUrl = `${appUrl}${createPageUrl('InvitationAccept')}?token=${inviteToken}`;
       
-      await base44.integrations.Core.SendEmail({
-        from_name: 'Estate Watch 365',
-        to: inviteForm.email,
-        subject: `You've been invited to join ${company.name}`,
-        body: `
+      const emailBody = `
 Hello ${inviteForm.name || ''},
 
 You've been invited to join ${company.name} as a ${roleLabel}.
@@ -365,7 +361,24 @@ This link will expire in 7 days.
 
 Best regards,
 ${company.name}
-        `.trim()
+        `.trim();
+
+      const emailResponse = await base44.integrations.Core.SendEmail({
+        from_name: 'Estate Watch 365',
+        to: inviteForm.email,
+        subject: `You've been invited to join ${company.name}`,
+        body: emailBody
+      });
+
+      // Log the email in CommunicationLog
+      await base44.entities.CommunicationLog.create({
+        company_id: company.id,
+        type: 'email',
+        subject: `You've been invited to join ${company.name}`,
+        message: emailBody,
+        client_email: inviteForm.email,
+        status: emailResponse?.status === 'failed' ? 'failed' : 'sent',
+        sent_at: new Date().toISOString()
       });
       
       setShowInviteDialog(false);
