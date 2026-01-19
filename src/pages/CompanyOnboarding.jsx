@@ -277,6 +277,7 @@ export default function CompanyOnboarding() {
                     value={companyData.companyName}
                     onChange={(e) => setCompanyData(prev => ({ ...prev, companyName: e.target.value }))}
                     placeholder="Your Company Name"
+                    required
                   />
                 </div>
 
