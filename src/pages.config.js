@@ -24,6 +24,7 @@ import Settings from './pages/Settings';
 import StripeSetup from './pages/StripeSetup';
 import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
 import InvitationAccept from './pages/InvitationAccept';
+import ForgotPassword from './pages/ForgotPassword';
 import __Layout from './Layout.jsx';
 
 
@@ -54,6 +55,7 @@ export const PAGES = {
     "StripeSetup": StripeSetup,
     "TestGoogleMapsAPI": TestGoogleMapsAPI,
     "InvitationAccept": InvitationAccept,
+    "ForgotPassword": ForgotPassword,
 }
 
 export const pagesConfig = {
