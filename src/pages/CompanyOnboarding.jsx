@@ -68,23 +68,25 @@ export default function CompanyOnboarding() {
     }
   };
 
-  const handleSubmit = async () => {
-    if (!user || !formData.companyName) return;
+  const handleCreateCompany = async () => {
+    if (!user || !companyData.companyName || !companyData.email) return;
     
     setLoading(true);
     try {
-      // Create company
-      const slug = formData.companyName
+      const slug = companyData.companyName
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '');
       
-      const company = await base44.entities.Company.create({
-        name: formData.companyName,
+      const newCompany = await base44.entities.Company.create({
+        name: companyData.companyName,
         slug: slug + '-' + Date.now().toString(36),
-        phone: formData.phone,
-        city: formData.city,
-        state: formData.state,
+        email: companyData.email,
+        phone: companyData.phone,
+        address: companyData.address,
+        city: companyData.city,
+        state: companyData.state,
+        zip: companyData.zip,
         logo_url: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/7e2dc0976_EstateIQFavIcon.png',
         subscription_plan: 'solopreneur',
         subscription_status: 'trial',
@@ -92,9 +94,8 @@ export default function CompanyOnboarding() {
         is_active: true
       });
 
-      // Create company member (owner with administrator role)
       await base44.entities.CompanyMember.create({
-        company_id: company.id,
+        company_id: newCompany.id,
         user_email: user.email,
         user_name: user.full_name,
         role: 'administrator',
@@ -102,9 +103,8 @@ export default function CompanyOnboarding() {
         is_active: true
       });
 
-      // Create default inspection template
       await base44.entities.InspectionTemplate.create({
-        company_id: company.id,
+        company_id: newCompany.id,
         name: 'Standard Weekly Inspection',
         description: 'Default template for routine property inspections',
         type: 'routine',
@@ -147,9 +147,68 @@ export default function CompanyOnboarding() {
         ]
       });
 
-      navigate(createPageUrl('Dashboard'));
+      setCompany(newCompany);
+      setStep('client');
     } catch (error) {
       console.error('Error creating company:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateClient = async () => {
+    if (!company || !clientData.firstName || !clientData.lastName || !clientData.email) return;
+    
+    setLoading(true);
+    try {
+      await base44.entities.Client.create({
+        company_id: company.id,
+        first_name: clientData.firstName,
+        last_name: clientData.lastName,
+        email: clientData.email,
+        phone: clientData.phone,
+        is_active: true
+      });
+
+      setStep('property');
+    } catch (error) {
+      console.error('Error creating client:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateProperty = async () => {
+    if (!company || !clientData.firstName || !propertyData.address || !propertyData.city || !propertyData.state) return;
+    
+    setLoading(true);
+    try {
+      // Get the client we just created
+      const clients = await base44.entities.Client.filter({
+        company_id: company.id,
+        first_name: clientData.firstName,
+        last_name: clientData.lastName
+      });
+
+      if (clients.length === 0) {
+        throw new Error('Client not found');
+      }
+
+      await base44.entities.Property.create({
+        company_id: company.id,
+        client_id: clients[0].id,
+        address: propertyData.address,
+        city: propertyData.city,
+        state: propertyData.state,
+        zip: propertyData.zip,
+        property_type: propertyData.propertyType,
+        status: 'occupied',
+        is_active: true
+      });
+
+      navigate(createPageUrl('Dashboard'));
+    } catch (error) {
+      console.error('Error creating property:', error);
     } finally {
       setLoading(false);
     }
