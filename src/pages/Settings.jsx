@@ -584,7 +584,7 @@ ${company.name}
           <TabsTrigger value="company">Company</TabsTrigger>
           {isDispatcherOrAdmin && <TabsTrigger value="team">Team</TabsTrigger>}
           {(companyMember?.is_owner || companyMember?.role === 'owner') && <TabsTrigger value="billing">Billing</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="financial">Financial</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="financial">Products & Services</TabsTrigger>}
           {isAdmin && <TabsTrigger value="reviews">Reviews</TabsTrigger>}
           {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
         </TabsList>
