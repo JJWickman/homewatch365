@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
-  User, Mail, Phone, MapPin, CreditCard, Save, X, Package
+  User, Mail, Phone, MapPin, CreditCard, Save, X, Package, Plus, Trash2, DollarSign
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +51,12 @@ export default function ClientForm() {
   
   const [availableServices, setAvailableServices] = useState([]);
   const [availableProducts, setAvailableProducts] = useState([]);
+  const [monthlyTransactions, setMonthlyTransactions] = useState([]);
+  const [newTransaction, setNewTransaction] = useState({
+    description: '',
+    amount: '',
+    billing_month: new Date().toISOString().slice(0, 7)
+  });
   
   const autoSaveFunction = async (data) => {
     if (!companyId || !clientId) return;
@@ -124,6 +130,12 @@ export default function ClientForm() {
             notes: client.notes || '',
             is_active: client.is_active !== false
           });
+          
+          // Load monthly transactions
+          const transactions = await base44.entities.ClientTransaction.filter({ 
+            client_id: id 
+          });
+          setMonthlyTransactions(transactions);
         }
       }
     } catch (error) {
@@ -162,6 +174,46 @@ export default function ClientForm() {
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleAddTransaction = async () => {
+    if (!clientId || !companyId || !newTransaction.description || !newTransaction.amount) {
+      alert('Please fill in all transaction fields');
+      return;
+    }
+
+    try {
+      const transaction = await base44.entities.ClientTransaction.create({
+        company_id: companyId,
+        client_id: clientId,
+        description: newTransaction.description,
+        amount: parseFloat(newTransaction.amount),
+        billing_month: newTransaction.billing_month,
+        transaction_date: new Date().toISOString().split('T')[0],
+        type: 'custom',
+        status: 'pending'
+      });
+      
+      setMonthlyTransactions(prev => [...prev, transaction]);
+      setNewTransaction({
+        description: '',
+        amount: '',
+        billing_month: new Date().toISOString().slice(0, 7)
+      });
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+      alert('Failed to add transaction');
+    }
+  };
+
+  const handleDeleteTransaction = async (transactionId) => {
+    try {
+      await base44.entities.ClientTransaction.delete(transactionId);
+      setMonthlyTransactions(prev => prev.filter(t => t.id !== transactionId));
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      alert('Failed to delete transaction');
+    }
   };
 
   if (loading) {
@@ -439,6 +491,83 @@ export default function ClientForm() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Monthly Billing Transactions */}
+        {clientId && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Monthly Billing Transactions
+              </CardTitle>
+              <CardDescription>Add custom items to include in monthly invoices</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Add New Transaction */}
+              <div className="border rounded-lg p-4 bg-slate-50">
+                <Label className="text-sm font-medium mb-3 block">Add New Item</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <Input
+                    placeholder="Description"
+                    value={newTransaction.description}
+                    onChange={(e) => setNewTransaction(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="Amount"
+                    value={newTransaction.amount}
+                    onChange={(e) => setNewTransaction(prev => ({ ...prev, amount: e.target.value }))}
+                  />
+                  <Input
+                    type="month"
+                    value={newTransaction.billing_month}
+                    onChange={(e) => setNewTransaction(prev => ({ ...prev, billing_month: e.target.value }))}
+                  />
+                </div>
+                <Button 
+                  type="button"
+                  onClick={handleAddTransaction} 
+                  className="mt-3"
+                  size="sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Item
+                </Button>
+              </div>
+
+              {/* Transactions List */}
+              <div className="space-y-2">
+                {monthlyTransactions.length === 0 ? (
+                  <p className="text-sm text-slate-500 text-center py-4">No billing items yet</p>
+                ) : (
+                  monthlyTransactions.map((transaction) => (
+                    <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg bg-white">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{transaction.description}</p>
+                        <p className="text-xs text-slate-500">
+                          {new Date(transaction.billing_month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="font-semibold">${transaction.amount.toFixed(2)}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteTransaction(transaction.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Notes */}
         <Card>
