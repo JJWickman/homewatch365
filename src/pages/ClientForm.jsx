@@ -88,9 +88,13 @@ export default function ClientForm() {
           is_active: true 
         });
         
-        // Separate services and products
-        setAvailableServices(allItems.filter(item => item.type === 'service'));
-        setAvailableProducts(allItems.filter(item => item.type === 'product'));
+        // Separate services (monthly subscriptions only) and products/add-ons
+        setAvailableServices(allItems.filter(item => 
+          item.type === 'service' && item.billing_frequency === 'monthly'
+        ));
+        setAvailableProducts(allItems.filter(item => 
+          item.type === 'product' || (item.type === 'service' && item.billing_frequency === 'one_time')
+        ));
       }
 
       // Check if editing existing client
