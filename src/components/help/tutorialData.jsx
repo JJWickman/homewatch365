@@ -1,4 +1,4 @@
-import { Users, Building2, ClipboardCheck, Calendar, UserPlus, Home, FileText } from 'lucide-react';
+import { Users, Building2, ClipboardCheck, Calendar, UserPlus, Home, FileText, Route, MapPin, Navigation } from 'lucide-react';
 
 export const tutorials = {
   createClient: {
@@ -188,6 +188,88 @@ export const tutorials = {
         ]
       }
     ]
+  },
+
+  optimizeRoute: {
+    id: 'optimizeRoute',
+    title: 'Optimizing Visit Routes',
+    description: 'Learn how to optimize routes for efficient field operations',
+    category: 'Daily Operations',
+    duration: '4 min',
+    icon: Route,
+    steps: [
+      {
+        title: 'Access Route Optimizer',
+        description: 'Navigate to the Route Optimizer page from the sidebar to start planning efficient routes for your field team.',
+        icon: Route,
+        tips: [
+          'This feature is available on Growth plans and above',
+          'Routes are optimized to save time and fuel costs',
+          'You can optimize routes for any team member'
+        ]
+      },
+      {
+        title: 'Select Field Inspector',
+        description: 'Choose which field inspector you want to optimize routes for from the dropdown menu.',
+        icon: Users,
+        tips: [
+          'Each inspector can have their own optimized route',
+          'View all team members assigned to field visits',
+          'Filter by availability and assigned properties'
+        ]
+      },
+      {
+        title: 'Choose Date Range',
+        description: 'Select the date for which you want to optimize visits. The system will load all scheduled visits for that day.',
+        icon: Calendar,
+        tips: [
+          'You can optimize routes for today or future dates',
+          'All scheduled visits for the selected date will appear',
+          'Rescheduled visits are automatically included'
+        ]
+      },
+      {
+        title: 'Set Start Location',
+        description: 'Enter the starting location for the route (home, office, or custom address). This helps optimize the first stop.',
+        icon: MapPin,
+        tips: [
+          'Use the inspector\'s home as default start location',
+          'You can set a custom office or meeting point',
+          'The start location is saved for future optimizations'
+        ]
+      },
+      {
+        title: 'Review Visit List',
+        description: 'Check all scheduled visits that will be included in the route optimization. You can see property addresses and visit types.',
+        icon: ClipboardCheck,
+        tips: [
+          'Verify all visits are for the correct date',
+          'Remove any visits that shouldn\'t be included',
+          'Add time estimates for more accurate routing'
+        ]
+      },
+      {
+        title: 'Optimize the Route',
+        description: 'Click "Optimize Route" to calculate the most efficient path. The system uses advanced algorithms to minimize travel time.',
+        icon: Navigation,
+        tips: [
+          'Optimization considers traffic patterns and distances',
+          'Routes are ordered for maximum efficiency',
+          'The map shows the complete optimized path'
+        ]
+      },
+      {
+        title: 'Review and Export',
+        description: 'Review the optimized route order and statistics. Export to Google Maps or share with your team.',
+        icon: Route,
+        tips: [
+          'See total distance and estimated travel time',
+          'Export directly to Google Maps for navigation',
+          'Share the optimized route with field inspectors',
+          'Routes can be adjusted manually if needed'
+        ]
+      }
+    ]
   }
 };
 
@@ -200,6 +282,6 @@ export const tutorialCategories = [
   {
     name: 'Daily Operations',
     description: 'Day-to-day task tutorials',
-    tutorials: ['createVisit']
+    tutorials: ['createVisit', 'optimizeRoute']
   }
 ];
