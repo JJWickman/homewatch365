@@ -15,33 +15,15 @@ import { base44 } from '@/api/base44Client';
 
 export default function Home() {
   const navigate = useNavigate();
-  const [isAuthenticating, setIsAuthenticating] = useState(true);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [showRegistration, setShowRegistration] = useState(false);
   const [registering, setRegistering] = useState(false);
-  const [company, setCompany] = useState(null);
   const [formData, setFormData] = useState({
     companyName: '',
     fullName: '',
     email: '',
     phone: ''
   });
-
-  React.useEffect(() => {
-    loadBranding();
-  }, []);
-
-  const loadBranding = async () => {
-    try {
-      const companies = await base44.entities.Company.list('-created_date', 1);
-      if (companies.length > 0) {
-        setCompany(companies[0]);
-      }
-    } catch (error) {
-      console.error('Failed to load branding:', error);
-    } finally {
-      setIsAuthenticating(false);
-    }
-  };
 
   const handleGetStarted = () => {
     setShowRegistration(true);
@@ -79,13 +61,7 @@ export default function Home() {
     }
   };
 
-  if (isAuthenticating) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-      </div>
-    );
-  }
+
 
   const features = [
     {
@@ -159,14 +135,12 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-3">
-              {company?.logo_url ? (
-                <img src={company.logo_url} alt={company.name} className="h-10 w-10 rounded-lg object-contain" />
-              ) : (
-                <div className="h-10 w-10 rounded-lg bg-slate-900 flex items-center justify-center">
-                  <Building className="h-6 w-6 text-white" />
-                </div>
-              )}
-              <span className="text-xl font-bold text-slate-900">{company?.name || 'Estate Watch'}</span>
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/55ddcfd0e_EstateIQLogo.png" 
+                alt="Estate IQ" 
+                className="h-10 w-10 object-contain" 
+              />
+              <span className="text-xl font-bold text-slate-900">Estate IQ</span>
             </div>
             <div className="flex items-center gap-4">
               <Button variant="ghost" onClick={() => base44.auth.redirectToLogin()}>
@@ -186,13 +160,13 @@ export default function Home() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
           <div className="text-center max-w-3xl mx-auto">
             <Badge className="mb-6 bg-amber-500 text-white hover:bg-amber-600">
-              Property Management Made Simple
+              Estate Management Software
             </Badge>
             <h1 className="text-4xl sm:text-6xl font-bold mb-6">
-              Manage Properties Like a Pro
+              The Complete Estate Watch Platform
             </h1>
             <p className="text-xl text-slate-300 mb-8">
-              All-in-one platform for property managers and estate concierge services. Inspections, scheduling, client management, and more.
+              All-in-one platform for estate watch and property management companies. Streamline inspections, scheduling, client management, and field operations.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
@@ -453,14 +427,12 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-3">
-              {company?.logo_url ? (
-                <img src={company.logo_url} alt={company.name} className="h-10 w-10 rounded-lg object-contain" />
-              ) : (
-                <div className="h-10 w-10 rounded-lg bg-slate-900 flex items-center justify-center">
-                  <Building className="h-6 w-6 text-white" />
-                </div>
-              )}
-              <span className="text-xl font-bold text-slate-900">{company?.name || 'Estate Watch'}</span>
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/55ddcfd0e_EstateIQLogo.png" 
+                alt="Estate IQ" 
+                className="h-10 w-10 object-contain" 
+              />
+              <span className="text-xl font-bold text-slate-900">Estate IQ</span>
             </div>
             <div className="flex gap-8 text-sm text-slate-600">
               <button onClick={() => base44.auth.redirectToLogin()} className="hover:text-slate-900">
@@ -474,18 +446,11 @@ export default function Home() {
               </button>
             </div>
             <div className="text-sm text-slate-600">
-              © 2026 Estate Watch. All rights reserved.
+              © 2026 Estate IQ. All rights reserved.
             </div>
           </div>
         </div>
       </footer>
-
-      <style>{`
-        :root {
-          --primary: ${company?.primary_color || '#1e3a5f'};
-          --accent: ${company?.accent_color || '#c9a962'};
-        }
-      `}</style>
     </div>
   );
 }
