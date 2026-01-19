@@ -221,31 +221,27 @@ export default function Layout({ children, currentPageName }) {
           </div>
 
           {/* Estate IQ Footer */}
-          <div className="p-4 border-t border-slate-800 bg-slate-950">
-            <div className="flex items-center justify-between">
+          <div className="p-4 border-t border-slate-200 bg-white">
+            <div className="flex items-center justify-center mb-3">
               <a 
                 href="https://www.estateiq.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                className="hover:opacity-80 transition-opacity"
               >
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/80aa6ec76_NewEstateIQLogo.png" 
                   alt="Estate IQ" 
-                  className="h-10 w-auto object-contain" 
+                  className="h-12 w-auto object-contain" 
                 />
-                <div>
-                  <p className="text-white font-semibold text-sm">Estate IQ</p>
-                  <p className="text-slate-500 text-xs">Property Management</p>
-                </div>
               </a>
             </div>
             <a
               href="#support"
-              className="flex items-center gap-2 mt-3 text-xs text-slate-400 hover:text-amber-500 transition-colors"
+              className="flex items-center justify-center gap-2 text-xs text-slate-600 hover:text-amber-500 transition-colors"
             >
               <span>Support</span>
-              <span className="text-slate-600">→</span>
+              <span className="text-slate-400">→</span>
             </a>
           </div>
           </div>
