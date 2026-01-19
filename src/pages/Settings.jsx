@@ -380,6 +380,38 @@ ${company.name}
     }
   };
 
+  const handleResendInvite = async (member) => {
+    if (!company) return;
+
+    try {
+      const appUrl = window.location.origin;
+      const roleLabel = member.role === 'field_inspector' ? 'Field Inspector' : 
+                       member.role === 'dispatcher' ? 'Dispatcher/Manager' : 'Administrator';
+      
+      await base44.integrations.Core.SendEmail({
+        from_name: 'Estate Watch 365',
+        to: member.user_email,
+        subject: `You've been invited to join ${company.name}`,
+        body: `
+Hello ${member.user_name || ''},
+
+You've been invited to join ${company.name} as a ${roleLabel}.
+
+Click the link below to sign in:
+${appUrl}
+
+Best regards,
+${company.name}
+        `.trim()
+      });
+
+      alert('Invitation sent to ' + member.user_email);
+    } catch (error) {
+      console.error('Error resending invite:', error);
+      alert('Failed to resend invitation');
+    }
+  };
+
   const getInitials = (name, email) => {
     if (name) return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     return email?.slice(0, 2).toUpperCase() || '??';
@@ -1153,6 +1185,10 @@ ${company.name}
                             <DropdownMenuItem onClick={() => handleEditMember(member)}>
                               <Edit2 className="h-4 w-4 mr-2" />
                               Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleResendInvite(member)}>
+                              <Mail className="h-4 w-4 mr-2" />
+                              Resend Invite
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               onClick={() => {
