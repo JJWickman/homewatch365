@@ -59,7 +59,7 @@ return baseItems;
 };
 
 const clientPortalPages = ['ClientPortal', 'ClientInspectionView'];
-const publicPages = ['CompanyOnboarding', 'ClientLogin'];
+const publicPages = ['CompanyOnboarding', 'ClientLogin', 'Home'];
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
