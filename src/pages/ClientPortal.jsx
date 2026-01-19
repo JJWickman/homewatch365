@@ -19,7 +19,7 @@ export default function ClientPortal() {
   const [client, setClient] = useState(null);
   const [company, setCompany] = useState(null);
   const [properties, setProperties] = useState([]);
-  const [inspections, setInspections] = useState([]);
+  const [visits, setVisits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [serviceSubscription, setServiceSubscription] = useState(null);
@@ -48,17 +48,17 @@ export default function ClientPortal() {
       setClient(clientData);
 
       // Load related data
-      const [companiesData, propertiesData, inspectionsData] = await Promise.all([
+      const [companiesData, propertiesData, visitsData] = await Promise.all([
         base44.entities.Company.filter({ id: clientData.company_id }),
         base44.entities.Property.filter({ client_id: clientData.id }),
-        base44.entities.Inspection.filter({ client_id: clientData.id, status: 'completed' }, '-scheduled_date', 20)
+        base44.entities.Visit.filter({ client_id: clientData.id, status: 'completed' }, '-scheduled_date', 20)
       ]);
 
       if (companiesData.length > 0) {
         setCompany(companiesData[0]);
       }
       setProperties(propertiesData);
-      setInspections(inspectionsData);
+      setVisits(visitsData);
 
       // Load service subscription
       if (clientData.service_subscription_id) {
@@ -395,33 +395,33 @@ export default function ClientPortal() {
           </section>
         )}
 
-        {/* Recent Inspections */}
+        {/* Recent Visits */}
         <section>
-          <h2 className="text-lg font-semibold mb-4">Recent Inspections</h2>
-          {inspections.length === 0 ? (
+          <h2 className="text-lg font-semibold mb-4">Recent Visits</h2>
+          {visits.length === 0 ? (
             <Card className="p-8 text-center">
               <ClipboardCheck className="h-10 w-10 mx-auto text-slate-300 mb-2" />
-              <p className="text-slate-500">No completed inspections yet</p>
+              <p className="text-slate-500">No completed visits yet</p>
             </Card>
           ) : (
             <div className="space-y-3">
-              {inspections.map((inspection) => {
-                const property = properties.find(p => p.id === inspection.property_id);
+              {visits.map((visit) => {
+                const property = properties.find(p => p.id === visit.property_id);
                 return (
                   <Card 
-                    key={inspection.id}
+                    key={visit.id}
                     className="cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => navigate(createPageUrl('ClientInspectionView') + `?id=${inspection.id}`)}
+                    onClick={() => navigate(createPageUrl('ClientInspectionView') + `?id=${visit.id}`)}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${
-                            inspection.overall_status === 'all_clear' 
+                            visit.overall_status === 'all_clear' 
                               ? 'bg-emerald-100' 
                               : 'bg-amber-100'
                           }`}>
-                            {inspection.overall_status === 'all_clear' ? (
+                            {visit.overall_status === 'all_clear' ? (
                               <CheckCircle2 className="h-6 w-6 text-emerald-600" />
                             ) : (
                               <AlertTriangle className="h-6 w-6 text-amber-600" />
@@ -432,14 +432,14 @@ export default function ClientPortal() {
                             <div className="flex items-center gap-3 text-sm text-slate-500">
                               <span className="flex items-center gap-1">
                                 <Calendar className="h-3.5 w-3.5" />
-                                {format(new Date(inspection.scheduled_date), 'MMM d, yyyy')}
+                                {format(new Date(visit.scheduled_date), 'MMM d, yyyy')}
                               </span>
-                              <span className="capitalize">{inspection.type}</span>
+                              <span className="capitalize">{visit.visit_type}</span>
                             </div>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <StatusBadge status={inspection.overall_status} />
+                          <StatusBadge status={visit.overall_status || visit.status} />
                           <Eye className="h-4 w-4 text-slate-400" />
                         </div>
                       </div>
