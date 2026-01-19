@@ -32,6 +32,7 @@ export default function FinancialManagement({ companyId }) {
   const [editingProduct, setEditingProduct] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingProduct, setDeletingProduct] = useState(null);
+  const [loadingSample, setLoadingSample] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -139,6 +140,23 @@ export default function FinancialManagement({ companyId }) {
     }
   };
 
+  const handleCreateSamples = async () => {
+    setLoadingSample(true);
+    try {
+      const response = await base44.functions.invoke('createSampleProducts');
+      if (response.data.success) {
+        loadProducts();
+      } else {
+        alert(response.data.message || 'Failed to create sample products');
+      }
+    } catch (error) {
+      console.error('Error creating samples:', error);
+      alert('Failed to create sample products');
+    } finally {
+      setLoadingSample(false);
+    }
+  };
+
   const getBillingFrequencyLabel = (frequency) => {
     const labels = {
       one_time: 'One-time',
@@ -193,10 +211,19 @@ export default function FinancialManagement({ companyId }) {
             <div className="text-center py-12 border rounded-lg bg-slate-50">
               <Package className="h-12 w-12 text-slate-300 mx-auto mb-3" />
               <p className="text-slate-600 mb-4">No products or services yet</p>
-              <Button onClick={handleAddProduct} variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Your First Product/Service
-              </Button>
+              <div className="flex gap-2 justify-center">
+                <Button onClick={handleAddProduct} variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Your First Product/Service
+                </Button>
+                <Button 
+                  onClick={handleCreateSamples} 
+                  variant="outline"
+                  disabled={loadingSample}
+                >
+                  {loadingSample ? 'Creating...' : 'Load Sample Data'}
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="space-y-3">
