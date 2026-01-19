@@ -323,14 +323,14 @@ export default function Settings() {
         }
       } else {
         // Create new member
-        const newMember = await base44.entities.CompanyMember.create({
+        const created = await base44.entities.CompanyMember.create({
           company_id: company.id,
           user_email: inviteForm.email,
           user_name: inviteForm.name,
           role: inviteForm.role,
           is_active: true
         });
-        memberToInvite = newMember;
+        memberToInvite = Array.isArray(created) ? created[0] : created;
       }
       
       // Send invite email
