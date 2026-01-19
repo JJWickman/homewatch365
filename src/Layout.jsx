@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { 
   Home, Users, Building2, ClipboardCheck, Calendar, 
   FileText, Settings, Menu, X, LogOut, ChevronDown,
-  Bell, Search, Plus, Building, UserCircle, Megaphone, Briefcase, Route
+  Bell, Search, Plus, Building, UserCircle, Megaphone, Briefcase, Route, BookOpen
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +46,7 @@ const baseItems = [
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
   { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
   { name: 'Route Optimizer', icon: Route, page: 'RouteOptimizer' },
+  { name: 'Help & Tutorials', icon: BookOpen, page: 'HelpTutorials' },
 ];
 
 // Only show Marketing for Enterprise plan
