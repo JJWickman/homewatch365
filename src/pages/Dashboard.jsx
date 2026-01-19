@@ -55,7 +55,14 @@ export default function Dashboard() {
       const freshUser = userList.length > 0 ? { ...currentUser, full_name: userList[0].full_name, id: userList[0].id } : currentUser;
       setUser(freshUser);
 
-      const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
+      let members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
+      
+      // Retry once if not found (company might have just been created)
+      if (members.length === 0) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
+      }
+      
       if (members.length === 0) {
         setLoading(false);
         return;

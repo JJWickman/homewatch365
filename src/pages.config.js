@@ -8,11 +8,13 @@ import Clients from './pages/Clients';
 import CompanyOnboarding from './pages/CompanyOnboarding';
 import Contractors from './pages/Contractors';
 import Dashboard from './pages/Dashboard';
+import ForgotPassword from './pages/ForgotPassword';
 import HelpTutorials from './pages/HelpTutorials';
 import Home from './pages/Home';
 import InspectionDetail from './pages/InspectionDetail';
 import InspectionFlow from './pages/InspectionFlow';
 import Inspections from './pages/Inspections';
+import InvitationAccept from './pages/InvitationAccept';
 import Marketing from './pages/Marketing';
 import Pricing from './pages/Pricing';
 import Properties from './pages/Properties';
@@ -23,8 +25,6 @@ import Schedule from './pages/Schedule';
 import Settings from './pages/Settings';
 import StripeSetup from './pages/StripeSetup';
 import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
-import InvitationAccept from './pages/InvitationAccept';
-import ForgotPassword from './pages/ForgotPassword';
 import __Layout from './Layout.jsx';
 
 
@@ -39,11 +39,13 @@ export const PAGES = {
     "CompanyOnboarding": CompanyOnboarding,
     "Contractors": Contractors,
     "Dashboard": Dashboard,
+    "ForgotPassword": ForgotPassword,
     "HelpTutorials": HelpTutorials,
     "Home": Home,
     "InspectionDetail": InspectionDetail,
     "InspectionFlow": InspectionFlow,
     "Inspections": Inspections,
+    "InvitationAccept": InvitationAccept,
     "Marketing": Marketing,
     "Pricing": Pricing,
     "Properties": Properties,
@@ -54,8 +56,6 @@ export const PAGES = {
     "Settings": Settings,
     "StripeSetup": StripeSetup,
     "TestGoogleMapsAPI": TestGoogleMapsAPI,
-    "InvitationAccept": InvitationAccept,
-    "ForgotPassword": ForgotPassword,
 }
 
 export const pagesConfig = {
