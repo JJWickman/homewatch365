@@ -58,19 +58,27 @@ export default function Dashboard() {
       setUser(freshUser);
 
       let members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-      
-      // Retry once if not found (company might have just been created)
-      if (members.length === 0) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-      }
-      
-      if (members.length === 0) {
-        // New user - redirect to onboarding
-        setCheckingOnboarding(false);
-        navigate(createPageUrl('CompanyOnboarding'));
-        return;
-      }
+
+          // Retry once if not found (company might have just been created)
+          if (members.length === 0) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
+          }
+
+          if (members.length === 0) {
+            // New user - redirect to onboarding
+            setCheckingOnboarding(false);
+            navigate(createPageUrl('CompanyOnboarding'));
+            return;
+          }
+
+          // Check if user has completed onboarding and wants to skip it
+          if (!freshUser.onboarding_completed) {
+            // User hasn't disabled onboarding, show it
+            setCheckingOnboarding(false);
+            navigate(createPageUrl('CompanyOnboarding'));
+            return;
+          }
       
       setCompanyMember(members[0]);
       const companyId = members[0].company_id;
