@@ -211,9 +211,13 @@ export default function CompanyOnboarding() {
         is_active: true
       });
 
+      toast.success('Onboarding complete! Redirecting to dashboard...');
+      // Small delay to ensure data is saved
+      await new Promise(resolve => setTimeout(resolve, 500));
       navigate(createPageUrl('Dashboard'));
     } catch (error) {
       console.error('Error creating property:', error);
+      toast.error('Failed to complete onboarding. Please try again.');
     } finally {
       setLoading(false);
     }
