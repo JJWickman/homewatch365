@@ -12,16 +12,36 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 
 export default function CompanyOnboarding() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState('company');
   const [loading, setLoading] = useState(false);
   const [checkingUser, setCheckingUser] = useState(true);
   const [user, setUser] = useState(null);
+  const [company, setCompany] = useState(null);
   
-  const [formData, setFormData] = useState({
+  const [companyData, setCompanyData] = useState({
     companyName: '',
+    email: '',
     phone: '',
+    address: '',
     city: '',
-    state: ''
+    state: '',
+    zip: ''
+  });
+
+  const [clientData, setClientData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: ''
+  });
+
+  const [propertyData, setPropertyData] = useState({
+    name: '',
+    address: '',
+    city: '',
+    state: '',
+    zip: '',
+    propertyType: 'single_family'
   });
 
   useEffect(() => {
