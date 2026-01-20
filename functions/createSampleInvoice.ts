@@ -10,24 +10,16 @@ Deno.serve(async (req) => {
     }
 
     // Find Jason Wickman client
-    const clients = await base44.entities.Client.filter({ 
-      first_name: 'Jason', 
-      last_name: 'Wickman' 
-    });
+    const allClients = await base44.entities.Client.list();
+    const client = allClients.find(c => c.first_name === 'Jason' && c.last_name === 'Wickman');
 
-    if (clients.length === 0) {
+    if (!client) {
       return Response.json({ error: 'Client Jason Wickman not found' }, { status: 404 });
     }
 
-    const client = clients[0];
-
     // Find Premium Monthly subscription
-    const products = await base44.entities.ProductService.filter({ 
-      company_id: client.company_id,
-      name: 'Premium Monthly Visit Service'
-    });
-
-    const premiumService = products.length > 0 ? products[0] : null;
+    const allProducts = await base44.entities.ProductService.list();
+    const premiumService = allProducts.find(p => p.name && p.name.includes('Premium Monthly'));
     const premiumPrice = premiumService ? premiumService.price : 249;
 
     // Create invoice for December 2025
