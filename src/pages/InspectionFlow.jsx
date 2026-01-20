@@ -22,6 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import StandardInspectionView from '@/components/inspections/StandardInspectionView';
 import FlexibleInspectionView from '@/components/inspections/FlexibleInspectionView';
 import MobileInspectionView from '@/components/inspections/MobileInspectionView';
