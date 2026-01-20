@@ -389,28 +389,24 @@ export default function ClientForm() {
                 <CreditCard className="h-4 w-4" />
                 Service Subscription
               </Label>
-              {availableServices.length === 0 ? (
-                <p className="text-sm text-slate-500">No service subscriptions available. Add them in Settings → Products & Services.</p>
-              ) : (
-                <Select
-                  value={formData.service_subscription_id}
-                  onValueChange={(value) => handleChange('service_subscription_id', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a service subscription..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableServices.map((service) => (
-                      <SelectItem key={service.id} value={service.id}>
-                        <div className="flex items-center justify-between w-full">
-                          <span>{service.name}</span>
-                          <span className="ml-4 text-slate-500">${service.price}/{service.billing_frequency}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+              <Select
+                value={formData.service_subscription_id}
+                onValueChange={(value) => handleChange('service_subscription_id', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={availableServices.length === 0 ? "No subscriptions available - add in Settings" : "Select a service subscription..."} />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableServices.map((service) => (
+                    <SelectItem key={service.id} value={service.id}>
+                      <div className="flex items-center justify-between w-full">
+                        <span>{service.name}</span>
+                        <span className="ml-4 text-slate-500">${service.price}/{service.billing_frequency}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Additional Products */}
@@ -419,11 +415,11 @@ export default function ClientForm() {
                 <Package className="h-4 w-4" />
                 Additional Products & Services
               </Label>
-              {availableProducts.length === 0 ? (
-                <p className="text-sm text-slate-500">No additional products available.</p>
-              ) : (
-                <div className="space-y-2 border rounded-lg p-4 max-h-60 overflow-y-auto">
-                  {availableProducts.map((product) => (
+              <div className="space-y-2 border rounded-lg p-4 max-h-60 overflow-y-auto">
+                {availableProducts.length === 0 ? (
+                  <p className="text-sm text-slate-500 text-center py-2">No additional products available</p>
+                ) : (
+                  availableProducts.map((product) => (
                     <div key={product.id} className="flex items-start gap-3">
                       <Checkbox
                         id={product.id}
@@ -448,9 +444,9 @@ export default function ClientForm() {
                         </div>
                       </label>
                     </div>
-                  ))}
-                </div>
-              )}
+                  ))
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
