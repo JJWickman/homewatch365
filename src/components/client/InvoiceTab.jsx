@@ -16,6 +16,8 @@ export default function InvoiceTab({ clientId, client }) {
   const [sending, setSending] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState(null);
+  const [confirmSendOpen, setConfirmSendOpen] = useState(false);
+  const [invoiceToSend, setInvoiceToSend] = useState(null);
 
   useEffect(() => {
     loadInvoices();
