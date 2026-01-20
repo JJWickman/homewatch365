@@ -24,13 +24,47 @@ Deno.serve(async (req) => {
 
         const company = companies[0];
 
-        // Check subscription plan - only professional and enterprise can send external emails
-        const allowedPlans = ['professional', 'enterprise'];
-        if (!allowedPlans.includes(company.subscription_plan)) {
-            return Response.json({ 
-                error: 'External email sending requires Professional or Enterprise subscription',
-                current_plan: company.subscription_plan 
-            }, { status: 403 });
+        // Email limits per subscription plan
+        const emailLimits = {
+            'solopreneur': 100,
+            'growth': 500,
+            'professional': 2000,
+            'enterprise': 10000
+        };
+
+        const monthlyLimit = emailLimits[company.subscription_plan] || 100;
+
+        // Get current month in YYYY-MM format
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+        // Get or create email usage record for this month
+        const usageRecords = await base44.entities.EmailUsage.filter({
+            company_id: company.id,
+            month: currentMonth
+        });
+
+        let usage;
+        if (usageRecords.length === 0) {
+            usage = await base44.asServiceRole.entities.EmailUsage.create({
+                company_id: company.id,
+                month: currentMonth,
+                emails_sent: 0,
+                last_reset_date: now.toISOString()
+            });
+        } else {
+            usage = usageRecords[0];
+        }
+
+        // Check if limit exceeded
+        if (usage.emails_sent >= monthlyLimit) {
+            return Response.json({
+                error: 'Monthly email limit exceeded',
+                limit: monthlyLimit,
+                used: usage.emails_sent,
+                plan: company.subscription_plan,
+                message: `You've reached your monthly limit of ${monthlyLimit} emails. Upgrade your plan to send more.`
+            }, { status: 429 });
         }
 
         // Parse request body
@@ -65,10 +99,20 @@ Deno.serve(async (req) => {
 
         await sgMail.send(msg);
 
+        // Increment email usage counter
+        await base44.asServiceRole.entities.EmailUsage.update(usage.id, {
+            emails_sent: usage.emails_sent + 1
+        });
+
         return Response.json({ 
             success: true, 
             message: `Email sent successfully to ${to}`,
-            from: msg.from
+            from: msg.from,
+            usage: {
+                sent: usage.emails_sent + 1,
+                limit: monthlyLimit,
+                remaining: monthlyLimit - (usage.emails_sent + 1)
+            }
         });
 
     } catch (error) {
