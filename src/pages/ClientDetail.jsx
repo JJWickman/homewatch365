@@ -28,7 +28,7 @@ export default function ClientDetail() {
   const navigate = useNavigate();
   const [client, setClient] = useState(null);
   const [properties, setProperties] = useState([]);
-  const [inspections, setInspections] = useState([]);
+  const [visits, setVisits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [showPortalDialog, setShowPortalDialog] = useState(false);
@@ -51,17 +51,17 @@ export default function ClientDetail() {
     }
 
     try {
-      const [clientData, propertiesData, inspectionsData] = await Promise.all([
+      const [clientData, propertiesData, visitsData] = await Promise.all([
         base44.entities.Client.filter({ id }),
         base44.entities.Property.filter({ client_id: id }),
-        base44.entities.Inspection.filter({ client_id: id }, '-scheduled_date', 20)
+        base44.entities.Visit.filter({ client_id: id }, '-scheduled_date', 20)
       ]);
 
       if (clientData.length > 0) {
         const c = clientData[0];
         setClient(c);
         setProperties(propertiesData);
-        setInspections(inspectionsData);
+        setVisits(visitsData);
         setPortalEmail(c.portal_user_email || '');
 
         // Load service subscription details
@@ -106,7 +106,7 @@ export default function ClientDetail() {
     return `${client.first_name?.[0] || ''}${client.last_name?.[0] || ''}`.toUpperCase();
   };
 
-  const completedInspections = inspections.filter(i => i.status === 'completed').length;
+  const completedVisits = visits.filter(v => v.status === 'completed').length;
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -369,8 +369,8 @@ export default function ClientDetail() {
                   <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{completedInspections}</p>
-                  <p className="text-sm text-slate-500">Inspections Completed</p>
+                  <p className="text-2xl font-bold">{completedVisits}</p>
+                  <p className="text-sm text-slate-500">Visits Completed</p>
                 </div>
               </div>
             </CardContent>
@@ -382,7 +382,7 @@ export default function ClientDetail() {
           <Tabs defaultValue="properties">
             <TabsList className="w-full justify-start mb-4">
               <TabsTrigger value="properties">Properties</TabsTrigger>
-              <TabsTrigger value="inspections">Inspections</TabsTrigger>
+              <TabsTrigger value="visits">Visits</TabsTrigger>
               <TabsTrigger value="files">Files</TabsTrigger>
               <TabsTrigger value="notes">Notes</TabsTrigger>
             </TabsList>
@@ -437,24 +437,24 @@ export default function ClientDetail() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="inspections">
+            <TabsContent value="visits">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Recent Inspections</CardTitle>
+                  <CardTitle className="text-lg">Recent Visits</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {inspections.length === 0 ? (
+                  {visits.length === 0 ? (
                     <EmptyState
                       icon={ClipboardCheck}
-                      title="No inspections"
-                      description="No inspections have been scheduled yet"
+                      title="No visits"
+                      description="No visits have been scheduled yet"
                     />
                   ) : (
                     <div className="space-y-3">
-                      {inspections.slice(0, 10).map((inspection) => (
+                      {visits.slice(0, 10).map((visit) => (
                         <Link
-                          key={inspection.id}
-                          to={createPageUrl('InspectionDetail') + `?id=${inspection.id}`}
+                          key={visit.id}
+                          to={createPageUrl('InspectionDetail') + `?id=${visit.id}`}
                           className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors border"
                         >
                           <div className="flex items-center gap-3">
@@ -463,12 +463,12 @@ export default function ClientDetail() {
                             </div>
                             <div>
                               <p className="font-medium text-slate-900">
-                                {format(new Date(inspection.scheduled_date), 'MMM d, yyyy')}
+                                {format(new Date(visit.scheduled_date), 'MMM d, yyyy')}
                               </p>
-                              <p className="text-sm text-slate-500 capitalize">{inspection.type} inspection</p>
+                              <p className="text-sm text-slate-500 capitalize">{visit.visit_type === 'inspection' ? `${visit.inspection_type || 'routine'} inspection` : visit.followup_type || 'follow-up'}</p>
                             </div>
                           </div>
-                          <StatusBadge status={inspection.status} />
+                          <StatusBadge status={visit.status} />
                         </Link>
                       ))}
                     </div>
