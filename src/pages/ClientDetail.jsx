@@ -53,11 +53,10 @@ export default function ClientDetail() {
     }
 
     try {
-      const [clientData, propertiesData, visitsData, configData] = await Promise.all([
+      const [clientData, propertiesData, visitsData] = await Promise.all([
         base44.entities.Client.filter({ id }),
         base44.entities.Property.filter({ client_id: id }),
-        base44.entities.Visit.filter({ client_id: id }, '-scheduled_date', 20),
-        base44.entities.PlanConfiguration.filter({ company_id: client?.company_id }).catch(() => [])
+        base44.entities.Visit.filter({ client_id: id }, '-scheduled_date', 20)
       ]);
 
       if (clientData.length > 0) {
@@ -65,8 +64,11 @@ export default function ClientDetail() {
         setClient(c);
         setProperties(propertiesData);
         setVisits(visitsData);
-        setBillingConfigs(configData || []);
         setPortalEmail(c.portal_user_email || '');
+
+        // Load billing configurations
+        const configData = await base44.entities.PlanConfiguration.filter({ company_id: c.company_id }).catch(() => []);
+        setBillingConfigs(configData || []);
 
         // Load service subscription details
         if (c.service_subscription_id) {
