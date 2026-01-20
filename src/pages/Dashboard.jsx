@@ -219,10 +219,10 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      {/* Today's Inspections - Full Width */}
+      {/* Today's Schedule - Full Width */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-lg font-semibold">Today's Inspections</CardTitle>
+          <CardTitle className="text-lg font-semibold">Today's Schedule</CardTitle>
           <Link to={createPageUrl('Schedule')} className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1">
             View all <ArrowRight className="h-4 w-4" />
           </Link>
