@@ -23,16 +23,15 @@ Deno.serve(async (req) => {
     const premiumPrice = premiumService ? premiumService.price : 249;
 
     // Create invoice for December 2025
+    const totalAmount = premiumPrice + 50;
     const invoice = await base44.asServiceRole.entities.Invoice.create({
       company_id: client.company_id,
       client_id: client.id,
       invoice_number: 'INV-2025-12-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0'),
-      invoice_date: '2025-12-01',
+      issue_date: '2025-12-01',
       due_date: '2025-12-31',
-      description: 'December 2025 - Premium Monthly Visit Service + Follow-up',
-      amount: premiumPrice + 50,
+      paid_date: '2025-12-15',
       status: 'paid',
-      billing_period: 'December 2025',
       line_items: [
         {
           description: 'Premium Monthly Visit Service',
@@ -47,11 +46,12 @@ Deno.serve(async (req) => {
           total: 50
         }
       ],
-      subtotal: premiumPrice + 50,
-      tax: 0,
-      total: premiumPrice + 50,
+      subtotal: totalAmount,
+      tax_rate: 0,
+      tax_amount: 0,
+      total: totalAmount,
       notes: 'Thank you for your continued business. This invoice includes your monthly premium service and one additional follow-up visit.',
-      paid_at: '2025-12-15T10:00:00Z'
+      payment_method: 'card'
     });
 
     return Response.json({ 
