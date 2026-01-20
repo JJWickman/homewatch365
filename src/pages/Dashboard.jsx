@@ -120,14 +120,17 @@ export default function Dashboard() {
       });
 
       const todayScheduled = visits.filter(v => v.scheduled_date === today && v.status !== 'cancelled');
-      
-      // Enrich with property data
+
+      // Enrich with property and client data
       const enrichedVisits = await Promise.all(todayScheduled.map(async (visit) => {
-        const props = await base44.entities.Property.filter({ id: visit.property_id, company_id: companyId });
-        return { ...visit, property: props[0] };
+        const [props, cls] = await Promise.all([
+          base44.entities.Property.filter({ id: visit.property_id, company_id: companyId }),
+          base44.entities.Client.filter({ id: visit.client_id, company_id: companyId })
+        ]);
+        return { ...visit, property: props[0], client: cls[0] };
       }));
-      
-      setTodayInspections(enrichedVisits.slice(0, 5));
+
+      setTodayInspections(enrichedVisits);
       setRecentActivity(activities);
       setCheckingOnboarding(false);
 
