@@ -277,7 +277,7 @@ ${client.company_id ? 'Your Property Management Team' : 'EstateWatch365'}
 
           <div className="border-t pt-4 flex justify-between items-center">
             <p className="text-lg font-semibold text-slate-500">Total Amount</p>
-            <p className="text-3xl font-bold text-slate-900">${currentInvoice.amount.toFixed(2)}</p>
+            <p className="text-3xl font-bold text-slate-900">${currentInvoice.amount ? currentInvoice.amount.toFixed(2) : '0.00'}</p>
           </div>
         </CardContent>
       </Card>
