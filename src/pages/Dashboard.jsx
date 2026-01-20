@@ -57,7 +57,8 @@ export default function Dashboard() {
      const freshUser = userList.length > 0 ? { ...currentUser, full_name: userList[0].full_name, id: userList[0].id, onboarding_completed: userList[0].onboarding_completed } : currentUser;
      setUser(freshUser);
 
-     if (!freshUser.onboarding_completed) {
+     // Check if user needs onboarding (field is false, undefined, or null)
+     if (freshUser.onboarding_completed !== true) {
         // User hasn't completed onboarding - show it again
         setCheckingOnboarding(false);
         navigate(createPageUrl('CompanyOnboarding'));
