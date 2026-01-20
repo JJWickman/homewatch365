@@ -52,7 +52,7 @@ Date: ${format(new Date(invoice.invoice_date), 'MMMM d, yyyy')}
 ${invoice.due_date ? `Due Date: ${format(new Date(invoice.due_date), 'MMMM d, yyyy')}` : ''}
 
 Description: ${invoice.description || 'Service Invoice'}
-Amount: $${invoice.amount.toFixed(2)}
+Amount: $${invoice.amount ? invoice.amount.toFixed(2) : '0.00'}
 Status: ${invoice.status.toUpperCase()}
 
 ${invoice.notes ? `Notes: ${invoice.notes}` : ''}
