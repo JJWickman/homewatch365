@@ -97,7 +97,8 @@ Deno.serve(async (req) => {
             msg.from = { email: msg.from, name: company.name };
         }
 
-        await sgMail.send(msg);
+        const sendResult = await sgMail.send(msg);
+        console.log('SendGrid response:', JSON.stringify(sendResult));
 
         // Increment email usage counter
         await base44.asServiceRole.entities.EmailUsage.update(usage.id, {
