@@ -78,21 +78,22 @@ ${client.company_id ? 'Your Property Management Team' : 'EstateWatch365'}
       if (result.data.success) {
         toast.success('Invoice sent successfully');
         // Update invoice status to sent
-        await base44.entities.Invoice.update(invoice.id, { 
-          status: 'sent',
-          sent_at: new Date().toISOString()
+        await base44.entities.Invoice.update(invoiceToSend.id, { 
+          status: 'sent'
         });
+        setConfirmSendOpen(false);
+        setInvoiceToSend(null);
         loadInvoices();
       } else {
         toast.error(result.data.error || 'Failed to send invoice');
       }
-    } catch (error) {
+      } catch (error) {
       console.error('Error sending invoice:', error);
       toast.error('Failed to send invoice');
-    } finally {
+      } finally {
       setSending(false);
-    }
-  };
+      }
+      };
 
   const handleEditInvoice = (invoice) => {
     setEditingInvoice({ ...invoice });
