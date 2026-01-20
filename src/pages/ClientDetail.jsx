@@ -22,6 +22,7 @@ import {
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
+import InvoiceTab from '@/components/client/InvoiceTab';
 import { toast } from 'sonner';
 
 export default function ClientDetail() {
@@ -383,6 +384,7 @@ export default function ClientDetail() {
             <TabsList className="w-full justify-start mb-4">
               <TabsTrigger value="properties">Properties</TabsTrigger>
               <TabsTrigger value="visits">Visits</TabsTrigger>
+              <TabsTrigger value="invoices">Invoices</TabsTrigger>
               <TabsTrigger value="files">Files</TabsTrigger>
               <TabsTrigger value="notes">Notes</TabsTrigger>
             </TabsList>
@@ -475,6 +477,10 @@ export default function ClientDetail() {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="invoices">
+              <InvoiceTab clientId={client.id} client={client} />
             </TabsContent>
 
             <TabsContent value="files">
