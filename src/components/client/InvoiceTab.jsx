@@ -51,7 +51,7 @@ export default function InvoiceTab({ clientId, client }) {
     try {
       const result = await base44.functions.invoke('sendExternalEmail', {
         to: client.email,
-        subject: `Invoice #${invoice.invoice_number} - ${invoice.description || 'Your Invoice'}`,
+        subject: `Invoice #${invoiceToSend.invoice_number} - ${invoiceToSend.description || 'Your Invoice'}`,
         body: `
 Hello ${client.first_name} ${client.last_name},
 
