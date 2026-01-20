@@ -379,7 +379,7 @@ ${client.company_id ? 'Your Property Management Team' : 'EstateWatch365'}
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
     </>
   );
 }
