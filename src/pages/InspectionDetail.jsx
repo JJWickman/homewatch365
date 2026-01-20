@@ -411,7 +411,7 @@ Your Property Management Team
         <div className="lg:col-span-2">
           <Tabs defaultValue="checklist">
             <TabsList className="w-full justify-start mb-4">
-              <TabsTrigger value="checklist">Checklist</TabsTrigger>
+              <TabsTrigger value="checklist">Inspection</TabsTrigger>
               <TabsTrigger value="photos">Photos</TabsTrigger>
               {inspection.issues_found?.length > 0 && (
                 <TabsTrigger value="issues">Issues ({inspection.issues_found.length})</TabsTrigger>
