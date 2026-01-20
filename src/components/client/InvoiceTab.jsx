@@ -34,7 +34,14 @@ export default function InvoiceTab({ clientId, client }) {
     }
   };
 
-  const handleSendInvoice = async (invoice) => {
+  const handleConfirmSend = (invoice) => {
+    setInvoiceToSend(invoice);
+    setConfirmSendOpen(true);
+  };
+
+  const handleSendInvoice = async () => {
+    if (!invoiceToSend) return;
+    
     if (!client.email) {
       toast.error('Client email is required to send invoice');
       return;
