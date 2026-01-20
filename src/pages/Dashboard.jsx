@@ -52,20 +52,24 @@ export default function Dashboard() {
   const loadDashboardData = async () => {
    try {
      const currentUser = await base44.auth.me();
-     // Fetch fresh user data to get full_name and onboarding_completed
-     const userList = await base44.entities.User.filter({ email: currentUser.email });
-     const freshUser = userList.length > 0 ? { ...currentUser, full_name: userList[0].full_name, id: userList[0].id, onboarding_completed: userList[0].onboarding_completed } : currentUser;
-     setUser(freshUser);
+     setUser(currentUser);
 
-     // Check if user needs onboarding (field is false, undefined, or null)
-     if (freshUser.onboarding_completed !== true) {
-        // User hasn't completed onboarding - show it again
+     let members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
+
+     // Check if user has no company - redirect to onboarding
+     if (members.length === 0) {
         setCheckingOnboarding(false);
         navigate(createPageUrl('CompanyOnboarding'));
         return;
       }
 
-     let members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
+     // Check if user needs onboarding (field is false, undefined, or null)
+     if (currentUser.onboarding_completed !== true && members.length > 0) {
+        // User has company but hasn't completed onboarding - show it again
+        setCheckingOnboarding(false);
+        navigate(createPageUrl('CompanyOnboarding'));
+        return;
+      }
 
           // Retry once if not found (company might have just been created)
           if (members.length === 0) {

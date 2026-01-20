@@ -61,17 +61,13 @@ export default function CompanyOnboarding() {
   const checkExistingCompany = async () => {
         try {
           const currentUser = await base44.auth.me();
-          
-          // Fetch fresh user data to check onboarding status
-          const userList = await base44.entities.User.filter({ email: currentUser.email });
-          const freshUser = userList.length > 0 ? { ...currentUser, onboarding_completed: userList[0].onboarding_completed } : currentUser;
-          setUser(freshUser);
+          setUser(currentUser);
 
           // Check if user already has a company
           const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
           if (members.length > 0) {
             // User has a company - check if they want to skip onboarding
-            if (freshUser.onboarding_completed === true) {
+            if (currentUser.onboarding_completed === true) {
               navigate(createPageUrl('Dashboard'));
               return;
             }
