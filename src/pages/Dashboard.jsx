@@ -151,6 +151,23 @@ export default function Dashboard() {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
+  const getActivityLink = (activity) => {
+    const entityTypeMap = {
+      'client': 'ClientDetail',
+      'property': 'PropertyDetail',
+      'inspection': 'InspectionDetail',
+      'task': 'Inspections',
+      'staff': 'Settings',
+      'billing': 'Dashboard',
+      'template': 'Settings',
+      'settings': 'Settings'
+    };
+
+    const page = entityTypeMap[activity.entity_type] || 'Dashboard';
+    const params = activity.entity_id ? `?id=${activity.entity_id}` : '';
+    return createPageUrl(page) + params;
+  };
+
   if (loading || checkingOnboarding) {
     return (
       <div className="space-y-6">
