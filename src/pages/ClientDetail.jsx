@@ -454,7 +454,18 @@ export default function ClientDetail() {
                   ) : (
                     <div className="space-y-3">
                       {visits.map((visit) => {
-                        const isIncluded = visit.visit_type !== 'followup';
+                        // Find billing configuration for this visit
+                        const billingConfig = billingConfigs.find(config => {
+                          if (config.visit_type !== visit.visit_type) return false;
+                          if (visit.visit_type === 'inspection' && config.inspection_subtype) {
+                            return config.inspection_subtype === (visit.inspection_type || 'routine');
+                          }
+                          return !config.inspection_subtype;
+                        });
+
+                        const isIncluded = billingConfig?.included_in_plan ?? (visit.visit_type !== 'followup');
+                        const extraCharge = billingConfig?.extra_charge ?? (visit.visit_type === 'followup' ? 50 : 0);
+
                         const visitTypeLabel = visit.visit_type === 'inspection' ? `${visit.inspection_type || 'routine'} inspection` : 
                                              visit.visit_type === 'followup' ? 'Follow-up' :
                                              visit.visit_type === 'pre_storm' ? 'Pre-Storm Visit' :
@@ -485,7 +496,7 @@ export default function ClientDetail() {
                                     ? 'bg-emerald-100 text-emerald-700' 
                                     : 'bg-orange-100 text-orange-700'
                                 }`}>
-                                  {isIncluded ? 'Included' : 'Extra: $50'}
+                                  {isIncluded ? 'Included' : `Extra: $${extraCharge.toFixed(2)}`}
                                 </div>
                               </div>
                               <StatusBadge status={visit.status} />
