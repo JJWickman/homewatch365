@@ -898,8 +898,6 @@ export default function Inspections() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="routine">Routine</SelectItem>
-                        <SelectItem value="pre_storm">Pre-Storm</SelectItem>
-                        <SelectItem value="post_storm">Post-Storm</SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                         <SelectItem value="custom_client_request">Custom Client Request</SelectItem>
                         <SelectItem value="drop_in">Drop-In</SelectItem>
@@ -1040,14 +1038,12 @@ export default function Inspections() {
                      </SelectTrigger>
                      <SelectContent>
                        <SelectItem value="routine">Routine</SelectItem>
-                       <SelectItem value="pre_storm">Pre-Storm</SelectItem>
-                       <SelectItem value="post_storm">Post-Storm</SelectItem>
                        <SelectItem value="other">Other</SelectItem>
                        <SelectItem value="custom_client_request">Custom Client Request</SelectItem>
                        <SelectItem value="drop_in">Drop-In</SelectItem>
                      </SelectContent>
-                   </Select>
-                 </div>
+                     </Select>
+                     </div>
 
                  {newVisit.inspection_type === 'other' && (
                    <div className="space-y-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
