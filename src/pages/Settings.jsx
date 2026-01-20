@@ -45,6 +45,7 @@ import FinancialManagement from '@/components/settings/FinancialManagement';
 import PasswordResetDialog from '@/components/auth/PasswordResetDialog';
 import UserManagementSection from '@/components/settings/UserManagementSection';
 import InspectionTemplates from '@/components/settings/InspectionTemplates';
+import PlanBillingConfiguration from '@/components/settings/PlanBillingConfiguration';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -719,6 +720,7 @@ ${company.name}
           {isDispatcherOrAdmin && <TabsTrigger value="team">Team</TabsTrigger>}
           {(companyMember?.is_owner || companyMember?.role === 'owner') && <TabsTrigger value="billing">Billing</TabsTrigger>}
           {isAdmin && <TabsTrigger value="financial">Products & Services</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="billing-config">Visit Billing</TabsTrigger>}
           {isAdmin && <TabsTrigger value="reviews">Reviews</TabsTrigger>}
           {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
           {isAdmin && <TabsTrigger value="templates">Inspection Templates</TabsTrigger>}
@@ -1453,6 +1455,10 @@ ${company.name}
 
         <TabsContent value="financial">
            <FinancialManagement companyId={company?.id} />
+         </TabsContent>
+
+         <TabsContent value="billing-config">
+           <PlanBillingConfiguration companyId={company?.id} />
          </TabsContent>
 
          <TabsContent value="reviews" className="space-y-6">
