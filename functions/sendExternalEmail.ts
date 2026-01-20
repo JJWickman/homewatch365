@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
         // Send email
         const msg = {
             to: to,
-            from: 'noreply@estatewatch365.com',
+            from: 'noreply@estatewatch365.app',
             subject: subject,
             text: body,
             html: body.replace(/\n/g, '<br>'),
