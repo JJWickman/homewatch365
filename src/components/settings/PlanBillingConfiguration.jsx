@@ -27,7 +27,7 @@ export default function PlanBillingConfiguration({ companyId }) {
 
   const loadConfigurations = async () => {
     try {
-      const data = await base44.entities.PlanConfiguration.filter({
+      const data = await base44.entities.ClientBillingPlans.filter({
         company_id: companyId
       });
       setConfigurations(data);
@@ -50,7 +50,7 @@ export default function PlanBillingConfiguration({ companyId }) {
         const key = `${visitType.id}_`;
         if (!configMap.has(key)) {
           try {
-            const config = await base44.entities.PlanConfiguration.create({
+            const config = await base44.entities.ClientBillingPlans.create({
               company_id: companyId,
               visit_type: visitType.id,
               included_in_plan: visitType.id === 'inspection' || visitType.id === 'pre_storm' || visitType.id === 'post_storm',
@@ -67,7 +67,7 @@ export default function PlanBillingConfiguration({ companyId }) {
           const key = `${visitType.id}_${subtype}`;
           if (!configMap.has(key)) {
             try {
-              const config = await base44.entities.PlanConfiguration.create({
+              const config = await base44.entities.ClientBillingPlans.create({
                 company_id: companyId,
                 visit_type: visitType.id,
                 inspection_subtype: subtype,
@@ -100,7 +100,7 @@ export default function PlanBillingConfiguration({ companyId }) {
     setFalse(true);
     try {
       for (const [configId, updates] of Object.entries(changes)) {
-        await base44.entities.PlanConfiguration.update(configId, updates);
+        await base44.entities.ClientBillingPlans.update(configId, updates);
       }
       setChanges({});
       await loadConfigurations();

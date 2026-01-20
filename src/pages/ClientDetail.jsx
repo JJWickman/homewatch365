@@ -67,7 +67,7 @@ export default function ClientDetail() {
         setPortalEmail(c.portal_user_email || '');
 
         // Load billing configurations
-        const configData = await base44.entities.PlanConfiguration.filter({ company_id: c.company_id }).catch(() => []);
+        const configData = await base44.entities.ClientBillingPlans.filter({ company_id: c.company_id }).catch(() => []);
         setBillingConfigs(configData || []);
 
         // Load service subscription details
