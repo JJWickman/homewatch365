@@ -57,15 +57,15 @@ Hello ${client.first_name} ${client.last_name},
 
 Please find your invoice details below:
 
-Invoice Number: #${invoice.invoice_number}
-Date: ${format(new Date(invoice.invoice_date), 'MMMM d, yyyy')}
-${invoice.due_date ? `Due Date: ${format(new Date(invoice.due_date), 'MMMM d, yyyy')}` : ''}
+Invoice Number: #${invoiceToSend.invoice_number}
+Date: ${format(new Date(invoiceToSend.issue_date), 'MMMM d, yyyy')}
+${invoiceToSend.due_date ? `Due Date: ${format(new Date(invoiceToSend.due_date), 'MMMM d, yyyy')}` : ''}
 
-Description: ${invoice.description || 'Service Invoice'}
-Amount: $${invoice.amount ? invoice.amount.toFixed(2) : '0.00'}
-Status: ${invoice.status.toUpperCase()}
+Description: ${invoiceToSend.line_items ? invoiceToSend.line_items.map(item => item.description).join(', ') : 'Service Invoice'}
+Amount: $${invoiceToSend.total ? invoiceToSend.total.toFixed(2) : '0.00'}
+Status: ${invoiceToSend.status.toUpperCase()}
 
-${invoice.notes ? `Notes: ${invoice.notes}` : ''}
+${invoiceToSend.notes ? `Notes: ${invoiceToSend.notes}` : ''}
 
 Thank you for your business!
 
