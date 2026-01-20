@@ -325,7 +325,7 @@ export default function CompanyOnboarding() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="companyName">Company Name *</Label>
+                  <Label htmlFor="companyName">Company Name <span className="text-red-500">*</span></Label>
                   <Input
                     id="companyName"
                     value={companyData.companyName}
@@ -333,6 +333,7 @@ export default function CompanyOnboarding() {
                     placeholder="Your Company Name"
                     required
                   />
+                  <p className="text-xs text-slate-500 mt-1">Required field</p>
                 </div>
 
                 <div>
