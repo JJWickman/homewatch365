@@ -119,7 +119,11 @@ export default function Dashboard() {
         issuesFound: highPriorityVisits
       });
 
-      const todayScheduled = visits.filter(v => v.scheduled_date === today && v.status !== 'cancelled');
+      const todayScheduled = visits.filter(v => {
+        const matchesDate = v.scheduled_date === today && v.status !== 'cancelled';
+        const matchesAssignment = !isFieldInspector || v.assigned_to === currentUser.email;
+        return matchesDate && matchesAssignment;
+      });
 
       // Enrich with property and client data
       const enrichedVisits = await Promise.all(todayScheduled.map(async (visit) => {
