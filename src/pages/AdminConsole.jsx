@@ -53,6 +53,7 @@ export default function AdminConsole() {
     accent_color: '#c9a962',
     logo_url: ''
   });
+  const [creatingDemoData, setCreatingDemoData] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -216,6 +217,27 @@ export default function AdminConsole() {
     }
   };
 
+  const handleCreateDemoData = async () => {
+    if (!window.confirm('This will create sample products and services. Continue?')) {
+      return;
+    }
+    
+    setCreatingDemoData(true);
+    try {
+      const response = await base44.functions.invoke('createSampleProducts', {});
+      if (response.data.success) {
+        alert(`Success! Created ${response.data.count} sample products and services.`);
+      } else {
+        alert(response.data.message || 'Failed to create demo data');
+      }
+    } catch (error) {
+      console.error('Error creating demo data:', error);
+      alert('Failed to create demo data');
+    } finally {
+      setCreatingDemoData(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -258,6 +280,7 @@ export default function AdminConsole() {
         <TabsList>
           <TabsTrigger value="contractor-types">Contractor Types</TabsTrigger>
           <TabsTrigger value="branding">Branding</TabsTrigger>
+          <TabsTrigger value="demo-data">Demo Data</TabsTrigger>
         </TabsList>
 
         {/* Contractor Types Tab */}
@@ -481,6 +504,54 @@ export default function AdminConsole() {
                   {saving ? 'Saving...' : 'Save Branding'}
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Demo Data Tab */}
+        <TabsContent value="demo-data">
+          <Card>
+            <CardHeader>
+              <CardTitle>Demo Data</CardTitle>
+              <CardDescription>Add sample products and services to get started quickly</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-900 mb-3">
+                  This will create the following sample items:
+                </p>
+                <ul className="text-sm text-blue-800 space-y-1 ml-4">
+                  <li>• Monthly Property Visit Service ($199/month)</li>
+                  <li>• Bi-Weekly Property Visit Service ($299/month)</li>
+                  <li>• Premium Monthly Visit Service ($249/month)</li>
+                  <li>• Follow-up or Issue Resolution ($50 one-time)</li>
+                  <li>• Smart Moisture Monitor System ($999 one-time)</li>
+                  <li>• Smart Water Supply Meter System ($499 one-time)</li>
+                  <li>• Remote Home Monitoring Package ($1,499 one-time)</li>
+                </ul>
+              </div>
+
+              <Button 
+                onClick={handleCreateDemoData}
+                disabled={creatingDemoData}
+                className="bg-slate-900 hover:bg-slate-800"
+              >
+                {creatingDemoData ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating Demo Data...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Sample Products & Services
+                  </>
+                )}
+              </Button>
+
+              <p className="text-xs text-slate-500">
+                Note: If sample products already exist, you'll need to delete them first before creating new ones.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
