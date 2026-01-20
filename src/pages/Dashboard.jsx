@@ -332,9 +332,9 @@ export default function Dashboard() {
                       {format(new Date(activity.created_date), 'MMM d, h:mm a')}
                     </span>
                   </div>
-                </div>
-              ))}
-            </div>
+                  </Link>
+                  ))}
+                  </div>
           )}
         </CardContent>
       </Card>
