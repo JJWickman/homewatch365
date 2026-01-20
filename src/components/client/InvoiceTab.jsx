@@ -218,7 +218,55 @@ ${client.company_id ? 'Your Property Management Team' : 'EstateWatch365'}
   }
 
   return (
-    <div className="space-y-4">
+    <>
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmSendOpen} onOpenChange={setConfirmSendOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send Invoice to Client?</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-slate-600">
+              An email with the invoice will be sent to:
+            </p>
+            <p className="font-medium text-slate-900">
+              {client.email}
+            </p>
+            {invoiceToSend && (
+              <div className="bg-slate-50 p-3 rounded-lg">
+                <p className="text-sm text-slate-600 mb-1">Invoice Details:</p>
+                <p className="font-medium text-slate-900">#{invoiceToSend.invoice_number}</p>
+                <p className="text-sm text-slate-600">
+                  ${invoiceToSend.total ? invoiceToSend.total.toFixed(2) : '0.00'}
+                </p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setConfirmSendOpen(false)}
+              disabled={sending}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSendInvoice}
+              disabled={sending}
+              className="bg-slate-900 hover:bg-slate-800"
+            >
+              {sending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
+              Send Invoice
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      <div className="space-y-4">
       {/* Current Invoice */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
