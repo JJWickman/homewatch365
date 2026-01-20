@@ -52,6 +52,9 @@ export default function CompanyOnboarding() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('force_restart') === 'true') {
       setCheckingUser(false);
+      toast.success('Welcome to Onboarding! Let\'s set up your account in 3 steps.', {
+        duration: 4000
+      });
       return;
     }
     checkExistingCompany();
