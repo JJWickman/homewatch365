@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 
 export default function CompanyOnboarding() {
   const navigate = useNavigate();
-  const [step, setStep] = useState('company');
+  const [step, setStep] = useState('welcome');
   const [loading, setLoading] = useState(false);
   const [checkingUser, setCheckingUser] = useState(true);
   const [user, setUser] = useState(null);
@@ -52,21 +52,11 @@ export default function CompanyOnboarding() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('force_restart') === 'true') {
       setCheckingUser(false);
-      toast.success('Welcome to Onboarding! Let\'s set up your account in 3 steps.', {
-        duration: 4000
-      });
+      setStep('welcome');
       return;
     }
     checkExistingCompany();
   }, []);
-
-  useEffect(() => {
-    if (!checkingUser && step === 'company') {
-      toast.success('Welcome to Onboarding! Let\'s set up your account in 3 steps.', {
-        duration: 4000
-      });
-    }
-  }, [checkingUser, step]);
 
   const checkExistingCompany = async () => {
         try {
@@ -269,8 +259,63 @@ export default function CompanyOnboarding() {
         </div>
 
         <Card>
-          {/* Company Step */}
-          {step === 'company' && (
+                  {/* Welcome Step */}
+                  {step === 'welcome' && (
+                    <>
+                      <CardHeader>
+                        <CardTitle className="text-center text-2xl">Welcome to Estate Watch! 🎉</CardTitle>
+                        <CardDescription className="text-center">
+                          Let's set up your account in 3 simple steps
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="text-center space-y-4">
+                          <p className="text-slate-600">
+                            We'll guide you through creating your company, adding your first client, and setting up your first property.
+                          </p>
+                          <p className="text-slate-600">
+                            This should take about 3 minutes.
+                          </p>
+                        </div>
+
+                        <div className="space-y-3 bg-slate-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">1</div>
+                            <div>
+                              <p className="font-medium">Create Your Company</p>
+                              <p className="text-sm text-slate-500">Set up your business information</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-semibold">2</div>
+                            <div>
+                              <p className="font-medium">Add Your First Client</p>
+                              <p className="text-sm text-slate-500">Create a client profile</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-semibold">3</div>
+                            <div>
+                              <p className="font-medium">Set Up First Property</p>
+                              <p className="text-sm text-slate-500">Add a property to manage</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <Button 
+                          onClick={() => setStep('company')}
+                          className="w-full bg-blue-600 hover:bg-blue-700"
+                          size="lg"
+                        >
+                          Get Started
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </Button>
+                      </CardContent>
+                    </>
+                  )}
+
+                  {/* Company Step */}
+                  {step === 'company' && (
             <>
               <CardHeader>
                 <CardTitle>Step 1: Create Your Company</CardTitle>
