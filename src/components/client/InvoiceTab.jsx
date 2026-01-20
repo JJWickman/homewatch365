@@ -197,11 +197,10 @@ ${client.company_id ? 'Your Property Management Team' : 'EstateWatch365'}
           </div>
           <div>
             <Label htmlFor="notes">Notes</Label>
-            <textarea
+            <Textarea
               id="notes"
               value={editingInvoice.notes || ''}
               onChange={(e) => setEditingInvoice({ ...editingInvoice, notes: e.target.value })}
-              className="w-full px-3 py-2 border rounded-md"
               rows={3}
             />
           </div>
