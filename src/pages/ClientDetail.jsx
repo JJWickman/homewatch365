@@ -30,6 +30,7 @@ export default function ClientDetail() {
   const [client, setClient] = useState(null);
   const [properties, setProperties] = useState([]);
   const [visits, setVisits] = useState([]);
+  const [billingConfigs, setBillingConfigs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [showPortalDialog, setShowPortalDialog] = useState(false);
@@ -52,10 +53,11 @@ export default function ClientDetail() {
     }
 
     try {
-      const [clientData, propertiesData, visitsData] = await Promise.all([
+      const [clientData, propertiesData, visitsData, configData] = await Promise.all([
         base44.entities.Client.filter({ id }),
         base44.entities.Property.filter({ client_id: id }),
-        base44.entities.Visit.filter({ client_id: id }, '-scheduled_date', 20)
+        base44.entities.Visit.filter({ client_id: id }, '-scheduled_date', 20),
+        base44.entities.PlanConfiguration.filter({ company_id: client?.company_id }).catch(() => [])
       ]);
 
       if (clientData.length > 0) {
@@ -63,6 +65,7 @@ export default function ClientDetail() {
         setClient(c);
         setProperties(propertiesData);
         setVisits(visitsData);
+        setBillingConfigs(configData || []);
         setPortalEmail(c.portal_user_email || '');
 
         // Load service subscription details
