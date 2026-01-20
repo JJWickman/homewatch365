@@ -442,49 +442,59 @@ export default function ClientDetail() {
             <TabsContent value="visits">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Completed Visits (Billable)</CardTitle>
-                  <p className="text-sm text-slate-500 mt-1">Only completed visits appear here for billing and monthly statements</p>
+                  <CardTitle className="text-lg">All Visits</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {(() => {
-                    const completedVisits = visits.filter(v => v.status === 'completed');
-                    return completedVisits.length === 0 ? (
-                      <EmptyState
-                        icon={ClipboardCheck}
-                        title="No completed visits"
-                        description="Completed visits will appear here for billing purposes"
-                      />
-                    ) : (
-                      <div className="space-y-3">
-                        {completedVisits.map((visit) => (
+                  {visits.length === 0 ? (
+                    <EmptyState
+                      icon={ClipboardCheck}
+                      title="No visits"
+                      description="No visits have been scheduled yet"
+                    />
+                  ) : (
+                    <div className="space-y-3">
+                      {visits.map((visit) => {
+                        const isIncluded = visit.visit_type !== 'followup';
+                        const visitTypeLabel = visit.visit_type === 'inspection' ? `${visit.inspection_type || 'routine'} inspection` : 
+                                             visit.visit_type === 'followup' ? 'Follow-up' :
+                                             visit.visit_type === 'pre_storm' ? 'Pre-Storm Visit' :
+                                             visit.visit_type === 'post_storm' ? 'Post-Storm Visit' :
+                                             visit.visit_type;
+                        
+                        return (
                           <Link
                             key={visit.id}
                             to={createPageUrl('InspectionDetail') + `?id=${visit.id}`}
-                            className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors border border-emerald-100 bg-emerald-50"
+                            className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors border"
                           >
-                            <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-                                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                            <div className="flex items-center gap-3 flex-1">
+                              <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center">
+                                <ClipboardCheck className="h-5 w-5 text-slate-500" />
                               </div>
                               <div>
                                 <p className="font-medium text-slate-900">
                                   {format(new Date(visit.scheduled_date), 'MMM d, yyyy')}
                                 </p>
-                                <p className="text-sm text-slate-600 capitalize">
-                                  {visit.visit_type === 'inspection' ? `${visit.inspection_type || 'routine'} inspection` : 
-                                   visit.visit_type === 'followup' ? 'Follow-up' :
-                                   visit.visit_type === 'pre_storm' ? 'Pre-Storm Visit' :
-                                   visit.visit_type === 'post_storm' ? 'Post-Storm Visit' :
-                                   visit.visit_type}
-                                </p>
+                                <p className="text-sm text-slate-600 capitalize">{visitTypeLabel}</p>
                               </div>
                             </div>
-                            <StatusBadge status={visit.status} />
+                            <div className="flex items-center gap-2">
+                              <div className="text-right">
+                                <div className={`text-xs font-semibold px-2 py-1 rounded ${
+                                  isIncluded 
+                                    ? 'bg-emerald-100 text-emerald-700' 
+                                    : 'bg-orange-100 text-orange-700'
+                                }`}>
+                                  {isIncluded ? 'Included' : 'Extra: $50'}
+                                </div>
+                              </div>
+                              <StatusBadge status={visit.status} />
+                            </div>
                           </Link>
-                        ))}
-                      </div>
-                    );
-                  })()}
+                        );
+                      })}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
