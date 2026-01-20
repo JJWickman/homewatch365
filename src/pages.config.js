@@ -26,6 +26,7 @@ import Settings from './pages/Settings';
 import StripeSetup from './pages/StripeSetup';
 import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
 import SuperAdminConsole from './pages/SuperAdminConsole';
+import OnboardingTest from './pages/OnboardingTest';
 import __Layout from './Layout.jsx';
 
 
@@ -58,6 +59,7 @@ export const PAGES = {
     "StripeSetup": StripeSetup,
     "TestGoogleMapsAPI": TestGoogleMapsAPI,
     "SuperAdminConsole": SuperAdminConsole,
+    "OnboardingTest": OnboardingTest,
 }
 
 export const pagesConfig = {
