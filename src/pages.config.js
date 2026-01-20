@@ -16,6 +16,7 @@ import InspectionFlow from './pages/InspectionFlow';
 import Inspections from './pages/Inspections';
 import InvitationAccept from './pages/InvitationAccept';
 import Marketing from './pages/Marketing';
+import OnboardingTest from './pages/OnboardingTest';
 import Pricing from './pages/Pricing';
 import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
@@ -24,9 +25,8 @@ import RouteOptimizer from './pages/RouteOptimizer';
 import Schedule from './pages/Schedule';
 import Settings from './pages/Settings';
 import StripeSetup from './pages/StripeSetup';
-import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
 import SuperAdminConsole from './pages/SuperAdminConsole';
-import OnboardingTest from './pages/OnboardingTest';
+import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
 import __Layout from './Layout.jsx';
 
 
@@ -49,6 +49,7 @@ export const PAGES = {
     "Inspections": Inspections,
     "InvitationAccept": InvitationAccept,
     "Marketing": Marketing,
+    "OnboardingTest": OnboardingTest,
     "Pricing": Pricing,
     "Properties": Properties,
     "PropertyDetail": PropertyDetail,
@@ -57,9 +58,8 @@ export const PAGES = {
     "Schedule": Schedule,
     "Settings": Settings,
     "StripeSetup": StripeSetup,
-    "TestGoogleMapsAPI": TestGoogleMapsAPI,
     "SuperAdminConsole": SuperAdminConsole,
-    "OnboardingTest": OnboardingTest,
+    "TestGoogleMapsAPI": TestGoogleMapsAPI,
 }
 
 export const pagesConfig = {

@@ -263,7 +263,7 @@ export default function CompanyOnboarding() {
                   {step === 'welcome' && (
                     <>
                       <CardHeader>
-                        <CardTitle className="text-center text-2xl">Welcome to Estate Watch! 🎉</CardTitle>
+                        <CardTitle className="text-center text-2xl">Welcome to EstateWatch365! 🎉</CardTitle>
                         <CardDescription className="text-center">
                           Let's set up your account in 3 simple steps
                         </CardDescription>
