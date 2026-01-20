@@ -48,6 +48,12 @@ export default function CompanyOnboarding() {
       const [skipFutureOnboarding, setSkipFutureOnboarding] = useState(false);
 
   useEffect(() => {
+    // Check if force_restart parameter is present
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('force_restart') === 'true') {
+      setCheckingUser(false);
+      return;
+    }
     checkExistingCompany();
   }, []);
 

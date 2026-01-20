@@ -51,7 +51,7 @@ export default function OnboardingTest() {
   };
 
   const triggerOnboarding = () => {
-    navigate(createPageUrl('CompanyOnboarding'));
+    navigate(createPageUrl('CompanyOnboarding') + '?force_restart=true');
   };
 
   if (loading) {
