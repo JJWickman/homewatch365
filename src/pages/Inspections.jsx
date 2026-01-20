@@ -359,7 +359,7 @@ export default function Inspections() {
           return;
         }
 
-        const isFlexibleType = ['other', 'custom_client_request', 'drop_in'].includes(newVisit.inspection_type);
+        const isFlexibleType = ['other', 'customer_called_in', 'drop_in'].includes(newVisit.inspection_type);
         
         const visitData = {
           company_id: companyId,
@@ -524,7 +524,7 @@ export default function Inspections() {
     const property = getProperty(newVisit.property_id);
     const staffMember = staff.find(s => s.user_email === newVisit.assigned_to);
     
-    const isFlexibleType = ['other', 'custom_client_request', 'drop_in'].includes(newVisit.inspection_type);
+    const isFlexibleType = ['other', 'customer_called_in', 'drop_in'].includes(newVisit.inspection_type);
     
     const inspectionData = {
       company_id: companyId,
@@ -880,6 +880,8 @@ export default function Inspections() {
                   <SelectContent>
                     <SelectItem value="inspection">Inspection</SelectItem>
                     <SelectItem value="followup">Follow-Up</SelectItem>
+                    <SelectItem value="pre_storm">Pre-Storm</SelectItem>
+                    <SelectItem value="post_storm">Post-Storm</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1026,24 +1028,24 @@ export default function Inspections() {
             )}
 
             {visitType === 'inspection' ? (
-               <>
-                 <div>
-                   <Label>Inspection Type</Label>
-                   <Select
-                     value={newVisit.inspection_type}
-                     onValueChange={(value) => setNewVisit(prev => ({ ...prev, inspection_type: value, template_id: !['other', 'custom_client_request', 'drop_in'].includes(value) ? prev.template_id : '' }))}
-                   >
-                     <SelectTrigger>
-                       <SelectValue />
-                     </SelectTrigger>
-                     <SelectContent>
-                       <SelectItem value="routine">Routine</SelectItem>
-                       <SelectItem value="other">Other</SelectItem>
-                       <SelectItem value="custom_client_request">Custom Client Request</SelectItem>
-                       <SelectItem value="drop_in">Drop-In</SelectItem>
-                     </SelectContent>
-                     </Select>
-                     </div>
+            <>
+              <div>
+                <Label>Inspection Type</Label>
+                <Select
+                  value={newVisit.inspection_type}
+                  onValueChange={(value) => setNewVisit(prev => ({ ...prev, inspection_type: value, template_id: !['other', 'customer_called_in', 'drop_in'].includes(value) ? prev.template_id : '' }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="routine">Routine</SelectItem>
+                    <SelectItem value="customer_called_in">Customer Called-In</SelectItem>
+                    <SelectItem value="drop_in">Drop-In</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
                  {newVisit.inspection_type === 'other' && (
                    <div className="space-y-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -1068,7 +1070,7 @@ export default function Inspections() {
                    </div>
                  )}
 
-                 {newVisit.inspection_type === 'custom_client_request' && (
+                 {newVisit.inspection_type === 'customer_called_in' && (
                    <div className="space-y-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
                      <div>
                        <Label>What was requested to inspect?</Label>
@@ -1157,7 +1159,7 @@ export default function Inspections() {
                     </Select>
                   </div>
 
-                  {visitType === 'inspection' && templates.length > 0 && !['other', 'custom_client_request', 'drop_in'].includes(newVisit.inspection_type) && (
+                  {visitType === 'inspection' && templates.length > 0 && !['other', 'customer_called_in', 'drop_in'].includes(newVisit.inspection_type) && (
                     <div>
                       <Label>Template</Label>
                       <Select
@@ -1178,7 +1180,7 @@ export default function Inspections() {
                     </div>
                   )}
 
-                  {visitType === 'inspection' && !['other', 'custom_client_request', 'drop_in'].includes(newVisit.inspection_type) && (
+                  {visitType === 'inspection' && !['other', 'customer_called_in', 'drop_in'].includes(newVisit.inspection_type) && (
                     <div className="flex items-center justify-between py-2">
                       <div>
                         <Label>Recurring Inspection</Label>
@@ -1237,7 +1239,7 @@ export default function Inspections() {
                   (visitType === 'followup' && !newVisit.followup_title) ||
                   creating ||
                   (visitType === 'inspection' && newVisit.is_recurring && !newVisit.recurrence_end_date) ||
-                  (visitType === 'inspection' && ['other', 'custom_client_request'].includes(newVisit.inspection_type) && !newVisit.inspection_details)
+                  (visitType === 'inspection' && ['other', 'customer_called_in'].includes(newVisit.inspection_type) && !newVisit.inspection_details)
                 }
                 className="bg-slate-900 hover:bg-slate-800"
               >
