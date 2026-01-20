@@ -308,8 +308,8 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="space-y-2">
-              {recentActivity.slice(0, 8).map((activity) => (
-                <div key={activity.id} className="flex items-center gap-4 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+               {recentActivity.slice(0, 8).map((activity) => (
+                 <Link key={activity.id} to={getActivityLink(activity)} className="flex items-center gap-4 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors hover:border-slate-300">
                   <Avatar className="h-9 w-9 shrink-0">
                     <AvatarFallback className="text-xs bg-slate-100">
                       {getInitials(activity.user_name)}
