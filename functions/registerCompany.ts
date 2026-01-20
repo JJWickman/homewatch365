@@ -100,6 +100,12 @@ Deno.serve(async (req) => {
 
     // Invite user via Base44's built-in user invitation system
     await base44.asServiceRole.users.inviteUser(email, 'user');
+    
+    // Set onboarding_completed to false for new users so they see onboarding
+    const users = await base44.asServiceRole.entities.User.filter({ email });
+    if (users.length > 0) {
+      await base44.asServiceRole.entities.User.update(users[0].id, { onboarding_completed: false });
+    }
 
     // Send welcome email
     await base44.asServiceRole.integrations.Core.SendEmail({
