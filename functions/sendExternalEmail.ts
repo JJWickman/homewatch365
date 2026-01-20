@@ -109,6 +109,7 @@ Deno.serve(async (req) => {
             success: true, 
             message: `Email sent successfully to ${to}`,
             from: msg.from,
+            sendGridResponse: sendResult,
             usage: {
                 sent: usage.emails_sent + 1,
                 limit: monthlyLimit,
