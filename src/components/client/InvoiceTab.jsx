@@ -298,7 +298,9 @@ ${client.company_id ? 'Your Property Management Team' : 'EstateWatch365'}
                     </div>
                     <div>
                       <p className="font-medium">#{invoice.invoice_number}</p>
-                      <p className="text-sm text-slate-500">{format(new Date(invoice.invoice_date), 'MMM d, yyyy')}</p>
+                      <p className="text-sm text-slate-500">
+                        {invoice.invoice_date ? format(new Date(invoice.invoice_date), 'MMM d, yyyy') : 'N/A'}
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">
