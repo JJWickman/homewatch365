@@ -30,11 +30,18 @@ const getPageRestrictions = () => {
 const getNavigationItems = (subscriptionPlan, memberRole) => {
 // Field Inspector - limited access (includes backward compatibility for 'technician')
 if (memberRole === 'field_inspector' || memberRole === 'technician') {
-  return [
+  const items = [
     { name: 'Dashboard', icon: Home, page: 'Dashboard' },
     { name: 'My Visits', icon: ClipboardCheck, page: 'Inspections' },
     { name: 'My Schedule', icon: Calendar, page: 'Schedule' }
   ];
+  
+  // Add Route Optimizer for field inspectors if company has growth+ subscription
+  if (['growth', 'professional', 'enterprise'].includes(subscriptionPlan)) {
+    items.push({ name: 'Route Optimizer', icon: Route, page: 'RouteOptimizer' });
+  }
+  
+  return items;
 }
 
 // Dispatcher/Manager and Administrator - full access
