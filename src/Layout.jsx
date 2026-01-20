@@ -123,15 +123,12 @@ export default function Layout({ children, currentPageName }) {
         return;
       }
       
-      // Load company membership
-      const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-      if (members.length > 0) {
-        setCompanyMember(members[0]);
-        // Load company details
-        const companies = await base44.entities.Company.filter({ id: members[0].company_id });
-        if (companies.length > 0) {
-          setCompany(companies[0]);
-        }
+      // Load company membership (reuse members already fetched)
+      setCompanyMember(members[0]);
+      // Load company details
+      const companies = await base44.entities.Company.filter({ id: members[0].company_id });
+      if (companies.length > 0) {
+        setCompany(companies[0]);
       }
     } catch (error) {
       console.log('User not authenticated');
