@@ -57,23 +57,23 @@ export default function Dashboard() {
      const freshUser = userList.length > 0 ? { ...currentUser, full_name: userList[0].full_name, id: userList[0].id, onboarding_completed: userList[0].onboarding_completed } : currentUser;
      setUser(freshUser);
 
+     if (!freshUser.onboarding_completed) {
+        // User hasn't completed onboarding - show it again
+        setCheckingOnboarding(false);
+        navigate(createPageUrl('CompanyOnboarding'));
+        return;
+      }
+
      let members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
 
-         // Retry once if not found (company might have just been created)
-         if (members.length === 0) {
-           await new Promise(resolve => setTimeout(resolve, 1000));
-           members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-         }
-
-         if (members.length === 0) {
-           // New user with no company - redirect to onboarding
-           setCheckingOnboarding(false);
-           navigate(createPageUrl('CompanyOnboarding'));
-           return;
-         }
+          // Retry once if not found (company might have just been created)
+          if (members.length === 0) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
+          }
 
      setCompanyMember(members[0]);
-     const companyId = members[0].company_id;
+     const companyId = members[0]?.company_id;
 
      const [companies, clients, properties, visits, activities] = await Promise.all([
        base44.entities.Company.filter({ id: companyId }),
@@ -82,20 +82,6 @@ export default function Dashboard() {
         base44.entities.Visit.filter({ company_id: companyId }),
         base44.entities.ActivityLog.filter({ company_id: companyId }, '-created_date', 10)
       ]);
-
-      if (companies.length === 0 || !companies[0].name) {
-        // Company doesn't exist or has no name - redirect to onboarding
-        setCheckingOnboarding(false);
-        navigate(createPageUrl('CompanyOnboarding'));
-        return;
-      }
-
-      if (!freshUser.onboarding_completed) {
-        // User hasn't completed onboarding - show it again
-        setCheckingOnboarding(false);
-        navigate(createPageUrl('CompanyOnboarding'));
-        return;
-      }
 
       setCompany(companies[0]);
 
