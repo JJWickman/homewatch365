@@ -106,7 +106,17 @@ export default function Layout({ children, currentPageName }) {
   const loadUserData = async () => {
     try {
       const currentUser = await base44.auth.me();
-      setUser(currentUser);
+      
+      // Fetch fresh user data to check onboarding status
+      const userList = await base44.entities.User.filter({ email: currentUser.email });
+      const freshUser = userList.length > 0 ? { ...currentUser, onboarding_completed: userList[0].onboarding_completed } : currentUser;
+      setUser(freshUser);
+      
+      // Check if user needs onboarding (not on onboarding page already)
+      if (freshUser.onboarding_completed !== true && currentPageName !== 'CompanyOnboarding') {
+        navigate(createPageUrl('CompanyOnboarding'));
+        return;
+      }
       
       // Load company membership
       const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
