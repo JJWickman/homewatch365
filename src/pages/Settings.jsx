@@ -1789,6 +1789,14 @@ ${company.name}
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="templates">
+          <InspectionTemplates 
+            companyId={company?.id} 
+            templates={templates} 
+            onRefresh={loadData}
+          />
+        </TabsContent>
       </Tabs>
 
       {/* Invite Dialog */}
