@@ -304,7 +304,7 @@ ${client.company_id ? 'Your Property Management Team' : 'EstateWatch365'}
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">${invoice.amount.toFixed(2)}</p>
+                   <p className="font-semibold">${invoice.amount ? invoice.amount.toFixed(2) : '0.00'}</p>
                     <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
                       invoice.status === 'paid' ? 'bg-emerald-100 text-emerald-700' :
                       invoice.status === 'sent' ? 'bg-blue-100 text-blue-700' :
