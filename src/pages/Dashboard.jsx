@@ -231,37 +231,42 @@ export default function Dashboard() {
           {todayInspections.length === 0 ? (
             <div className="text-center py-8 text-slate-500">
               <Calendar className="h-10 w-10 mx-auto mb-2 text-slate-300" />
-              <p>No inspections scheduled for today</p>
+              <p>No visits scheduled for today</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {todayInspections.map((inspection) => (
+              {todayInspections.map((visit) => (
                 <Link 
-                  key={inspection.id} 
-                  to={createPageUrl('InspectionDetail') + `?id=${inspection.id}`}
+                  key={visit.id} 
+                  to={createPageUrl('InspectionDetail') + `?id=${visit.id}`}
                   className="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200"
                 >
                   <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
                     <Building2 className="h-6 w-6 text-slate-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-slate-900 truncate">
-                      {inspection.property?.name || inspection.property?.address}
-                    </p>
-                    <div className="flex items-center gap-3 text-sm text-slate-500">
-                      {inspection.scheduled_time && (
+                    <div>
+                      <p className="font-medium text-slate-900 truncate">
+                        {visit.property?.name || visit.property?.address}
+                      </p>
+                      <p className="text-sm text-slate-600 truncate">
+                        {visit.client?.first_name} {visit.client?.last_name}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
+                      {visit.scheduled_time && (
                         <span className="flex items-center gap-1">
                           <Clock className="h-3.5 w-3.5" />
-                          {inspection.scheduled_time}
+                          {visit.scheduled_time}
                         </span>
                       )}
                       <span className="flex items-center gap-1 truncate">
                         <MapPin className="h-3.5 w-3.5 shrink-0" />
-                        {inspection.property?.city}
+                        {visit.property?.city}
                       </span>
                     </div>
                   </div>
-                  <StatusBadge status={inspection.status} />
+                  <StatusBadge status={visit.status} />
                 </Link>
               ))}
             </div>
