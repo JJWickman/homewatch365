@@ -230,7 +230,7 @@ ${client.company_id ? 'Your Property Management Team' : 'EstateWatch365'}
             </Button>
             <Button 
               size="sm" 
-              onClick={() => handleSendInvoice(currentInvoice)}
+              onClick={() => handleConfirmSend(currentInvoice)}
               disabled={sending || !client.email}
               className="bg-slate-900 hover:bg-slate-800"
             >
