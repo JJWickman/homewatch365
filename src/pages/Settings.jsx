@@ -89,7 +89,8 @@ export default function Settings() {
   const [inviteForm, setInviteForm] = useState({
     email: '',
     name: '',
-    role: 'field_inspector'
+    role: 'field_inspector',
+    access_level: 'user'
   });
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
@@ -334,13 +335,15 @@ export default function Settings() {
           user_email: inviteForm.email,
           user_name: inviteForm.name,
           role: inviteForm.role,
+          access_level: inviteForm.access_level,
           is_active: false
         });
-      } else if (inviteForm.name || inviteForm.role) {
+      } else if (inviteForm.name || inviteForm.role || inviteForm.access_level) {
         // Update existing member
         await base44.entities.CompanyMember.update(existing[0].id, {
           user_name: inviteForm.name || existing[0].user_name,
-          role: inviteForm.role || existing[0].role
+          role: inviteForm.role || existing[0].role,
+          access_level: inviteForm.access_level || existing[0].access_level
         });
       }
       
@@ -384,7 +387,7 @@ ${company.name}
       });
       
       setShowInviteDialog(false);
-      setInviteForm({ email: '', name: '', role: 'field_inspector' });
+      setInviteForm({ email: '', name: '', role: 'field_inspector', access_level: 'user' });
       setInviteError('');
       loadData();
     } catch (error) {
@@ -400,7 +403,8 @@ ${company.name}
       id: member.id,
       user_name: member.user_name || '',
       user_email: member.user_email,
-      role: member.role
+      role: member.role,
+      access_level: member.access_level || 'user'
     });
     setShowEditDialog(true);
   };
@@ -411,7 +415,8 @@ ${company.name}
     try {
       await base44.entities.CompanyMember.update(editingMember.id, {
         user_name: editingMember.user_name,
-        role: editingMember.role
+        role: editingMember.role,
+        access_level: editingMember.access_level
       });
       setShowEditDialog(false);
       setEditingMember(null);
@@ -1574,14 +1579,17 @@ ${company.name}
                        {member.is_owner && (
                          <Shield className="h-5 w-5 text-amber-600" title="Company Owner" />
                        )}
-                       {member.role === 'administrator' && (
-                         <Shield className="h-5 w-5 text-blue-600" title="Administrator" />
+                       {member.access_level === 'admin' && !member.is_owner && (
+                         <Shield className="h-5 w-5 text-blue-600" title="Admin Access" />
                        )}
                        <Badge variant="outline" className="capitalize">
                          {member.role === 'field_inspector' ? 'Field Inspector' : 
                           member.role === 'dispatcher' ? 'Dispatcher/Manager' : 
                           'Administrator'}
                        </Badge>
+                       {member.access_level === 'admin' && (
+                         <Badge className="bg-blue-100 text-blue-800 border-blue-200">Admin Access</Badge>
+                       )}
                        {member.is_active === false && (
                          <Badge variant="destructive">Suspended</Badge>
                        )}
@@ -1884,7 +1892,7 @@ ${company.name}
               />
             </div>
             <div>
-              <Label>Role</Label>
+              <Label>Job Role</Label>
               <Select
                 value={inviteForm.role}
                 onValueChange={(value) => setInviteForm(prev => ({ ...prev, role: value }))}
@@ -1898,6 +1906,23 @@ ${company.name}
                   <SelectItem value="administrator">Administrator</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-slate-500 mt-1">Their job function in the company</p>
+            </div>
+            <div>
+              <Label>Security Access Level</Label>
+              <Select
+                value={inviteForm.access_level}
+                onValueChange={(value) => setInviteForm(prev => ({ ...prev, access_level: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">User - Standard Access</SelectItem>
+                  <SelectItem value="admin">Admin - Full Access</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-slate-500 mt-1">Determines permissions and what they can access</p>
             </div>
           </div>
 
@@ -1953,7 +1978,7 @@ ${company.name}
                 />
               </div>
               <div>
-                <Label>Role</Label>
+                <Label>Job Role</Label>
                 <Select
                   value={editingMember.role}
                   onValueChange={(value) => setEditingMember(prev => ({ ...prev, role: value }))}
@@ -1967,6 +1992,23 @@ ${company.name}
                     <SelectItem value="administrator">Administrator</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-slate-500 mt-1">Their job function in the company</p>
+              </div>
+              <div>
+                <Label>Security Access Level</Label>
+                <Select
+                  value={editingMember.access_level}
+                  onValueChange={(value) => setEditingMember(prev => ({ ...prev, access_level: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">User - Standard Access</SelectItem>
+                    <SelectItem value="admin">Admin - Full Access</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-slate-500 mt-1">Determines permissions and what they can access</p>
               </div>
             </div>
           )}
