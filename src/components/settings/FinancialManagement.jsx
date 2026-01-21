@@ -170,10 +170,12 @@ export default function FinancialManagement({ companyId }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    type: 'service',
+    type: 'subscription',
+    inspection_frequency: 'weekly',
     price: '',
-    billing_frequency: 'one_time',
-    category: '',
+    billing_frequency: 'monthly',
+    included_pre_storm_visits: 0,
+    included_post_storm_visits: 0,
     is_active: true,
     included_visit_types: []
   });
@@ -206,10 +208,12 @@ export default function FinancialManagement({ companyId }) {
     setFormData({
       name: '',
       description: '',
-      type: 'service',
+      type: 'subscription',
+      inspection_frequency: 'weekly',
       price: '',
-      billing_frequency: 'one_time',
-      category: '',
+      billing_frequency: 'monthly',
+      included_pre_storm_visits: 0,
+      included_post_storm_visits: 0,
       is_active: true,
       included_visit_types: []
     });
@@ -222,9 +226,11 @@ export default function FinancialManagement({ companyId }) {
       name: product.name,
       description: product.description || '',
       type: product.type,
+      inspection_frequency: product.inspection_frequency || 'weekly',
       price: product.price.toString(),
       billing_frequency: product.billing_frequency,
-      category: product.category || '',
+      included_pre_storm_visits: product.included_pre_storm_visits || 0,
+      included_post_storm_visits: product.included_post_storm_visits || 0,
       is_active: product.is_active,
       included_visit_types: product.included_visit_types || []
     });
@@ -244,10 +250,15 @@ export default function FinancialManagement({ companyId }) {
       type: formData.type,
       price: parseFloat(formData.price),
       billing_frequency: formData.billing_frequency,
-      category: formData.category,
       is_active: formData.is_active,
       included_visit_types: formData.included_visit_types
     };
+
+    if (formData.type === 'subscription') {
+      productData.inspection_frequency = formData.inspection_frequency;
+      productData.included_pre_storm_visits = parseInt(formData.included_pre_storm_visits) || 0;
+      productData.included_post_storm_visits = parseInt(formData.included_post_storm_visits) || 0;
+    }
 
     try {
       if (editingProduct) {
@@ -363,41 +374,105 @@ export default function FinancialManagement({ companyId }) {
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
-              {products.map((product) => (
-                <div
-                  key={product.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 transition-colors"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-semibold">{product.name}</h3>
-                      <Badge variant="outline" className="capitalize">
-                        {product.type}
-                      </Badge>
-                      {!product.is_active && (
-                        <Badge variant="outline" className="bg-slate-100">
-                          Inactive
-                        </Badge>
-                      )}
-                    </div>
-                    {product.description && (
-                      <p className="text-sm text-slate-600 mb-2">{product.description}</p>
-                    )}
-                    <div className="flex items-center gap-4 text-sm text-slate-500">
-                      <span className="font-medium text-slate-900">
-                        ${product.price.toFixed(2)}
-                      </span>
-                      <span>•</span>
-                      <span>{getBillingFrequencyLabel(product.billing_frequency)}</span>
-                      {product.category && (
-                        <>
+            <div className="space-y-6">
+              {/* Subscription Plans */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Subscription Plans</h3>
+                <div className="space-y-3">
+                  {products.filter(p => p.type === 'subscription').map((product) => (
+                    <div
+                      key={product.id}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-1">
+                          <h3 className="font-semibold">{product.name}</h3>
+                          <Badge variant="outline" className="capitalize">
+                            {product.inspection_frequency?.replace('_', '-')}
+                          </Badge>
+                          {!product.is_active && (
+                            <Badge variant="outline" className="bg-slate-100">
+                              Inactive
+                            </Badge>
+                          )}
+                        </div>
+                        {product.description && (
+                          <p className="text-sm text-slate-600 mb-2">{product.description}</p>
+                        )}
+                        <div className="flex items-center gap-4 text-sm text-slate-500">
+                          <span className="font-medium text-slate-900">
+                            ${product.price.toFixed(2)}
+                          </span>
                           <span>•</span>
-                          <span>{product.category}</span>
-                        </>
-                      )}
+                          <span>{getBillingFrequencyLabel(product.billing_frequency)}</span>
+                          {(product.included_pre_storm_visits > 0 || product.included_post_storm_visits > 0) && (
+                            <>
+                              <span>•</span>
+                              <span>
+                                {product.included_pre_storm_visits} Pre-Storm, {product.included_post_storm_visits} Post-Storm
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditProduct(product)}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setDeletingProduct(product);
+                            setShowDeleteDialog(true);
+                          }}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  ))}
+                  {products.filter(p => p.type === 'subscription').length === 0 && (
+                    <p className="text-sm text-slate-500 text-center py-4 border rounded-lg bg-slate-50">No subscription plans yet</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Add-On Services */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Add-On Services</h3>
+                <div className="space-y-3">
+                  {products.filter(p => p.type === 'addon').map((product) => (
+                    <div
+                      key={product.id}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-1">
+                          <h3 className="font-semibold">{product.name}</h3>
+                          <Badge variant="outline">Add-On</Badge>
+                          {!product.is_active && (
+                            <Badge variant="outline" className="bg-slate-100">
+                              Inactive
+                            </Badge>
+                          )}
+                        </div>
+                        {product.description && (
+                          <p className="text-sm text-slate-600 mb-2">{product.description}</p>
+                        )}
+                        <div className="flex items-center gap-4 text-sm text-slate-500">
+                          <span className="font-medium text-slate-900">
+                            ${product.price.toFixed(2)}
+                          </span>
+                          <span>•</span>
+                          <span>{getBillingFrequencyLabel(product.billing_frequency)}</span>
+                        </div>
+                      </div>
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
@@ -417,9 +492,33 @@ export default function FinancialManagement({ companyId }) {
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                  </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditProduct(product)}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setDeletingProduct(product);
+                            setShowDeleteDialog(true);
+                          }}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  {products.filter(p => p.type === 'addon').length === 0 && (
+                    <p className="text-sm text-slate-500 text-center py-4 border rounded-lg bg-slate-50">No add-on services yet</p>
+                  )}
                 </div>
-              ))}
+              </div>
             </div>
           )}
         </CardContent>
@@ -459,25 +558,44 @@ export default function FinancialManagement({ companyId }) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Type *</Label>
+              <Select
+                value={formData.type}
+                onValueChange={(value) => setFormData({ ...formData, type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="subscription">Subscription Plan</SelectItem>
+                  <SelectItem value="addon">Add-On Service</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {formData.type === 'subscription' && (
               <div>
-                <Label>Type *</Label>
+                <Label>Inspection Frequency *</Label>
                 <Select
-                  value={formData.type}
-                  onValueChange={(value) => setFormData({ ...formData, type: value })}
+                  value={formData.inspection_frequency}
+                  onValueChange={(value) => setFormData({ ...formData, inspection_frequency: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="product">Product</SelectItem>
-                    <SelectItem value="service">Service</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="bi_weekly">Bi-Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+            )}
 
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Price *</Label>
+                <Label>Monthly Price *</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                   <Input
@@ -491,9 +609,7 @@ export default function FinancialManagement({ companyId }) {
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Billing Frequency</Label>
                 <Select
@@ -504,23 +620,38 @@ export default function FinancialManagement({ companyId }) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="one_time">One-time</SelectItem>
                     <SelectItem value="monthly">Monthly</SelectItem>
                     <SelectItem value="quarterly">Quarterly</SelectItem>
                     <SelectItem value="annually">Annually</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-
-              <div>
-                <Label>Category</Label>
-                <Input
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="e.g., Inspection"
-                />
-              </div>
             </div>
+
+            {formData.type === 'subscription' && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Included Pre-Storm Visits</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={formData.included_pre_storm_visits}
+                    onChange={(e) => setFormData({ ...formData, included_pre_storm_visits: e.target.value })}
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <Label>Included Post-Storm Visits</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={formData.included_post_storm_visits}
+                    onChange={(e) => setFormData({ ...formData, included_post_storm_visits: e.target.value })}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+            )}
 
             <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
               <input
@@ -535,10 +666,10 @@ export default function FinancialManagement({ companyId }) {
               </Label>
             </div>
 
-            {formData.type === 'service' && (
+            {formData.type === 'subscription' && (
               <div className="border-t pt-4">
-                <Label className="text-base font-semibold">Visit Types Included in This Service</Label>
-                <p className="text-xs text-slate-500 mt-1 mb-3">Configure which visit types are included in this service plan</p>
+                <Label className="text-base font-semibold">Additional Visit Types Configuration</Label>
+                <p className="text-xs text-slate-500 mt-1 mb-3">Configure billing for other inspection types and follow-ups</p>
                 <VisitTypesConfig
                   visitTypes={formData.included_visit_types}
                   onChange={(types) => setFormData({ ...formData, included_visit_types: types })}
@@ -556,7 +687,7 @@ export default function FinancialManagement({ companyId }) {
               disabled={!formData.name || !formData.price}
               className="bg-slate-900 hover:bg-slate-800"
             >
-              {editingProduct ? 'Update' : 'Add'} {formData.type === 'product' ? 'Product' : 'Service'}
+              {editingProduct ? 'Update' : 'Add'} {formData.type === 'subscription' ? 'Subscription Plan' : 'Add-On Service'}
             </Button>
           </DialogFooter>
         </DialogContent>
