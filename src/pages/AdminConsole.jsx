@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Trash2, Edit, AlertCircle, Loader2, Palette, Upload, Building, Save } from 'lucide-react';
+import { Plus, Trash2, Edit, AlertCircle, Loader2, Palette, Upload, Building, Save, DollarSign } from 'lucide-react';
+import BillingOverview from '@/components/admin/BillingOverview';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -276,12 +277,18 @@ export default function AdminConsole() {
         subtitle="Manage system-wide settings and customizations"
       />
 
-      <Tabs defaultValue="contractor-types" className="space-y-4">
+      <Tabs defaultValue="billing" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="billing">Billing</TabsTrigger>
           <TabsTrigger value="contractor-types">Contractor Types</TabsTrigger>
           <TabsTrigger value="branding">Branding</TabsTrigger>
           <TabsTrigger value="demo-data">Demo Data</TabsTrigger>
         </TabsList>
+
+        {/* Billing Tab */}
+        <TabsContent value="billing">
+          <BillingOverview companyId={companyId} />
+        </TabsContent>
 
         {/* Contractor Types Tab */}
         <TabsContent value="contractor-types" className="space-y-4">

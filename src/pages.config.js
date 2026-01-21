@@ -1,4 +1,5 @@
 import AdminConsole from './pages/AdminConsole';
+import BillingTest from './pages/BillingTest';
 import ClientDetail from './pages/ClientDetail';
 import ClientForm from './pages/ClientForm';
 import ClientInspectionView from './pages/ClientInspectionView';
@@ -27,12 +28,12 @@ import Settings from './pages/Settings';
 import StripeSetup from './pages/StripeSetup';
 import SuperAdminConsole from './pages/SuperAdminConsole';
 import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
-import BillingTest from './pages/BillingTest';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AdminConsole": AdminConsole,
+    "BillingTest": BillingTest,
     "ClientDetail": ClientDetail,
     "ClientForm": ClientForm,
     "ClientInspectionView": ClientInspectionView,
@@ -61,7 +62,6 @@ export const PAGES = {
     "StripeSetup": StripeSetup,
     "SuperAdminConsole": SuperAdminConsole,
     "TestGoogleMapsAPI": TestGoogleMapsAPI,
-    "BillingTest": BillingTest,
 }
 
 export const pagesConfig = {
