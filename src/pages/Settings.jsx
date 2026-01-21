@@ -717,7 +717,6 @@ ${company.name}
         <TabsList className="mb-6">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="company">Company</TabsTrigger>
-          {isDispatcherOrAdmin && <TabsTrigger value="team">Team</TabsTrigger>}
           {(companyMember?.is_owner || companyMember?.role === 'owner') && <TabsTrigger value="billing">Billing</TabsTrigger>}
           {isAdmin && <TabsTrigger value="financial">Products & Services</TabsTrigger>}
           {isAdmin && <TabsTrigger value="reviews">Reviews</TabsTrigger>}
@@ -1224,90 +1223,6 @@ ${company.name}
           </Card>
         </TabsContent>
 
-        <TabsContent value="team">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Team Members
-                </CardTitle>
-                <CardDescription>Manage staff access and roles</CardDescription>
-              </div>
-              {canManageStaff && (
-                <Button onClick={() => setShowInviteDialog(true)} className="bg-slate-900 hover:bg-slate-800">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Invite Member
-                </Button>
-              )}
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {staff.map((member) => (
-                  <div 
-                    key={member.id}
-                    className="flex items-center justify-between p-4 rounded-lg border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarFallback className="bg-slate-900 text-white">
-                          {getInitials(member.user_name, member.user_email)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{member.user_name || member.user_email}</p>
-                        <p className="text-sm text-slate-500">{member.user_email}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                       {member.is_owner && (
-                         <Shield className="h-5 w-5 text-amber-600" title="Company Owner" />
-                       )}
-                       {member.role === 'administrator' && (
-                         <Shield className="h-5 w-5 text-blue-600" title="Administrator" />
-                       )}
-                       <Badge variant="outline" className="capitalize">
-                         {member.role === 'field_inspector' ? 'Field Inspector' : 
-                          member.role === 'dispatcher' ? 'Dispatcher/Manager' : 
-                          'Administrator'}
-                       </Badge>
-                       {canManageStaff && member.user_email !== companyMember?.user_email && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEditMember(member)}>
-                              <Edit2 className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleResendInvite(member)}>
-                              <Mail className="h-4 w-4 mr-2" />
-                              Resend Invite
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => {
-                                setDeletingMember(member);
-                                setShowDeleteDialog(true);
-                              }}
-                              className="text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Remove
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         <TabsContent value="billing" className="space-y-6">
           {/* Current Plan & Trial Status */}
           {company?.subscription_status === 'trial' && company.trial_ends_at && (
@@ -1592,6 +1507,89 @@ ${company.name}
         </TabsContent>
 
         <TabsContent value="admin" className="space-y-6">
+          {/* Team Members */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Team Members
+                </CardTitle>
+                <CardDescription>Manage staff access and roles</CardDescription>
+              </div>
+              {canManageStaff && (
+                <Button onClick={() => setShowInviteDialog(true)} className="bg-slate-900 hover:bg-slate-800">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Invite Member
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {staff.map((member) => (
+                  <div 
+                    key={member.id}
+                    className="flex items-center justify-between p-4 rounded-lg border"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarFallback className="bg-slate-900 text-white">
+                          {getInitials(member.user_name, member.user_email)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{member.user_name || member.user_email}</p>
+                        <p className="text-sm text-slate-500">{member.user_email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                       {member.is_owner && (
+                         <Shield className="h-5 w-5 text-amber-600" title="Company Owner" />
+                       )}
+                       {member.role === 'administrator' && (
+                         <Shield className="h-5 w-5 text-blue-600" title="Administrator" />
+                       )}
+                       <Badge variant="outline" className="capitalize">
+                         {member.role === 'field_inspector' ? 'Field Inspector' : 
+                          member.role === 'dispatcher' ? 'Dispatcher/Manager' : 
+                          'Administrator'}
+                       </Badge>
+                       {canManageStaff && member.user_email !== companyMember?.user_email && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditMember(member)}>
+                              <Edit2 className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleResendInvite(member)}>
+                              <Mail className="h-4 w-4 mr-2" />
+                              Resend Invite
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => {
+                                setDeletingMember(member);
+                                setShowDeleteDialog(true);
+                              }}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Remove
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Geocoding Tool */}
           <Card>
             <CardHeader>
