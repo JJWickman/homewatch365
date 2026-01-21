@@ -6,7 +6,7 @@ import { format, startOfWeek, endOfWeek, isToday, parseISO } from 'date-fns';
 import { 
   ClipboardCheck, Building2, Users, AlertTriangle, 
   Calendar, ArrowRight, Clock, MapPin, CheckCircle2,
-  TrendingUp, FileWarning, CloudRain
+  TrendingUp, FileWarning, CloudRain, DollarSign
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,8 @@ export default function Dashboard() {
     inspectionsThisWeek: 0,
     completedThisWeek: 0,
     pendingTasks: 0,
-    issuesFound: 0
+    issuesFound: 0,
+    monthlyRevenue: 0
   });
   const [todayInspections, setTodayInspections] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
@@ -80,13 +81,14 @@ export default function Dashboard() {
      setCompanyMember(members[0]);
      const companyId = members[0]?.company_id;
 
-     const [companies, clients, properties, visits, activities] = await Promise.all([
-       base44.entities.Company.filter({ id: companyId }),
-        base44.entities.Client.filter({ company_id: companyId, is_active: true }),
-        base44.entities.Property.filter({ company_id: companyId, is_active: true }),
-        base44.entities.Visit.filter({ company_id: companyId }),
-        base44.entities.ActivityLog.filter({ company_id: companyId }, '-created_date', 10)
-      ]);
+     const [companies, clients, properties, visits, activities, transactions] = await Promise.all([
+      base44.entities.Company.filter({ id: companyId }),
+       base44.entities.Client.filter({ company_id: companyId, is_active: true }),
+       base44.entities.Property.filter({ company_id: companyId, is_active: true }),
+       base44.entities.Visit.filter({ company_id: companyId }),
+       base44.entities.ActivityLog.filter({ company_id: companyId }, '-created_date', 10),
+       base44.entities.ClientTransaction.filter({ company_id: companyId })
+     ]);
 
       setCompany(companies[0]);
 
@@ -110,13 +112,23 @@ export default function Dashboard() {
         (v.priority === 'high' || v.priority === 'urgent')
       ).length;
 
+      // Calculate monthly revenue from transactions
+      const currentMonth = format(new Date(), 'yyyy-MM');
+      const monthlyRevenue = transactions
+        .filter(t => t.billing_month === currentMonth)
+        .reduce((sum, t) => sum + (t.amount || 0), 0);
+      
+      // Also add up monthly rates from active clients
+      const recurringRevenue = clients.reduce((sum, c) => sum + (c.monthly_rate || 0), 0);
+
       setStats({
         totalClients: clients.length,
         totalProperties: properties.length,
         inspectionsThisWeek: weekVisits.length,
         completedThisWeek,
         pendingTasks: 0,
-        issuesFound: highPriorityVisits
+        issuesFound: highPriorityVisits,
+        monthlyRevenue: monthlyRevenue || recurringRevenue
       });
 
       const todayScheduled = visits.filter(v => {
@@ -200,7 +212,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <Link to={createPageUrl('Properties')} className="cursor-pointer h-full">
           <StatsCard
             title="Total Properties"
@@ -236,6 +248,15 @@ export default function Dashboard() {
             icon={AlertTriangle}
             iconColor="text-red-600"
             iconBg="bg-red-50"
+          />
+        </Link>
+        <Link to={createPageUrl('Billing')} className="cursor-pointer h-full">
+          <StatsCard
+            title="Monthly Revenue"
+            value={`$${stats.monthlyRevenue.toLocaleString()}`}
+            icon={DollarSign}
+            iconColor="text-green-600"
+            iconBg="bg-green-50"
           />
         </Link>
       </div>
