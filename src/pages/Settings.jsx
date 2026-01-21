@@ -425,12 +425,40 @@ ${company.name}
     if (!deletingMember) return;
     
     try {
-      await base44.entities.CompanyMember.update(deletingMember.id, { is_active: false });
+      await base44.entities.CompanyMember.delete(deletingMember.id);
       setShowDeleteDialog(false);
       setDeletingMember(null);
       loadData();
     } catch (error) {
       console.error('Error deleting member:', error);
+    }
+  };
+
+  const handleSuspendMember = async (member) => {
+    try {
+      await base44.entities.CompanyMember.update(member.id, { 
+        is_active: member.is_active === false ? true : false 
+      });
+      loadData();
+    } catch (error) {
+      console.error('Error suspending member:', error);
+    }
+  };
+
+  const handleForcePasswordReset = async (member) => {
+    try {
+      const response = await base44.functions.invoke('adminResetUserPassword', {
+        user_email: member.user_email
+      });
+      
+      if (response.data.success) {
+        alert(`Password reset email sent to ${member.user_email}`);
+      } else {
+        alert('Failed to send password reset: ' + (response.data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error forcing password reset:', error);
+      alert('Failed to send password reset email');
     }
   };
 
@@ -1554,6 +1582,9 @@ ${company.name}
                           member.role === 'dispatcher' ? 'Dispatcher/Manager' : 
                           'Administrator'}
                        </Badge>
+                       {member.is_active === false && (
+                         <Badge variant="destructive">Suspended</Badge>
+                       )}
                        {canManageStaff && member.user_email !== companyMember?.user_email && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -1564,11 +1595,31 @@ ${company.name}
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleEditMember(member)}>
                               <Edit2 className="h-4 w-4 mr-2" />
-                              Edit
+                              Edit Role & Access
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleResendInvite(member)}>
                               <Mail className="h-4 w-4 mr-2" />
                               Resend Invite
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleForcePasswordReset(member)}>
+                              <Lock className="h-4 w-4 mr-2" />
+                              Force Password Reset
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleSuspendMember(member)}
+                              className={member.is_active === false ? "text-green-600" : "text-amber-600"}
+                            >
+                              {member.is_active === false ? (
+                                <>
+                                  <Check className="h-4 w-4 mr-2" />
+                                  Reactivate Account
+                                </>
+                              ) : (
+                                <>
+                                  <X className="h-4 w-4 mr-2" />
+                                  Suspend Account
+                                </>
+                              )}
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               onClick={() => {
@@ -1578,7 +1629,7 @@ ${company.name}
                               className="text-red-600"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Remove
+                              Remove Permanently
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
