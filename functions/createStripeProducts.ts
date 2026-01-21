@@ -8,8 +8,14 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     
-    if (!user || user.role !== 'admin') {
-      return Response.json({ error: 'Unauthorized - Admin only' }, { status: 403 });
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check if user is admin by checking CompanyMember access_level
+    const members = await base44.asServiceRole.entities.CompanyMember.filter({ user_email: user.email });
+    if (members.length === 0 || (members[0].access_level !== 'admin' && !members[0].is_owner)) {
+      return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
     // Create products and prices for each tier
