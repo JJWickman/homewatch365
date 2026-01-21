@@ -70,8 +70,8 @@ export default function AdminConsole() {
         const member = members[0];
         setCompanyMember(member);
         
-        // Check if user is owner (admin)
-        if (member.role !== 'owner') {
+        // Check if user is owner or administrator
+        if (member.role !== 'owner' && member.role !== 'administrator') {
           setLoading(false);
           return;
         }
@@ -247,8 +247,8 @@ export default function AdminConsole() {
     );
   }
 
-  // Only allow owners (admins)
-  if (!companyMember || companyMember.role !== 'owner') {
+  // Only allow owners and administrators
+  if (!companyMember || (companyMember.role !== 'owner' && companyMember.role !== 'administrator')) {
     return (
       <div className="space-y-4">
         <PageHeader
