@@ -58,7 +58,7 @@ const baseItems = [
 
 // Only show Billing for Administrators
 if (memberRole === 'administrator' || memberRole === 'owner') {
-  baseItems.splice(7, 0, { name: 'Billing', icon: DollarSign, page: 'AdminConsole' });
+  baseItems.splice(7, 0, { name: 'Billing', icon: DollarSign, page: 'Billing' });
 }
 
 // Only show Marketing for Enterprise plan
