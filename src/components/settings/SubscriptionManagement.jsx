@@ -254,6 +254,66 @@ export default function SubscriptionManagement({ company, companyMember }) {
         </CardContent>
       </Card>
 
+      {/* Add-Ons Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Subscription Add-Ons</CardTitle>
+          <CardDescription>Enhance your plan with additional features</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="border rounded-lg p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                    <TrendingUp className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Marketing Suite</h3>
+                    <p className="text-2xl font-bold text-slate-900">$50<span className="text-sm font-normal text-slate-500">/month</span></p>
+                  </div>
+                </div>
+                
+                <ul className="space-y-2 mb-4">
+                  <li className="flex items-start gap-2 text-sm">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-slate-700">Email marketing campaigns</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-sm">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-slate-700">SMS marketing campaigns</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-sm">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-slate-700">Newsletter templates</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-sm">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-slate-700">Social media marketing tools</span>
+                  </li>
+                </ul>
+
+                {company?.marketing_addon_active && (
+                  <Badge className="bg-green-100 text-green-800 border-green-200">Active</Badge>
+                )}
+              </div>
+
+              <Button 
+                variant={company?.marketing_addon_active ? "outline" : "default"}
+                className={company?.marketing_addon_active ? "" : "bg-purple-600 hover:bg-purple-700"}
+                disabled={loadingCheckout}
+              >
+                {company?.marketing_addon_active ? "Remove Add-On" : "Add to Plan"}
+              </Button>
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-500 mt-4">
+            Add-ons are billed monthly in addition to your base subscription plan.
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Payment Method Note */}
       <Alert>
         <CreditCard className="h-4 w-4" />
