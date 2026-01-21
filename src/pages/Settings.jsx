@@ -47,6 +47,7 @@ import UserManagementSection from '@/components/settings/UserManagementSection';
 import InspectionTemplates from '@/components/settings/InspectionTemplates';
 import PlanBillingConfiguration from '@/components/settings/PlanBillingConfiguration';
 import StripeConnectCard from '@/components/settings/StripeConnectCard';
+import SubscriptionManagement from '@/components/settings/SubscriptionManagement';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -751,7 +752,7 @@ ${company.name}
         <TabsList className="mb-6">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="company">Company</TabsTrigger>
-          {(companyMember?.is_owner || companyMember?.role === 'owner') && <TabsTrigger value="billing">Billing</TabsTrigger>}
+          {(companyMember?.is_owner || companyMember?.role === 'owner') && <TabsTrigger value="subscription">Subscription</TabsTrigger>}
           {isAdmin && <TabsTrigger value="financial">Products & Services</TabsTrigger>}
           {isAdmin && <TabsTrigger value="reviews">Reviews</TabsTrigger>}
           {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
@@ -1255,6 +1256,10 @@ ${company.name}
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="subscription">
+          <SubscriptionManagement company={company} companyMember={companyMember} />
         </TabsContent>
 
         <TabsContent value="billing" className="space-y-6">
