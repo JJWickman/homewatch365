@@ -109,50 +109,6 @@ const VisitTypesConfig = ({ visitTypes, onChange }) => {
             </div>
           );
         }
-
-        return (
-          <div key={visitType.id} className="p-3 border rounded-lg space-y-2">
-            <Label className="text-sm font-medium">{visitType.label}</Label>
-            <div className="ml-3 space-y-2">
-              {visitType.subtypes.map(subtype => {
-                const state = getVisitTypeState(visitType.id, subtype);
-                const subtypeLabel = {
-                  'routine': 'Routine',
-                  'customer_called_in': 'Customer Called-In',
-                  'drop_in': 'Drop-In',
-                  'other': 'Other'
-                }[subtype];
-
-                return (
-                  <div key={subtype} className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={state.included}
-                        onChange={() => handleToggle(visitType.id, subtype)}
-                        className="rounded"
-                      />
-                      <Label className="mb-0 text-xs">{subtypeLabel}</Label>
-                    </div>
-                    {!state.included && (
-                      <div className="ml-6 flex items-center gap-2">
-                        <Label className="text-xs text-slate-600">Extra: $</Label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={state.extra_charge}
-                          onChange={(e) => handleChargeChange(visitType.id, subtype, e.target.value)}
-                          className="w-16 h-6 text-xs"
-                        />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
       })}
     </div>
   );
