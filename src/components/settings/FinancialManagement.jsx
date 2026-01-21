@@ -473,25 +473,6 @@ export default function FinancialManagement({ companyId }) {
                           <span>{getBillingFrequencyLabel(product.billing_frequency)}</span>
                         </div>
                       </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditProduct(product)}
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setDeletingProduct(product);
-                        setShowDeleteDialog(true);
-                      }}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                       <div className="flex items-center gap-2">
                         <Button
                           variant="outline"
