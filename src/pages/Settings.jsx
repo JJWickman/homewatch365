@@ -46,6 +46,7 @@ import PasswordResetDialog from '@/components/auth/PasswordResetDialog';
 import UserManagementSection from '@/components/settings/UserManagementSection';
 import InspectionTemplates from '@/components/settings/InspectionTemplates';
 import PlanBillingConfiguration from '@/components/settings/PlanBillingConfiguration';
+import StripeConnectCard from '@/components/settings/StripeConnectCard';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -1540,6 +1541,9 @@ ${company.name}
         </TabsContent>
 
         <TabsContent value="admin" className="space-y-6">
+          {/* Stripe Connect */}
+          <StripeConnectCard company={company} onRefresh={loadData} />
+
           {/* Team Members */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
