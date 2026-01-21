@@ -2,6 +2,14 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
+    // Prevent sample data creation in production
+    const allowSampleData = Deno.env.get('ALLOW_SAMPLE_DATA');
+    if (allowSampleData !== 'true') {
+      return Response.json({ 
+        error: 'Sample data creation is disabled in production. Set ALLOW_SAMPLE_DATA=true environment variable to enable.' 
+      }, { status: 403 });
+    }
+
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
