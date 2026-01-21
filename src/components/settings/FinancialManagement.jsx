@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Plus, Edit2, Trash2, DollarSign, Package, Check } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import ProductServiceWizard from './ProductServiceWizard';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -118,6 +119,7 @@ export default function FinancialManagement({ companyId }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingProduct, setDeletingProduct] = useState(null);
@@ -160,20 +162,21 @@ export default function FinancialManagement({ companyId }) {
       alert(`You have reached the maximum of ${MAX_PRODUCTS} products/services for your plan.`);
       return;
     }
-    setEditingProduct(null);
-    setFormData({
-      name: '',
-      description: '',
-      type: 'subscription',
-      inspection_frequency: 'weekly',
-      price: '',
-      billing_frequency: 'monthly',
-      included_pre_storm_visits: 0,
-      included_post_storm_visits: 0,
-      is_active: true,
-      included_visit_types: []
-    });
-    setShowDialog(true);
+    setShowWizard(true);
+  };
+
+  const handleWizardComplete = async (data) => {
+    try {
+      await base44.entities.ProductService.create({
+        company_id: companyId,
+        ...data
+      });
+      setShowWizard(false);
+      loadProducts();
+    } catch (error) {
+      console.error('Error saving product:', error);
+      alert('Failed to save product/service');
+    }
   };
 
   const handleEditProduct = (product) => {
@@ -460,6 +463,16 @@ export default function FinancialManagement({ companyId }) {
           )}
         </CardContent>
       </Card>
+
+      {/* Wizard Dialog */}
+      <Dialog open={showWizard} onOpenChange={setShowWizard}>
+        <DialogContent className="max-w-2xl">
+          <ProductServiceWizard 
+            onComplete={handleWizardComplete}
+            onCancel={() => setShowWizard(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Add/Edit Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
