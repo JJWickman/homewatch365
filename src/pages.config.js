@@ -1,4 +1,3 @@
-import AdminConsole from './pages/AdminConsole';
 import BillingTest from './pages/BillingTest';
 import ClientDetail from './pages/ClientDetail';
 import ClientForm from './pages/ClientForm';
@@ -33,7 +32,6 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "AdminConsole": AdminConsole,
     "BillingTest": BillingTest,
     "ClientDetail": ClientDetail,
     "ClientForm": ClientForm,
