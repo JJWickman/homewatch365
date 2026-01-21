@@ -66,9 +66,13 @@ export default function ClientDetail() {
         setVisits(visitsData);
         setPortalEmail(c.portal_user_email || '');
 
-        // Load billing configurations
-        const configData = await base44.entities.ClientBillingPlans.filter({ company_id: c.company_id }).catch(() => []);
-        setBillingConfigs(configData || []);
+        // Load service billing configurations from ProductService
+        if (c.service_subscription_id) {
+          const serviceData = await base44.entities.ProductService.filter({ id: c.service_subscription_id }).catch(() => []);
+          if (serviceData.length > 0 && serviceData[0].included_visit_types) {
+            setBillingConfigs(serviceData[0].included_visit_types);
+          }
+        }
 
         // Load service subscription details
         if (c.service_subscription_id) {

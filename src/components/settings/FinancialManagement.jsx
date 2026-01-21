@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Edit2, Trash2, DollarSign, Package } from 'lucide-react';
+import { Plus, Edit2, Trash2, DollarSign, Package, Check } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +25,139 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from 'lucide-react';
 
+const VISIT_TYPES = [
+  { id: 'inspection', label: 'Inspections', subtypes: ['routine', 'customer_called_in', 'drop_in', 'other'] },
+  { id: 'followup', label: 'Follow-ups', subtypes: [] },
+  { id: 'pre_storm', label: 'Pre-Storm Visits', subtypes: [] },
+  { id: 'post_storm', label: 'Post-Storm Visits', subtypes: [] }
+];
+
+const VisitTypesConfig = ({ visitTypes, onChange }) => {
+  const handleToggle = (visitType, inspectionSubtype = null) => {
+    const existing = visitTypes.find(
+      vt => vt.visit_type === visitType && vt.inspection_subtype === inspectionSubtype
+    );
+
+    if (existing) {
+      onChange(visitTypes.map(vt =>
+        vt.visit_type === visitType && vt.inspection_subtype === inspectionSubtype
+          ? { ...vt, included: !vt.included }
+          : vt
+      ));
+    } else {
+      onChange([
+        ...visitTypes,
+        {
+          visit_type: visitType,
+          inspection_subtype: inspectionSubtype,
+          included: true,
+          extra_charge: 0
+        }
+      ]);
+    }
+  };
+
+  const handleChargeChange = (visitType, inspectionSubtype, charge) => {
+    const existing = visitTypes.find(
+      vt => vt.visit_type === visitType && vt.inspection_subtype === inspectionSubtype
+    );
+
+    if (existing) {
+      onChange(visitTypes.map(vt =>
+        vt.visit_type === visitType && vt.inspection_subtype === inspectionSubtype
+          ? { ...vt, extra_charge: parseFloat(charge) || 0 }
+          : vt
+      ));
+    }
+  };
+
+  const getVisitTypeState = (visitType, inspectionSubtype = null) => {
+    return visitTypes.find(
+      vt => vt.visit_type === visitType && vt.inspection_subtype === inspectionSubtype
+    ) || { included: false, extra_charge: 0 };
+  };
+
+  return (
+    <div className="space-y-3">
+      {VISIT_TYPES.map(visitType => {
+        if (visitType.subtypes.length === 0) {
+          const state = getVisitTypeState(visitType.id);
+          return (
+            <div key={visitType.id} className="p-3 border rounded-lg space-y-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={state.included}
+                  onChange={() => handleToggle(visitType.id)}
+                  className="rounded"
+                />
+                <Label className="mb-0 text-sm font-medium">{visitType.label}</Label>
+              </div>
+              {!state.included && (
+                <div className="ml-6 flex items-center gap-2">
+                  <Label className="text-xs text-slate-600">Extra Charge: $</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={state.extra_charge}
+                    onChange={(e) => handleChargeChange(visitType.id, null, e.target.value)}
+                    className="w-20 h-7 text-xs"
+                  />
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        return (
+          <div key={visitType.id} className="p-3 border rounded-lg space-y-2">
+            <Label className="text-sm font-medium">{visitType.label}</Label>
+            <div className="ml-3 space-y-2">
+              {visitType.subtypes.map(subtype => {
+                const state = getVisitTypeState(visitType.id, subtype);
+                const subtypeLabel = {
+                  'routine': 'Routine',
+                  'customer_called_in': 'Customer Called-In',
+                  'drop_in': 'Drop-In',
+                  'other': 'Other'
+                }[subtype];
+
+                return (
+                  <div key={subtype} className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={state.included}
+                        onChange={() => handleToggle(visitType.id, subtype)}
+                        className="rounded"
+                      />
+                      <Label className="mb-0 text-xs">{subtypeLabel}</Label>
+                    </div>
+                    {!state.included && (
+                      <div className="ml-6 flex items-center gap-2">
+                        <Label className="text-xs text-slate-600">Extra: $</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={state.extra_charge}
+                          onChange={(e) => handleChargeChange(visitType.id, subtype, e.target.value)}
+                          className="w-16 h-6 text-xs"
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 export default function FinancialManagement({ companyId }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +174,8 @@ export default function FinancialManagement({ companyId }) {
     price: '',
     billing_frequency: 'one_time',
     category: '',
-    is_active: true
+    is_active: true,
+    included_visit_types: []
   });
 
   const MAX_PRODUCTS = 10;
@@ -76,7 +210,8 @@ export default function FinancialManagement({ companyId }) {
       price: '',
       billing_frequency: 'one_time',
       category: '',
-      is_active: true
+      is_active: true,
+      included_visit_types: []
     });
     setShowDialog(true);
   };
@@ -90,7 +225,8 @@ export default function FinancialManagement({ companyId }) {
       price: product.price.toString(),
       billing_frequency: product.billing_frequency,
       category: product.category || '',
-      is_active: product.is_active
+      is_active: product.is_active,
+      included_visit_types: product.included_visit_types || []
     });
     setShowDialog(true);
   };
@@ -109,7 +245,8 @@ export default function FinancialManagement({ companyId }) {
       price: parseFloat(formData.price),
       billing_frequency: formData.billing_frequency,
       category: formData.category,
-      is_active: formData.is_active
+      is_active: formData.is_active,
+      included_visit_types: formData.included_visit_types
     };
 
     try {
@@ -397,6 +534,17 @@ export default function FinancialManagement({ companyId }) {
                 Active (available for billing)
               </Label>
             </div>
+
+            {formData.type === 'service' && (
+              <div className="border-t pt-4">
+                <Label className="text-base font-semibold">Visit Types Included in This Service</Label>
+                <p className="text-xs text-slate-500 mt-1 mb-3">Configure which visit types are included in this service plan</p>
+                <VisitTypesConfig
+                  visitTypes={formData.included_visit_types}
+                  onChange={(types) => setFormData({ ...formData, included_visit_types: types })}
+                />
+              </div>
+            )}
           </div>
 
           <DialogFooter>
