@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { base44 } from '@/api/base44Client';
+import OfflineProvider from '@/components/shared/OfflineProvider';
+import OfflineBanner from '@/components/shared/OfflineBanner';
 import { 
         Home, Users, Building2, ClipboardCheck, Calendar, 
         FileText, Settings, Menu, X, LogOut, ChevronDown,
@@ -156,9 +158,12 @@ export default function Layout({ children, currentPageName }) {
   // Client portal layout
   if (clientPortalPages.includes(currentPageName)) {
     return (
-      <div className="min-h-screen bg-slate-50">
-        {children}
-      </div>
+      <OfflineProvider>
+        <div className="min-h-screen bg-slate-50">
+          <OfflineBanner />
+          {children}
+        </div>
+      </OfflineProvider>
     );
   }
 
@@ -188,7 +193,9 @@ export default function Layout({ children, currentPageName }) {
   const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'admin';
 
   return (
+    <OfflineProvider>
     <div className="min-h-screen bg-slate-50">
+      <OfflineBanner />
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
@@ -392,6 +399,7 @@ export default function Layout({ children, currentPageName }) {
           --accent: ${company?.accent_color || '#c9a962'};
         }
       `}</style>
-    </div>
-  );
-}
+      </div>
+      </OfflineProvider>
+      );
+      }
