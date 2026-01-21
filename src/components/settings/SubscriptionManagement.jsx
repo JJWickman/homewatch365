@@ -50,10 +50,14 @@ export default function SubscriptionManagement({ company, companyMember }) {
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [stripePrices, setStripePrices] = useState({});
   const [loadingCheckout, setLoadingCheckout] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState(null);
 
   useEffect(() => {
     loadStripePrices();
-  }, []);
+    if (company?.stripe_customer_id) {
+      loadPaymentMethod();
+    }
+  }, [company?.stripe_customer_id]);
 
   const loadStripePrices = async () => {
     try {
@@ -63,6 +67,19 @@ export default function SubscriptionManagement({ company, companyMember }) {
       }
     } catch (error) {
       console.error('Error loading Stripe prices:', error);
+    }
+  };
+
+  const loadPaymentMethod = async () => {
+    try {
+      const response = await base44.functions.invoke('getPaymentMethod', {
+        company_id: company.id
+      });
+      if (response.data.success && response.data.payment_method) {
+        setPaymentMethod(response.data.payment_method);
+      }
+    } catch (error) {
+      console.error('Error loading payment method:', error);
     }
   };
 
@@ -134,7 +151,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
       {company?.subscription_status === 'active' && (
         <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="text-sm text-slate-600">Current Plan</p>
                 <p className="text-2xl font-bold capitalize text-slate-900">
@@ -143,6 +160,17 @@ export default function SubscriptionManagement({ company, companyMember }) {
               </div>
               <Badge className="bg-blue-600 text-white">Active</Badge>
             </div>
+            {paymentMethod && (
+              <div className="flex items-center gap-2 pt-4 border-t border-blue-200">
+                <CreditCard className="h-4 w-4 text-slate-600" />
+                <span className="text-sm text-slate-700">
+                  {paymentMethod.brand?.toUpperCase()} •••• {paymentMethod.last4}
+                </span>
+                <span className="text-xs text-slate-500 ml-2">
+                  Expires {paymentMethod.exp_month}/{paymentMethod.exp_year}
+                </span>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
