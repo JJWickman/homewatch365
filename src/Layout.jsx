@@ -3,10 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { base44 } from '@/api/base44Client';
 import { 
-  Home, Users, Building2, ClipboardCheck, Calendar, 
-  FileText, Settings, Menu, X, LogOut, ChevronDown,
-  Bell, Search, Plus, Building, UserCircle, Megaphone, Briefcase, Route, BookOpen
-} from 'lucide-react';
+        Home, Users, Building2, ClipboardCheck, Calendar, 
+        FileText, Settings, Menu, X, LogOut, ChevronDown,
+        Bell, Search, Plus, Building, UserCircle, Megaphone, Briefcase, Route, BookOpen, DollarSign
+      } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -55,6 +55,11 @@ const baseItems = [
   { name: 'Route Optimizer', icon: Route, page: 'RouteOptimizer' },
   { name: 'Help & Tutorials', icon: BookOpen, page: 'HelpTutorials' },
 ];
+
+// Only show Billing for Administrators
+if (memberRole === 'administrator' || memberRole === 'owner') {
+  baseItems.splice(7, 0, { name: 'Billing', icon: DollarSign, page: 'AdminConsole' });
+}
 
 // Only show Marketing for Enterprise plan
 if (subscriptionPlan === 'enterprise') {
