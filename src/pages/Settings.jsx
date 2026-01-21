@@ -752,7 +752,7 @@ ${company.name}
         <TabsList className="mb-6">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="company">Company</TabsTrigger>
-          {(companyMember?.is_owner || companyMember?.role === 'owner') && <TabsTrigger value="subscription">Subscription</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="subscription">Subscription</TabsTrigger>}
           {isAdmin && <TabsTrigger value="financial">Products & Services</TabsTrigger>}
           {isAdmin && <TabsTrigger value="reviews">Reviews</TabsTrigger>}
           {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}

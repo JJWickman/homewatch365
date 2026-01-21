@@ -96,14 +96,14 @@ export default function SubscriptionManagement({ company, companyMember }) {
     }
   };
 
-  const isOwner = companyMember?.is_owner || companyMember?.role === 'owner';
+  const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'owner' || companyMember?.is_owner;
 
-  if (!isOwner) {
+  if (!isAdmin) {
     return (
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Only the company owner can manage subscription settings.
+          Only administrators can manage subscription settings.
         </AlertDescription>
       </Alert>
     );
