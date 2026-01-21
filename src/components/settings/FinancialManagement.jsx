@@ -404,7 +404,7 @@ export default function FinancialManagement({ companyId }) {
 
               {/* Add-On Services */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Add-On Services</h3>
+                <h3 className="text-lg font-semibold mb-3">Add-On Products or Services</h3>
                 <div className="space-y-3">
                   {products.filter(p => p.type === 'addon').map((product) => (
                     <div
