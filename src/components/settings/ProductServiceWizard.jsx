@@ -17,6 +17,8 @@ export default function ProductServiceWizard({ onComplete, onCancel }) {
     visitsPerMonth: 4,
     preStormIncluded: false,
     postStormIncluded: false,
+    preStormQuantity: 12,
+    postStormQuantity: 12,
     followUpsIncluded: 0
   });
 
@@ -84,8 +86,8 @@ export default function ProductServiceWizard({ onComplete, onCancel }) {
           type: 'subscription',
           billing_frequency: 'monthly',
           inspection_frequency: inspectionFrequency,
-          included_pre_storm_visits: formData.preStormIncluded ? 999 : 0,
-          included_post_storm_visits: formData.postStormIncluded ? 999 : 0
+          included_pre_storm_visits: formData.preStormIncluded ? formData.preStormQuantity : 0,
+          included_post_storm_visits: formData.postStormIncluded ? formData.postStormQuantity : 0
         });
       }
     }
@@ -373,27 +375,55 @@ export default function ProductServiceWizard({ onComplete, onCancel }) {
             />
           </div>
 
-          <div className="space-y-3 border rounded-lg p-4 bg-slate-50">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="pre-storm"
-                checked={formData.preStormIncluded}
-                onCheckedChange={(checked) => setFormData({ ...formData, preStormIncluded: checked })}
-              />
-              <label htmlFor="pre-storm" className="text-sm font-medium cursor-pointer">
-                Pre-Storm Visits Included
-              </label>
+          <div className="space-y-4 border rounded-lg p-4 bg-slate-50">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="pre-storm"
+                  checked={formData.preStormIncluded}
+                  onCheckedChange={(checked) => setFormData({ ...formData, preStormIncluded: checked })}
+                />
+                <label htmlFor="pre-storm" className="text-sm font-medium cursor-pointer">
+                  Pre-Storm Visits Included
+                </label>
+              </div>
+              {formData.preStormIncluded && (
+                <div className="ml-6">
+                  <Label className="text-xs">Quantity per Year</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={formData.preStormQuantity}
+                    onChange={(e) => setFormData({ ...formData, preStormQuantity: parseInt(e.target.value) || 0 })}
+                    className="mt-1 w-32"
+                  />
+                </div>
+              )}
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="post-storm"
-                checked={formData.postStormIncluded}
-                onCheckedChange={(checked) => setFormData({ ...formData, postStormIncluded: checked })}
-              />
-              <label htmlFor="post-storm" className="text-sm font-medium cursor-pointer">
-                Post-Storm Visits Included
-              </label>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="post-storm"
+                  checked={formData.postStormIncluded}
+                  onCheckedChange={(checked) => setFormData({ ...formData, postStormIncluded: checked })}
+                />
+                <label htmlFor="post-storm" className="text-sm font-medium cursor-pointer">
+                  Post-Storm Visits Included
+                </label>
+              </div>
+              {formData.postStormIncluded && (
+                <div className="ml-6">
+                  <Label className="text-xs">Quantity per Year</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={formData.postStormQuantity}
+                    onChange={(e) => setFormData({ ...formData, postStormQuantity: parseInt(e.target.value) || 0 })}
+                    className="mt-1 w-32"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
