@@ -113,6 +113,26 @@ export default function SubscriptionManagement({ company, companyMember }) {
     }
   };
 
+  const handleManagePaymentMethod = async () => {
+    if (!company) return;
+    
+    setLoadingCheckout(true);
+    try {
+      const response = await base44.functions.invoke('createBillingPortalSession', {
+        company_id: company.id
+      });
+      
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      }
+    } catch (error) {
+      console.error('Error creating billing portal:', error);
+      alert('Failed to open billing portal. Please try again.');
+    } finally {
+      setLoadingCheckout(false);
+    }
+  };
+
   const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'owner' || companyMember?.is_owner;
 
   if (!isAdmin) {
@@ -151,7 +171,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
       {company?.subscription_status === 'active' && (
         <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-600">Current Plan</p>
                 <p className="text-2xl font-bold capitalize text-slate-900">
@@ -160,15 +180,54 @@ export default function SubscriptionManagement({ company, companyMember }) {
               </div>
               <Badge className="bg-blue-600 text-white">Active</Badge>
             </div>
-            {paymentMethod && (
-              <div className="flex items-center gap-2 pt-4 border-t border-blue-200">
-                <CreditCard className="h-4 w-4 text-slate-600" />
-                <span className="text-sm text-slate-700">
-                  {paymentMethod.brand?.toUpperCase()} •••• {paymentMethod.last4}
-                </span>
-                <span className="text-xs text-slate-500 ml-2">
-                  Expires {paymentMethod.exp_month}/{paymentMethod.exp_year}
-                </span>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Payment Method Section */}
+      {company?.stripe_customer_id && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Payment Method Stored
+            </CardTitle>
+            <CardDescription>Manage your payment information</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {paymentMethod ? (
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-white border flex items-center justify-center">
+                    <CreditCard className="h-5 w-5 text-slate-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-slate-900">
+                      {paymentMethod.brand?.toUpperCase()} •••• {paymentMethod.last4}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      Expires {paymentMethod.exp_month}/{paymentMethod.exp_year}
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  variant="outline"
+                  onClick={handleManagePaymentMethod}
+                  disabled={loadingCheckout}
+                >
+                  Change Payment Method
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <p className="text-sm text-slate-500 mb-4">No payment method on file</p>
+                <Button 
+                  onClick={handleManagePaymentMethod}
+                  disabled={loadingCheckout}
+                  className="bg-slate-900 hover:bg-slate-800"
+                >
+                  Add Payment Method
+                </Button>
               </div>
             )}
           </CardContent>
