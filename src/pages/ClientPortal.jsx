@@ -25,6 +25,9 @@ export default function ClientPortal() {
   const [serviceSubscription, setServiceSubscription] = useState(null);
   const [additionalProducts, setAdditionalProducts] = useState([]);
   const [currentStatement, setCurrentStatement] = useState(null);
+  const [allStatements, setAllStatements] = useState([]);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedStatement, setSelectedStatement] = useState(null);
 
   useEffect(() => {
     loadPortalData();
@@ -85,14 +88,15 @@ export default function ClientPortal() {
         setAdditionalProducts(selectedProducts);
       }
 
+      // Load all statements
+      const allStmt = await base44.entities.MonthlyStatement.filter({ client_id: clientData.id }, '-billing_month');
+      setAllStatements(allStmt);
+
       // Load current month's statement
       const currentMonth = new Date().toISOString().slice(0, 7);
-      const statements = await base44.entities.MonthlyStatement.filter({
-        client_id: clientData.id,
-        billing_month: currentMonth
-      });
-      if (statements.length > 0) {
-        setCurrentStatement(statements[0]);
+      const current = allStmt.find(s => s.billing_month === currentMonth);
+      if (current) {
+        setCurrentStatement(current);
       }
 
     } catch (error) {
@@ -106,31 +110,24 @@ export default function ClientPortal() {
     base44.auth.logout();
   };
 
-  const handleSubscribe = async () => {
-    if (!client || !client.monthly_rate) {
-      alert('Subscription not configured. Please contact your property manager.');
-      return;
-    }
-
-    setLoadingCheckout(true);
+  const handleDownloadInvoice = async (statementId) => {
     try {
-      const response = await base44.functions.invoke('createClientSubscription', {
-        client_id: client.id,
-        company_id: client.company_id,
-        email: user.email,
-        amount: client.monthly_rate,
-        billing_frequency: client.billing_frequency || 'monthly'
+      const response = await base44.functions.invoke('generateInvoicePDF', {
+        statement_id: statementId
       });
-
-      if (response.data.url) {
-        window.location.href = response.data.url;
+      
+      if (response.data.success) {
+        window.open(response.data.pdf_url, '_blank');
       }
     } catch (error) {
-      console.error('Error starting checkout:', error);
-      alert('Failed to start checkout. Please try again.');
-    } finally {
-      setLoadingCheckout(false);
+      console.error('Error downloading invoice:', error);
+      alert('Failed to download invoice');
     }
+  };
+
+  const handlePayInvoice = (statement) => {
+    setSelectedStatement(statement);
+    setShowPaymentModal(true);
   };
 
   if (loading) {
@@ -254,55 +251,74 @@ export default function ClientPortal() {
             </CardContent>
           </Card>
 
-          {/* Current Invoice */}
+          {/* Billing & Invoices */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Current Month Statement</CardTitle>
+              <CardTitle className="text-lg">Billing & Invoices</CardTitle>
             </CardHeader>
             <CardContent>
-              {currentStatement ? (
+              {allStatements.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center text-sm text-slate-500">
-                    <span>Billing Period</span>
-                    <span>{format(new Date(currentStatement.billing_month + '-01'), 'MMMM yyyy')}</span>
-                  </div>
-                  
-                  <div className="space-y-2 border-t pt-3">
-                    {currentStatement.line_items?.map((item, index) => (
-                      <div key={index} className="flex justify-between items-center text-sm">
-                        <span className="text-slate-700">{item.description}</span>
-                        <span className="font-medium">${item.amount.toFixed(2)}</span>
+                  {allStatements.slice(0, 3).map((statement) => (
+                    <div 
+                      key={statement.id}
+                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">
+                            {format(new Date(statement.billing_month + '-01'), 'MMMM yyyy')}
+                          </span>
+                          <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
+                            statement.status === 'paid' 
+                              ? 'bg-green-100 text-green-700'
+                              : statement.status === 'sent'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-slate-100 text-slate-700'
+                          }`}>
+                            {statement.status === 'paid' && <CheckCircle2 className="h-3 w-3" />}
+                            <span className="capitalize">{statement.status}</span>
+                          </div>
+                        </div>
+                        <div className="text-sm text-slate-600 mt-1">
+                          Total: <span className="font-semibold">${statement.total.toFixed(2)}</span>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                  
-                  <div className="border-t pt-3">
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold">Total Due</span>
-                      <span className="font-bold text-xl text-slate-900">
-                        ${currentStatement.total.toFixed(2)}
-                      </span>
+                      <div className="flex gap-2 ml-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownloadInvoice(statement.id)}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        {statement.status !== 'paid' && (
+                          <Button
+                            size="sm"
+                            className="bg-blue-600 hover:bg-blue-700"
+                            onClick={() => handlePayInvoice(statement)}
+                          >
+                            <CreditCard className="h-4 w-4 mr-1" />
+                            Pay
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="pt-2">
-                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${
-                      currentStatement.status === 'paid' 
-                        ? 'bg-green-100 text-green-700'
-                        : currentStatement.status === 'sent'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-slate-100 text-slate-700'
-                    }`}>
-                      {currentStatement.status === 'paid' && <CheckCircle2 className="h-3 w-3" />}
-                      <span className="capitalize">{currentStatement.status}</span>
+                  ))}
+
+                  {allStatements.length > 3 && (
+                    <div className="text-center pt-3 border-t">
+                      <p className="text-xs text-slate-500">
+                        Showing 3 of {allStatements.length} invoices
+                      </p>
                     </div>
-                  </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8">
                   <FileText className="h-8 w-8 mx-auto text-slate-300 mb-2" />
-                  <p className="text-slate-500 text-sm">No statement generated yet</p>
-                  <p className="text-slate-400 text-xs mt-1">Statements are generated at the end of each month</p>
+                  <p className="text-slate-500 text-sm">No invoices yet</p>
+                  <p className="text-slate-400 text-xs mt-1">Invoices will appear here once generated</p>
                 </div>
               )}
             </CardContent>
@@ -461,6 +477,49 @@ export default function ClientPortal() {
           )}
         </section>
       </main>
+
+      {/* Payment Modal */}
+      {showPaymentModal && selectedStatement && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <Card className="max-w-md w-full">
+            <CardHeader>
+              <CardTitle>Pay Invoice</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-slate-600">Period</span>
+                  <span className="font-medium">{format(new Date(selectedStatement.billing_month + '-01'), 'MMMM yyyy')}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-semibold">Amount Due</span>
+                  <span className="text-2xl font-bold text-blue-600">${selectedStatement.total.toFixed(2)}</span>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  onClick={() => {
+                    window.open(`${window.location.origin}/InvoicePayment?statement_id=${selectedStatement.id}`, '_blank');
+                    setShowPaymentModal(false);
+                  }}
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Pay Securely
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setShowPaymentModal(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="border-t bg-white mt-12">
