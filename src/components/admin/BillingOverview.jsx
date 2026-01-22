@@ -632,6 +632,8 @@ export default function BillingOverview({ companyId }) {
             <Button 
               onClick={handleSendInvoice} 
               disabled={!emailAddress || sending}
+              style={{ backgroundColor: '#000', color: '#fff' }}
+              className="hover:bg-slate-800"
             >
               {sending ? (
                 <>
