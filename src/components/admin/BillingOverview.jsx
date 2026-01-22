@@ -71,9 +71,6 @@ export default function BillingOverview({ companyId }) {
       
       if (response.data.success) {
         toast.success(`Invoice emailed to ${emailAddress} successfully!`);
-        setEmailDialogOpen(false);
-        setSendingStatement(null);
-        setEmailAddress('');
         loadBillingData();
       }
     } catch (error) {
@@ -81,6 +78,9 @@ export default function BillingOverview({ companyId }) {
       toast.error('Failed to send invoice: ' + error.message);
     } finally {
       setSending(false);
+      setEmailDialogOpen(false);
+      setSendingStatement(null);
+      setEmailAddress('');
     }
   };
 
