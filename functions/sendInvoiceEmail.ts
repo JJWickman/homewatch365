@@ -61,12 +61,17 @@ ${company.phone || ''}
 ${company.email || ''}
     `.trim();
 
-    // Send email with PDF attachment
-    await base44.integrations.Core.SendEmail({
-      from_name: company.name,
-      to: client.email,
+    // Send email with SendGrid
+    sgMail.setApiKey(Deno.env.get('SENDGRID_API_KEY'));
+    
+    const recipientEmail = email_override || client.email;
+    
+    await sgMail.send({
+      to: recipientEmail,
+      from: company.email || 'noreply@estatewatch365.com',
       subject: subject,
-      body: emailBody
+      text: emailBody,
+      html: emailBody.replace(/\n/g, '<br>')
     });
 
     // Update statement status
