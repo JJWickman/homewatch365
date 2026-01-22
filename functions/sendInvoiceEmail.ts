@@ -84,7 +84,7 @@ ${company.email || ''}
     await base44.entities.CommunicationLog.create({
       company_id: statement.company_id,
       client_id: client.id,
-      client_email: client.email,
+      client_email: email_override || client.email,
       type: 'email',
       subject: subject,
       message: emailBody,
