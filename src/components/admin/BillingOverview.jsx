@@ -3,7 +3,8 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, TrendingUp, Users, Calendar, Loader2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { DollarSign, TrendingUp, Users, Calendar, Loader2, Mail, FileText } from 'lucide-react';
 
 export default function BillingOverview({ companyId }) {
   const [loading, setLoading] = useState(true);
@@ -33,6 +34,37 @@ export default function BillingOverview({ companyId }) {
       console.error('Error loading billing data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendInvoice = async (statementId) => {
+    try {
+      const response = await base44.functions.invoke('sendInvoiceEmail', {
+        statement_id: statementId
+      });
+      
+      if (response.data.success) {
+        alert('Invoice sent successfully!');
+        loadBillingData();
+      }
+    } catch (error) {
+      console.error('Error sending invoice:', error);
+      alert('Failed to send invoice: ' + error.message);
+    }
+  };
+
+  const handleDownloadInvoice = async (statementId) => {
+    try {
+      const response = await base44.functions.invoke('generateInvoicePDF', {
+        statement_id: statementId
+      });
+      
+      if (response.data.success) {
+        window.open(response.data.pdf_url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error generating invoice:', error);
+      alert('Failed to generate invoice: ' + error.message);
     }
   };
 
@@ -193,6 +225,7 @@ export default function BillingOverview({ companyId }) {
                     <th className="text-left py-3 px-2 font-medium text-slate-600">Month</th>
                     <th className="text-left py-3 px-2 font-medium text-slate-600">Status</th>
                     <th className="text-right py-3 px-2 font-medium text-slate-600">Total</th>
+                    <th className="text-right py-3 px-2 font-medium text-slate-600">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -218,6 +251,26 @@ export default function BillingOverview({ companyId }) {
                         </td>
                         <td className="py-3 px-2 text-right font-medium">
                           ${(statement.total || 0).toLocaleString()}
+                        </td>
+                        <td className="py-3 px-2 text-right">
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDownloadInvoice(statement.id)}
+                            >
+                              <FileText className="h-4 w-4" />
+                            </Button>
+                            {statement.status !== 'paid' && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleSendInvoice(statement.id)}
+                              >
+                                <Mail className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
