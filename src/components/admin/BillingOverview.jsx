@@ -400,7 +400,7 @@ export default function BillingOverview({ companyId }) {
                                 className="gap-1"
                               >
                                 <Mail className="h-4 w-4" />
-                                <span className="text-xs hidden xl:inline">Email</span>
+                                <span className="text-xs">Email</span>
                               </Button>
                             )}
                           </div>
