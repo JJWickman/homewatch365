@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
-import { Send, Edit, Loader2, FileText, DollarSign, Mail, Download, Plus } from 'lucide-react';
+import { Send, Edit, Loader2, FileText, DollarSign, Mail, Download, Plus, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,8 @@ export default function InvoiceTab({ clientId, client }) {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState(false);
+  const [editingStatement, setEditingStatement] = useState(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -104,6 +106,11 @@ export default function InvoiceTab({ clientId, client }) {
   };
 
   const handleSendStatement = async (statementId) => {
+    if (!client.email) {
+      toast.error('Client email is required');
+      return;
+    }
+
     setSending(true);
     try {
       const response = await base44.functions.invoke('sendInvoiceEmail', {
@@ -112,16 +119,69 @@ export default function InvoiceTab({ clientId, client }) {
 
       if (response.data.success) {
         toast.success('Invoice sent successfully!');
+        await base44.entities.MonthlyStatement.update(statementId, {
+          status: 'sent',
+          sent_at: new Date().toISOString()
+        });
         loadData();
       } else {
-        toast.error('Failed to send invoice');
+        toast.error(response.data.message || 'Failed to send invoice');
       }
     } catch (error) {
       console.error('Error sending invoice:', error);
-      toast.error('Failed to send invoice');
+      toast.error(error.message || 'Failed to send invoice');
     } finally {
       setSending(false);
     }
+  };
+
+  const handleEditStatement = (statement) => {
+    setEditingStatement({ ...statement });
+    setShowEditDialog(true);
+  };
+
+  const handleSaveStatement = async () => {
+    try {
+      const lineItems = editingStatement.line_items || [];
+      const subtotal = lineItems.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+      const taxAmount = parseFloat(editingStatement.tax_amount) || 0;
+      const total = subtotal + taxAmount;
+
+      await base44.entities.MonthlyStatement.update(editingStatement.id, {
+        line_items: lineItems,
+        subtotal,
+        tax_amount: taxAmount,
+        total,
+        notes: editingStatement.notes
+      });
+
+      toast.success('Invoice updated successfully');
+      setShowEditDialog(false);
+      setEditingStatement(null);
+      loadData();
+    } catch (error) {
+      console.error('Error updating statement:', error);
+      toast.error('Failed to update invoice');
+    }
+  };
+
+  const handleAddLineItem = () => {
+    const newItem = { description: '', amount: 0 };
+    setEditingStatement({
+      ...editingStatement,
+      line_items: [...(editingStatement.line_items || []), newItem]
+    });
+  };
+
+  const handleUpdateLineItem = (index, field, value) => {
+    const updatedItems = [...editingStatement.line_items];
+    updatedItems[index] = { ...updatedItems[index], [field]: value };
+    setEditingStatement({ ...editingStatement, line_items: updatedItems });
+  };
+
+  const handleRemoveLineItem = (index) => {
+    const updatedItems = editingStatement.line_items.filter((_, i) => i !== index);
+    setEditingStatement({ ...editingStatement, line_items: updatedItems });
   };
 
   const handleDownloadStatement = async (statementId) => {
@@ -156,6 +216,104 @@ export default function InvoiceTab({ clientId, client }) {
   const currentMonthTransactions = transactions.filter(t => t.billing_month === currentMonth);
 
   return (
+    <>
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Invoice</DialogTitle>
+          </DialogHeader>
+          {editingStatement && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-medium mb-2">Line Items</p>
+                <div className="space-y-2">
+                  {editingStatement.line_items?.map((item, index) => (
+                    <div key={index} className="flex gap-2 items-start">
+                      <input
+                        type="text"
+                        value={item.description}
+                        onChange={(e) => handleUpdateLineItem(index, 'description', e.target.value)}
+                        placeholder="Description"
+                        className="flex-1 px-3 py-2 border rounded-md text-sm"
+                      />
+                      <input
+                        type="number"
+                        value={item.amount}
+                        onChange={(e) => handleUpdateLineItem(index, 'amount', parseFloat(e.target.value))}
+                        placeholder="Amount"
+                        step="0.01"
+                        className="w-32 px-3 py-2 border rounded-md text-sm"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveLineItem(index)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddLineItem}
+                  className="mt-2"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Line Item
+                </Button>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Tax Amount</label>
+                <input
+                  type="number"
+                  value={editingStatement.tax_amount || 0}
+                  onChange={(e) => setEditingStatement({ ...editingStatement, tax_amount: parseFloat(e.target.value) })}
+                  step="0.01"
+                  className="w-full px-3 py-2 border rounded-md text-sm mt-1"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Notes</label>
+                <textarea
+                  value={editingStatement.notes || ''}
+                  onChange={(e) => setEditingStatement({ ...editingStatement, notes: e.target.value })}
+                  rows={3}
+                  className="w-full px-3 py-2 border rounded-md text-sm mt-1"
+                />
+              </div>
+
+              <div className="bg-slate-50 p-3 rounded-lg">
+                <div className="flex justify-between text-sm">
+                  <span>Subtotal:</span>
+                  <span>${(editingStatement.line_items?.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0) || 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm mt-1">
+                  <span>Tax:</span>
+                  <span>${(parseFloat(editingStatement.tax_amount) || 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between font-bold mt-2 pt-2 border-t">
+                  <span>Total:</span>
+                  <span>${((editingStatement.line_items?.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0) || 0) + (parseFloat(editingStatement.tax_amount) || 0)).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveStatement} className="bg-slate-900 hover:bg-slate-800">
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     <div className="space-y-4">
       {/* Generate & Send Invoice */}
       <Card>
@@ -245,6 +403,13 @@ export default function InvoiceTab({ clientId, client }) {
                     <Button
                       variant="outline"
                       size="sm"
+                      onClick={() => handleEditStatement(statement)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => handleDownloadStatement(statement.id)}
                     >
                       <Download className="h-4 w-4" />
@@ -298,5 +463,6 @@ export default function InvoiceTab({ clientId, client }) {
         </Card>
       )}
     </div>
+    </>
   );
 }
