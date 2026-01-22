@@ -29,7 +29,11 @@ Deno.serve(async (req) => {
 
     // Generate PDF
     const pdfResponse = await base44.functions.invoke('generateInvoicePDF', { statement_id });
-    const { pdf_url, payment_url } = pdfResponse.data;
+    const { pdf_url } = pdfResponse.data;
+
+    // Generate client portal link
+    const appUrl = new URL(req.url).origin;
+    const portalUrl = `${appUrl}/ClientPortal`;
 
     // Prepare email
     const subject = `Invoice from ${company.name} - ${statement.billing_month}`;
@@ -43,8 +47,8 @@ Invoice Details:
 - Total Amount: $${statement.total.toFixed(2)}
 - Due Date: ${new Date(statement.finalized_at || statement.created_date).toLocaleDateString()}
 
-You can pay this invoice online by clicking the link below:
-${payment_url}
+View and pay your invoice in the client portal:
+${portalUrl}
 
 Or download the attached PDF for your records.
 
@@ -86,7 +90,7 @@ ${company.email || ''}
       success: true,
       message: 'Invoice sent successfully',
       pdf_url,
-      payment_url
+      portal_url: portalUrl
     });
 
   } catch (error) {
