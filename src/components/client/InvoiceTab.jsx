@@ -418,7 +418,10 @@ export default function InvoiceTab({ clientId, client }) {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleSendStatement(statement.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSendStatement(statement.id);
+                        }}
                         disabled={sending}
                       >
                         <Mail className="h-4 w-4" />
