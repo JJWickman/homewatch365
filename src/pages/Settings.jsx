@@ -48,7 +48,6 @@ import InspectionTemplates from '@/components/settings/InspectionTemplates';
 import PlanBillingConfiguration from '@/components/settings/PlanBillingConfiguration';
 import StripeConnectCard from '@/components/settings/StripeConnectCard';
 import SubscriptionManagement from '@/components/settings/SubscriptionManagement';
-import BillingsSection from '@/components/settings/BillingsSection';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -755,7 +754,6 @@ ${company.name}
           <TabsTrigger value="company">Company</TabsTrigger>
           {isAdmin && <TabsTrigger value="subscription">Subscription</TabsTrigger>}
           {isAdmin && <TabsTrigger value="financial">Products & Services</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="billings">Billings</TabsTrigger>}
           {isAdmin && <TabsTrigger value="reviews">Reviews</TabsTrigger>}
           {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
           {isAdmin && <TabsTrigger value="templates">Inspection Templates</TabsTrigger>}
@@ -1266,10 +1264,6 @@ ${company.name}
 
         <TabsContent value="financial">
            <FinancialManagement companyId={company?.id} />
-         </TabsContent>
-
-         <TabsContent value="billings">
-           <BillingsSection companyId={company?.id} />
          </TabsContent>
 
          <TabsContent value="reviews" className="space-y-6">
