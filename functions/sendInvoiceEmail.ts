@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import sgMail from 'npm:@sendgrid/mail@8.1.0';
 
 Deno.serve(async (req) => {
   try {
@@ -9,7 +10,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { statement_id } = await req.json();
+    const { statement_id, email_override } = await req.json();
 
     // Get the statement
     const statements = await base44.entities.MonthlyStatement.filter({ id: statement_id });
