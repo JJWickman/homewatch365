@@ -1,122 +1,141 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
-import { Send, Edit, Loader2, FileText, DollarSign } from 'lucide-react';
+import { Send, Edit, Loader2, FileText, DollarSign, Mail, Download, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from 'sonner';
 import EmptyState from '@/components/shared/EmptyState';
 
 export default function InvoiceTab({ clientId, client }) {
-  const [invoices, setInvoices] = useState([]);
+  const [statements, setStatements] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [editingInvoice, setEditingInvoice] = useState(null);
-  const [confirmSendOpen, setConfirmSendOpen] = useState(false);
-  const [invoiceToSend, setInvoiceToSend] = useState(null);
 
   useEffect(() => {
-    loadInvoices();
+    loadData();
   }, [clientId]);
 
-  const loadInvoices = async () => {
+  const loadData = async () => {
     try {
-      const data = await base44.entities.Invoice.filter({ client_id: clientId }, '-created_date', 10);
-      setInvoices(data);
+      const [statementsData, transactionsData] = await Promise.all([
+        base44.entities.MonthlyStatement.filter({ client_id: clientId }, '-billing_month'),
+        base44.entities.ClientTransaction.filter({ client_id: clientId }, '-transaction_date', 50)
+      ]);
+      setStatements(statementsData);
+      setTransactions(transactionsData);
     } catch (error) {
-      console.error('Error loading invoices:', error);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleConfirmSend = (invoice) => {
-    setInvoiceToSend(invoice);
-    setConfirmSendOpen(true);
-  };
-
-  const handleSendInvoice = async () => {
-    if (!invoiceToSend) return;
-    
+  const handleGenerateAndSend = async () => {
     if (!client.email) {
-      toast.error('Client email is required to send invoice');
+      toast.error('Client email is required');
       return;
     }
 
-    setSending(true);
+    setGenerating(true);
     try {
-      const result = await base44.functions.invoke('sendExternalEmail', {
-        to: client.email,
-        subject: `Invoice #${invoiceToSend.invoice_number} - ${invoiceToSend.description || 'Your Invoice'}`,
-        body: `
-Hello ${client.first_name} ${client.last_name},
+      // Get current month
+      const now = new Date();
+      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-Please find your invoice details below:
+      // Check if statement already exists
+      let statement = statements.find(s => s.billing_month === currentMonth);
+      
+      if (!statement) {
+        // Get all transactions for the current month
+        const monthTransactions = transactions.filter(t => t.billing_month === currentMonth);
+        
+        if (monthTransactions.length === 0) {
+          toast.error('No transactions found for the current month');
+          return;
+        }
 
-Invoice Number: #${invoiceToSend.invoice_number}
-Date: ${format(new Date(invoiceToSend.issue_date), 'MMMM d, yyyy')}
-${invoiceToSend.due_date ? `Due Date: ${format(new Date(invoiceToSend.due_date), 'MMMM d, yyyy')}` : ''}
+        // Calculate totals
+        const subtotal = monthTransactions.reduce((sum, t) => sum + t.amount, 0);
+        const taxAmount = 0;
+        const total = subtotal + taxAmount;
 
-Description: ${invoiceToSend.line_items ? invoiceToSend.line_items.map(item => item.description).join(', ') : 'Service Invoice'}
-Amount: $${invoiceToSend.total ? invoiceToSend.total.toFixed(2) : '0.00'}
-Status: ${invoiceToSend.status.toUpperCase()}
+        // Create line items from transactions
+        const lineItems = monthTransactions.map(t => ({
+          description: t.description,
+          amount: t.amount,
+          type: t.type
+        }));
 
-${invoiceToSend.notes ? `Notes: ${invoiceToSend.notes}` : ''}
+        // Create statement
+        statement = await base44.entities.MonthlyStatement.create({
+          company_id: client.company_id,
+          client_id: clientId,
+          billing_month: currentMonth,
+          status: 'draft',
+          line_items: lineItems,
+          subtotal,
+          tax_amount: taxAmount,
+          total
+        });
+      }
 
-Thank you for your business!
-
-Best regards,
-${client.company_id ? 'Your Property Management Team' : 'EstateWatch365'}
-        `,
-        from_name: 'EstateWatch365'
+      // Send the invoice
+      const response = await base44.functions.invoke('sendInvoiceEmail', {
+        statement_id: statement.id
       });
 
-      if (result.data.success) {
-        toast.success('Invoice sent successfully');
-        // Update invoice status to sent
-        await base44.entities.Invoice.update(invoiceToSend.id, { 
-          status: 'sent'
-        });
-        setConfirmSendOpen(false);
-        setInvoiceToSend(null);
-        loadInvoices();
+      if (response.data.success) {
+        toast.success('Invoice generated and sent successfully!');
+        loadData();
       } else {
-        toast.error(result.data.error || 'Failed to send invoice');
+        toast.error('Failed to send invoice');
       }
-      } catch (error) {
-      console.error('Error sending invoice:', error);
-      toast.error('Failed to send invoice');
-      } finally {
-      setSending(false);
-      }
-      };
-
-  const handleEditInvoice = (invoice) => {
-    setEditingInvoice({ ...invoice });
-    setEditMode(true);
+    } catch (error) {
+      console.error('Error generating invoice:', error);
+      toast.error('Failed to generate invoice');
+    } finally {
+      setGenerating(false);
+    }
   };
 
-  const handleSaveInvoice = async () => {
+  const handleSendStatement = async (statementId) => {
+    setSending(true);
     try {
-      await base44.entities.Invoice.update(editingInvoice.id, {
-        description: editingInvoice.description,
-        amount: parseFloat(editingInvoice.amount),
-        due_date: editingInvoice.due_date,
-        notes: editingInvoice.notes,
-        status: editingInvoice.status
+      const response = await base44.functions.invoke('sendInvoiceEmail', {
+        statement_id: statementId
       });
-      setEditMode(false);
-      setEditingInvoice(null);
-      toast.success('Invoice updated');
-      loadInvoices();
+
+      if (response.data.success) {
+        toast.success('Invoice sent successfully!');
+        loadData();
+      } else {
+        toast.error('Failed to send invoice');
+      }
     } catch (error) {
-      console.error('Error updating invoice:', error);
-      toast.error('Failed to update invoice');
+      console.error('Error sending invoice:', error);
+      toast.error('Failed to send invoice');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleDownloadStatement = async (statementId) => {
+    try {
+      const response = await base44.functions.invoke('generateInvoicePDF', {
+        statement_id: statementId
+      });
+
+      if (response.data.success) {
+        window.open(response.data.pdf_url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      toast.error('Failed to download invoice');
     }
   };
 
@@ -130,256 +149,154 @@ ${client.company_id ? 'Your Property Management Team' : 'EstateWatch365'}
     );
   }
 
-  if (invoices.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-12">
-          <EmptyState
-            icon={FileText}
-            title="No invoices"
-            description="No invoices have been created for this client yet"
-          />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const currentInvoice = invoices[0]; // Most recent invoice
-
-  if (editMode && editingInvoice) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Edit Invoice #{editingInvoice.invoice_number}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Input
-              id="description"
-              value={editingInvoice.description || ''}
-              onChange={(e) => setEditingInvoice({ ...editingInvoice, description: e.target.value })}
-            />
-          </div>
-          <div>
-            <Label htmlFor="amount">Amount</Label>
-            <Input
-              id="amount"
-              type="number"
-              step="0.01"
-              value={editingInvoice.amount || ''}
-              onChange={(e) => setEditingInvoice({ ...editingInvoice, amount: e.target.value })}
-            />
-          </div>
-          <div>
-            <Label htmlFor="due_date">Due Date</Label>
-            <Input
-              id="due_date"
-              type="date"
-              value={editingInvoice.due_date ? editingInvoice.due_date.split('T')[0] : ''}
-              onChange={(e) => setEditingInvoice({ ...editingInvoice, due_date: e.target.value })}
-            />
-          </div>
-          <div>
-            <Label htmlFor="status">Status</Label>
-            <select
-              id="status"
-              value={editingInvoice.status}
-              onChange={(e) => setEditingInvoice({ ...editingInvoice, status: e.target.value })}
-              className="w-full px-3 py-2 border rounded-md"
-            >
-              <option value="draft">Draft</option>
-              <option value="sent">Sent</option>
-              <option value="paid">Paid</option>
-              <option value="overdue">Overdue</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
-          <div>
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              value={editingInvoice.notes || ''}
-              onChange={(e) => setEditingInvoice({ ...editingInvoice, notes: e.target.value })}
-              rows={3}
-            />
-          </div>
-          <div className="flex gap-3 pt-4">
-            <Button variant="outline" onClick={() => { setEditMode(false); setEditingInvoice(null); }}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveInvoice} className="bg-slate-900 hover:bg-slate-800">
-              Save Changes
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Get current month
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const currentStatement = statements.find(s => s.billing_month === currentMonth);
+  const currentMonthTransactions = transactions.filter(t => t.billing_month === currentMonth);
 
   return (
-    <>
-      {/* Confirmation Dialog */}
-      <Dialog open={confirmSendOpen} onOpenChange={setConfirmSendOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Send Invoice to Client?</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <p className="text-sm text-slate-600">
-              An email with the invoice will be sent to:
-            </p>
-            <p className="font-medium text-slate-900">
-              {client.email}
-            </p>
-            {invoiceToSend && (
-              <div className="bg-slate-50 p-3 rounded-lg">
-                <p className="text-sm text-slate-600 mb-1">Invoice Details:</p>
-                <p className="font-medium text-slate-900">#{invoiceToSend.invoice_number}</p>
-                <p className="text-sm text-slate-600">
-                  ${invoiceToSend.total ? invoiceToSend.total.toFixed(2) : '0.00'}
-                </p>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setConfirmSendOpen(false)}
-              disabled={sending}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleSendInvoice}
-              disabled={sending}
-              className="bg-slate-900 hover:bg-slate-800"
-            >
-              {sending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4 mr-2" />
-              )}
-              Send Invoice
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      <div className="space-y-4">
-      {/* Current Invoice */}
+    <div className="space-y-4">
+      {/* Generate & Send Invoice */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg">Current Invoice</CardTitle>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => handleEditInvoice(currentInvoice)}>
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
-            <Button 
-              size="sm" 
-              onClick={() => handleConfirmSend(currentInvoice)}
-              disabled={sending || !client.email}
-              className="bg-slate-900 hover:bg-slate-800"
-            >
-              {sending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4 mr-2" />
-              )}
-              Send to Client
-            </Button>
-          </div>
+        <CardHeader>
+          <CardTitle className="text-lg">Generate Invoice</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-slate-500">Invoice Number</p>
-              <p className="font-medium">#{currentInvoice.invoice_number}</p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-500">Date</p>
-              <p className="font-medium">
-                {currentInvoice.invoice_date ? format(new Date(currentInvoice.invoice_date), 'MMM d, yyyy') : 'N/A'}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-900 mb-2">
+              {currentStatement 
+                ? 'An invoice has already been generated for this month.'
+                : `Generate invoice for ${format(new Date(currentMonth + '-01'), 'MMMM yyyy')} with all transactions and send to client.`
+              }
+            </p>
+            {currentMonthTransactions.length > 0 && (
+              <p className="text-xs text-blue-700">
+                {currentMonthTransactions.length} transaction(s) this month • Total: ${currentMonthTransactions.reduce((sum, t) => sum + t.amount, 0).toFixed(2)}
               </p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-500">Due Date</p>
-              <p className="font-medium">
-                {currentInvoice.due_date ? format(new Date(currentInvoice.due_date), 'MMM d, yyyy') : 'Not set'}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-500">Status</p>
-              <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                currentInvoice.status === 'paid' ? 'bg-emerald-100 text-emerald-700' :
-                currentInvoice.status === 'sent' ? 'bg-blue-100 text-blue-700' :
-                currentInvoice.status === 'overdue' ? 'bg-red-100 text-red-700' :
-                'bg-slate-100 text-slate-700'
-              }`}>
-                {currentInvoice.status.toUpperCase()}
-              </span>
-            </div>
+            )}
           </div>
           
-          <div className="border-t pt-4">
-            <p className="text-sm text-slate-500 mb-2">Description</p>
-            <p className="font-medium">{currentInvoice.description || 'No description'}</p>
-          </div>
-
-          {currentInvoice.notes && (
-            <div className="border-t pt-4">
-              <p className="text-sm text-slate-500 mb-2">Notes</p>
-              <p className="text-slate-600 whitespace-pre-wrap">{currentInvoice.notes}</p>
-            </div>
-          )}
-
-          <div className="border-t pt-4 flex justify-between items-center">
-            <p className="text-lg font-semibold text-slate-500">Total Amount</p>
-            <p className="text-3xl font-bold text-slate-900">${currentInvoice.amount ? currentInvoice.amount.toFixed(2) : '0.00'}</p>
-          </div>
+          <Button 
+            onClick={handleGenerateAndSend}
+            disabled={generating || !client.email || currentMonthTransactions.length === 0}
+            className="w-full bg-blue-600 hover:bg-blue-700"
+          >
+            {generating ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Plus className="h-4 w-4 mr-2" />
+                {currentStatement ? 'Resend Current Invoice' : 'Generate & Send Invoice'}
+              </>
+            )}
+          </Button>
         </CardContent>
       </Card>
 
       {/* Invoice History */}
-      {invoices.length > 1 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Invoice History</CardTitle>
-          </CardHeader>
-          <CardContent>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Invoice History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {statements.length === 0 ? (
+            <EmptyState
+              icon={FileText}
+              title="No invoices yet"
+              description="Generate the first invoice for this client"
+            />
+          ) : (
             <div className="space-y-2">
-              {invoices.slice(1).map((invoice) => (
-                <div key={invoice.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50">
-                  <div className="flex items-center gap-3">
+              {statements.map((statement) => (
+                <div 
+                  key={statement.id}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50"
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center">
                       <FileText className="h-5 w-5 text-slate-500" />
                     </div>
-                    <div>
-                      <p className="font-medium">#{invoice.invoice_number}</p>
-                      <p className="text-sm text-slate-500">
-                        {invoice.invoice_date ? format(new Date(invoice.invoice_date), 'MMM d, yyyy') : 'N/A'}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium">
+                        {format(new Date(statement.billing_month + '-01'), 'MMMM yyyy')}
                       </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge 
+                          variant="outline" 
+                          className={
+                            statement.status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' :
+                            statement.status === 'sent' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                            'bg-slate-50 text-slate-700'
+                          }
+                        >
+                          {statement.status}
+                        </Badge>
+                        <span className="text-sm text-slate-600">
+                          ${statement.total.toFixed(2)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                   <p className="font-semibold">${invoice.amount ? invoice.amount.toFixed(2) : '0.00'}</p>
-                    <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                      invoice.status === 'paid' ? 'bg-emerald-100 text-emerald-700' :
-                      invoice.status === 'sent' ? 'bg-blue-100 text-blue-700' :
-                      invoice.status === 'overdue' ? 'bg-red-100 text-red-700' :
-                      'bg-slate-100 text-slate-700'
-                    }`}>
-                      {invoice.status.toUpperCase()}
-                    </span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownloadStatement(statement.id)}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    {statement.status !== 'paid' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSendStatement(statement.id)}
+                        disabled={sending}
+                      >
+                        <Mail className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Current Month Transactions */}
+      {currentMonthTransactions.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">
+              {format(new Date(currentMonth + '-01'), 'MMMM yyyy')} Transactions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {currentMonthTransactions.map((transaction) => (
+                <div 
+                  key={transaction.id}
+                  className="flex items-center justify-between p-3 border rounded-lg text-sm"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-slate-900">{transaction.description}</p>
+                    <p className="text-xs text-slate-500 capitalize">{transaction.type}</p>
+                  </div>
+                  <p className="font-semibold text-slate-900">${transaction.amount.toFixed(2)}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 pt-3 border-t flex justify-between items-center">
+              <span className="font-semibold">Total</span>
+              <span className="text-xl font-bold">${currentMonthTransactions.reduce((sum, t) => sum + t.amount, 0).toFixed(2)}</span>
+            </div>
           </CardContent>
         </Card>
       )}
-      </div>
-    </>
+    </div>
   );
 }
