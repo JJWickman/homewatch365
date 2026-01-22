@@ -568,7 +568,7 @@ export default function BillingOverview({ companyId }) {
                 }}>
                   Cancel
                 </Button>
-                <Button onClick={handleSaveEdit}>
+                <Button onClick={handleSaveEdit} className="text-black">
                   Save Changes
                 </Button>
               </>
