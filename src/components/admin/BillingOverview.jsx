@@ -397,10 +397,10 @@ export default function BillingOverview({ companyId }) {
                                 size="sm"
                                 onClick={() => handleOpenEmailDialog(statement)}
                                 title="Email to Client"
-                                className="gap-1"
+                                className="gap-1 text-black"
                               >
                                 <Mail className="h-4 w-4" />
-                                <span className="text-xs text-black">Email</span>
+                                <span className="text-xs">Email</span>
                               </Button>
                             )}
                           </div>
