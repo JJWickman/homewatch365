@@ -281,7 +281,7 @@ export default function Layout({ children, currentPageName }) {
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/c534cf318_NewEstateWatchLogo.png" 
                   alt="Estate Watch 365" 
-                  className="h-12 w-auto object-contain" 
+                  className="h-20 w-auto object-contain" 
                 />
               </a>
             </div>
