@@ -23,6 +23,10 @@ export default function BillingOverview({ companyId }) {
   const [viewingStatement, setViewingStatement] = useState(null);
   const [editedStatement, setEditedStatement] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [sendingStatement, setSendingStatement] = useState(null);
+  const [emailAddress, setEmailAddress] = useState('');
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     if (companyId) {
@@ -48,19 +52,35 @@ export default function BillingOverview({ companyId }) {
     }
   };
 
-  const handleSendInvoice = async (statementId) => {
+  const handleOpenEmailDialog = (statement) => {
+    const client = clients.find(c => c.id === statement.client_id);
+    setSendingStatement(statement);
+    setEmailAddress(client?.email || '');
+    setEmailDialogOpen(true);
+  };
+
+  const handleSendInvoice = async () => {
+    if (!emailAddress || !sendingStatement) return;
+
+    setSending(true);
     try {
       const response = await base44.functions.invoke('sendInvoiceEmail', {
-        statement_id: statementId
+        statement_id: sendingStatement.id,
+        email_override: emailAddress
       });
       
       if (response.data.success) {
-        toast.success('Invoice emailed to client successfully!');
+        toast.success(`Invoice emailed to ${emailAddress} successfully!`);
+        setEmailDialogOpen(false);
+        setSendingStatement(null);
+        setEmailAddress('');
         loadBillingData();
       }
     } catch (error) {
       console.error('Error sending invoice:', error);
       toast.error('Failed to send invoice: ' + error.message);
+    } finally {
+      setSending(false);
     }
   };
 
@@ -375,7 +395,7 @@ export default function BillingOverview({ companyId }) {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleSendInvoice(statement.id)}
+                                onClick={() => handleOpenEmailDialog(statement)}
                                 title="Email to Client"
                                 className="gap-1"
                               >
@@ -557,6 +577,75 @@ export default function BillingOverview({ companyId }) {
                 Close
               </Button>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Confirmation Dialog */}
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Email Invoice to Client</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Send invoice to:</Label>
+              <Input
+                type="email"
+                value={emailAddress}
+                onChange={(e) => setEmailAddress(e.target.value)}
+                placeholder="client@example.com"
+                className="mt-2"
+              />
+              <p className="text-xs text-slate-500 mt-2">
+                Confirm or update the email address before sending
+              </p>
+            </div>
+            
+            {sendingStatement && (
+              <div className="bg-slate-50 rounded-lg p-4 text-sm">
+                <div className="flex justify-between mb-2">
+                  <span className="text-slate-600">Client:</span>
+                  <span className="font-medium">
+                    {(() => {
+                      const client = clients.find(c => c.id === sendingStatement.client_id);
+                      return client ? `${client.first_name} ${client.last_name}` : 'Unknown';
+                    })()}
+                  </span>
+                </div>
+                <div className="flex justify-between mb-2">
+                  <span className="text-slate-600">Billing Month:</span>
+                  <span className="font-medium">{sendingStatement.billing_month}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Total Amount:</span>
+                  <span className="font-medium">${sendingStatement.total?.toFixed(2)}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEmailDialogOpen(false)} disabled={sending}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSendInvoice} 
+              disabled={!emailAddress || sending}
+            >
+              {sending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Invoice
+                </>
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
