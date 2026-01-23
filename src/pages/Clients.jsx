@@ -107,17 +107,17 @@ export default function Clients() {
     {
       header: 'Client',
       cell: (client) => (
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10">
+        <div className="flex items-center gap-3 min-w-[200px]">
+          <Avatar className="h-10 w-10 shrink-0">
             <AvatarFallback className="bg-slate-900 text-white text-sm">
               {getInitials(client.first_name, client.last_name)}
             </AvatarFallback>
           </Avatar>
-          <div>
-            <p className="font-medium text-slate-900">
+          <div className="min-w-0">
+            <p className="font-medium text-slate-900 truncate">
               {client.first_name} {client.last_name}
             </p>
-            <p className="text-sm text-slate-500">{client.email}</p>
+            <p className="text-sm text-slate-500 truncate">{client.email}</p>
           </div>
         </div>
       )
