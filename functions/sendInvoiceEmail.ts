@@ -115,8 +115,7 @@ Deno.serve(async (req) => {
     const { file_url: pdf_url } = await base44.asServiceRole.integrations.Core.UploadFile({ file });
 
     // Generate client portal link
-    const appUrl = new URL(req.url).origin;
-    const portalUrl = `${appUrl}/ClientPortal`;
+    const portalUrl = `https://estatewatch365.app/ClientPortal`;
 
     // Prepare email
     const subject = `Invoice from ${company.name} - ${statement.billing_month}`;
@@ -160,15 +159,26 @@ ${company.email || ''}
     
     console.log('Sending email from:', fromEmail, 'to:', recipientEmail);
     
+    // Fetch the PDF file content for attachment
+    const pdfResponse = await fetch(pdf_url);
+    const pdfBuffer = await pdfResponse.arrayBuffer();
+    const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(pdfBuffer)));
+    
     try {
       await sgMail.send({
         to: recipientEmail,
         from: fromEmail,
         subject: subject,
         text: emailBody,
-        html: emailBody.replace(/\n/g, '<br>')
+        html: emailBody.replace(/\n/g, '<br>'),
+        attachments: [{
+          content: pdfBase64,
+          filename: `invoice_${statement.billing_month}.pdf`,
+          type: 'application/pdf',
+          disposition: 'attachment'
+        }]
       });
-      console.log('Email sent successfully');
+      console.log('Email sent successfully with PDF attachment');
     } catch (sgError) {
       console.error('SendGrid error:', sgError.response?.body || sgError);
       throw new Error(`SendGrid error: ${JSON.stringify(sgError.response?.body || sgError.message)}`);
