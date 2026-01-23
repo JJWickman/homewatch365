@@ -12,23 +12,23 @@ Deno.serve(async (req) => {
 
     const { statement_id, email_override } = await req.json();
 
-    // Get the statement
-    const statements = await base44.entities.MonthlyStatement.filter({ id: statement_id });
+    // Get the statement using service role
+    const statements = await base44.asServiceRole.entities.MonthlyStatement.filter({ id: statement_id });
     if (statements.length === 0) {
       return Response.json({ error: 'Statement not found' }, { status: 404 });
     }
     const statement = statements[0];
 
-    // Get client and company
+    // Get client and company using service role
     const [clients, companies] = await Promise.all([
-      base44.entities.Client.filter({ id: statement.client_id }),
-      base44.entities.Company.filter({ id: statement.company_id })
+      base44.asServiceRole.entities.Client.filter({ id: statement.client_id }),
+      base44.asServiceRole.entities.Company.filter({ id: statement.company_id })
     ]);
 
     const client = clients[0];
     const company = companies[0];
 
-    // Generate PDF
+    // Generate PDF using service role
     console.log('Calling generateInvoicePDF for statement:', statement_id);
     const pdfResponse = await base44.asServiceRole.functions.invoke('generateInvoicePDF', { statement_id });
     console.log('PDF response:', pdfResponse.data);
