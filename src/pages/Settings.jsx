@@ -772,8 +772,8 @@ ${company.name}
             <CardContent className="space-y-6">
               <div>
                 <Label>Profile Picture</Label>
-                <div className="flex items-start justify-between gap-6 mt-2">
-                  <div className="flex items-start gap-6">
+                <div className="flex flex-col gap-4 mt-2">
+                  <div className="flex items-start gap-4 sm:gap-6">
                     <div className="h-24 w-24 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden flex-shrink-0">
                       {user?.avatar_url ? (
                         <img src={user.avatar_url} alt="Profile" className="h-full w-full object-cover" />
@@ -781,7 +781,7 @@ ${company.name}
                         <User className="h-10 w-10 text-slate-300" />
                       )}
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <Label htmlFor="profile-upload" className="cursor-pointer">
                         <Button variant="outline" size="sm" disabled={uploading} asChild>
                           <span>
@@ -800,20 +800,21 @@ ${company.name}
                       <p className="text-xs text-slate-500 mt-2">JPG, PNG or GIF (Max 5MB)</p>
                     </div>
                   </div>
-                  <div className="flex gap-2 flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Button 
                       onClick={() => setShowPasswordReset(true)} 
                       variant="outline"
+                      className="w-full sm:w-auto"
                     >
                       <Lock className="h-4 w-4 mr-2" />
                       Change Password
                     </Button>
-                    <Button onClick={handleSaveProfile} disabled={savingProfile} className="bg-slate-900 hover:bg-slate-800">
+                    <Button onClick={handleSaveProfile} disabled={savingProfile} className="bg-slate-900 hover:bg-slate-800 w-full sm:w-auto">
                       <Save className="h-4 w-4 mr-2" />
                       {savingProfile ? 'Saving...' : 'Save'}
                     </Button>
                   </div>
-                  </div>
+                </div>
               </div>
               <div className="border-t pt-4">
                 {companyMember?.is_owner && (
