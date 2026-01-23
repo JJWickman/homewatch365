@@ -297,32 +297,32 @@ export default function Layout({ children, currentPageName }) {
           </aside>
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className="lg:pl-64 min-w-0">
         {/* Top header */}
         <header className="sticky top-0 z-30 h-16 bg-white border-b border-slate-200">
           <div className="flex items-center justify-between h-full px-4 lg:px-6">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
               <button 
                 onClick={() => setSidebarOpen(true)} 
-                className="lg:hidden text-slate-600"
+                className="lg:hidden text-slate-600 shrink-0"
               >
                 <Menu className="h-6 w-6" />
               </button>
-              
-              <div className="hidden md:flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-2 w-64">
-                <Search className="h-4 w-4 text-slate-400" />
+
+              <div className="hidden md:flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-2 max-w-xs flex-1">
+                <Search className="h-4 w-4 text-slate-400 shrink-0" />
                 <input 
                   type="text" 
                   placeholder="Search..." 
-                  className="bg-transparent text-sm outline-none w-full"
+                  className="bg-transparent text-sm outline-none w-full min-w-0"
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 shrink-0">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
+                  <Button variant="ghost" size="icon" className="relative h-9 w-9">
                     <Bell className="h-5 w-5 text-slate-600" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -338,18 +338,18 @@ export default function Layout({ children, currentPageName }) {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 hover:bg-slate-100 rounded-lg px-2 py-1.5 transition-colors">
-                    <Avatar className="h-8 w-8">
+                  <button className="flex items-center gap-2 hover:bg-slate-100 rounded-lg px-2 py-1.5 transition-colors min-w-0">
+                    <Avatar className="h-8 w-8 shrink-0">
                           <AvatarImage src={user?.avatar_url} alt={user?.full_name} />
                           <AvatarFallback className="bg-blue-600 text-white text-xs">
                             {getInitials(user?.full_name)}
                           </AvatarFallback>
                         </Avatar>
-                    <div className="hidden sm:block text-left">
-                      <p className="text-sm font-medium text-slate-900">{companyMember?.user_name || user?.full_name}</p>
-                      <p className="text-xs text-slate-500 capitalize">{companyMember?.role || 'Member'}</p>
+                    <div className="hidden sm:block text-left min-w-0">
+                      <p className="text-sm font-medium text-slate-900 truncate">{companyMember?.user_name || user?.full_name}</p>
+                      <p className="text-xs text-slate-500 capitalize truncate">{companyMember?.role || 'Member'}</p>
                     </div>
-                    <ChevronDown className="h-4 w-4 text-slate-400" />
+                    <ChevronDown className="h-4 w-4 text-slate-400 hidden sm:block shrink-0" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -376,7 +376,7 @@ export default function Layout({ children, currentPageName }) {
         </header>
 
         {/* Page content */}
-        <main className="p-4 lg:p-6">
+        <main className="p-4 lg:p-6 min-w-0 overflow-x-hidden">
           <TrialBanner company={company} companyMember={companyMember} />
           {isPageRestricted && isAdmin && (
             <Alert className="mb-6 bg-blue-50 border-blue-200">
