@@ -152,7 +152,11 @@ ${company.email || ''}
     sgMail.setApiKey(sendgridApiKey);
     
     const recipientEmail = email_override || client.email;
-    const fromEmail = 'noreply@estatewatch365.app';
+    
+    // Use company's verified billing email or default
+    const fromEmail = (company.billing_email_verified && company.billing_email) 
+      ? company.billing_email 
+      : 'noreply@estatewatch365.app';
     
     console.log('Sending email from:', fromEmail, 'to:', recipientEmail);
     
