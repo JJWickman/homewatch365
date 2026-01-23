@@ -117,6 +117,10 @@ ${company.email || ''}
 
   } catch (error) {
     console.error('Error sending invoice:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('Error details:', error.response?.data || error.stack);
+    return Response.json({ 
+      error: error.message, 
+      details: error.response?.data || error.toString() 
+    }, { status: 500 });
   }
 });
