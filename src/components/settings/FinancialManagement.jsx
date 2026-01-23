@@ -543,7 +543,7 @@ export default function FinancialManagement({ companyId }) {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Monthly Price *</Label>
                 <div className="relative">
@@ -579,7 +579,7 @@ export default function FinancialManagement({ companyId }) {
             </div>
 
             {formData.type === 'subscription' && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>Included Pre-Storm Visits</Label>
                   <Input

@@ -115,7 +115,7 @@ export default function ProductServiceWizard({ onComplete, onCancel }) {
             <p className="text-sm text-slate-600">Choose the type of item you want to create</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button
               onClick={() => handleTypeSelect('product')}
               className="p-6 border-2 rounded-lg hover:border-slate-900 hover:bg-slate-50 transition-all text-left group"
@@ -260,7 +260,7 @@ export default function ProductServiceWizard({ onComplete, onCancel }) {
             <p className="text-sm text-slate-600 mb-4">Is this a recurring subscription or a one-time service?</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button
               onClick={() => {
                 setServiceType('recurring');

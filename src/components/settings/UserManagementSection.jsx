@@ -217,7 +217,7 @@ export default function UserManagementSection({ staff = [], company }) {
                     home_address: { ...editData.home_address, address: e.target.value }
                   })}
                 />
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <Input
                     placeholder="City"
                     value={editData.home_address?.city || ''}
@@ -225,6 +225,7 @@ export default function UserManagementSection({ staff = [], company }) {
                       ...editData,
                       home_address: { ...editData.home_address, city: e.target.value }
                     })}
+                    className="sm:col-span-2"
                   />
                   <Input
                     placeholder="State"

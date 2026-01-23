@@ -835,7 +835,7 @@ ${company.name}
                   </div>
                 )}
                 <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="user-first-name">First Name</Label>
                     <Input
@@ -916,11 +916,12 @@ ${company.name}
                          onChange={(e) => setBaseHqAddress({ ...baseHqAddress, address: e.target.value })}
                          className="mt-1"
                        />
-                       <div className="grid grid-cols-2 gap-3">
+                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                          <Input
                            placeholder="City"
                            value={baseHqAddress.city}
                            onChange={(e) => setBaseHqAddress({ ...baseHqAddress, city: e.target.value })}
+                           className="sm:col-span-2"
                          />
                          <Input
                            placeholder="State"
@@ -948,11 +949,12 @@ ${company.name}
                          onChange={(e) => setHomeAddress({ ...homeAddress, address: e.target.value })}
                          className="mt-1"
                        />
-                       <div className="grid grid-cols-2 gap-3">
+                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                          <Input
                            placeholder="City"
                            value={homeAddress.city}
                            onChange={(e) => setHomeAddress({ ...homeAddress, city: e.target.value })}
+                           className="sm:col-span-2"
                          />
                          <Input
                            placeholder="State"
@@ -1083,8 +1085,8 @@ ${company.name}
                 />
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="col-span-2">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div className="sm:col-span-2">
                   <Label>City</Label>
                   <Input
                     value={companyForm.city}
@@ -1653,7 +1655,7 @@ ${company.name}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6">
                 <div>
                   <Label>Primary Color</Label>
                   <div className="flex items-center gap-3 mt-2">
@@ -1661,12 +1663,12 @@ ${company.name}
                       type="color"
                       value={companyForm.primary_color}
                       onChange={(e) => setCompanyForm(prev => ({ ...prev, primary_color: e.target.value }))}
-                      className="h-10 w-14 rounded border cursor-pointer"
+                      className="h-10 w-14 rounded border cursor-pointer flex-shrink-0"
                     />
                     <Input
                       value={companyForm.primary_color}
                       onChange={(e) => setCompanyForm(prev => ({ ...prev, primary_color: e.target.value }))}
-                      className="w-32"
+                      className="flex-1 max-w-[200px]"
                     />
                   </div>
                 </div>
@@ -1677,12 +1679,12 @@ ${company.name}
                       type="color"
                       value={companyForm.accent_color}
                       onChange={(e) => setCompanyForm(prev => ({ ...prev, accent_color: e.target.value }))}
-                      className="h-10 w-14 rounded border cursor-pointer"
+                      className="h-10 w-14 rounded border cursor-pointer flex-shrink-0"
                     />
                     <Input
                       value={companyForm.accent_color}
                       onChange={(e) => setCompanyForm(prev => ({ ...prev, accent_color: e.target.value }))}
-                      className="w-32"
+                      className="flex-1 max-w-[200px]"
                     />
                   </div>
                 </div>
