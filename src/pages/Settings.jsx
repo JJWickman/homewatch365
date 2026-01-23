@@ -750,15 +750,17 @@ ${company.name}
       />
 
       <Tabs defaultValue="profile">
-        <TabsList className="mb-6">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="company">Company</TabsTrigger>
-          {isAdmin && <TabsTrigger value="subscription">Subscription</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="financial">Products & Services</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="reviews">Reviews</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="templates">Inspection Templates</TabsTrigger>}
+        <div className="mb-6 -mx-4 px-4 md:mx-0 md:px-0 overflow-x-auto">
+          <TabsList className="inline-flex w-full md:w-auto min-w-max">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="company">Company</TabsTrigger>
+            {isAdmin && <TabsTrigger value="subscription">Subscription</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="financial">Products & Services</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="reviews">Reviews</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="templates">Templates</TabsTrigger>}
           </TabsList>
+        </div>
 
         <TabsContent value="profile">
           <Card>
