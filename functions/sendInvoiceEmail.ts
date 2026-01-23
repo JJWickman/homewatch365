@@ -29,7 +29,9 @@ Deno.serve(async (req) => {
     const company = companies[0];
 
     // Generate PDF
-    const pdfResponse = await base44.functions.invoke('generateInvoicePDF', { statement_id });
+    console.log('Calling generateInvoicePDF for statement:', statement_id);
+    const pdfResponse = await base44.asServiceRole.functions.invoke('generateInvoicePDF', { statement_id });
+    console.log('PDF response:', pdfResponse.data);
     const { pdf_url } = pdfResponse.data;
 
     // Generate client portal link
