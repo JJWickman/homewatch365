@@ -1,22 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Mail, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, CheckCircle2, AlertCircle, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 
 export default function BillingEmailSection({ company, onUpdate }) {
-  const [email, setEmail] = useState(company?.billing_email || '');
+  const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    from_name: '',
+    from_email: company?.billing_email || '',
+    reply_to: '',
+    address: company?.address || '',
+    address2: '',
+    city: company?.city || '',
+    state: company?.state || '',
+    zip: company?.zip || '',
+    country: 'United States',
+    nickname: ''
+  });
+
+  useEffect(() => {
+    // Auto-populate from company settings
+    setFormData(prev => ({
+      ...prev,
+      from_name: company?.name || '',
+      from_email: company?.billing_email || '',
+      reply_to: company?.billing_email || company?.email || '',
+      address: company?.address || '',
+      city: company?.city || '',
+      state: company?.state || '',
+      zip: company?.zip || '',
+      nickname: company?.name ? `${company.name} Billing` : ''
+    }));
+  }, [company]);
 
   const handleRequestVerification = async () => {
-    if (!email) {
-      toast.error('Please enter an email address');
+    if (!formData.from_email || !formData.from_name) {
+      toast.error('Please enter sender name and email address');
       return;
     }
 
@@ -24,12 +52,13 @@ export default function BillingEmailSection({ company, onUpdate }) {
     try {
       const response = await base44.functions.invoke('verifySenderEmail', {
         company_id: company.id,
-        email,
-        action: 'request_verification'
+        action: 'request_verification',
+        ...formData
       });
 
       if (response.data.success) {
         toast.success(response.data.message);
+        setShowForm(false);
         onUpdate();
       } else {
         toast.error(response.data.error || 'Failed to request verification');
@@ -111,28 +140,195 @@ export default function BillingEmailSection({ company, onUpdate }) {
           </Alert>
         )}
 
-        {!isVerified && (
+        {!isVerified && !showForm && (
           <div className="space-y-3">
-            <div>
-              <Label htmlFor="billing_email">Billing Email Address</Label>
-              <Input
-                id="billing_email"
-                type="email"
-                placeholder="billing@yourcompany.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1"
-                disabled={loading}
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                You must have access to this email to complete verification
-              </p>
+            <Button
+              onClick={() => setShowForm(true)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Mail className="h-4 w-4 mr-2" />
+              Set Up Custom Sender Email
+            </Button>
+
+            {hasPendingVerification && (
+              <Button
+                variant="outline"
+                onClick={handleCheckVerification}
+                disabled={checking}
+                className="ml-2"
+              >
+                {checking ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Checking...
+                  </>
+                ) : (
+                  'Check Verification Status'
+                )}
+              </Button>
+            )}
+          </div>
+        )}
+
+        {!isVerified && showForm && (
+          <div className="space-y-4 border-t pt-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-blue-900 mb-2">What happens when you request verification?</p>
+                  <ol className="list-decimal list-inside space-y-1 text-blue-700">
+                    <li>We'll send a verification email to the address you specify below</li>
+                    <li>You'll need to click the verification link in that email</li>
+                    <li>Once verified, all invoices will automatically be sent from your custom email</li>
+                    <li>Clients will see your company name and domain instead of our default sender</li>
+                  </ol>
+                  <p className="mt-2 font-medium text-blue-900">
+                    Important: You must have access to the email address to complete verification
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="from_name">From Name *</Label>
+                <Input
+                  id="from_name"
+                  value={formData.from_name}
+                  onChange={(e) => setFormData({ ...formData, from_name: e.target.value })}
+                  placeholder="Your Company Name"
+                  className="mt-1"
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  What clients will see as the sender name
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="from_email">From Email Address *</Label>
+                <Input
+                  id="from_email"
+                  type="email"
+                  value={formData.from_email}
+                  onChange={(e) => setFormData({ ...formData, from_email: e.target.value, reply_to: e.target.value })}
+                  placeholder="billing@yourcompany.com"
+                  className="mt-1"
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  <strong>Verification required</strong> - You'll receive a verification email
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="reply_to">Reply To Email</Label>
+                <Input
+                  id="reply_to"
+                  type="email"
+                  value={formData.reply_to}
+                  onChange={(e) => setFormData({ ...formData, reply_to: e.target.value })}
+                  placeholder="billing@yourcompany.com"
+                  className="mt-1"
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  Where replies should go (usually same as from email)
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="nickname">Nickname</Label>
+                <Input
+                  id="nickname"
+                  value={formData.nickname}
+                  onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
+                  placeholder="Company Name Billing"
+                  className="mt-1"
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  Internal identifier for this sender
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Company Address</h4>
+              
+              <div>
+                <Label htmlFor="address">Address Line 1</Label>
+                <Input
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="123 Main Street"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="address2">Address Line 2</Label>
+                <Input
+                  id="address2"
+                  value={formData.address2}
+                  onChange={(e) => setFormData({ ...formData, address2: e.target.value })}
+                  placeholder="Suite 100 (optional)"
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    placeholder="City"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="state">State</Label>
+                  <Input
+                    id="state"
+                    value={formData.state}
+                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                    placeholder="State"
+                    className="mt-1"
+                    maxLength={2}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="zip">Zip Code</Label>
+                  <Input
+                    id="zip"
+                    value={formData.zip}
+                    onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
+                    placeholder="12345"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="country">Country</Label>
+                  <Input
+                    id="country"
+                    value={formData.country}
+                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                    className="mt-1"
+                    disabled
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-4">
               <Button
                 onClick={handleRequestVerification}
-                disabled={loading || !email}
+                disabled={loading || !formData.from_email || !formData.from_name}
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 {loading ? (
@@ -141,26 +337,20 @@ export default function BillingEmailSection({ company, onUpdate }) {
                     Sending...
                   </>
                 ) : (
-                  'Request Verification'
+                  <>
+                    <Mail className="h-4 w-4 mr-2" />
+                    Request Verification
+                  </>
                 )}
               </Button>
 
-              {hasPendingVerification && (
-                <Button
-                  variant="outline"
-                  onClick={handleCheckVerification}
-                  disabled={checking}
-                >
-                  {checking ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Checking...
-                    </>
-                  ) : (
-                    'Check Verification Status'
-                  )}
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                onClick={() => setShowForm(false)}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
             </div>
           </div>
         )}

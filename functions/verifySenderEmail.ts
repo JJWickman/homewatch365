@@ -9,7 +9,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { company_id, email, action } = await req.json();
+    const { 
+      company_id, 
+      action,
+      from_name,
+      from_email,
+      reply_to,
+      address,
+      address2,
+      city,
+      state,
+      zip,
+      country,
+      nickname
+    } = await req.json();
 
     if (action === 'request_verification') {
       // Request sender verification from SendGrid
@@ -20,16 +33,17 @@ Deno.serve(async (req) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          nickname: `${company_id.slice(-8)}_billing`,
-          from_email: email,
-          from_name: 'Billing',
-          reply_to: email,
-          reply_to_name: 'Billing',
-          address: '',
-          city: '',
-          state: '',
-          zip: '',
-          country: 'United States'
+          nickname: nickname || `${company_id.slice(-8)}_billing`,
+          from_email: from_email,
+          from_name: from_name,
+          reply_to: reply_to || from_email,
+          reply_to_name: from_name,
+          address: address || '',
+          address2: address2 || '',
+          city: city || '',
+          state: state || '',
+          zip: zip || '',
+          country: country || 'United States'
         })
       });
 
@@ -45,7 +59,7 @@ Deno.serve(async (req) => {
 
       // Update company with pending verification
       await base44.asServiceRole.entities.Company.update(company_id, {
-        billing_email: email,
+        billing_email: from_email,
         billing_email_verified: false,
         sendgrid_sender_id: sgData.id
       });
