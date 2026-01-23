@@ -245,7 +245,7 @@ export default function Clients() {
 
       {/* Delete Dialog */}
       <Dialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ open, client: null })}>
-        <DialogContent>
+        <DialogContent className="max-w-md mx-4 sm:mx-auto">
           <DialogHeader>
             <DialogTitle>Deactivate Client</DialogTitle>
             <DialogDescription>
@@ -253,11 +253,11 @@ export default function Clients() {
               Their properties and history will be preserved but they will be hidden from active views.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialog({ open: false, client: null })}>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setDeleteDialog({ open: false, client: null })} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDelete}>
+            <Button variant="destructive" onClick={handleDelete} className="w-full sm:w-auto">
               Deactivate
             </Button>
           </DialogFooter>
