@@ -62,17 +62,31 @@ ${company.email || ''}
     `.trim();
 
     // Send email with SendGrid
-    sgMail.setApiKey(Deno.env.get('SENDGRID_API_KEY'));
+    const sendgridApiKey = Deno.env.get('SENDGRID_API_KEY');
+    if (!sendgridApiKey) {
+      throw new Error('SENDGRID_API_KEY not configured');
+    }
+    
+    sgMail.setApiKey(sendgridApiKey);
     
     const recipientEmail = email_override || client.email;
+    const fromEmail = company.email || 'noreply@estatewatch365.com';
     
-    await sgMail.send({
-      to: recipientEmail,
-      from: company.email || 'noreply@estatewatch365.com',
-      subject: subject,
-      text: emailBody,
-      html: emailBody.replace(/\n/g, '<br>')
-    });
+    console.log('Sending email from:', fromEmail, 'to:', recipientEmail);
+    
+    try {
+      await sgMail.send({
+        to: recipientEmail,
+        from: fromEmail,
+        subject: subject,
+        text: emailBody,
+        html: emailBody.replace(/\n/g, '<br>')
+      });
+      console.log('Email sent successfully');
+    } catch (sgError) {
+      console.error('SendGrid error:', sgError.response?.body || sgError);
+      throw new Error(`SendGrid error: ${JSON.stringify(sgError.response?.body || sgError.message)}`);
+    }
 
     // Update statement status
     await base44.entities.MonthlyStatement.update(statement.id, {
