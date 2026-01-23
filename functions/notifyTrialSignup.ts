@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
     const owner = members[0];
     
     // Send notification email to platform admins
-    const adminEmail = 'notifications@estatewatch365.app'; // Change this to your admin email
+    const adminEmails = ['jason@estatewatch365.com', 'alex@estatewatch365.com'];
     
     const subject = `🎉 New Trial Signup: ${company.name}`;
     const body = `
@@ -47,11 +47,14 @@ Created: ${new Date(company.created_date).toLocaleString()}
 View in dashboard: https://estatewatch365.app/Dashboard
     `.trim();
     
-    await base44.asServiceRole.integrations.Core.SendEmail({
-      to: adminEmail,
-      subject: subject,
-      body: body
-    });
+    // Send to all admin emails
+    await Promise.all(adminEmails.map(email => 
+      base44.asServiceRole.integrations.Core.SendEmail({
+        to: email,
+        subject: subject,
+        body: body
+      })
+    ));
     
     console.log('Trial signup notification sent for company:', company.name);
     
