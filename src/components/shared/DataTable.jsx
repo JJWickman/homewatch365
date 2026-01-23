@@ -52,13 +52,14 @@ export default function DataTable({
   }
 
   return (
-    <div className="border rounded-lg bg-white overflow-hidden">
-      <div className="overflow-x-auto">
-        <Table className="min-w-[600px]">
+    <>
+      {/* Desktop Table View */}
+      <div className="hidden md:block border rounded-lg bg-white overflow-hidden">
+        <Table>
           <TableHeader>
             <TableRow className="bg-slate-50">
               {columns.map((col, i) => (
-                <TableHead key={i} className={`font-semibold whitespace-nowrap ${col.className || ''}`}>
+                <TableHead key={i} className={`font-semibold ${col.className || ''}`}>
                   {col.header}
                 </TableHead>
               ))}
@@ -72,7 +73,7 @@ export default function DataTable({
                 className={onRowClick ? 'cursor-pointer hover:bg-slate-50 transition-colors' : ''}
               >
                 {columns.map((col, j) => (
-                  <TableCell key={j} className={`${col.cellClassName || ''} py-3`}>
+                  <TableCell key={j} className={col.cellClassName}>
                     {col.cell ? col.cell(row) : row[col.accessor]}
                   </TableCell>
                 ))}
@@ -81,6 +82,26 @@ export default function DataTable({
           </TableBody>
         </Table>
       </div>
-    </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-3">
+        {data.map((row, i) => (
+          <div 
+            key={row.id || i}
+            onClick={() => onRowClick && onRowClick(row)}
+            className={`border rounded-lg bg-white p-4 space-y-3 ${onRowClick ? 'cursor-pointer active:bg-slate-50' : ''}`}
+          >
+            {columns.map((col, j) => (
+              <div key={j} className={col.cellClassName}>
+                <div className="text-xs font-medium text-slate-500 mb-1">{col.header}</div>
+                <div className="text-sm">
+                  {col.cell ? col.cell(row) : row[col.accessor]}
+                </div>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
