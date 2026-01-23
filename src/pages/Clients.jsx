@@ -185,7 +185,7 @@ export default function Clients() {
   ];
 
   return (
-    <div>
+    <div className="pb-6">
       <PageHeader
         title="Clients"
         subtitle={`${clients.length} total clients`}
@@ -194,8 +194,8 @@ export default function Clients() {
       />
 
       {/* Filters */}
-      <Card className="mb-6 p-4">
-        <div className="flex flex-col sm:flex-row gap-4">
+      <Card className="mb-6 p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
