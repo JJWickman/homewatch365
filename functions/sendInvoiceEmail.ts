@@ -70,8 +70,7 @@ ${company.email || ''}
     sgMail.setApiKey(sendgridApiKey);
     
     const recipientEmail = email_override || client.email;
-    // Use a verified SendGrid sender email - you need to verify this in SendGrid
-    const fromEmail = 'jason@agilidy.com'; // Change this to your verified sender email
+    const fromEmail = 'noreply@estatewatch365.app';
     
     console.log('Sending email from:', fromEmail, 'to:', recipientEmail);
     
