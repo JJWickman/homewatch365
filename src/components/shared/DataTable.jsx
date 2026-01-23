@@ -53,32 +53,34 @@ export default function DataTable({
 
   return (
     <div className="border rounded-lg bg-white overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-slate-50">
-            {columns.map((col, i) => (
-              <TableHead key={i} className={`font-semibold ${col.className || ''}`}>
-                {col.header}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((row, i) => (
-            <TableRow 
-              key={row.id || i} 
-              onClick={() => onRowClick && onRowClick(row)}
-              className={onRowClick ? 'cursor-pointer hover:bg-slate-50 transition-colors' : ''}
-            >
-              {columns.map((col, j) => (
-                <TableCell key={j} className={col.cellClassName}>
-                  {col.cell ? col.cell(row) : row[col.accessor]}
-                </TableCell>
+      <div className="overflow-x-auto">
+        <Table className="min-w-[600px]">
+          <TableHeader>
+            <TableRow className="bg-slate-50">
+              {columns.map((col, i) => (
+                <TableHead key={i} className={`font-semibold whitespace-nowrap ${col.className || ''}`}>
+                  {col.header}
+                </TableHead>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {data.map((row, i) => (
+              <TableRow 
+                key={row.id || i} 
+                onClick={() => onRowClick && onRowClick(row)}
+                className={onRowClick ? 'cursor-pointer hover:bg-slate-50 transition-colors' : ''}
+              >
+                {columns.map((col, j) => (
+                  <TableCell key={j} className={`${col.cellClassName || ''} py-3`}>
+                    {col.cell ? col.cell(row) : row[col.accessor]}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
