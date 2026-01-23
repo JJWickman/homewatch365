@@ -330,28 +330,33 @@ export default function Dashboard() {
           ) : (
             <div className="space-y-2">
                {recentActivity.slice(0, 8).map((activity) => (
-                 <Link key={activity.id} to={getActivityLink(activity)} className="flex items-center gap-4 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors hover:border-slate-300">
-                   <Avatar className="h-9 w-9 shrink-0">
+                 <Link key={activity.id} to={getActivityLink(activity)} className="flex items-start sm:items-center gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors hover:border-slate-300">
+                   <Avatar className="h-8 w-8 shrink-0">
                      <AvatarFallback className="text-xs bg-slate-100">
                        {getInitials(activity.user_name)}
                      </AvatarFallback>
                    </Avatar>
                    <div className="flex-1 min-w-0">
-                     <p className="text-sm text-slate-900">
-                       <span className="font-medium">{activity.user_name || 'Someone'}</span>
-                       {' '}{activity.action}d{' '}
-                       <span className="font-medium">{activity.entity_name || activity.entity_type}</span>
-                     </p>
+                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3">
+                       <p className="text-sm text-slate-900 leading-tight">
+                         <span className="font-medium">{activity.user_name || 'Someone'}</span>
+                         {' '}{activity.action}d{' '}
+                         <span className="font-medium">{activity.entity_name || activity.entity_type}</span>
+                       </p>
+                       <div className="flex items-center gap-2 text-xs text-slate-500">
+                         <StatusBadge status={activity.action} className="text-xs" />
+                         <span className="hidden sm:flex items-center gap-1 shrink-0">
+                           <Clock className="h-3 w-3" />
+                           {format(new Date(activity.created_date), 'MMM d, h:mm a')}
+                         </span>
+                         <span className="sm:hidden shrink-0">
+                           {format(new Date(activity.created_date), 'MMM d')}
+                         </span>
+                       </div>
+                     </div>
                      {activity.details && (
-                       <p className="text-xs text-slate-500 mt-0.5">{activity.details}</p>
+                       <p className="text-xs text-slate-500 mt-1 line-clamp-1">{activity.details}</p>
                      )}
-                   </div>
-                   <div className="flex items-center gap-3 text-xs text-slate-500 shrink-0">
-                     <StatusBadge status={activity.action} className="text-xs" />
-                     <span className="flex items-center gap-1">
-                       <Clock className="h-3.5 w-3.5" />
-                       {format(new Date(activity.created_date), 'MMM d, h:mm a')}
-                     </span>
                    </div>
                  </Link>
                ))}
