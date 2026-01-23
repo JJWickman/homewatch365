@@ -48,6 +48,7 @@ import InspectionTemplates from '@/components/settings/InspectionTemplates';
 import PlanBillingConfiguration from '@/components/settings/PlanBillingConfiguration';
 import StripeConnectCard from '@/components/settings/StripeConnectCard';
 import SubscriptionManagement from '@/components/settings/SubscriptionManagement';
+import BillingEmailSection from '@/components/settings/BillingEmailSection';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -1402,6 +1403,9 @@ ${company.name}
         </TabsContent>
 
         <TabsContent value="admin" className="space-y-6">
+          {/* Billing Email */}
+          <BillingEmailSection company={company} onUpdate={loadData} />
+
           {/* Stripe Connect */}
           <StripeConnectCard company={company} onRefresh={loadData} />
 
