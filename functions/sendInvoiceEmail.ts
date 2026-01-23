@@ -28,6 +28,10 @@ Deno.serve(async (req) => {
     const client = clients[0];
     const company = companies[0];
 
+    if (!client || !company) {
+      return Response.json({ error: 'Client or company not found' }, { status: 404 });
+    }
+
     // Generate PDF inline instead of calling another function
     const { jsPDF } = await import('npm:jspdf@2.5.2');
     const doc = new jsPDF();
