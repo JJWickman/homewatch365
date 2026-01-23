@@ -91,13 +91,13 @@ ${company.email || ''}
     }
 
     // Update statement status
-    await base44.entities.MonthlyStatement.update(statement.id, {
+    await base44.asServiceRole.entities.MonthlyStatement.update(statement.id, {
       status: 'sent',
       sent_at: new Date().toISOString()
     });
 
     // Log communication
-    await base44.entities.CommunicationLog.create({
+    await base44.asServiceRole.entities.CommunicationLog.create({
       company_id: statement.company_id,
       client_id: client.id,
       client_email: email_override || client.email,
