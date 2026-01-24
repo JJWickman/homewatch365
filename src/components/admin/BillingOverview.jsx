@@ -519,21 +519,24 @@ export default function BillingOverview({ companyId }) {
                 <div className="flex justify-between text-sm items-center">
                   <span className="text-slate-600">Tax</span>
                   {isEditing ? (
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={editedStatement.tax_amount || 0}
-                      onChange={(e) => {
-                        const newTax = parseFloat(e.target.value) || 0;
-                        const newTotal = editedStatement.subtotal + newTax;
-                        setEditedStatement({ 
-                          ...editedStatement, 
-                          tax_amount: newTax,
-                          total: newTotal
-                        });
-                      }}
-                      className="w-32 text-right"
-                    />
+                    <div className="relative w-32">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={(editedStatement.tax_amount || 0).toFixed(2)}
+                        onChange={(e) => {
+                          const newTax = parseFloat(e.target.value) || 0;
+                          const newTotal = editedStatement.subtotal + newTax;
+                          setEditedStatement({ 
+                            ...editedStatement, 
+                            tax_amount: newTax,
+                            total: newTotal
+                          });
+                        }}
+                        className="pl-7 text-right"
+                      />
+                    </div>
                   ) : (
                     <span className="font-medium">${editedStatement.tax_amount?.toFixed(2) || '0.00'}</span>
                   )}
