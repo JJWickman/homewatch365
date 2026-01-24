@@ -182,9 +182,9 @@ Deno.serve(async (req) => {
 
     console.log(`Sending all onboarding emails to ${testEmail}...`);
 
-    // Send all 5 onboarding emails
+    // Send all 5 onboarding emails using service role
     for (const email of EMAIL_TOPICS) {
-      await base44.integrations.Core.SendEmail({
+      await base44.asServiceRole.integrations.Core.SendEmail({
         from_name: 'Estate Watch 365',
         to: testEmail,
         subject: `[TEST ${email.number}/5] ${email.subject}`,
@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
     }
 
     // Send trial reminder
-    await base44.integrations.Core.SendEmail({
+    await base44.asServiceRole.integrations.Core.SendEmail({
       from_name: 'Estate Watch 365',
       to: testEmail,
       subject: `[TEST TRIAL REMINDER] ${TRIAL_REMINDER_SUBJECT}`,
