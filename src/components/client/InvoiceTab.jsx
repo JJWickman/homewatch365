@@ -118,7 +118,7 @@ export default function InvoiceTab({ clientId, client }) {
       });
 
       if (response.data.success) {
-        toast.success('Invoice sent successfully!');
+        toast.success(`Invoice emailed to ${client.email} successfully!`);
         await base44.entities.MonthlyStatement.update(statementId, {
           status: 'sent',
           sent_at: new Date().toISOString()
@@ -129,7 +129,7 @@ export default function InvoiceTab({ clientId, client }) {
       }
     } catch (error) {
       console.error('Error sending invoice:', error);
-      toast.error(error.message || 'Failed to send invoice');
+      toast.error('Failed to send invoice: ' + error.message);
     } finally {
       setSending(false);
     }
