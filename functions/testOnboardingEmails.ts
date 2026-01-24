@@ -199,7 +199,7 @@ Deno.serve(async (req) => {
             to: [{ email: testEmail }]
           }],
           from: {
-            email: 'noreply@estatewatch365.com',
+            email: 'noreply@estatewatch365.app',
             name: 'Estate Watch 365'
           },
           subject: `[TEST ${email.number}/5] ${email.subject}`,
@@ -230,7 +230,7 @@ Deno.serve(async (req) => {
           to: [{ email: testEmail }]
         }],
         from: {
-          email: 'noreply@estatewatch365.com',
+          email: 'noreply@estatewatch365.app',
           name: 'Estate Watch 365'
         },
         subject: `[TEST TRIAL REMINDER] ${TRIAL_REMINDER_SUBJECT}`,
