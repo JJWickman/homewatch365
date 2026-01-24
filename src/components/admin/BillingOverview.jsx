@@ -475,24 +475,27 @@ export default function BillingOverview({ companyId }) {
                               placeholder="Description"
                             />
                           </div>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={item.amount}
-                            onChange={(e) => {
-                              const newItems = [...editedStatement.line_items];
-                              newItems[idx].amount = parseFloat(e.target.value) || 0;
-                              const newSubtotal = newItems.reduce((sum, i) => sum + i.amount, 0);
-                              const newTotal = newSubtotal + (editedStatement.tax_amount || 0);
-                              setEditedStatement({ 
-                                ...editedStatement, 
-                                line_items: newItems,
-                                subtotal: newSubtotal,
-                                total: newTotal
-                              });
-                            }}
-                            className="w-32"
-                          />
+                          <div className="relative w-32">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={item.amount.toFixed(2)}
+                              onChange={(e) => {
+                                const newItems = [...editedStatement.line_items];
+                                newItems[idx].amount = parseFloat(e.target.value) || 0;
+                                const newSubtotal = newItems.reduce((sum, i) => sum + i.amount, 0);
+                                const newTotal = newSubtotal + (editedStatement.tax_amount || 0);
+                                setEditedStatement({ 
+                                  ...editedStatement, 
+                                  line_items: newItems,
+                                  subtotal: newSubtotal,
+                                  total: newTotal
+                                });
+                              }}
+                              className="pl-7"
+                            />
+                          </div>
                         </>
                       ) : (
                         <>
