@@ -177,30 +177,73 @@ The Estate Watch 365 Team`;
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
     const testEmail = 'jason@biglynx.com';
+    const sendgridApiKey = Deno.env.get('SENDGRID_API_KEY');
+
+    if (!sendgridApiKey) {
+      throw new Error('SENDGRID_API_KEY not configured');
+    }
 
     console.log(`Sending all onboarding emails to ${testEmail}...`);
 
-    // Send all 5 onboarding emails using service role
+    // Send all 5 onboarding emails
     for (const email of EMAIL_TOPICS) {
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        from_name: 'Estate Watch 365',
-        to: testEmail,
-        subject: `[TEST ${email.number}/5] ${email.subject}`,
-        body: email.content
+      const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${sendgridApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          personalizations: [{
+            to: [{ email: testEmail }]
+          }],
+          from: {
+            email: 'noreply@estatewatch365.com',
+            name: 'Estate Watch 365'
+          },
+          subject: `[TEST ${email.number}/5] ${email.subject}`,
+          content: [{
+            type: 'text/plain',
+            value: email.content
+          }]
+        })
       });
-      console.log(`Sent email ${email.number}: ${email.topic}`);
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error(`Failed to send email ${email.number}:`, error);
+      } else {
+        console.log(`Sent email ${email.number}: ${email.topic}`);
+      }
     }
 
     // Send trial reminder
-    await base44.asServiceRole.integrations.Core.SendEmail({
-      from_name: 'Estate Watch 365',
-      to: testEmail,
-      subject: `[TEST TRIAL REMINDER] ${TRIAL_REMINDER_SUBJECT}`,
-      body: TRIAL_REMINDER_CONTENT
+    const reminderResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${sendgridApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        personalizations: [{
+          to: [{ email: testEmail }]
+        }],
+        from: {
+          email: 'noreply@estatewatch365.com',
+          name: 'Estate Watch 365'
+        },
+        subject: `[TEST TRIAL REMINDER] ${TRIAL_REMINDER_SUBJECT}`,
+        content: [{
+          type: 'text/plain',
+          value: TRIAL_REMINDER_CONTENT
+        }]
+      })
     });
-    console.log('Sent trial reminder email');
+
+    if (reminderResponse.ok) {
+      console.log('Sent trial reminder email');
+    }
 
     return Response.json({
       success: true,
