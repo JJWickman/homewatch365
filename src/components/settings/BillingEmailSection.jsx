@@ -195,11 +195,13 @@ export default function BillingEmailSection({ company, onUpdate }) {
                   <ol className="list-decimal list-inside space-y-1 text-blue-700">
                     <li>We'll send a verification email to the address you specify below</li>
                     <li>You'll need to click the verification link in that email</li>
-                    <li>Once verified, all invoices will automatically be sent from your custom email</li>
+                    <li><strong>The link will take you to a SendGrid/Twilio branded page</strong> - this is normal and expected</li>
+                    <li><strong>You DO NOT need to login</strong> - simply visiting the page completes the verification</li>
+                    <li>Once verified, all external email communications (invoices, reports, etc.) will be sent from your custom email using SendGrid</li>
                     <li>Clients will see your company name and domain instead of our default sender</li>
                   </ol>
-                  <p className="mt-2 font-medium text-blue-900">
-                    Important: You must have access to the email address to complete verification
+                  <p className="mt-3 font-medium text-blue-900">
+                    Important: You must have access to the email address to complete verification. SendGrid is our trusted email service provider for all external communications.
                   </p>
                 </div>
               </div>
