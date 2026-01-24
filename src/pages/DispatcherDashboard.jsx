@@ -127,29 +127,13 @@ export default function DispatcherDashboard() {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Schedule & Map */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Daily Schedule */}
+        {/* Schedule & Map Combined */}
+        <div className="lg:col-span-2">
           <DailySchedule 
-            visits={visits} 
+            visits={visits}
+            properties={propertiesWithVisits}
             onRefresh={loadData}
           />
-
-          {/* Map View */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Property Locations
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <DispatcherMap 
-                properties={propertiesWithVisits}
-                visits={visits}
-              />
-            </CardContent>
-          </Card>
         </div>
 
         {/* Team Availability Sidebar */}

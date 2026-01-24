@@ -64,13 +64,21 @@ export default function TeamAvailability({ team, companyId }) {
 
   const activeTeam = team.filter(t => t.is_active && (t.role === 'field_inspector' || t.role === 'technician'));
 
+  const getStatusColor = (count, total) => {
+    if (count === 0) return 'bg-slate-200';
+    const percentage = (count / total) * 100;
+    if (percentage === 100) return 'bg-green-500';
+    if (percentage >= 50) return 'bg-blue-500';
+    return 'bg-amber-500';
+  };
+
   return (
     <Card className="h-fit">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
-          Team Availability
-          <Badge variant="outline" className="ml-auto">This Week</Badge>
+          Team Status
+          <Badge variant="outline" className="ml-auto">Live</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -88,78 +96,102 @@ export default function TeamAvailability({ team, companyId }) {
             ) : (
               activeTeam.map((member) => {
                 const stats = getMemberStats(member.user_email);
+                const completionRate = stats.todayCount > 0 ? (stats.todayCompleted / stats.todayCount) * 100 : 0;
                 
                 return (
                   <div 
                     key={member.id}
-                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow"
+                    className="p-4 rounded-lg border bg-gradient-to-br from-white to-slate-50 hover:shadow-lg transition-all"
                   >
                     <div className="flex items-start gap-3">
-                      <Avatar>
-                        <AvatarFallback className="bg-slate-900 text-white text-sm">
-                          {getInitials(member.user_name, member.user_email)}
-                        </AvatarFallback>
-                      </Avatar>
+                      <div className="relative">
+                        <Avatar className="h-12 w-12 border-2 border-white shadow-md">
+                          <AvatarFallback className="bg-gradient-to-br from-blue-600 to-blue-700 text-white font-semibold">
+                            {getInitials(member.user_name, member.user_email)}
+                          </AvatarFallback>
+                        </Avatar>
+                        {stats.todayCount > 0 && (
+                          <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-white shadow-sm flex items-center justify-center border-2 border-white">
+                            {completionRate === 100 ? (
+                              <CheckCircle2 className="h-3 w-3 text-green-600" />
+                            ) : (
+                              <div className="h-2 w-2 rounded-full bg-blue-600 animate-pulse" />
+                            )}
+                          </div>
+                        )}
+                      </div>
                       
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">
+                        <p className="font-semibold text-slate-900 truncate">
                           {member.user_name || member.user_email}
                         </p>
                         <p className="text-xs text-slate-500 capitalize">
                           {member.role === 'field_inspector' ? 'Field Inspector' : member.role}
                         </p>
 
-                        <div className="mt-3 space-y-2">
-                          {/* Today's Progress */}
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-slate-600 flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              Today
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">
-                                {stats.todayCompleted}/{stats.todayCount}
-                              </span>
-                              {stats.todayCount > 0 && (
-                                <CheckCircle2 className="h-3 w-3 text-green-600" />
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Week Progress */}
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-slate-600">Week Total</span>
-                            <span className="font-medium">
-                              {stats.completed}/{stats.weekTotal}
-                            </span>
-                          </div>
-
-                          {/* Progress Bar */}
-                          {stats.weekTotal > 0 && (
-                            <div className="w-full bg-slate-100 rounded-full h-1.5">
-                              <div 
-                                className="bg-green-500 h-1.5 rounded-full transition-all"
-                                style={{ width: `${(stats.completed / stats.weekTotal) * 100}%` }}
+                        {/* Visual Progress Circle */}
+                        <div className="mt-3 flex items-center gap-4">
+                          <div className="relative">
+                            <svg className="w-16 h-16 transform -rotate-90">
+                              <circle
+                                cx="32"
+                                cy="32"
+                                r="28"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                fill="none"
+                                className="text-slate-100"
                               />
+                              <circle
+                                cx="32"
+                                cy="32"
+                                r="28"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                fill="none"
+                                strokeDasharray={`${2 * Math.PI * 28}`}
+                                strokeDashoffset={`${2 * Math.PI * 28 * (1 - completionRate / 100)}`}
+                                className={completionRate === 100 ? 'text-green-500' : completionRate >= 50 ? 'text-blue-500' : 'text-amber-500'}
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="text-center">
+                                <p className="text-lg font-bold text-slate-900">{stats.todayCompleted}</p>
+                                <p className="text-xs text-slate-500">/{stats.todayCount}</p>
+                              </div>
                             </div>
-                          )}
-                        </div>
+                          </div>
 
-                        {/* Status Badge */}
-                        <div className="mt-2">
-                          {stats.todayCount === 0 ? (
-                            <Badge variant="outline" className="text-xs">
-                              No visits today
-                            </Badge>
-                          ) : stats.todayCompleted === stats.todayCount ? (
-                            <Badge className="bg-green-100 text-green-800 text-xs">
-                              All done today
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-blue-100 text-blue-800 text-xs">
-                              {stats.todayCount - stats.todayCompleted} remaining
-                            </Badge>
-                          )}
+                          <div className="flex-1 space-y-2">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-slate-600 font-medium">Today</span>
+                              <span className="font-semibold text-slate-900">
+                                {stats.todayCount > 0 ? `${Math.round(completionRate)}%` : '0%'}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-slate-600">This Week</span>
+                              <span className="font-medium text-slate-700">
+                                {stats.completed}/{stats.weekTotal}
+                              </span>
+                            </div>
+                            
+                            {/* Status Badge */}
+                            {stats.todayCount === 0 ? (
+                              <Badge variant="outline" className="text-xs w-full justify-center">
+                                Off Today
+                              </Badge>
+                            ) : completionRate === 100 ? (
+                              <Badge className="bg-green-100 text-green-700 border-green-200 text-xs w-full justify-center">
+                                ✓ Complete
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs w-full justify-center">
+                                {stats.todayCount - stats.todayCompleted} left
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
