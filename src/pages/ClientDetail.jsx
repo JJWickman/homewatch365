@@ -393,7 +393,7 @@ export default function ClientDetail() {
             <TabsList className="w-full justify-start mb-4">
               <TabsTrigger value="properties">Properties</TabsTrigger>
               <TabsTrigger value="visits">Visits</TabsTrigger>
-              <TabsTrigger value="invoices">Invoices</TabsTrigger>
+              <TabsTrigger value="invoices">Billing</TabsTrigger>
               <TabsTrigger value="files">Files</TabsTrigger>
               <TabsTrigger value="notes">Notes</TabsTrigger>
             </TabsList>
