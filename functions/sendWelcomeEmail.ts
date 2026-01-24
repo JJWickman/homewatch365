@@ -46,13 +46,18 @@ Over the next few days, we'll send you helpful tips to get the most out of Estat
 
 **We're Here For You - Always**
 
-Got questions? Hit a snag? Just want to chat about growing your business? Reply to this email anytime. We're real people who genuinely care about your success.
+Got questions? Hit a snag? Just want to chat about growing your business? Reach out to us directly:
+• Jason: jason@estatewatch365.com
+• Alex: alex@estatewatch365.com
+
+We're real people who genuinely care about your success, and we personally read and respond to every email.
 
 Your business is about to level up in ways you never imagined. We can't wait to see what you accomplish!
 
 Let's do this! 💪
 
 To your success,
+Jason & Alex
 The Estate Watch 365 Team
 
 P.S. Seriously, if you need ANYTHING - we're just an email away. Your success is our success, and we're invested in making you wildly successful!
