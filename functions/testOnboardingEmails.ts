@@ -25,7 +25,10 @@ Clients are at the heart of your property management business. Each client can h
 Ready to add your first client? Log in now and give it a try!
 
 Best regards,
-The Estate Watch 365 Team`
+The Estate Watch 365 Team
+
+---
+Login to your dashboard: https://estatewatch365.app`
   },
   {
     number: 2,
@@ -52,7 +55,10 @@ The system will automatically geocode the address for route optimization.
 Ready to add your first property? Jump in now!
 
 Best regards,
-The Estate Watch 365 Team`
+The Estate Watch 365 Team
+
+---
+Login to your dashboard: https://estatewatch365.app`
   },
   {
     number: 3,
@@ -78,7 +84,10 @@ Regular inspections are the backbone of property watch services. With Estate Wat
 Ready to schedule your first visit? Let's do it!
 
 Best regards,
-The Estate Watch 365 Team`
+The Estate Watch 365 Team
+
+---
+Login to your dashboard: https://estatewatch365.app`
   },
   {
     number: 4,
@@ -109,7 +118,10 @@ Once set up, go to the "Billing" page to:
 Ready to set up your billing? Get started now!
 
 Best regards,
-The Estate Watch 365 Team`
+The Estate Watch 365 Team
+
+---
+Login to your dashboard: https://estatewatch365.app`
   },
   {
     number: 5,
@@ -141,7 +153,10 @@ The system will calculate the best order to visit properties and show you the ro
 You're now ready to use Estate Watch 365 like a pro! If you have any questions, just reply to this email.
 
 Best regards,
-The Estate Watch 365 Team`
+The Estate Watch 365 Team
+
+---
+Login to your dashboard: https://estatewatch365.app`
   }
 ];
 
@@ -173,7 +188,10 @@ Questions? Just reply to this email or contact our support team.
 Don't let your trial expire - subscribe today!
 
 Best regards,
-The Estate Watch 365 Team`;
+The Estate Watch 365 Team
+
+---
+Login to your dashboard: https://estatewatch365.app`;
 
 Deno.serve(async (req) => {
   try {
