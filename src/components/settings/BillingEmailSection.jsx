@@ -56,12 +56,27 @@ export default function BillingEmailSection({ company, onUpdate }) {
         ...formData
       });
 
+      console.log('SendGrid Response:', response.data);
+
       if (response.data.success) {
         toast.success(response.data.message);
+        
+        // Show detailed SendGrid feedback
+        if (response.data.sendgrid_response) {
+          console.log('SendGrid Details:', response.data.sendgrid_response);
+          toast.info(`SendGrid Status: ${response.data.sendgrid_response.status || 'Sent'}`);
+        }
+        
         setShowForm(false);
         onUpdate();
       } else {
         toast.error(response.data.error || 'Failed to request verification');
+        
+        // Show SendGrid error details if available
+        if (response.data.sendgrid_error) {
+          console.error('SendGrid Error:', response.data.sendgrid_error);
+          toast.error(`SendGrid: ${response.data.sendgrid_error}`);
+        }
       }
     } catch (error) {
       console.error('Error:', error);
