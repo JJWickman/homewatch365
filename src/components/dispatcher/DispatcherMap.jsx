@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Loader2 } from 'lucide-react';
 
 export default function DispatcherMap({ properties, visits }) {
@@ -8,18 +9,28 @@ export default function DispatcherMap({ properties, visits }) {
   const markersRef = useRef([]);
 
   useEffect(() => {
-    if (!window.google) {
+    loadGoogleMaps();
+  }, []);
+
+  const loadGoogleMaps = async () => {
+    if (window.google) {
+      initMap();
+      return;
+    }
+
+    try {
+      const { data } = await base44.functions.invoke('googleMapsConfig', {});
       const script = document.createElement('script');
-      const apiKey = 'YOUR_GOOGLE_MAPS_API_KEY'; // Will use env variable
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${data.apiKey}`;
       script.async = true;
       script.defer = true;
       script.onload = initMap;
       document.head.appendChild(script);
-    } else {
-      initMap();
+    } catch (error) {
+      console.error('Failed to load Google Maps:', error);
+      setLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     if (map && properties.length > 0) {
