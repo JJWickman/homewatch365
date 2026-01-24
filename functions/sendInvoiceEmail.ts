@@ -274,8 +274,8 @@ If you have any questions, please don't hesitate to contact us.
         to: recipientEmail,
         from: fromEmail,
         subject: subject,
-        text: emailBody,
-        html: emailBody.replace(/\n/g, '<br>'),
+        text: plainTextBody,
+        html: emailBody,
         attachments: [{
           content: pdfBase64,
           filename: `invoice_${statement.billing_month}.pdf`,
