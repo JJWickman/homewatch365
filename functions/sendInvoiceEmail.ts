@@ -117,29 +117,134 @@ Deno.serve(async (req) => {
     // Generate client portal link
     const portalUrl = `https://estatewatch365.app/ClientPortal`;
 
-    // Prepare email
+    // Prepare email with branded HTML template
     const subject = `Invoice from ${company.name} - ${statement.billing_month}`;
+    
+    const primaryColor = company.primary_color || '#1e3a5f';
+    const accentColor = company.accent_color || '#c9a962';
+    
     const emailBody = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+    .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, ${primaryColor} 0%, ${primaryColor}dd 100%); color: white; padding: 30px 20px; text-align: center; }
+    .logo { max-width: 120px; height: auto; margin-bottom: 10px; }
+    .content { padding: 30px 20px; }
+    .invoice-details { background: #f8f9fa; border-left: 4px solid ${accentColor}; padding: 15px; margin: 20px 0; border-radius: 4px; }
+    .invoice-details strong { color: ${primaryColor}; }
+    .line-items { margin: 20px 0; border-collapse: collapse; width: 100%; }
+    .line-items th { background: ${primaryColor}; color: white; padding: 10px; text-align: left; }
+    .line-items td { padding: 10px; border-bottom: 1px solid #eee; }
+    .totals { text-align: right; margin: 20px 0; font-size: 18px; }
+    .totals strong { color: ${primaryColor}; }
+    .button { display: inline-block; background: ${accentColor}; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }
+    .signature { margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee; color: #666; }
+    .signature strong { color: ${primaryColor}; display: block; margin-bottom: 5px; }
+    .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      ${company.logo_url ? `<img src="${company.logo_url}" alt="${company.name}" class="logo">` : ''}
+      <h1 style="margin: 10px 0; font-size: 28px;">INVOICE</h1>
+      <p style="margin: 5px 0; opacity: 0.9;">${statement.billing_month}</p>
+    </div>
+    
+    <div class="content">
+      <p style="font-size: 16px;">Dear ${client.first_name} ${client.last_name},</p>
+      <p>Please find your invoice details below. Payment can be made through the client portal or by contacting us directly.</p>
+      
+      <div class="invoice-details">
+        <strong>Invoice #:</strong> ${statement.id.slice(0, 8).toUpperCase()}<br>
+        <strong>Invoice Date:</strong> ${new Date(statement.created_date).toLocaleDateString()}<br>
+        <strong>Billing Period:</strong> ${statement.billing_month}<br>
+        <strong>Due Date:</strong> ${new Date(statement.finalized_at || statement.created_date).toLocaleDateString()}
+      </div>
+      
+      <table class="line-items">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th style="text-align: right;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${statement.line_items && statement.line_items.length > 0 
+            ? statement.line_items.map(item => `
+              <tr>
+                <td>${item.description || 'Service'}</td>
+                <td style="text-align: right;">$${item.amount.toFixed(2)}</td>
+              </tr>
+            `).join('')
+            : '<tr><td colspan="2">No items</td></tr>'
+          }
+        </tbody>
+      </table>
+      
+      <div class="totals">
+        <div>Subtotal: $${statement.subtotal.toFixed(2)}</div>
+        ${statement.tax_amount > 0 ? `<div>Tax: $${statement.tax_amount.toFixed(2)}</div>` : ''}
+        <div style="margin-top: 10px;"><strong>Total Due: $${statement.total.toFixed(2)}</strong></div>
+      </div>
+      
+      <center>
+        <a href="${portalUrl}" class="button">View & Pay Invoice</a>
+      </center>
+      
+      <p style="margin-top: 20px; color: #666; font-size: 14px;">A PDF copy of this invoice is attached for your records.</p>
+      
+      <div class="signature">
+        <strong>${company.name}</strong>
+        ${company.address ? `<div>${company.address}</div>` : ''}
+        ${company.city ? `<div>${company.city}, ${company.state} ${company.zip}</div>` : ''}
+        ${company.phone ? `<div>Phone: ${company.phone}</div>` : ''}
+        ${company.email ? `<div>Email: ${company.email}</div>` : ''}
+        ${company.website ? `<div>Web: ${company.website}</div>` : ''}
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>If you have any questions about this invoice, please contact us.</p>
+      <p style="margin-top: 10px;">This is an automated email sent via SendGrid by ${company.name}</p>
+    </div>
+  </div>
+</body>
+</html>
+    `.trim();
+    
+    // Plain text version
+    const plainTextBody = `
 Dear ${client.first_name} ${client.last_name},
 
-Please find attached your invoice for ${statement.billing_month}.
+Please find your invoice for ${statement.billing_month}.
 
-Invoice Details:
-- Invoice #: ${statement.id.slice(0, 8).toUpperCase()}
-- Total Amount: $${statement.total.toFixed(2)}
-- Due Date: ${new Date(statement.finalized_at || statement.created_date).toLocaleDateString()}
+INVOICE DETAILS:
+Invoice #: ${statement.id.slice(0, 8).toUpperCase()}
+Invoice Date: ${new Date(statement.created_date).toLocaleDateString()}
+Billing Period: ${statement.billing_month}
+Total Amount: $${statement.total.toFixed(2)}
+Due Date: ${new Date(statement.finalized_at || statement.created_date).toLocaleDateString()}
 
 View and pay your invoice in the client portal:
 ${portalUrl}
 
-Or download the attached PDF for your records.
+A PDF copy is attached for your records.
+
+---
+${company.name}
+${company.address || ''}
+${company.city ? `${company.city}, ${company.state} ${company.zip}` : ''}
+${company.phone ? `Phone: ${company.phone}` : ''}
+${company.email ? `Email: ${company.email}` : ''}
+${company.website ? `Web: ${company.website}` : ''}
 
 If you have any questions, please don't hesitate to contact us.
-
-Best regards,
-${company.name}
-${company.phone || ''}
-${company.email || ''}
     `.trim();
 
     // Send email with SendGrid
