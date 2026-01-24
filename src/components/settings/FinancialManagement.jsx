@@ -285,7 +285,7 @@ export default function FinancialManagement({ companyId }) {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5" />
@@ -298,10 +298,12 @@ export default function FinancialManagement({ companyId }) {
           <Button 
             onClick={handleAddProduct}
             disabled={products.length >= MAX_PRODUCTS}
-            className="bg-slate-900 hover:bg-slate-800"
+            className="bg-slate-900 hover:bg-slate-800 sm:shrink-0"
+            size="sm"
           >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Product/Service
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Add Product/Service</span>
+            <span className="sm:hidden">Add New</span>
           </Button>
         </CardHeader>
         <CardContent>
