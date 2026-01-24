@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from 'sonner';
 import EmptyState from '@/components/shared/EmptyState';
 
@@ -17,6 +19,9 @@ export default function InvoiceTab({ clientId, client }) {
   const [sending, setSending] = useState(false);
   const [editingStatement, setEditingStatement] = useState(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [sendingStatement, setSendingStatement] = useState(null);
+  const [emailAddress, setEmailAddress] = useState('');
 
   useEffect(() => {
     loadData();
@@ -105,21 +110,25 @@ export default function InvoiceTab({ clientId, client }) {
     }
   };
 
-  const handleSendStatement = async (statementId) => {
-    if (!client.email) {
-      toast.error('Client email is required');
-      return;
-    }
+  const handleOpenEmailDialog = (statement) => {
+    setSendingStatement(statement);
+    setEmailAddress(client?.email || '');
+    setEmailDialogOpen(true);
+  };
+
+  const handleSendStatement = async () => {
+    if (!emailAddress || !sendingStatement) return;
 
     setSending(true);
     try {
       const response = await base44.functions.invoke('sendInvoiceEmail', {
-        statement_id: statementId
+        statement_id: sendingStatement.id,
+        email_override: emailAddress
       });
 
       if (response.data.success) {
-        toast.success(`Invoice emailed to ${client.email} successfully!`);
-        await base44.entities.MonthlyStatement.update(statementId, {
+        toast.success(`Invoice emailed to ${emailAddress} successfully!`);
+        await base44.entities.MonthlyStatement.update(sendingStatement.id, {
           status: 'sent',
           sent_at: new Date().toISOString()
         });
@@ -132,6 +141,9 @@ export default function InvoiceTab({ clientId, client }) {
       toast.error('Failed to send invoice: ' + error.message);
     } finally {
       setSending(false);
+      setEmailDialogOpen(false);
+      setSendingStatement(null);
+      setEmailAddress('');
     }
   };
 
@@ -314,6 +326,74 @@ export default function InvoiceTab({ clientId, client }) {
         </DialogContent>
       </Dialog>
 
+      {/* Email Confirmation Dialog */}
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Email Invoice to Client</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Send invoice to:</Label>
+              <Input
+                type="email"
+                value={emailAddress}
+                onChange={(e) => setEmailAddress(e.target.value)}
+                placeholder="client@example.com"
+                className="mt-2"
+              />
+              <p className="text-xs text-slate-500 mt-2">
+                Confirm or update the email address before sending
+              </p>
+            </div>
+            
+            {sendingStatement && (
+              <div className="bg-slate-50 rounded-lg p-4 text-sm">
+                <div className="flex justify-between mb-2">
+                  <span className="text-slate-600">Client:</span>
+                  <span className="font-medium">
+                    {client ? `${client.first_name} ${client.last_name}` : 'Unknown'}
+                  </span>
+                </div>
+                <div className="flex justify-between mb-2">
+                  <span className="text-slate-600">Billing Month:</span>
+                  <span className="font-medium">{sendingStatement.billing_month}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Total Amount:</span>
+                  <span className="font-medium">${sendingStatement.total?.toFixed(2)}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEmailDialogOpen(false)} disabled={sending}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSendStatement} 
+              disabled={!emailAddress || sending}
+              style={{ backgroundColor: '#000', color: '#fff' }}
+              className="hover:bg-slate-800"
+            >
+              {sending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Invoice
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     <div className="space-y-4">
       {/* Generate & Send Invoice */}
       <Card>
@@ -415,17 +495,18 @@ export default function InvoiceTab({ clientId, client }) {
                       <Download className="h-4 w-4" />
                     </Button>
                     {statement.status !== 'paid' && (
-                      <Button
-                        variant="outline"
-                        size="sm"
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleSendStatement(statement.id);
+                          handleOpenEmailDialog(statement);
                         }}
-                        disabled={sending}
+                        title="Email to Client"
+                        style={{ backgroundColor: '#000', color: '#fff', borderColor: '#000' }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md hover:bg-slate-800 transition-colors"
                       >
-                        <Mail className="h-4 w-4" />
-                      </Button>
+                        <Mail className="h-3.5 w-3.5" />
+                        Email
+                      </button>
                     )}
                   </div>
                 </div>
