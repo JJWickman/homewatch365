@@ -302,7 +302,7 @@ If you have any questions, please don't hesitate to contact us.
       client_email: email_override || client.email,
       type: 'email',
       subject: subject,
-      message: emailBody,
+      message: plainTextBody,
       status: 'sent',
       sent_at: new Date().toISOString()
     });
