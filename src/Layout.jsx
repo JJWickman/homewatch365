@@ -398,6 +398,92 @@ export default function Layout({ children, currentPageName }) {
           --primary: ${company?.primary_color || '#1e3a5f'};
           --accent: ${company?.accent_color || '#c9a962'};
         }
+
+        /* Glassy Modern Theme */
+        body {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background-attachment: fixed;
+        }
+
+        /* Glass cards */
+        [class*="Card"] {
+          background: rgba(255, 255, 255, 0.85) !important;
+          backdrop-filter: blur(20px) !important;
+          border: 1px solid rgba(255, 255, 255, 0.3) !important;
+          box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15) !important;
+        }
+
+        /* Glass inputs and selects */
+        input, select, textarea, [role="combobox"] {
+          background: rgba(255, 255, 255, 0.6) !important;
+          backdrop-filter: blur(10px) !important;
+          border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        }
+
+        /* Glass sidebar */
+        aside {
+          background: rgba(30, 58, 95, 0.85) !important;
+          backdrop-filter: blur(20px) !important;
+          border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        /* Glass header */
+        header {
+          background: rgba(255, 255, 255, 0.85) !important;
+          backdrop-filter: blur(20px) !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+        }
+
+        /* Glass dialogs */
+        [role="dialog"] > div:first-child {
+          background: rgba(255, 255, 255, 0.9) !important;
+          backdrop-filter: blur(30px) !important;
+          border: 1px solid rgba(255, 255, 255, 0.3) !important;
+          box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2) !important;
+        }
+
+        /* Glass buttons */
+        button {
+          backdrop-filter: blur(10px) !important;
+          transition: all 0.3s ease !important;
+        }
+
+        button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* Smooth scrollbar */
+        ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Glass badges */
+        [class*="badge"] {
+          background: rgba(255, 255, 255, 0.5) !important;
+          backdrop-filter: blur(10px) !important;
+          border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        }
+
+        /* Animations */
+        * {
+          transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
       `}</style>
       </div>
       </OfflineProvider>
