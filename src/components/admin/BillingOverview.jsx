@@ -284,8 +284,8 @@ export default function BillingOverview({ companyId }) {
       {/* Statements Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Statements ({data.periodLabel})</CardTitle>
-          <CardDescription>Client billing statements for the selected period</CardDescription>
+          <CardTitle className="text-base">Invoices ({data.periodLabel})</CardTitle>
+          <CardDescription>Client invoices for the selected period</CardDescription>
         </CardHeader>
         <CardContent>
           {/* Filters */}
@@ -330,7 +330,6 @@ export default function BillingOverview({ companyId }) {
               >
                 <option value="">All statuses</option>
                 <option value="draft">Draft</option>
-                <option value="finalized">Finalized</option>
                 <option value="sent">Sent</option>
                 <option value="paid">Paid</option>
               </select>
@@ -412,7 +411,7 @@ export default function BillingOverview({ companyId }) {
             </div>
           ) : (
             <p className="text-center text-slate-500 py-8">
-              {searchClient || searchMonth || filterStatus ? 'No statements match your filters' : 'No statements for this period'}
+              {searchClient || searchMonth || filterStatus ? 'No invoices match your filters' : 'No invoices for this period'}
             </p>
           )}
         </CardContent>
