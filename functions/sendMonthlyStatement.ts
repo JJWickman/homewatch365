@@ -15,10 +15,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing required parameters' }, { status: 400 });
     }
 
-    // Get statement
+    // Get invoice/statement
     const statements = await base44.entities.MonthlyStatement.filter({ id: statement_id });
     if (statements.length === 0) {
-      return Response.json({ error: 'Statement not found' }, { status: 404 });
+      return Response.json({ error: 'Invoice not found' }, { status: 404 });
     }
     const statement = statements[0];
 
@@ -36,15 +36,15 @@ Deno.serve(async (req) => {
     }
     const company = companies[0];
 
-    // Generate statement HTML
-    const statementHtml = generateStatementHtml(client, company, statement);
+    // Generate invoice HTML
+    const invoiceHtml = generateStatementHtml(client, company, statement);
 
     // Send email
     await base44.integrations.Core.SendEmail({
       from_name: company.name,
       to: client.email,
-      subject: `Monthly Statement - ${new Date(statement.billing_month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`,
-      body: statementHtml
+      subject: `Monthly Invoice - ${new Date(statement.billing_month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`,
+      body: invoiceHtml
     });
 
     return Response.json({ success: true });
@@ -76,12 +76,12 @@ function generateStatementHtml(client, company, statement) {
       <div class="container">
         <div class="header">
           <h1>${company.name}</h1>
-          <p>Monthly Statement - ${monthName}</p>
+          <p>Monthly Invoice - ${monthName}</p>
         </div>
         
         <div class="content">
           <p>Dear ${client.first_name} ${client.last_name},</p>
-          <p>Here is your monthly statement for ${monthName}:</p>
+          <p>Here is your monthly invoice for ${monthName}:</p>
           
           <div style="margin: 20px 0;">
             ${lineItems.map(item => `

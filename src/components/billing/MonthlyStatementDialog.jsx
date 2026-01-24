@@ -15,7 +15,7 @@ import { Plus, Trash2, FileText, Send, Mail } from 'lucide-react';
 
 export default function MonthlyStatementDialog({ open, onOpenChange, clientId, billingMonth, onStatementUpdated }) {
   const [loading, setLoading] = useState(true);
-  const [statement, setStatement] = useState(null);
+  const [invoice, setInvoice] = useState(null);
   const [lineItems, setLineItems] = useState([]);
   const [newItem, setNewItem] = useState({ description: '', amount: '' });
   const [sending, setSending] = useState(false);
@@ -37,22 +37,22 @@ export default function MonthlyStatementDialog({ open, onOpenChange, clientId, b
       const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
       const companyId = members[0]?.company_id;
 
-      // Check for existing statement
+      // Check for existing invoice
       const statements = await base44.entities.MonthlyStatement.filter({ 
         client_id: clientId, 
         billing_month: billingMonth 
       });
 
       if (statements.length > 0) {
-        setStatement(statements[0]);
+        setInvoice(statements[0]);
         setLineItems(statements[0].line_items || []);
       } else {
-        // Generate draft statement
+        // Generate draft invoice
         const items = await generateLineItems(currentClient, companyId);
         setLineItems(items);
         
         const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
-        const newStatement = await base44.entities.MonthlyStatement.create({
+        const newInvoice = await base44.entities.MonthlyStatement.create({
           company_id: companyId,
           client_id: clientId,
           billing_month: billingMonth,
@@ -62,10 +62,10 @@ export default function MonthlyStatementDialog({ open, onOpenChange, clientId, b
           tax_amount: 0,
           total: subtotal
         });
-        setStatement(newStatement);
+        setInvoice(newInvoice);
       }
     } catch (error) {
-      console.error('Error loading statement:', error);
+      console.error('Error loading invoice:', error);
     } finally {
       setLoading(false);
     }
@@ -149,7 +149,7 @@ export default function MonthlyStatementDialog({ open, onOpenChange, clientId, b
   const updateStatement = async (items) => {
     const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
     
-    await base44.entities.MonthlyStatement.update(statement.id, {
+    await base44.entities.MonthlyStatement.update(invoice.id, {
       line_items: items,
       subtotal,
       total: subtotal
@@ -159,7 +159,7 @@ export default function MonthlyStatementDialog({ open, onOpenChange, clientId, b
   };
 
   const handleFinalize = async () => {
-    await base44.entities.MonthlyStatement.update(statement.id, {
+    await base44.entities.MonthlyStatement.update(invoice.id, {
       status: 'finalized',
       finalized_at: new Date().toISOString()
     });
@@ -172,23 +172,23 @@ export default function MonthlyStatementDialog({ open, onOpenChange, clientId, b
     setSending(true);
     try {
       const response = await base44.functions.invoke('sendMonthlyStatement', {
-        statement_id: statement.id,
+        statement_id: invoice.id,
         client_id: clientId
       });
 
       if (response.data.success) {
-        await base44.entities.MonthlyStatement.update(statement.id, {
+        await base44.entities.MonthlyStatement.update(invoice.id, {
           status: 'sent',
           sent_at: new Date().toISOString()
         });
         
-        alert('Statement sent successfully!');
+        alert('Invoice sent successfully!');
         if (onStatementUpdated) onStatementUpdated();
         loadStatement(); // Reload to show updated status
       }
     } catch (error) {
-      console.error('Error sending statement:', error);
-      alert('Failed to send statement');
+      console.error('Error sending invoice:', error);
+      alert('Failed to send invoice');
     } finally {
       setSending(false);
     }
@@ -214,10 +214,10 @@ export default function MonthlyStatementDialog({ open, onOpenChange, clientId, b
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Monthly Statement - {new Date(billingMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            Monthly Invoice - {new Date(billingMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           </DialogTitle>
           <DialogDescription>
-            Review and edit statement before finalizing
+            Review and edit invoice before finalizing
           </DialogDescription>
         </DialogHeader>
 
@@ -225,7 +225,7 @@ export default function MonthlyStatementDialog({ open, onOpenChange, clientId, b
           {/* Line Items */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Statement Items</CardTitle>
+              <CardTitle className="text-base">Invoice Items</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {lineItems.map((item, index) => (
@@ -236,7 +236,7 @@ export default function MonthlyStatementDialog({ open, onOpenChange, clientId, b
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="font-semibold">${item.amount.toFixed(2)}</span>
-                    {statement?.status === 'draft' && (
+                    {invoice?.status === 'draft' && (
                       <Button
                         variant="ghost"
                         size="icon"
@@ -255,7 +255,7 @@ export default function MonthlyStatementDialog({ open, onOpenChange, clientId, b
               )}
 
               {/* Add New Item (only if draft) */}
-              {statement?.status === 'draft' && (
+              {invoice?.status === 'draft' && (
                 <div className="border-t pt-3 mt-3">
                   <Label className="text-sm font-medium mb-2 block">Add Custom Item</Label>
                   <div className="flex gap-2">
@@ -303,16 +303,16 @@ export default function MonthlyStatementDialog({ open, onOpenChange, clientId, b
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Close
             </Button>
-            {statement?.status === 'draft' && (
+            {invoice?.status === 'draft' && (
               <Button onClick={handleFinalize}>
                 <Send className="h-4 w-4 mr-2" />
-                Finalize Statement
+                Finalize Invoice
               </Button>
             )}
-            {(statement?.status === 'finalized' || statement?.status === 'sent') && (
+            {(invoice?.status === 'finalized' || invoice?.status === 'sent') && (
               <Button onClick={handleSendEmail} disabled={sending}>
                 <Mail className="h-4 w-4 mr-2" />
-                {sending ? 'Sending...' : statement?.status === 'sent' ? 'Resend Email' : 'Send Email'}
+                {sending ? 'Sending...' : invoice?.status === 'sent' ? 'Resend Email' : 'Send Email'}
               </Button>
             )}
           </div>

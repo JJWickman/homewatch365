@@ -259,7 +259,7 @@ export default function BillingOverview({ companyId }) {
                 <Calendar className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-slate-600">Statements</p>
+                <p className="text-sm text-slate-600">Invoices</p>
                 <p className="text-2xl font-bold">{data.statements.length}</p>
               </div>
             </div>
