@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { company_id } = await req.json();
+    const { company_id, return_url } = await req.json();
 
     // Get company
     const companies = await base44.entities.Company.filter({ id: company_id });
