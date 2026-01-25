@@ -15,27 +15,36 @@ Deno.serve(async (req) => {
     // First fetch the actual price IDs from Stripe
     const products = await stripe.products.list({ limit: 100 });
     const prices = {};
+    
+    console.log('Found products:', products.data.length);
 
     for (const product of products.data) {
+      console.log(`Product: ${product.name}, metadata:`, product.metadata);
       const planId = product.metadata?.plan_id;
       if (planId) {
         const productPrices = await stripe.prices.list({
           product: product.id,
           limit: 10,
         });
+        
+        console.log(`  Prices for ${planId}:`, productPrices.data.length);
 
         productPrices.data.forEach(price => {
           const billingCycle = price.metadata?.billing_cycle || 'monthly';
           const key = `${planId}_${billingCycle}`;
           prices[key] = price.id;
+          console.log(`    Added ${key} = ${price.id}`);
         });
       }
     };
+
+    console.log('Final prices object:', prices);
 
     if (!prices.solopreneur_monthly || !prices.professional_monthly) {
       return Response.json({
         error: 'Required prices not found in Stripe',
         available_prices: prices,
+        debug: { products_count: products.data.length }
       }, { status: 400 });
     }
 
