@@ -150,24 +150,8 @@ export default function SubscriptionManagement({ company, companyMember }) {
     }
   };
 
-  const handleUpdatePaymentMethod = async () => {
-    try {
-      setLoadingCheckout(true);
-      const response = await base44.functions.invoke('createBillingPortalSession', {
-        company_id: company.id,
-        return_url: `${window.location.origin}/Settings?tab=billing&payment_updated=true`
-      });
-      if (response.data?.url) {
-        window.open(response.data.url, '_blank');
-      } else {
-        alert('Failed to open billing portal. Please try again.');
-      }
-      setLoadingCheckout(false);
-    } catch (error) {
-      console.error('Error:', error);
-      alert(`Error: ${error.message || 'Failed to open billing portal'}`);
-      setLoadingCheckout(false);
-    }
+  const handleUpdatePaymentMethod = () => {
+    window.open('https://billing.stripe.com/p/login/bJe5kD88z7pI0tKb0a83C00', '_blank');
   };
 
   const handlePaymentSuccess = () => {
