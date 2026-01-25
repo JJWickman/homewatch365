@@ -34,6 +34,15 @@ Deno.serve(async (req) => {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
 
+    // Create Stripe customer
+    const stripeCustomer = await stripe.customers.create({
+      email: email,
+      name: companyName,
+      metadata: {
+        company_name: companyName
+      }
+    });
+
     // Create company with 14-day trial
     const company = await base44.asServiceRole.entities.Company.create({
       name: companyName,
@@ -43,6 +52,7 @@ Deno.serve(async (req) => {
       subscription_plan: 'solopreneur',
       subscription_status: 'trial',
       trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+      stripe_customer_id: stripeCustomer.id,
       is_active: true
     });
 
