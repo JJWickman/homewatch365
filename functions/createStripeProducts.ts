@@ -43,6 +43,7 @@ Deno.serve(async (req) => {
     const results = [];
 
     for (const tier of tiers) {
+      console.log(`Creating product for tier: ${tier.id}`);
       // Create product
       const product = await stripe.products.create({
         name: tier.name,
@@ -51,6 +52,7 @@ Deno.serve(async (req) => {
           plan_id: tier.id
         }
       });
+      console.log(`✓ Created product ${product.id} for ${tier.id}`);
 
       // Create monthly price
       const monthlyPrice = await stripe.prices.create({
