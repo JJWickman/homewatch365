@@ -108,9 +108,8 @@ export default function SubscriptionManagement({ company, companyMember }) {
     if (company.subscription_status === 'trial' || !company.stripe_subscription_id) {
       startNewSubscription(tierId);
     } else if (company.stripe_subscription_id) {
-      // If already subscribed, open plan change dialog
-      setSelectedNewPlan(tierId);
-      setShowPlanChangeDialog(true);
+      // If already subscribed, open Stripe billing portal
+      handleUpdatePaymentMethod();
     }
   };
 
