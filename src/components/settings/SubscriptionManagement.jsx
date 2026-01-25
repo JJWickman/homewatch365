@@ -58,16 +58,13 @@ export default function SubscriptionManagement({ company, companyMember }) {
       loadPaymentMethod();
     }
 
-    // Check if returning from Stripe billing portal
+    // Check if returning from Stripe checkout
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('payment_updated') === 'true') {
-      // Reload payment method after a short delay to ensure Stripe webhook processed
+    if (urlParams.get('session_id') || urlParams.get('payment_updated') === 'true') {
+      // Reload after returning from Stripe to sync company data
       setTimeout(() => {
-        loadPaymentMethod();
-      }, 2000);
-      
-      // Clean up URL
-      window.history.replaceState({}, '', window.location.pathname + '?tab=billing');
+        window.location.reload();
+      }, 1000);
     }
   }, [company?.stripe_customer_id]);
 
