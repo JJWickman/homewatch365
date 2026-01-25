@@ -52,10 +52,33 @@ Deno.serve(async (req) => {
         if (subscription.status === 'past_due') status = 'past_due';
         if (subscription.status === 'canceled') status = 'cancelled';
         if (subscription.status === 'unpaid') status = 'past_due';
+        if (subscription.status === 'trialing') status = 'trial';
+        
+        // Get the current plan from the subscription items
+        const currentItem = subscription.items.data[0];
+        const priceId = currentItem?.price?.id;
+        
+        // Map price_id to subscription plan
+        let subscriptionPlan = 'solopreneur';
+        const prices = {
+          'solopreneur': ['price_1StZCZPeV0U8kQVWfqIo4TX3', 'price_1StZCaPeV0U8kQVWq1YZE2Qc'],
+          'growth': ['price_1StZCaPeV0U8kQVWlHfEGcMb', 'price_1StZCaPeV0U8kQVWUBU8ngVH'],
+          'professional': ['price_1StZCaPeV0U8kQVWeBWyiiD2', 'price_1StZCbPeV0U8kQVWgxrzpv6J'],
+          'enterprise': ['price_1StZCbPeV0U8kQVW2oDZEnlc', 'price_1StZCbPeV0U8kQVWKczHSlFf']
+        };
+        
+        for (const [plan, priceIds] of Object.entries(prices)) {
+          if (priceIds.includes(priceId)) {
+            subscriptionPlan = plan;
+            break;
+          }
+        }
         
         await base44.asServiceRole.entities.Company.update(companyId, {
+          subscription_plan: subscriptionPlan,
           subscription_status: status,
-          stripe_subscription_id: subscription.id
+          stripe_subscription_id: subscription.id,
+          trial_ends_at: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null
         });
         break;
       }
