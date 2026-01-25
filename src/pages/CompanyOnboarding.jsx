@@ -484,27 +484,38 @@ export default function CompanyOnboarding() {
                 </div>
 
                 <div className="flex gap-3">
-                  <Button 
-                    onClick={() => setStep('company')}
-                    variant="outline"
-                    className="w-full"
-                    disabled={loading}
-                  >
-                    Back
-                  </Button>
-                  <Button 
-                    onClick={handleCreateClient}
-                    disabled={loading || !clientData.firstName || !clientData.lastName || !clientData.email}
-                    className="w-full bg-slate-900 hover:bg-slate-800"
-                  >
-                    {loading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <ArrowRight className="h-4 w-4 mr-2" />
-                    )}
-                    {loading ? 'Creating...' : 'Continue'}
-                  </Button>
-                </div>
+                   <Button 
+                     onClick={() => setStep('company')}
+                     variant="outline"
+                     className="w-full"
+                     disabled={loading}
+                   >
+                     Back
+                   </Button>
+                   <Button 
+                     onClick={() => {
+                       // Allow skip to dashboard after company creation
+                       setStep('complete');
+                     }}
+                     variant="ghost"
+                     className="text-slate-600 hover:text-slate-700"
+                     disabled={loading}
+                   >
+                     Skip
+                   </Button>
+                   <Button 
+                     onClick={handleCreateClient}
+                     disabled={loading || !clientData.firstName || !clientData.lastName || !clientData.email}
+                     className="w-full bg-slate-900 hover:bg-slate-800"
+                   >
+                     {loading ? (
+                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                     ) : (
+                       <ArrowRight className="h-4 w-4 mr-2" />
+                     )}
+                     {loading ? 'Creating...' : 'Continue'}
+                   </Button>
+                 </div>
               </CardContent>
             </>
           )}
