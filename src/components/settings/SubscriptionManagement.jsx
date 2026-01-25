@@ -160,12 +160,15 @@ export default function SubscriptionManagement({ company, companyMember }) {
         company_id: company.id,
         return_url: `${window.location.origin}/Settings?tab=billing&payment_updated=true`
       });
-      if (response.data.url) {
+      if (response.data?.url) {
         window.open(response.data.url, '_blank');
-        setLoadingCheckout(false);
+      } else {
+        alert('Failed to open billing portal. Please try again.');
       }
+      setLoadingCheckout(false);
     } catch (error) {
-      alert(`Error: ${error.message}`);
+      console.error('Error:', error);
+      alert(`Error: ${error.message || 'Failed to open billing portal'}`);
       setLoadingCheckout(false);
     }
   };
