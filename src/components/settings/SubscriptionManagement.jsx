@@ -56,6 +56,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [showPlanChangeDialog, setShowPlanChangeDialog] = useState(false);
+  const [selectedNewPlan, setSelectedNewPlan] = useState(null);
 
   useEffect(() => {
     console.log('SubscriptionManagement: company =', company);
