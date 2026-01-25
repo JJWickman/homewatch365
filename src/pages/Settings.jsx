@@ -93,7 +93,8 @@ export default function Settings() {
     email: '',
     name: '',
     role: 'field_inspector',
-    access_level: 'user'
+    access_level: 'user',
+    crm_marketing_access: false
   });
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
@@ -339,6 +340,7 @@ export default function Settings() {
           user_name: inviteForm.name,
           role: inviteForm.role,
           access_level: inviteForm.access_level,
+          crm_marketing_access: inviteForm.role === 'administrator' ? true : inviteForm.crm_marketing_access,
           is_active: false
         });
       } else if (inviteForm.name || inviteForm.role || inviteForm.access_level) {
@@ -346,7 +348,8 @@ export default function Settings() {
         await base44.entities.CompanyMember.update(existing[0].id, {
           user_name: inviteForm.name || existing[0].user_name,
           role: inviteForm.role || existing[0].role,
-          access_level: inviteForm.access_level || existing[0].access_level
+          access_level: inviteForm.access_level || existing[0].access_level,
+          crm_marketing_access: inviteForm.role === 'administrator' ? true : (inviteForm.crm_marketing_access || existing[0].crm_marketing_access)
         });
       }
       
@@ -390,7 +393,7 @@ ${company.name}
       });
       
       setShowInviteDialog(false);
-      setInviteForm({ email: '', name: '', role: 'field_inspector', access_level: 'user' });
+      setInviteForm({ email: '', name: '', role: 'field_inspector', access_level: 'user', crm_marketing_access: false });
       setInviteError('');
       loadData();
     } catch (error) {
@@ -1805,7 +1808,11 @@ ${company.name}
               <Label>Job Role</Label>
               <Select
                 value={inviteForm.role}
-                onValueChange={(value) => setInviteForm(prev => ({ ...prev, role: value }))}
+                onValueChange={(value) => setInviteForm(prev => ({ 
+                  ...prev, 
+                  role: value,
+                  crm_marketing_access: value === 'administrator' ? true : prev.crm_marketing_access
+                }))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -1834,6 +1841,37 @@ ${company.name}
               </Select>
               <p className="text-xs text-slate-500 mt-1">Determines permissions and what they can access</p>
             </div>
+            {inviteForm.role !== 'administrator' && (
+              <div className="border-t pt-4">
+                <Label className="text-base font-medium mb-3 block">Additional Functionality Access</Label>
+                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                  <input
+                    type="checkbox"
+                    id="invite_crm_marketing"
+                    checked={inviteForm.crm_marketing_access}
+                    onChange={(e) => setInviteForm(prev => ({ ...prev, crm_marketing_access: e.target.checked }))}
+                    className="rounded mt-0.5"
+                  />
+                  <div className="flex-1">
+                    <Label htmlFor="invite_crm_marketing" className="mb-0 text-sm font-medium cursor-pointer">
+                      CRM & Marketing Access
+                    </Label>
+                    <p className="text-xs text-slate-500 mt-1">Grant access to marketing campaigns, email tools, and CRM features</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            {inviteForm.role === 'administrator' && (
+              <div className="border-t pt-4">
+                <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <Check className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-900">Administrators have full access</p>
+                    <p className="text-xs text-blue-700 mt-1">Administrators automatically get CRM & Marketing access along with all other features</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <DialogFooter>
@@ -1891,7 +1929,11 @@ ${company.name}
                 <Label>Job Role</Label>
                 <Select
                   value={editingMember.role}
-                  onValueChange={(value) => setEditingMember(prev => ({ ...prev, role: value }))}
+                  onValueChange={(value) => setEditingMember(prev => ({ 
+                    ...prev, 
+                    role: value,
+                    crm_marketing_access: value === 'administrator' ? true : prev.crm_marketing_access
+                  }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -1920,24 +1962,37 @@ ${company.name}
                 </Select>
                 <p className="text-xs text-slate-500 mt-1">Determines permissions and what they can access</p>
               </div>
-              <div className="border-t pt-4">
-                <Label className="text-base font-medium mb-3 block">Additional Functionality Access</Label>
-                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-                  <input
-                    type="checkbox"
-                    id="crm_marketing_access"
-                    checked={editingMember.crm_marketing_access}
-                    onChange={(e) => setEditingMember(prev => ({ ...prev, crm_marketing_access: e.target.checked }))}
-                    className="rounded mt-0.5"
-                  />
-                  <div className="flex-1">
-                    <Label htmlFor="crm_marketing_access" className="mb-0 text-sm font-medium cursor-pointer">
-                      CRM & Marketing Access
-                    </Label>
-                    <p className="text-xs text-slate-500 mt-1">Grant access to marketing campaigns, email tools, and CRM features</p>
+              {editingMember.role !== 'administrator' && (
+                <div className="border-t pt-4">
+                  <Label className="text-base font-medium mb-3 block">Additional Functionality Access</Label>
+                  <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                    <input
+                      type="checkbox"
+                      id="crm_marketing_access"
+                      checked={editingMember.crm_marketing_access}
+                      onChange={(e) => setEditingMember(prev => ({ ...prev, crm_marketing_access: e.target.checked }))}
+                      className="rounded mt-0.5"
+                    />
+                    <div className="flex-1">
+                      <Label htmlFor="crm_marketing_access" className="mb-0 text-sm font-medium cursor-pointer">
+                        CRM & Marketing Access
+                      </Label>
+                      <p className="text-xs text-slate-500 mt-1">Grant access to marketing campaigns, email tools, and CRM features</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+              {editingMember.role === 'administrator' && (
+                <div className="border-t pt-4">
+                  <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <Check className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-blue-900">Administrators have full access</p>
+                      <p className="text-xs text-blue-700 mt-1">Administrators automatically get CRM & Marketing access along with all other features</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
