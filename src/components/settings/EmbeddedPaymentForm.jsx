@@ -150,14 +150,6 @@ export default function EmbeddedPaymentForm({ company, onSuccess, onCancel }) {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-slate-500" />
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <Alert variant="destructive">
@@ -167,12 +159,11 @@ export default function EmbeddedPaymentForm({ company, onSuccess, onCancel }) {
     );
   }
 
-  if (!stripeLoaded || !clientSecret) {
+  if (loading || !stripeLoaded || !clientSecret) {
     return (
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>Unable to initialize payment form. Please try again.</AlertDescription>
-      </Alert>
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-6 w-6 animate-spin text-slate-500" />
+      </div>
     );
   }
 
