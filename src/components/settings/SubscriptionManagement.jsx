@@ -106,8 +106,8 @@ export default function SubscriptionManagement({ company, companyMember }) {
       return;
     }
 
-    // If on trial, start new subscription directly
-    if (company.subscription_status === 'trial') {
+    // If on trial or no active subscription, start new subscription directly
+    if (company.subscription_status === 'trial' || !company.stripe_subscription_id) {
       startNewSubscription(tierId);
     } else if (company.stripe_subscription_id) {
       // If already subscribed, open plan change dialog
