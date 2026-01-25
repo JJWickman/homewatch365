@@ -88,10 +88,37 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Create CRM & Marketing add-on
+    const addonProduct = await stripe.products.create({
+      name: 'CRM & Marketing Add-On',
+      description: 'Advanced CRM features and marketing automation tools',
+      metadata: {
+        addon_id: 'crm_marketing'
+      }
+    });
+
+    const addonPrice = await stripe.prices.create({
+      product: addonProduct.id,
+      unit_amount: 9900, // $99/month
+      currency: 'usd',
+      recurring: {
+        interval: 'month'
+      },
+      metadata: {
+        addon_id: 'crm_marketing'
+      }
+    });
+
+    results.push({
+      addon: 'crm_marketing',
+      product_id: addonProduct.id,
+      price_id: addonPrice.id
+    });
+
     return Response.json({ 
       success: true,
       products: results,
-      message: 'Stripe products and prices created successfully'
+      message: 'Stripe products, prices, and add-ons created successfully'
     });
   } catch (error) {
     console.error('Error creating Stripe products:', error);

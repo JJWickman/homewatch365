@@ -356,12 +356,16 @@ export default function SubscriptionManagement({ company, companyMember }) {
                     <TrendingUp className="h-5 w-5 text-purple-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Marketing Suite</h3>
-                    <p className="text-2xl font-bold text-slate-900">$50<span className="text-sm font-normal text-slate-500">/month</span></p>
+                    <h3 className="font-semibold text-lg">CRM & Marketing</h3>
+                    <p className="text-2xl font-bold text-slate-900">$99<span className="text-sm font-normal text-slate-500">/month</span></p>
                   </div>
                 </div>
                 
                 <ul className="space-y-2 mb-4">
+                  <li className="flex items-start gap-2 text-sm">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-slate-700">Advanced CRM features and contact management</span>
+                  </li>
                   <li className="flex items-start gap-2 text-sm">
                     <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
                     <span className="text-slate-700">Email marketing campaigns</span>
@@ -372,7 +376,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
                   </li>
                   <li className="flex items-start gap-2 text-sm">
                     <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-slate-700">Newsletter templates</span>
+                    <span className="text-slate-700">Newsletter templates and automation</span>
                   </li>
                   <li className="flex items-start gap-2 text-sm">
                     <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
