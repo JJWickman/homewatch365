@@ -6,7 +6,7 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { companyName, fullName, email, phone } = await req.json();
+    const { companyName, fullName, email, phone, promoCode } = await req.json();
 
     // Validate required fields
     if (!companyName || !fullName || !email) {
