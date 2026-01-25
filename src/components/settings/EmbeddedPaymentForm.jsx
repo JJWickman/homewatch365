@@ -8,11 +8,7 @@ import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Use live publishable key - must match the live secret key
-const stripePromise = loadStripe('pk_live_51QjbjyCnIACp9uPu0sW1qgm4nj7zTnTICdgRqhDMZRSKe02J3TScY7KBsFQoRODg0sH7HllqIGPg9zWQTVc5BfK300gPP5I4Dw').catch(err => {
-  console.error('Failed to load Stripe:', err);
-  toast.error('Failed to load payment form');
-  return null;
-});
+const stripePromise = loadStripe('pk_live_51QjbjyCnIACp9uPu0sW1qgm4nj7zTnTICdgRqhDMZRSKe02J3TScY7KBsFQoRODg0sH7HllqIGPg9zWQTVc5BfK300gPP5I4Dw');
 
 function PaymentForm({ onSuccess, onCancel }) {
   const stripe = useStripe();
@@ -112,25 +108,10 @@ export default function EmbeddedPaymentForm({ company, onSuccess, onCancel }) {
   const [clientSecret, setClientSecret] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [stripeLoaded, setStripeLoaded] = useState(false);
 
   useEffect(() => {
-    // Wait for Stripe to load
-    stripePromise.then(stripe => {
-      if (stripe) {
-        setStripeLoaded(true);
-      } else {
-        setError('Failed to load Stripe');
-        setLoading(false);
-      }
-    });
+    loadSetupIntent();
   }, []);
-
-  useEffect(() => {
-    if (stripeLoaded) {
-      loadSetupIntent();
-    }
-  }, [stripeLoaded]);
 
   const loadSetupIntent = async () => {
     try {
@@ -159,7 +140,7 @@ export default function EmbeddedPaymentForm({ company, onSuccess, onCancel }) {
     );
   }
 
-  if (loading || !stripeLoaded || !clientSecret) {
+  if (loading || !clientSecret) {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin text-slate-500" />
