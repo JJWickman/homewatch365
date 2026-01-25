@@ -95,11 +95,17 @@ export default function SubscriptionManagement({ company, companyMember }) {
   };
 
   const handleSelectPlan = async (tierId) => {
-    if (!company) return;
-    
+    if (!company) {
+      console.error('No company found');
+      return;
+    }
+
     setLoadingCheckout(true);
     try {
+      console.log('handleSelectPlan: stripePrices =', stripePrices);
+      console.log('handleSelectPlan: tierId =', tierId, 'billingCycle =', billingCycle);
       const priceId = stripePrices[tierId]?.[billingCycle];
+      console.log('handleSelectPlan: priceId =', priceId);
       
       if (!priceId) {
         alert('Stripe products not configured yet. Please run "Create Stripe Products" from the Settings → Admin tab first.');
