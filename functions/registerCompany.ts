@@ -34,6 +34,56 @@ Deno.serve(async (req) => {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
 
+    // Validate and apply promo code if provided
+    let trialDays = 14;
+    let promoData = null;
+    
+    if (promoCode) {
+      const promotions = await base44.asServiceRole.entities.Promotion.filter({
+        code: promoCode.toUpperCase()
+      });
+      
+      if (promotions.length > 0) {
+        const promo = promotions[0];
+        
+        // Check if promo is active and not expired
+        if (!promo.is_active) {
+          return Response.json({ 
+            success: false, 
+            message: 'This promotional code is no longer active.' 
+          }, { status: 400 });
+        }
+        
+        if (promo.expiry_date && new Date(promo.expiry_date) < new Date()) {
+          return Response.json({ 
+            success: false, 
+            message: 'This promotional code has expired.' 
+          }, { status: 400 });
+        }
+        
+        // Check if code has reached max uses
+        if (promo.max_uses && promo.uses_count >= promo.max_uses) {
+          return Response.json({ 
+            success: false, 
+            message: 'This promotional code has reached its usage limit.' 
+          }, { status: 400 });
+        }
+        
+        promoData = promo;
+        
+        // Apply benefits based on promo type
+        if (promo.benefit_type === 'extended_trial') {
+          trialDays = 14 + (promo.trial_days_added || 0);
+        }
+      } else if (promoCode) {
+        // Promo code provided but doesn't exist
+        return Response.json({ 
+          success: false, 
+          message: 'Invalid promotional code.' 
+        }, { status: 400 });
+      }
+    }
+
     // Create Stripe customer
     const stripeCustomer = await stripe.customers.create({
       email: email,
@@ -43,7 +93,7 @@ Deno.serve(async (req) => {
       }
     });
 
-    // Create company with 14-day trial
+    // Create company with trial (extended if promo applies)
     const company = await base44.asServiceRole.entities.Company.create({
       name: companyName,
       slug: slug + '-' + Date.now().toString(36),
@@ -51,10 +101,17 @@ Deno.serve(async (req) => {
       logo_url: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/7e2dc0976_EstateIQFavIcon.png',
       subscription_plan: 'solopreneur',
       subscription_status: 'trial',
-      trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+      trial_ends_at: new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000).toISOString(),
       stripe_customer_id: stripeCustomer.id,
       is_active: true
     });
+
+    // Increment promo code usage if one was used
+    if (promoData) {
+      await base44.asServiceRole.entities.Promotion.update(promoData.id, {
+        uses_count: (promoData.uses_count || 0) + 1
+      });
+    }
 
     // Create company member (owner)
     await base44.asServiceRole.entities.CompanyMember.create({
