@@ -108,7 +108,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
       startNewSubscription(tierId);
     } else if (company.stripe_subscription_id) {
       // If already subscribed, open Stripe billing portal
-      handleUpdatePaymentMethod();
+      window.open('https://billing.stripe.com/p/login/bJe5kD88z7pI0tKb0a83C00', '_blank');
     }
   };
 
