@@ -4,18 +4,12 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 
 Deno.serve(async (req) => {
   try {
-    // List all products with their prices
-    const products = await stripe.products.list({
-      active: true,
-      expand: ['data.default_price']
-    });
-
     const prices = await stripe.prices.list({
       active: true,
-      expand: ['data.product']
+      limit: 100
     });
 
-    // Group prices by product and billing cycle
+    // Group prices by plan and billing cycle
     const pricesByPlan = {};
     
     for (const price of prices.data) {
@@ -41,7 +35,9 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error fetching Stripe prices:', error);
     return Response.json({ 
+      success: false,
+      prices: {},
       error: error.message 
-    }, { status: 500 });
+    }, { status: 200 });
   }
 });
