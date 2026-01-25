@@ -16,18 +16,22 @@ Deno.serve(async (req) => {
 
     const { company_id } = await req.json();
 
+    console.log('createSetupIntent called for company_id:', company_id);
+
     // Get company
-    const companies = await base44.entities.Company.filter({ id: company_id });
-    if (companies.length === 0) {
+    const company = await base44.entities.Company.get(company_id);
+    if (!company) {
+      console.error('Company not found:', company_id);
       return Response.json({ error: 'Company not found' }, { status: 404 });
     }
 
-    const company = companies[0];
+    console.log('Found company:', company.name);
 
     // Create or get Stripe customer
     let customerId = company.stripe_customer_id;
 
     if (!customerId) {
+      console.log('Creating new Stripe customer...');
       const customer = await stripe.customers.create({
         email: company.email || user.email,
         name: company.name,
@@ -37,18 +41,25 @@ Deno.serve(async (req) => {
       });
 
       customerId = customer.id;
+      console.log('Created Stripe customer:', customerId);
 
       // Update company with Stripe customer ID
       await base44.asServiceRole.entities.Company.update(company.id, {
         stripe_customer_id: customerId
       });
+    } else {
+      console.log('Using existing Stripe customer:', customerId);
     }
 
     // Create SetupIntent
+    console.log('Creating SetupIntent...');
     const setupIntent = await stripe.setupIntents.create({
       customer: customerId,
       payment_method_types: ['card'],
     });
+
+    console.log('SetupIntent created:', setupIntent.id);
+    console.log('Client secret:', setupIntent.client_secret ? 'present' : 'missing');
 
     return Response.json({
       success: true,
