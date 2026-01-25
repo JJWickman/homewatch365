@@ -61,8 +61,8 @@ Deno.serve(async (req) => {
           billing_cycle
         }
       },
-      success_url: `${req.headers.get('origin')}/Settings?tab=billing&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get('origin')}/Settings?tab=billing`,
+      success_url: 'https://app.example.com/Settings?tab=billing&session_id={CHECKOUT_SESSION_ID}',
+      cancel_url: 'https://app.example.com/Settings?tab=billing',
       metadata: {
         company_id: company.id,
         subscription_plan,
