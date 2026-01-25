@@ -12,9 +12,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Hardcoded price IDs from the last successful run
-    const soloPrice = 'price_1StZXyPeV0U8kQVWV3jppUDw';
-    const professionalPrice = 'price_1StZXzPeV0U8kQVWlmh4jxSl';
+    // Live price IDs
+    const soloPrice = 'price_1StZjBPeV0U8kQVWEIIGtEfk';
+    const professionalPrice = 'price_1StZjCPeV0U8kQVW8BgD9C2w';
 
     console.log('\n=== PLAN UPGRADE TEST: SOLOPRENEUR TO PROFESSIONAL ===\n');
 
