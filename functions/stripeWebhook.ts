@@ -61,10 +61,10 @@ Deno.serve(async (req) => {
         // Map price_id to subscription plan (live prices)
         let subscriptionPlan = 'solopreneur';
         const prices = {
-          'solopreneur': ['price_1StZwTPeV0U8kQVWH4B8N61h', 'price_1StZwTPeV0U8kQVW7lY03z2p'],
-          'growth': ['price_1StZwTPeV0U8kQVWHGAVoa86', 'price_1StZwTPeV0U8kQVWpuw0rmyX'],
-          'professional': ['price_1StZwUPeV0U8kQVWJvrBIXnH', 'price_1StZwUPeV0U8kQVWu69BMOe3'],
-          'enterprise': ['price_1StZwUPeV0U8kQVWwe9gqFbX', 'price_1StZwVPeV0U8kQVWyUCzvonw']
+          'solopreneur': ['price_1StZzpGwUVhIPcgxL7HiPZEJ', 'price_1StZzpGwUVhIPcgxkMp5kbKe'],
+          'growth': ['price_1StZzpGwUVhIPcgxRSLH94NJ', 'price_1StZzpGwUVhIPcgxZzv8KbYN'],
+          'professional': ['price_1StZzqGwUVhIPcgx5UJRLUfb', 'price_1StZzqGwUVhIPcgxaIaDPAO6'],
+          'enterprise': ['price_1StZzqGwUVhIPcgxOWFkoHih', 'price_1StZzqGwUVhIPcgxpFrillOn']
         };
         
         for (const [plan, priceIds] of Object.entries(prices)) {
