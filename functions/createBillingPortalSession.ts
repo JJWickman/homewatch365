@@ -44,10 +44,12 @@ Deno.serve(async (req) => {
       });
     }
 
+    const { return_url } = await req.json();
+
     // Create billing portal session
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${new URL(req.url).origin}/Settings?tab=billing&payment_updated=true`,
+      return_url: return_url || `${new URL(req.url).origin}/Settings?tab=billing&payment_updated=true`,
     });
 
     return Response.json({
