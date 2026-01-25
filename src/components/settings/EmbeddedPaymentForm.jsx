@@ -110,26 +110,36 @@ export default function EmbeddedPaymentForm({ company, onSuccess, onCancel }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log('EmbeddedPaymentForm mounted, company:', company);
     loadSetupIntent();
   }, []);
 
   const loadSetupIntent = async () => {
+    console.log('Starting loadSetupIntent...');
     try {
       const response = await base44.functions.invoke('createSetupIntent', {
         company_id: company.id
       });
       
+      console.log('createSetupIntent response:', response);
+      
       if (response.data.success) {
+        console.log('Got clientSecret:', response.data.clientSecret);
         setClientSecret(response.data.clientSecret);
       } else {
+        console.error('Failed to initialize payment form');
         setError('Failed to initialize payment form');
       }
     } catch (err) {
+      console.error('Error in loadSetupIntent:', err);
       setError(err.message);
     } finally {
+      console.log('Setting loading to false');
       setLoading(false);
     }
   };
+
+  console.log('Render state - loading:', loading, 'clientSecret:', clientSecret, 'error:', error);
 
   if (error) {
     return (
@@ -141,6 +151,7 @@ export default function EmbeddedPaymentForm({ company, onSuccess, onCancel }) {
   }
 
   if (loading || !clientSecret) {
+    console.log('Showing loading spinner');
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin text-slate-500" />
@@ -148,8 +159,11 @@ export default function EmbeddedPaymentForm({ company, onSuccess, onCancel }) {
     );
   }
 
+  console.log('Rendering Elements with clientSecret:', clientSecret);
+
   return (
     <Elements 
+      key={clientSecret}
       stripe={stripePromise} 
       options={{
         clientSecret,
