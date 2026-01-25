@@ -4,9 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Users, TrendingUp, Briefcase, Shield, Check, CreditCard, AlertCircle } from 'lucide-react';
-import EmbeddedPaymentForm from './EmbeddedPaymentForm';
 
 const PRICING_TIERS = [
   {
@@ -53,7 +51,6 @@ export default function SubscriptionManagement({ company, companyMember }) {
   const [stripePrices, setStripePrices] = useState({});
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(null);
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
 
   useEffect(() => {
     loadStripePrices();
@@ -131,9 +128,24 @@ export default function SubscriptionManagement({ company, companyMember }) {
     }
   };
 
-  const handlePaymentSuccess = () => {
-    setShowPaymentForm(false);
-    loadPaymentMethod();
+  const handleUpdatePaymentMethod = async () => {
+    setLoadingCheckout(true);
+    try {
+      const response = await base44.functions.invoke('createBillingPortalSession', {
+        company_id: company.id
+      });
+      
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      } else {
+        alert('Failed to open billing portal. Please try again.');
+        setLoadingCheckout(false);
+      }
+    } catch (error) {
+      console.error('Error opening billing portal:', error);
+      alert(`Error: ${error.message || 'Failed to open billing portal. Please try again.'}`);
+      setLoadingCheckout(false);
+    }
   };
 
   const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'owner' || companyMember?.is_owner;
@@ -215,9 +227,10 @@ export default function SubscriptionManagement({ company, companyMember }) {
                 </div>
                 <Button 
                   variant="outline"
-                  onClick={() => setShowPaymentForm(true)}
+                  onClick={handleUpdatePaymentMethod}
+                  disabled={loadingCheckout}
                 >
-                  Update
+                  {loadingCheckout ? 'Loading...' : 'Update'}
                 </Button>
               </div>
             </div>
@@ -225,39 +238,18 @@ export default function SubscriptionManagement({ company, companyMember }) {
             <div className="text-center py-6">
               <p className="text-sm text-slate-500 mb-4">No payment method on file</p>
               <Button 
-                onClick={() => setShowPaymentForm(true)}
+                onClick={handleUpdatePaymentMethod}
+                disabled={loadingCheckout}
                 className="bg-slate-900 hover:bg-slate-800"
               >
-                Add Payment Method
+                {loadingCheckout ? 'Loading...' : 'Add Payment Method'}
               </Button>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Payment Method Form - Embedded */}
-      {showPaymentForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Add Payment Method</CardTitle>
-            <CardDescription>
-              Securely add your payment information. Your card details are encrypted and handled by Stripe.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <EmbeddedPaymentForm
-              company={company}
-              onSuccess={handlePaymentSuccess}
-              onCancel={() => setShowPaymentForm(false)}
-            />
-          </CardContent>
-        </Card>
-      )}
 
-      {/* Remaining Cards */}
-      <Card className="hidden">
-        <CardContent></CardContent>
-      </Card>
 
       {/* Billing Cycle Toggle */}
       <Card>
