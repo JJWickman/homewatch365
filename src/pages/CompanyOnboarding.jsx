@@ -114,7 +114,7 @@ export default function CompanyOnboarding() {
         state: companyData.state,
         zip: companyData.zip,
         logo_url: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/7e2dc0976_EstateIQFavIcon.png',
-        subscription_plan: 'solopreneur',
+        subscription_plan: selectedPlan === 'trial' ? 'solopreneur' : selectedPlan,
         subscription_status: 'trial',
         trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
         is_active: true
