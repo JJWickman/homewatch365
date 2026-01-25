@@ -24,14 +24,30 @@ Deno.serve(async (req) => {
 
     const company = companies[0];
 
-    if (!company.stripe_customer_id) {
-      return Response.json({ error: 'No Stripe customer found' }, { status: 400 });
+    // Create Stripe customer if it doesn't exist
+    let customerId = company.stripe_customer_id;
+    
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: company.name,
+        metadata: {
+          company_id: company.id,
+          user_email: user.email
+        }
+      });
+      
+      customerId = customer.id;
+      
+      await base44.asServiceRole.entities.Company.update(company.id, {
+        stripe_customer_id: customerId
+      });
     }
 
     // Create billing portal session
     const session = await stripe.billingPortal.sessions.create({
-      customer: company.stripe_customer_id,
-      return_url: `${new URL(req.url).origin}/Settings`,
+      customer: customerId,
+      return_url: `${new URL(req.url).origin}/Settings?tab=billing`,
     });
 
     return Response.json({
