@@ -112,41 +112,40 @@ export default function EmbeddedPaymentForm({ company, onSuccess, onCancel }) {
   const [clientSecret, setClientSecret] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [stripeLoaded, setStripeLoaded] = useState(false);
 
   useEffect(() => {
-    console.log('EmbeddedPaymentForm mounted, company:', company);
-    loadSetupIntent();
+    // Wait for Stripe to load
+    stripePromise.then(stripe => {
+      if (stripe) {
+        setStripeLoaded(true);
+      } else {
+        setError('Failed to load Stripe');
+        setLoading(false);
+      }
+    });
   }, []);
+
+  useEffect(() => {
+    if (stripeLoaded) {
+      loadSetupIntent();
+    }
+  }, [stripeLoaded]);
 
   const loadSetupIntent = async () => {
     try {
-      console.log('Starting loadSetupIntent...');
-      toast.loading('Loading payment form...');
-      
       const response = await base44.functions.invoke('createSetupIntent', {
         company_id: company.id
       });
-
-      console.log('createSetupIntent response:', response);
-      toast.dismiss();
       
       if (response.data.success) {
-        console.log('Got clientSecret:', response.data.clientSecret);
         setClientSecret(response.data.clientSecret);
-        toast.success('Payment form ready');
       } else {
-        const errorMsg = 'Failed to initialize payment form';
-        console.error(errorMsg);
-        setError(errorMsg);
-        toast.error(errorMsg);
+        setError('Failed to initialize payment form');
       }
     } catch (err) {
-      toast.dismiss();
-      console.error('Error in loadSetupIntent:', err);
       setError(err.message);
-      toast.error(`Error: ${err.message}`);
     } finally {
-      console.log('Setting loading to false');
       setLoading(false);
     }
   };
@@ -168,7 +167,7 @@ export default function EmbeddedPaymentForm({ company, onSuccess, onCancel }) {
     );
   }
 
-  if (!clientSecret) {
+  if (!stripeLoaded || !clientSecret) {
     return (
       <Alert>
         <AlertCircle className="h-4 w-4" />
