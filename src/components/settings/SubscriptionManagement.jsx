@@ -126,12 +126,13 @@ export default function SubscriptionManagement({ company, companyMember }) {
       });
       
       if (response.data.url) {
-        window.location.href = response.data.url;
+        // Open in new tab to avoid iframe restrictions
+        window.open(response.data.url, '_blank', 'noopener,noreferrer');
+        setLoadingCheckout(false);
       }
     } catch (error) {
       console.error('Error creating billing portal:', error);
       alert('Failed to open billing portal. Please try again.');
-    } finally {
       setLoadingCheckout(false);
     }
   };
