@@ -7,6 +7,7 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
 
 Deno.serve(async (req) => {
   try {
+    const body = await req.json();
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
@@ -14,7 +15,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { company_id, return_url } = await req.json();
+    const { company_id, return_url } = body;
 
     // Get company
     const companies = await base44.entities.Company.filter({ id: company_id });
