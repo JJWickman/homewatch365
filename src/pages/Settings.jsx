@@ -423,9 +423,10 @@ ${company.name}
       });
       setShowEditDialog(false);
       setEditingMember(null);
-      loadData();
+      await loadData();
     } catch (error) {
       console.error('Error updating member:', error);
+      alert('Failed to update team member: ' + error.message);
     }
   };
 

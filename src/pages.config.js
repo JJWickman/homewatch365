@@ -9,6 +9,7 @@ import Clients from './pages/Clients';
 import CompanyOnboarding from './pages/CompanyOnboarding';
 import Contractors from './pages/Contractors';
 import Dashboard from './pages/Dashboard';
+import DispatcherDashboard from './pages/DispatcherDashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import HelpTutorials from './pages/HelpTutorials';
 import Home from './pages/Home';
@@ -29,7 +30,6 @@ import Settings from './pages/Settings';
 import StripeSetup from './pages/StripeSetup';
 import SuperAdminConsole from './pages/SuperAdminConsole';
 import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
-import DispatcherDashboard from './pages/DispatcherDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -45,6 +45,7 @@ export const PAGES = {
     "CompanyOnboarding": CompanyOnboarding,
     "Contractors": Contractors,
     "Dashboard": Dashboard,
+    "DispatcherDashboard": DispatcherDashboard,
     "ForgotPassword": ForgotPassword,
     "HelpTutorials": HelpTutorials,
     "Home": Home,
@@ -65,7 +66,6 @@ export const PAGES = {
     "StripeSetup": StripeSetup,
     "SuperAdminConsole": SuperAdminConsole,
     "TestGoogleMapsAPI": TestGoogleMapsAPI,
-    "DispatcherDashboard": DispatcherDashboard,
 }
 
 export const pagesConfig = {
