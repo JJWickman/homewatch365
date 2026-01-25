@@ -58,13 +58,13 @@ Deno.serve(async (req) => {
         const currentItem = subscription.items.data[0];
         const priceId = currentItem?.price?.id;
         
-        // Map price_id to subscription plan
+        // Map price_id to subscription plan (live prices)
         let subscriptionPlan = 'solopreneur';
         const prices = {
-          'solopreneur': ['price_1StZCZPeV0U8kQVWfqIo4TX3', 'price_1StZCaPeV0U8kQVWq1YZE2Qc'],
-          'growth': ['price_1StZCaPeV0U8kQVWlHfEGcMb', 'price_1StZCaPeV0U8kQVWUBU8ngVH'],
-          'professional': ['price_1StZCaPeV0U8kQVWeBWyiiD2', 'price_1StZCbPeV0U8kQVWgxrzpv6J'],
-          'enterprise': ['price_1StZCbPeV0U8kQVW2oDZEnlc', 'price_1StZCbPeV0U8kQVWKczHSlFf']
+          'solopreneur': ['price_1StZjBPeV0U8kQVWEIIGtEfk', 'price_1StZjBPeV0U8kQVWxpSzlCxr'],
+          'growth': ['price_1StZjCPeV0U8kQVWLXISNLgR', 'price_1StZjCPeV0U8kQVWltFh3wo9'],
+          'professional': ['price_1StZjCPeV0U8kQVW8BgD9C2w', 'price_1StZjCPeV0U8kQVWVjwi8VZU'],
+          'enterprise': ['price_1StZjDPeV0U8kQVWOnyVFOTa', 'price_1StZjDPeV0U8kQVWfy9Z7Vku']
         };
         
         for (const [plan, priceIds] of Object.entries(prices)) {
