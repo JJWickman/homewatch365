@@ -105,33 +105,50 @@ export default function SubscriptionManagement({ company, companyMember }) {
 
     setLoadingCheckout(true);
     try {
-      console.log('handleSelectPlan: stripePrices =', stripePrices);
-      console.log('handleSelectPlan: tierId =', tierId, 'billingCycle =', billingCycle);
       const priceId = stripePrices[tierId]?.[billingCycle];
-      console.log('handleSelectPlan: priceId =', priceId);
-      
+
       if (!priceId) {
         alert('Stripe products not configured yet. Please run "Create Stripe Products" from the Settings → Admin tab first.');
         setLoadingCheckout(false);
         return;
       }
 
-      const response = await base44.functions.invoke('createCheckoutSession', {
-        price_id: priceId,
-        company_id: company.id,
-        subscription_plan: tierId,
-        billing_cycle: billingCycle
-      });
-      
-      if (response.data.url) {
-        window.location.href = response.data.url;
+      // If company already has a subscription, update it instead of creating new checkout
+      if (company.stripe_subscription_id) {
+        const response = await base44.functions.invoke('updateSubscription', {
+          subscription_id: company.stripe_subscription_id,
+          price_id: priceId,
+          company_id: company.id,
+          subscription_plan: tierId,
+          billing_cycle: billingCycle
+        });
+
+        if (response.data.success) {
+          alert('Subscription updated successfully!');
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          alert('Failed to update subscription. Please try again.');
+          setLoadingCheckout(false);
+        }
       } else {
-        alert('Failed to create checkout session. Please try again.');
-        setLoadingCheckout(false);
+        // Create new checkout session for new subscriptions
+        const response = await base44.functions.invoke('createCheckoutSession', {
+          price_id: priceId,
+          company_id: company.id,
+          subscription_plan: tierId,
+          billing_cycle: billingCycle
+        });
+
+        if (response.data.url) {
+          window.location.href = response.data.url;
+        } else {
+          alert('Failed to create checkout session. Please try again.');
+          setLoadingCheckout(false);
+        }
       }
     } catch (error) {
-      console.error('Error creating checkout:', error);
-      alert(`Error: ${error.message || 'Failed to start checkout. Please try again.'}`);
+      console.error('Error with plan change:', error);
+      alert(`Error: ${error.message || 'Failed to process plan change. Please try again.'}`);
       setLoadingCheckout(false);
     }
   };
