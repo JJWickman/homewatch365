@@ -136,7 +136,8 @@ export default function SubscriptionManagement({ company, companyMember }) {
           price_id: priceId,
           company_id: company.id,
           subscription_plan: tierId,
-          billing_cycle: billingCycle
+          billing_cycle: billingCycle,
+          return_url: `${window.location.origin}/Settings?tab=billing`
         });
 
         if (response.data.url) {
