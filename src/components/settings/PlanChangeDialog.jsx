@@ -69,6 +69,12 @@ export default function PlanChangeDialog({
   const [loading, setLoading] = useState(false);
   const [useNewPaymentMethod, setUseNewPaymentMethod] = useState(false);
 
+  useEffect(() => {
+    if (open) {
+      setSelectedPlan(newPlan || null);
+    }
+  }, [open, newPlan]);
+
   const currentTier = PRICING_TIERS.find(t => t.id === currentPlan);
   const selectedTier = selectedPlan ? PRICING_TIERS.find(t => t.id === selectedPlan) : null;
 
