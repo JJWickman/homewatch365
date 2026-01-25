@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Users, TrendingUp, Briefcase, Shield, Check, CreditCard, AlertCircle } from 'lucide-react';
 import EmbeddedPaymentForm from './EmbeddedPaymentForm';
 
@@ -196,13 +197,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
           <CardDescription>Manage your payment information</CardDescription>
         </CardHeader>
         <CardContent>
-          {showPaymentForm ? (
-            <EmbeddedPaymentForm
-              company={company}
-              onSuccess={handlePaymentSuccess}
-              onCancel={() => setShowPaymentForm(false)}
-            />
-          ) : paymentMethod ? (
+          {paymentMethod ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
                 <div className="flex items-center gap-3">
@@ -238,6 +233,28 @@ export default function SubscriptionManagement({ company, companyMember }) {
             </div>
           )}
         </CardContent>
+      </Card>
+
+      {/* Payment Method Dialog */}
+      <Dialog open={showPaymentForm} onOpenChange={setShowPaymentForm}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Add Payment Method</DialogTitle>
+            <DialogDescription>
+              Securely add your payment information. Your card details are encrypted and handled by Stripe.
+            </DialogDescription>
+          </DialogHeader>
+          <EmbeddedPaymentForm
+            company={company}
+            onSuccess={handlePaymentSuccess}
+            onCancel={() => setShowPaymentForm(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Remaining Cards */}
+      <Card className="hidden">
+        <CardContent></CardContent>
       </Card>
 
       {/* Billing Cycle Toggle */}
