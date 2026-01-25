@@ -80,12 +80,14 @@ Deno.serve(async (req) => {
           }
         }
         
-        await base44.asServiceRole.entities.Company.update(companyId, {
-          subscription_plan: subscriptionPlan,
-          subscription_status: status,
-          stripe_subscription_id: subscription.id,
-          trial_ends_at: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null
-        });
+        if (companyId) {
+          await base44.asServiceRole.entities.Company.update(companyId, {
+            subscription_plan: subscriptionPlan,
+            subscription_status: status,
+            stripe_subscription_id: subscription.id,
+            trial_ends_at: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null
+          });
+        }
         break;
       }
 
