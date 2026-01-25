@@ -186,7 +186,19 @@ export default function SubscriptionManagement({ company, companyMember }) {
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      <PlanChangeDialog
+        open={showPlanChangeDialog}
+        onOpenChange={setShowPlanChangeDialog}
+        currentPlan={company?.subscription_plan}
+        billingCycle={billingCycle}
+        company={company}
+        stripePrices={stripePrices}
+        paymentMethod={paymentMethod}
+        onPaymentMethodChange={handleUpdatePaymentMethod}
+        onPlanChangeComplete={() => setLoadingCheckout(false)}
+      />
+      <div className="space-y-6">
       {/* Current Plan Status */}
       {company?.subscription_status === 'trial' && company.trial_ends_at && (
         <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
