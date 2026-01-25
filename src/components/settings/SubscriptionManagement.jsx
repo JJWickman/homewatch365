@@ -91,7 +91,8 @@ export default function SubscriptionManagement({ company, companyMember }) {
       const priceId = stripePrices[tierId]?.[billingCycle];
       
       if (!priceId) {
-        alert('Payment system not configured. Please contact support.');
+        alert('Stripe products not configured yet. Please run "Create Stripe Products" from the Settings → Admin tab first.');
+        setLoadingCheckout(false);
         return;
       }
 
@@ -104,11 +105,13 @@ export default function SubscriptionManagement({ company, companyMember }) {
       
       if (response.data.url) {
         window.location.href = response.data.url;
+      } else {
+        alert('Failed to create checkout session. Please try again.');
+        setLoadingCheckout(false);
       }
     } catch (error) {
       console.error('Error creating checkout:', error);
-      alert('Failed to start checkout. Please try again.');
-    } finally {
+      alert(`Error: ${error.message || 'Failed to start checkout. Please try again.'}`);
       setLoadingCheckout(false);
     }
   };
