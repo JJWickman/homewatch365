@@ -306,13 +306,13 @@ export default function CompanyOnboarding() {
                         </div>
 
                         <Button 
-                          onClick={() => setStep('company')}
-                          className="w-full bg-blue-600 hover:bg-blue-700"
-                          size="lg"
-                        >
-                          Get Started
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Button>
+                           onClick={() => setStep('plan')}
+                           className="w-full bg-blue-600 hover:bg-blue-700"
+                           size="lg"
+                         >
+                           Get Started
+                           <ArrowRight className="h-4 w-4 ml-2" />
+                         </Button>
                       </CardContent>
                     </>
                   )}
