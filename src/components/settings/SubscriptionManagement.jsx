@@ -235,22 +235,24 @@ export default function SubscriptionManagement({ company, companyMember }) {
         </CardContent>
       </Card>
 
-      {/* Payment Method Dialog */}
-      <Dialog open={showPaymentForm} onOpenChange={setShowPaymentForm}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Add Payment Method</DialogTitle>
-            <DialogDescription>
+      {/* Payment Method Form - Embedded */}
+      {showPaymentForm && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Add Payment Method</CardTitle>
+            <CardDescription>
               Securely add your payment information. Your card details are encrypted and handled by Stripe.
-            </DialogDescription>
-          </DialogHeader>
-          <EmbeddedPaymentForm
-            company={company}
-            onSuccess={handlePaymentSuccess}
-            onCancel={() => setShowPaymentForm(false)}
-          />
-        </DialogContent>
-      </Dialog>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <EmbeddedPaymentForm
+              company={company}
+              onSuccess={handlePaymentSuccess}
+              onCancel={() => setShowPaymentForm(false)}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Remaining Cards */}
       <Card className="hidden">
