@@ -407,7 +407,8 @@ ${company.name}
       user_name: member.user_name || '',
       user_email: member.user_email,
       role: member.role,
-      access_level: member.access_level || 'user'
+      access_level: member.access_level || 'user',
+      crm_marketing_access: member.crm_marketing_access || false
     });
     setShowEditDialog(true);
   };
@@ -419,7 +420,8 @@ ${company.name}
       await base44.entities.CompanyMember.update(editingMember.id, {
         user_name: editingMember.user_name,
         role: editingMember.role,
-        access_level: editingMember.access_level
+        access_level: editingMember.access_level,
+        crm_marketing_access: editingMember.crm_marketing_access
       });
       setShowEditDialog(false);
       setEditingMember(null);
@@ -1917,6 +1919,24 @@ ${company.name}
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-slate-500 mt-1">Determines permissions and what they can access</p>
+              </div>
+              <div className="border-t pt-4">
+                <Label className="text-base font-medium mb-3 block">Additional Functionality Access</Label>
+                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                  <input
+                    type="checkbox"
+                    id="crm_marketing_access"
+                    checked={editingMember.crm_marketing_access}
+                    onChange={(e) => setEditingMember(prev => ({ ...prev, crm_marketing_access: e.target.checked }))}
+                    className="rounded mt-0.5"
+                  />
+                  <div className="flex-1">
+                    <Label htmlFor="crm_marketing_access" className="mb-0 text-sm font-medium cursor-pointer">
+                      CRM & Marketing Access
+                    </Label>
+                    <p className="text-xs text-slate-500 mt-1">Grant access to marketing campaigns, email tools, and CRM features</p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
