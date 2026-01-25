@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Users, TrendingUp, Briefcase, Shield, Check, CreditCard, AlertCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Users, TrendingUp, Briefcase, Shield, Check, CreditCard, AlertCircle, X } from 'lucide-react';
+import EmbeddedPaymentForm from './EmbeddedPaymentForm';
 
 const PRICING_TIERS = [
   {
@@ -51,6 +53,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
   const [stripePrices, setStripePrices] = useState({});
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(null);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
   useEffect(() => {
     console.log('SubscriptionManagement: company =', company);
@@ -133,24 +136,14 @@ export default function SubscriptionManagement({ company, companyMember }) {
     }
   };
 
-  const handleUpdatePaymentMethod = async () => {
-    setLoadingCheckout(true);
-    try {
-      const response = await base44.functions.invoke('createBillingPortalSession', {
-        company_id: company.id
-      });
-      
-      if (response.data.url) {
-        window.location.href = response.data.url;
-      } else {
-        alert('Failed to open billing portal. Please try again.');
-        setLoadingCheckout(false);
-      }
-    } catch (error) {
-      console.error('Error opening billing portal:', error);
-      alert(`Error: ${error.message || 'Failed to open billing portal. Please try again.'}`);
-      setLoadingCheckout(false);
-    }
+  const handleUpdatePaymentMethod = () => {
+    setShowPaymentDialog(true);
+  };
+
+  const handlePaymentSuccess = () => {
+    setShowPaymentDialog(false);
+    setLoadingCheckout(false);
+    loadPaymentMethod();
   };
 
   const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'owner' || companyMember?.is_owner;
@@ -254,7 +247,21 @@ export default function SubscriptionManagement({ company, companyMember }) {
         </CardContent>
       </Card>
 
-
+      {/* Payment Method Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Update Payment Method</DialogTitle>
+            <DialogDescription>
+              Add or update your payment information securely
+            </DialogDescription>
+          </DialogHeader>
+          <EmbeddedPaymentForm 
+            company={company}
+            onSuccess={handlePaymentSuccess}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Billing Cycle Toggle */}
       <Card>
