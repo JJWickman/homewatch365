@@ -193,6 +193,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
         open={showPlanChangeDialog}
         onOpenChange={setShowPlanChangeDialog}
         currentPlan={company?.subscription_plan}
+        newPlan={selectedNewPlan}
         billingCycle={billingCycle}
         company={company}
         stripePrices={stripePrices}
