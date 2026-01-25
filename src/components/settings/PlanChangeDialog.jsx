@@ -57,6 +57,7 @@ export default function PlanChangeDialog({
   open,
   onOpenChange,
   currentPlan,
+  newPlan,
   billingCycle,
   company,
   stripePrices,
@@ -64,7 +65,7 @@ export default function PlanChangeDialog({
   onPaymentMethodChange,
   onPlanChangeComplete
 }) {
-  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState(newPlan || null);
   const [loading, setLoading] = useState(false);
   const [useNewPaymentMethod, setUseNewPaymentMethod] = useState(false);
 
