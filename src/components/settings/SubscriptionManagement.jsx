@@ -414,13 +414,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
         </CardContent>
       </Card>
 
-      {/* Payment Method Note */}
-      <Alert>
-        <CreditCard className="h-4 w-4" />
-        <AlertDescription>
-          To update your payment method or view billing history, visit the Admin tab.
-        </AlertDescription>
-      </Alert>
+
     </div>
   );
 }
