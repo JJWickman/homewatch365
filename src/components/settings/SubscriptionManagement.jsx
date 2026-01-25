@@ -136,8 +136,19 @@ export default function SubscriptionManagement({ company, companyMember }) {
     }
   };
 
-  const handleUpdatePaymentMethod = () => {
-    setShowPaymentDialog(true);
+  const handleUpdatePaymentMethod = async () => {
+    try {
+      setLoadingCheckout(true);
+      const response = await base44.functions.invoke('createBillingPortalSession', {
+        company_id: company.id
+      });
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      }
+    } catch (error) {
+      alert(`Error: ${error.message}`);
+      setLoadingCheckout(false);
+    }
   };
 
   const handlePaymentSuccess = () => {
