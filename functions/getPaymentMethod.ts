@@ -29,15 +29,35 @@ Deno.serve(async (req) => {
     }
 
     // Get default payment method from Stripe
-    const customer = await stripe.customers.retrieve(company.stripe_customer_id);
+    const customer = await stripe.customers.retrieve(company.stripe_customer_id, {
+      expand: ['invoice_settings.default_payment_method']
+    });
     
-    if (!customer.invoice_settings?.default_payment_method) {
-      return Response.json({ success: true, payment_method: null });
+    // Check both invoice_settings.default_payment_method and default_source
+    let paymentMethodId = customer.invoice_settings?.default_payment_method;
+    
+    if (!paymentMethodId && customer.default_source) {
+      paymentMethodId = customer.default_source;
+    }
+    
+    if (!paymentMethodId) {
+      // Try to get the first attached payment method
+      const paymentMethods = await stripe.paymentMethods.list({
+        customer: company.stripe_customer_id,
+        type: 'card',
+        limit: 1
+      });
+      
+      if (paymentMethods.data.length === 0) {
+        return Response.json({ success: true, payment_method: null });
+      }
+      
+      paymentMethodId = paymentMethods.data[0].id;
     }
 
-    const paymentMethod = await stripe.paymentMethods.retrieve(
-      customer.invoice_settings.default_payment_method
-    );
+    const paymentMethod = typeof paymentMethodId === 'string' 
+      ? await stripe.paymentMethods.retrieve(paymentMethodId)
+      : paymentMethodId;
 
     return Response.json({
       success: true,
