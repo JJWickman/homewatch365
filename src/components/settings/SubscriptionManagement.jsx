@@ -111,6 +111,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
       startNewSubscription(tierId);
     } else if (company.stripe_subscription_id) {
       // If already subscribed, open plan change dialog
+      setSelectedNewPlan(tierId);
       setShowPlanChangeDialog(true);
     }
   };
