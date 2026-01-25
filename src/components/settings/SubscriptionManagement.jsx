@@ -232,9 +232,9 @@ export default function SubscriptionManagement({ company, companyMember }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
-            Payment Method
+            Subscription Management
           </CardTitle>
-          <CardDescription>Manage your payment information</CardDescription>
+          <CardDescription>Manage your subscription and payment information</CardDescription>
         </CardHeader>
         <CardContent>
           {paymentMethod ? (
