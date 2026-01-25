@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import { Users, TrendingUp, Briefcase, Shield, Check, CreditCard, AlertCircle, X } from 'lucide-react';
+import PlanChangeDialog from './PlanChangeDialog';
 
 
 const PRICING_TIERS = [
