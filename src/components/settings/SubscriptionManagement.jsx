@@ -384,8 +384,17 @@ export default function SubscriptionManagement({ company, companyMember }) {
                   </li>
                 </ul>
 
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-xs text-blue-900">
+                    <strong>Note:</strong> Add-on to any plan • Included in Enterprise • Up to 5,000 emails per month
+                  </p>
+                </div>
+
                 {company?.marketing_addon_active && (
                   <Badge className="bg-green-100 text-green-800 border-green-200">Active</Badge>
+                )}
+                {company?.subscription_plan === 'enterprise' && !company?.marketing_addon_active && (
+                  <Badge className="bg-purple-100 text-purple-800 border-purple-200">Included in Plan</Badge>
                 )}
               </div>
 
