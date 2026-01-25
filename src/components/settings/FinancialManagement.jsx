@@ -138,7 +138,7 @@ export default function FinancialManagement({ companyId }) {
     included_visit_types: []
   });
 
-  const MAX_PRODUCTS = 10;
+  const MAX_PRODUCTS = 25;
 
   useEffect(() => {
     loadProducts();
