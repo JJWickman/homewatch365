@@ -143,7 +143,8 @@ export default function SubscriptionManagement({ company, companyMember }) {
         company_id: company.id
       });
       if (response.data.url) {
-        window.location.href = response.data.url;
+        window.open(response.data.url, '_blank');
+        setLoadingCheckout(false);
       }
     } catch (error) {
       alert(`Error: ${error.message}`);
