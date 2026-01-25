@@ -53,6 +53,8 @@ export default function SubscriptionManagement({ company, companyMember }) {
   const [paymentMethod, setPaymentMethod] = useState(null);
 
   useEffect(() => {
+    console.log('SubscriptionManagement: company =', company);
+    console.log('SubscriptionManagement: companyMember =', companyMember);
     loadStripePrices();
     if (company?.stripe_customer_id) {
       loadPaymentMethod();
