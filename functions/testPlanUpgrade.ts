@@ -12,14 +12,32 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Price IDs from our Stripe products
-    const prices = {
-      solopreneur_monthly: 'price_1StZTgPeV0U8kQVW6zYiddYi',
-      solopreneur_annual: 'price_1StZTgPeV0U8kQVWovGAVPqX',
-      growth_monthly: 'price_1StZThPeV0U8kQVWU3ppT6k4',
-      professional_monthly: 'price_1StZThPeV0U8kQVWMfe6NuXj',
-      enterprise_monthly: 'price_1StZTiPeV0U8kQVW0jD3t1fy',
+    // First fetch the actual price IDs from Stripe
+    const products = await stripe.products.list({ limit: 100 });
+    const prices = {};
+
+    for (const product of products.data) {
+      const planId = product.metadata?.plan_id;
+      if (planId) {
+        const productPrices = await stripe.prices.list({
+          product: product.id,
+          limit: 10,
+        });
+
+        productPrices.data.forEach(price => {
+          const billingCycle = price.metadata?.billing_cycle || 'monthly';
+          const key = `${planId}_${billingCycle}`;
+          prices[key] = price.id;
+        });
+      }
     };
+
+    if (!prices.solopreneur_monthly || !prices.professional_monthly) {
+      return Response.json({
+        error: 'Required prices not found in Stripe',
+        available_prices: prices,
+      }, { status: 400 });
+    }
 
     // Step 1: Create a customer
     console.log('Step 1: Creating test customer...');
