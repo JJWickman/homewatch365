@@ -608,36 +608,6 @@ ${company.name}
       console.error('Error loading Stripe prices:', error);
     }
   };
-
-  const handleSelectPlan = async (tierId) => {
-    if (!company) return;
-    
-    setLoadingCheckout(true);
-    try {
-      const priceId = stripePrices[tierId]?.[billingCycle];
-      
-      if (!priceId) {
-        alert('Payment system not configured. Please contact support.');
-        return;
-      }
-
-      const response = await base44.functions.invoke('createCheckoutSession', {
-        price_id: priceId,
-        company_id: company.id,
-        subscription_plan: tierId,
-        billing_cycle: billingCycle
-      });
-      
-      if (response.data.url) {
-        window.location.href = response.data.url;
-      }
-    } catch (error) {
-      console.error('Error creating checkout:', error);
-      alert('Failed to start checkout. Please try again.');
-    } finally {
-      setLoadingCheckout(false);
-    }
-  };
   
   const DEFAULT_CONTRACTOR_TYPES = [
     'electrician', 'hvac', 'roofer', 'plumber', 'pool_service', 'landscaping', 
