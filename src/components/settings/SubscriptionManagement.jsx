@@ -140,7 +140,8 @@ export default function SubscriptionManagement({ company, companyMember }) {
     try {
       setLoadingCheckout(true);
       const response = await base44.functions.invoke('createBillingPortalSession', {
-        company_id: company.id
+        company_id: company.id,
+        return_url: `${window.location.origin}/Settings?tab=billing&payment_updated=true`
       });
       if (response.data.url) {
         window.open(response.data.url, '_blank');
