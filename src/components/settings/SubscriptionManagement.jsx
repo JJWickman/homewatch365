@@ -122,11 +122,14 @@ export default function SubscriptionManagement({ company, companyMember }) {
       const priceId = stripePrices[tierId]?.[billingCycle];
 
       if (!priceId) {
+        console.error('No price ID found for plan:', tierId, 'cycle:', billingCycle);
+        console.error('Available stripePrices:', stripePrices);
         alert('Stripe products not configured yet. Please run "Create Stripe Products" from the Settings → Admin tab first.');
         setLoadingCheckout(false);
         return;
       }
 
+      console.log('Creating checkout session for:', { tierId, priceId, billingCycle });
       const response = await base44.functions.invoke('createCheckoutSession', {
         price_id: priceId,
         company_id: company.id,
@@ -135,14 +138,16 @@ export default function SubscriptionManagement({ company, companyMember }) {
         return_url: `${window.location.origin}/Settings?tab=billing`
       });
 
-      if (response.data.url) {
+      console.log('Checkout response:', response.data);
+      if (response.data?.url) {
         window.location.href = response.data.url;
       } else {
+        console.error('No URL in response:', response.data);
         alert('Failed to create checkout session. Please try again.');
         setLoadingCheckout(false);
       }
     } catch (error) {
-      console.error('Error with plan change:', error);
+      console.error('Error with checkout session:', error);
       alert(`Error: ${error.message || 'Failed to process plan change. Please try again.'}`);
       setLoadingCheckout(false);
     }
