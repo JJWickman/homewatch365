@@ -71,10 +71,10 @@ Deno.serve(async (req) => {
       // Create annual price
       const annualPrice = await stripe.prices.create({
         product: product.id,
-        unit_amount: tier.annualPrice * 100,
+        unit_amount: tier.annualPrice * 100 * 12,
         currency: 'usd',
         recurring: {
-          interval: 'month'
+          interval: 'year'
         },
         metadata: {
           plan_id: tier.id,
