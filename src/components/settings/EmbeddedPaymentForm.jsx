@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_51QjbjyCnIACp9uPuGXqfYP5P6Xn6L4kXCHxaOj3Vvw35fkvv0QgCgOEh5a0OVhIL6b3vTCyJZgJkLKyLUy6n9V0u00FgOJJlhZ');
+const stripePromise = loadStripe('pk_live_51QjbjyCnIACp9uPu0sW1qgm4nj7zTnTICdgRqhDMZRSKe02J3TScY7KBsFQoRODg0sH7HllqIGPg9zWQTVc5BfK300gPP5I4Dw');
 
 function PaymentForm({ onSuccess, onCancel }) {
   const stripe = useStripe();
