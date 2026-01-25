@@ -109,31 +109,39 @@ export default function EmbeddedPaymentForm({ company, onSuccess, onCancel }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log('EmbeddedPaymentForm mounted, company:', company);
     loadSetupIntent();
   }, []);
 
   const loadSetupIntent = async () => {
     try {
+      console.log('Starting loadSetupIntent...');
       toast.loading('Loading payment form...');
+      
       const response = await base44.functions.invoke('createSetupIntent', {
         company_id: company.id
       });
 
+      console.log('createSetupIntent response:', response);
       toast.dismiss();
       
       if (response.data.success) {
+        console.log('Got clientSecret:', response.data.clientSecret);
         setClientSecret(response.data.clientSecret);
         toast.success('Payment form ready');
       } else {
         const errorMsg = 'Failed to initialize payment form';
+        console.error(errorMsg);
         setError(errorMsg);
         toast.error(errorMsg);
       }
     } catch (err) {
       toast.dismiss();
+      console.error('Error in loadSetupIntent:', err);
       setError(err.message);
       toast.error(`Error: ${err.message}`);
     } finally {
+      console.log('Setting loading to false');
       setLoading(false);
     }
   };
