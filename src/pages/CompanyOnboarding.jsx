@@ -262,6 +262,25 @@ export default function CompanyOnboarding() {
         </div>
 
         <Card>
+                  {/* Plan Selection Step */}
+                  {step === 'plan' && (
+                    <div className="px-6 py-8">
+                      <PlanSelectionStep
+                        onContinue={(plan, promo) => {
+                          setSelectedPlan(plan);
+                          setPromoCode(promo);
+                          setStep('company');
+                        }}
+                        onSkip={() => {
+                          // Skip to company creation with trial plan
+                          setSelectedPlan('trial');
+                          setStep('company');
+                        }}
+                        isLoading={loading}
+                      />
+                    </div>
+                  )}
+
                   {/* Welcome Step */}
                   {step === 'welcome' && (
                     <>
