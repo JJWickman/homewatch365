@@ -240,9 +240,8 @@ export default function SubscriptionManagement({ company, companyMember }) {
                 <Button 
                   variant="outline"
                   onClick={handleUpdatePaymentMethod}
-                  disabled={loadingCheckout}
                 >
-                  {loadingCheckout ? 'Loading...' : 'Update'}
+                  Update
                 </Button>
               </div>
             </div>
