@@ -7,7 +7,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const stripePromise = loadStripe('pk_live_51QjbjyCnIACp9uPu0sW1qgm4nj7zTnTICdgRqhDMZRSKe02J3TScY7KBsFQoRODg0sH7HllqIGPg9zWQTVc5BfK300gPP5I4Dw');
+// Use live publishable key - must match the live secret key
+const stripePromise = loadStripe('pk_live_51QjbjyCnIACp9uPu0sW1qgm4nj7zTnTICdgRqhDMZRSKe02J3TScY7KBsFQoRODg0sH7HllqIGPg9zWQTVc5BfK300gPP5I4Dw').catch(err => {
+  console.error('Failed to load Stripe:', err);
+  toast.error('Failed to load payment form');
+  return null;
+});
 
 function PaymentForm({ onSuccess, onCancel }) {
   const stripe = useStripe();
@@ -164,7 +169,12 @@ export default function EmbeddedPaymentForm({ company, onSuccess, onCancel }) {
   }
 
   if (!clientSecret) {
-    return null;
+    return (
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>Unable to initialize payment form. Please try again.</AlertDescription>
+      </Alert>
+    );
   }
 
   return (
