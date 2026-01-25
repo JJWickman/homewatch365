@@ -46,7 +46,13 @@ Deno.serve(async (req) => {
 
       case 'customer.subscription.updated': {
         const subscription = event.data.object;
-        const companyId = subscription.metadata.company_id;
+        
+        // Get company_id from subscription metadata or customer metadata
+        let companyId = subscription.metadata?.company_id;
+        if (!companyId) {
+          const customer = await stripe.customers.retrieve(subscription.customer);
+          companyId = customer.metadata?.company_id;
+        }
         
         let status = 'active';
         if (subscription.status === 'past_due') status = 'past_due';
