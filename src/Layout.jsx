@@ -25,7 +25,7 @@ import TrialBanner from '@/components/subscription/TrialBanner';
 
 const getPageRestrictions = () => {
   return {
-    'Marketing': 'enterprise'
+    'Marketing': 'enterprise_or_addon'
   };
 };
 
@@ -63,12 +63,9 @@ if (memberRole === 'administrator' || memberRole === 'owner') {
   baseItems.splice(7, 0, { name: 'Billing', icon: DollarSign, page: 'Billing' });
 }
 
-// Only show Marketing for Enterprise plan
-if (subscriptionPlan === 'enterprise') {
-  baseItems.push(
-    { name: 'Marketing', icon: Megaphone, page: 'Marketing' }
-  );
-}
+// Show Marketing for Enterprise plan or if add-on is active
+// Note: company object needed to check marketing_addon_active
+// This will be checked in the layout component itself
 
 return baseItems;
 };
@@ -185,11 +182,21 @@ export default function Layout({ children, currentPageName }) {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  const navigationItems = getNavigationItems(company?.subscription_plan, companyMember?.role);
+  const hasMarketingAccess = company?.subscription_plan === 'enterprise' || company?.marketing_addon_active === true;
+  
+  let navigationItems = getNavigationItems(company?.subscription_plan, companyMember?.role);
+  
+  // Add Marketing if company has access
+  if (hasMarketingAccess && (memberRole === 'dispatcher' || memberRole === 'administrator' || memberRole === 'owner')) {
+    const hasMarketing = navigationItems.some(item => item.name === 'Marketing');
+    if (!hasMarketing) {
+      navigationItems.push({ name: 'Marketing', icon: Megaphone, page: 'Marketing' });
+    }
+  }
 
   const pageRestrictions = getPageRestrictions();
-  const isPageRestricted = pageRestrictions[currentPageName] && 
-                          company?.subscription_plan !== pageRestrictions[currentPageName];
+  const hasMarketingAccessForPage = company?.subscription_plan === 'enterprise' || company?.marketing_addon_active === true;
+  const isPageRestricted = pageRestrictions[currentPageName] === 'enterprise_or_addon' && !hasMarketingAccessForPage;
   const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'admin';
 
   return (
@@ -382,9 +389,9 @@ export default function Layout({ children, currentPageName }) {
             <Alert className="mb-6 bg-blue-50 border-blue-200">
               <AlertCircle className="h-4 w-4 text-blue-600" />
               <AlertDescription className="text-blue-900">
-                <strong>Demo Mode:</strong> This feature is for demonstration purposes only and requires an Enterprise subscription to be fully functional. 
+                <strong>Restricted Access:</strong> This feature requires the CRM & Marketing add-on ($99/mo) or an Enterprise subscription. 
                 <a href={createPageUrl('Settings')} className="underline ml-1 font-medium hover:text-blue-700">
-                  Upgrade your plan
+                  Manage subscription
                 </a>
               </AlertDescription>
             </Alert>
