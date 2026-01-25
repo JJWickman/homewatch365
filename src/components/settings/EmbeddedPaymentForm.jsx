@@ -47,6 +47,7 @@ function PaymentForm({ onSuccess, onCancel }) {
         setError(confirmError.message);
         setLoading(false);
       } else if (setupIntent && setupIntent.status === 'succeeded') {
+        setLoading(false);
         onSuccess();
       } else {
         setError('Payment setup failed. Please try again.');
