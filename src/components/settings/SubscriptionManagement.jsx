@@ -458,7 +458,6 @@ export default function SubscriptionManagement({ company, companyMember }) {
           </p>
         </CardContent>
       </Card>
-
-      </div>
-      );
+    </div>
+    );
       }
