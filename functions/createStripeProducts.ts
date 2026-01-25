@@ -115,6 +115,18 @@ Deno.serve(async (req) => {
       price_id: addonPrice.id
     });
 
+    // Store prices in a Settings entity for easy reference
+    try {
+      const settings = await base44.asServiceRole.entities.Settings.list();
+      if (settings.length > 0) {
+        await base44.asServiceRole.entities.Settings.update(settings[0].id, {
+          stripe_prices: results
+        });
+      }
+    } catch (e) {
+      console.log('Settings entity not available, skipping storage');
+    }
+
     return Response.json({ 
       success: true,
       products: results,
