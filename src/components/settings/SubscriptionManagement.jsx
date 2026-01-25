@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Users, TrendingUp, Briefcase, Shield, Check, CreditCard, AlertCircle } from 'lucide-react';
+import EmbeddedPaymentForm from './EmbeddedPaymentForm';
 
 const PRICING_TIERS = [
   {
@@ -51,6 +52,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
   const [stripePrices, setStripePrices] = useState({});
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(null);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
 
   useEffect(() => {
     loadStripePrices();
@@ -128,25 +130,9 @@ export default function SubscriptionManagement({ company, companyMember }) {
     }
   };
 
-  const handleManagePaymentMethod = async () => {
-    if (!company) return;
-    
-    setLoadingCheckout(true);
-    try {
-      const response = await base44.functions.invoke('createBillingPortalSession', {
-        company_id: company.id
-      });
-      
-      if (response.data.url) {
-        // Open in new tab to avoid iframe restrictions
-        window.open(response.data.url, '_blank', 'noopener,noreferrer');
-        setLoadingCheckout(false);
-      }
-    } catch (error) {
-      console.error('Error creating billing portal:', error);
-      alert('Failed to open billing portal. Please try again.');
-      setLoadingCheckout(false);
-    }
+  const handlePaymentSuccess = () => {
+    setShowPaymentForm(false);
+    loadPaymentMethod();
   };
 
   const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'owner' || companyMember?.is_owner;
@@ -201,17 +187,23 @@ export default function SubscriptionManagement({ company, companyMember }) {
       )}
 
       {/* Payment Method Section */}
-      {company?.stripe_customer_id && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
-              Payment Method Stored
-            </CardTitle>
-            <CardDescription>Manage your payment information</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {paymentMethod ? (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5" />
+            Payment Method
+          </CardTitle>
+          <CardDescription>Manage your payment information</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {showPaymentForm ? (
+            <EmbeddedPaymentForm
+              company={company}
+              onSuccess={handlePaymentSuccess}
+              onCancel={() => setShowPaymentForm(false)}
+            />
+          ) : paymentMethod ? (
+            <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-lg bg-white border flex items-center justify-center">
@@ -228,27 +220,25 @@ export default function SubscriptionManagement({ company, companyMember }) {
                 </div>
                 <Button 
                   variant="outline"
-                  onClick={handleManagePaymentMethod}
-                  disabled={loadingCheckout}
+                  onClick={() => setShowPaymentForm(true)}
                 >
-                  Change Payment Method
+                  Update
                 </Button>
               </div>
-            ) : (
-              <div className="text-center py-6">
-                <p className="text-sm text-slate-500 mb-4">No payment method on file</p>
-                <Button 
-                  onClick={handleManagePaymentMethod}
-                  disabled={loadingCheckout}
-                  className="bg-slate-900 hover:bg-slate-800"
-                >
-                  Add Payment Method
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-sm text-slate-500 mb-4">No payment method on file</p>
+              <Button 
+                onClick={() => setShowPaymentForm(true)}
+                className="bg-slate-900 hover:bg-slate-800"
+              >
+                Add Payment Method
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Billing Cycle Toggle */}
       <Card>
