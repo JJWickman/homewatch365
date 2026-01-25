@@ -258,21 +258,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
         </CardContent>
       </Card>
 
-      {/* Payment Method Dialog */}
-      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Update Payment Method</DialogTitle>
-            <DialogDescription>
-              Add or update your payment information securely
-            </DialogDescription>
-          </DialogHeader>
-          <EmbeddedPaymentForm 
-            company={company}
-            onSuccess={handlePaymentSuccess}
-          />
-        </DialogContent>
-      </Dialog>
+
 
       {/* Billing Cycle Toggle */}
       <Card>
