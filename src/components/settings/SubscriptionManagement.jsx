@@ -99,12 +99,22 @@ export default function SubscriptionManagement({ company, companyMember }) {
     }
   };
 
-  const handleSelectPlan = async (tierId) => {
+  const handleSelectPlan = (tierId) => {
     if (!company) {
       console.error('No company found');
       return;
     }
 
+    // If on trial, start new subscription directly
+    if (company.subscription_status === 'trial') {
+      startNewSubscription(tierId);
+    } else if (company.stripe_subscription_id) {
+      // If already subscribed, open plan change dialog
+      setShowPlanChangeDialog(true);
+    }
+  };
+
+  const startNewSubscription = async (tierId) => {
     setLoadingCheckout(true);
     try {
       const priceId = stripePrices[tierId]?.[billingCycle];
@@ -115,39 +125,19 @@ export default function SubscriptionManagement({ company, companyMember }) {
         return;
       }
 
-      // If company already has a subscription, update it instead of creating new checkout
-      if (company.stripe_subscription_id) {
-        const response = await base44.functions.invoke('updateSubscription', {
-          subscription_id: company.stripe_subscription_id,
-          price_id: priceId,
-          company_id: company.id,
-          subscription_plan: tierId,
-          billing_cycle: billingCycle
-        });
+      const response = await base44.functions.invoke('createCheckoutSession', {
+        price_id: priceId,
+        company_id: company.id,
+        subscription_plan: tierId,
+        billing_cycle: billingCycle,
+        return_url: `${window.location.origin}/Settings?tab=billing`
+      });
 
-        if (response.data.success) {
-          alert('Subscription updated successfully!');
-          setTimeout(() => window.location.reload(), 1000);
-        } else {
-          alert('Failed to update subscription. Please try again.');
-          setLoadingCheckout(false);
-        }
+      if (response.data.url) {
+        window.location.href = response.data.url;
       } else {
-        // Create new checkout session for new subscriptions
-        const response = await base44.functions.invoke('createCheckoutSession', {
-          price_id: priceId,
-          company_id: company.id,
-          subscription_plan: tierId,
-          billing_cycle: billingCycle,
-          return_url: `${window.location.origin}/Settings?tab=billing`
-        });
-
-        if (response.data.url) {
-          window.location.href = response.data.url;
-        } else {
-          alert('Failed to create checkout session. Please try again.');
-          setLoadingCheckout(false);
-        }
+        alert('Failed to create checkout session. Please try again.');
+        setLoadingCheckout(false);
       }
     } catch (error) {
       console.error('Error with plan change:', error);
