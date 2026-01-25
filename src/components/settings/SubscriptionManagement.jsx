@@ -267,9 +267,10 @@ export default function SubscriptionManagement({ company, companyMember }) {
               <p className="text-sm text-slate-500 mb-4">No payment method on file</p>
               <Button 
                 onClick={handleUpdatePaymentMethod}
+                disabled={loadingCheckout}
                 className="bg-slate-900 hover:bg-slate-800"
               >
-                Add Payment Method
+                {loadingCheckout ? 'Loading...' : 'Add Payment Method'}
               </Button>
             </div>
           )}
