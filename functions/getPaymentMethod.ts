@@ -59,6 +59,10 @@ Deno.serve(async (req) => {
       ? await stripe.paymentMethods.retrieve(paymentMethodId)
       : paymentMethodId;
 
+    if (!paymentMethod?.card) {
+      return Response.json({ success: true, payment_method: null });
+    }
+
     return Response.json({
       success: true,
       payment_method: {
