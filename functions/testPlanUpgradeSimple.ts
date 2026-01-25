@@ -13,8 +13,8 @@ Deno.serve(async (req) => {
     }
 
     // Live price IDs
-    const soloPrice = 'price_1StZjBPeV0U8kQVWEIIGtEfk';
-    const professionalPrice = 'price_1StZjCPeV0U8kQVW8BgD9C2w';
+    const soloPrice = 'price_1StZpsPeV0U8kQVW4yPBdJtL';
+    const professionalPrice = 'price_1StZptPeV0U8kQVW10MfQjXQ';
 
     console.log('\n=== PLAN UPGRADE TEST: SOLOPRENEUR TO PROFESSIONAL ===\n');
 
