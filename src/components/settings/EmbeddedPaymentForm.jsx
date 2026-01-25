@@ -13,11 +13,12 @@ function PaymentForm({ onSuccess, onCancel }) {
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isReady, setIsReady] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!stripe || !elements) {
+    if (!stripe || !elements || !isReady) {
       return;
     }
 
@@ -47,7 +48,9 @@ function PaymentForm({ onSuccess, onCancel }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <PaymentElement />
+      <PaymentElement 
+        onReady={() => setIsReady(true)}
+      />
       
       {error && (
         <Alert variant="destructive">
@@ -67,13 +70,18 @@ function PaymentForm({ onSuccess, onCancel }) {
         </Button>
         <Button 
           type="submit" 
-          disabled={!stripe || loading}
+          disabled={!stripe || !isReady || loading}
           className="bg-blue-600 hover:bg-blue-700"
         >
           {loading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
               Processing...
+            </>
+          ) : !isReady ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              Loading...
             </>
           ) : (
             'Save Payment Method'
