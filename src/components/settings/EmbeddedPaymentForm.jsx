@@ -26,19 +26,29 @@ function PaymentForm({ onSuccess, onCancel }) {
     setError(null);
 
     try {
-      const { error: submitError } = await stripe.confirmSetup({
-        elements,
-        confirmParams: {
-          return_url: window.location.href,
-        },
-        redirect: 'if_required',
-      });
-
+      // Submit the form data to create the payment method
+      const { error: submitError } = await elements.submit();
+      
       if (submitError) {
         setError(submitError.message);
         setLoading(false);
-      } else {
+        return;
+      }
+
+      // Confirm the setup
+      const { error: confirmError, setupIntent } = await stripe.confirmSetup({
+        elements,
+        redirect: 'if_required',
+      });
+
+      if (confirmError) {
+        setError(confirmError.message);
+        setLoading(false);
+      } else if (setupIntent && setupIntent.status === 'succeeded') {
         onSuccess();
+      } else {
+        setError('Payment setup failed. Please try again.');
+        setLoading(false);
       }
     } catch (err) {
       setError(err.message);
