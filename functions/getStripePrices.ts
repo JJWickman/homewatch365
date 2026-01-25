@@ -19,8 +19,13 @@ Deno.serve(async (req) => {
     const pricesByPlan = {};
     
     for (const price of prices.data) {
-      const planId = price.metadata.plan_id;
-      const billingCycle = price.metadata.billing_cycle;
+      const planId = price.metadata?.plan_id;
+      const billingCycle = price.metadata?.billing_cycle;
+      
+      // Skip if metadata is missing
+      if (!planId || !billingCycle) {
+        continue;
+      }
       
       if (!pricesByPlan[planId]) {
         pricesByPlan[planId] = {};
