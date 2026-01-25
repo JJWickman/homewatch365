@@ -47,6 +47,8 @@ export default function CompanyOnboarding() {
       });
 
       const [skipFutureOnboarding, setSkipFutureOnboarding] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState('trial');
+  const [promoCode, setPromoCode] = useState('');
 
   useEffect(() => {
     // Check if force_restart parameter is present
