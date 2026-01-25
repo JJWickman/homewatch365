@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { price_id, company_id, subscription_plan, billing_cycle } = await req.json();
+    const { price_id, company_id, subscription_plan, billing_cycle, return_url } = await req.json();
 
     // Get or create company
     const companies = await base44.asServiceRole.entities.Company.filter({ id: company_id });
