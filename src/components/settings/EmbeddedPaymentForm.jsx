@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const stripePromise = loadStripe('pk_live_51QjbjyCnIACp9uPu0sW1qgm4nj7zTnTICdgRqhDMZRSKe02J3TScY7KBsFQoRODg0sH7HllqIGPg9zWQTVc5BfK300gPP5I4Dw');
 
@@ -113,17 +114,25 @@ export default function EmbeddedPaymentForm({ company, onSuccess, onCancel }) {
 
   const loadSetupIntent = async () => {
     try {
+      toast.loading('Loading payment form...');
       const response = await base44.functions.invoke('createSetupIntent', {
         company_id: company.id
       });
 
+      toast.dismiss();
+      
       if (response.data.success) {
         setClientSecret(response.data.clientSecret);
+        toast.success('Payment form ready');
       } else {
-        setError('Failed to initialize payment form');
+        const errorMsg = 'Failed to initialize payment form';
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (err) {
+      toast.dismiss();
       setError(err.message);
+      toast.error(`Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
