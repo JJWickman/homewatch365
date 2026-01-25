@@ -366,13 +366,6 @@ export default function SubscriptionManagement({ company, companyMember }) {
                       ))}
                     </ul>
                     
-                    <Button 
-                      onClick={() => handleSelectPlan(tier.id)}
-                      disabled={isCurrentPlan || loadingCheckout}
-                      className={`w-full ${tier.popular ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-900 hover:bg-slate-800'}`}
-                    >
-                      {loadingCheckout ? 'Loading...' : (isCurrentPlan ? 'Current Plan' : company?.subscription_status === 'trial' ? 'Start Subscription' : 'Change Plan')}
-                    </Button>
                     {company?.subscription_status === 'trial' && !isCurrentPlan && (
                       <p className="text-xs text-center text-slate-500 mt-2">
                         14-day free trial included
