@@ -40,16 +40,16 @@ Company Details:
 - Trial Ends: ${company.trial_ends_at ? new Date(company.trial_ends_at).toLocaleDateString() : 'N/A'}
 - Phone: ${company.phone || 'N/A'}
 - Email: ${company.email || 'N/A'}
-- Website: ${company.website || 'N/A'}
+- Address: ${[company.address, company.city, company.state, company.zip].filter(Boolean).join(', ') || 'N/A'}
 
 Created: ${new Date(company.created_date).toLocaleString()}
 
 View in dashboard: https://estatewatch365.app/Dashboard
     `.trim();
     
-    // Send to all admin emails
+    // Send to all admin emails using SendGrid via external email
     await Promise.all(adminEmails.map(email => 
-      base44.asServiceRole.integrations.Core.SendEmail({
+      base44.asServiceRole.functions.invoke('sendExternalEmail', {
         to: email,
         subject: subject,
         body: body
