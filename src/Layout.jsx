@@ -183,11 +183,12 @@ export default function Layout({ children, currentPageName }) {
   };
 
   const hasMarketingAccess = company?.subscription_plan === 'enterprise' || company?.marketing_addon_active === true;
+  const isAdminOrOwner = companyMember?.role === 'administrator' || companyMember?.is_owner === true;
 
   let navigationItems = getNavigationItems(company?.subscription_plan, companyMember?.role);
 
-  // Add CRM & Marketing if company has access AND user has permission
-  if (hasMarketingAccess && companyMember?.crm_marketing_access === true) {
+  // Add CRM & Marketing if company has access AND (user is admin/owner OR has explicit permission)
+  if (hasMarketingAccess && (isAdminOrOwner || companyMember?.crm_marketing_access === true)) {
     const hasMarketing = navigationItems.some(item => item.name === 'CRM & Marketing');
     if (!hasMarketing) {
       navigationItems.push({ name: 'CRM & Marketing', icon: Megaphone, page: 'Marketing' });
