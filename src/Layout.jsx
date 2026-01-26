@@ -182,7 +182,9 @@ export default function Layout({ children, currentPageName }) {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  const hasMarketingAccess = company?.subscription_plan === 'enterprise' || company?.marketing_addon_active === true;
+  const hasMarketingAccess = company?.subscription_plan === 'enterprise' || 
+                             company?.marketing_addon_active === true ||
+                             company?.subscription_plan?.endsWith('_crm');
   const isAdminOrOwner = companyMember?.role === 'administrator' || companyMember?.is_owner === true;
 
   let navigationItems = getNavigationItems(company?.subscription_plan, companyMember?.role);
