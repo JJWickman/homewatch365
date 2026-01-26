@@ -21,11 +21,44 @@ const PLANS = [
     features: ['Unlimited clients & properties', 'Inspections & scheduling', 'Follow-ups & tasks']
   },
   {
+    id: 'solopreneur_crm',
+    name: 'Solopreneur + CRM - $149/mo',
+    description: 'Solopreneur with marketing tools',
+    features: ['Everything in Solopreneur', 'CRM & Marketing', 'Email campaigns', 'SMS marketing'],
+    badge: 'Bundle'
+  },
+  {
     id: 'growth',
     name: 'Growth - $199/mo',
     description: 'Most popular for growing teams',
     features: ['Everything in Solopreneur', 'Up to 5 team members', 'Route optimization'],
     popular: true
+  },
+  {
+    id: 'growth_crm',
+    name: 'Growth + CRM - $248/mo',
+    description: 'Growth with marketing tools',
+    features: ['Everything in Growth', 'CRM & Marketing', 'Email campaigns', 'SMS marketing'],
+    badge: 'Bundle'
+  },
+  {
+    id: 'professional',
+    name: 'Professional - $249/mo',
+    description: 'For larger teams',
+    features: ['Up to 10 team members', '2 admin users', 'Priority support']
+  },
+  {
+    id: 'professional_crm',
+    name: 'Professional + CRM - $299/mo',
+    description: 'Professional with marketing',
+    features: ['Everything in Professional', 'CRM & Marketing', 'Email campaigns', 'SMS marketing'],
+    badge: 'Bundle'
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise - $499/mo',
+    description: 'Complete solution',
+    features: ['Up to 50 team members', 'CRM included', 'Contractor management', 'Priority support']
   }
 ];
 
