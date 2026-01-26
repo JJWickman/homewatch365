@@ -354,11 +354,16 @@ export default function SubscriptionManagement({ company, companyMember }) {
               return (
                 <Card 
                   key={tier.id}
-                  className={`relative ${tier.popular ? 'border-2 border-blue-500 shadow-lg' : ''} ${isCurrentPlan ? 'ring-2 ring-green-500' : ''}`}
+                  className={`relative ${tier.popular ? 'border-2 border-blue-500 shadow-lg' : ''} ${isCurrentPlan ? 'ring-2 ring-green-500' : ''} ${tier.badge ? 'border-purple-300' : ''}`}
                 >
-                  {tier.popular && (
+                  {tier.popular && !isCurrentPlan && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                       <Badge className="bg-blue-600 text-white">Most Popular</Badge>
+                    </div>
+                  )}
+                  {tier.badge && !isCurrentPlan && !tier.popular && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <Badge className="bg-purple-600 text-white">{tier.badge}</Badge>
                     </div>
                   )}
                   {isCurrentPlan && (
