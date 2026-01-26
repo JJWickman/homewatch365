@@ -262,8 +262,8 @@ export default function CompanyOnboarding() {
         </div>
 
         <Card>
-                  {/* Plan Selection Step */}
-                  {step === 'plan' && (
+                  {/* Welcome Step - Plan Selection First */}
+                  {step === 'welcome' && (
                     <div className="px-6 py-8">
                       <PlanSelectionStep
                         onContinue={(plan, promo) => {
@@ -281,8 +281,8 @@ export default function CompanyOnboarding() {
                     </div>
                   )}
 
-                  {/* Welcome Step */}
-                  {step === 'welcome' && (
+                  {/* Old Welcome Step - Removed */}
+                  {step === 'old_welcome' && (
                     <>
                       <CardHeader>
                         <CardTitle className="text-center text-2xl">Welcome to EstateWatch365! 🎉</CardTitle>
