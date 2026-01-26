@@ -90,32 +90,76 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create CRM & Marketing add-on
-    const addonProduct = await stripe.products.create({
-      name: 'CRM & Marketing Add-On',
-      description: 'Advanced CRM features and marketing automation tools',
-      metadata: {
-        addon_id: 'crm_marketing'
-      }
-    });
-
-    const addonPrice = await stripe.prices.create({
-      product: addonProduct.id,
-      unit_amount: 9900, // $99/month
-      currency: 'usd',
-      recurring: {
-        interval: 'month'
+    // Create bundled CRM & Marketing plans
+    const bundledTiers = [
+      {
+        id: 'solopreneur_crm',
+        name: 'Solopreneur + CRM & Marketing',
+        monthlyPrice: 149,
+        annualPrice: 119 // 20% discount
       },
-      metadata: {
-        addon_id: 'crm_marketing'
+      {
+        id: 'growth_crm',
+        name: 'Growth + CRM & Marketing',
+        monthlyPrice: 248,
+        annualPrice: 198.40 // 20% discount
+      },
+      {
+        id: 'professional_crm',
+        name: 'Professional + CRM & Marketing',
+        monthlyPrice: 299,
+        annualPrice: 239.20 // 20% discount
       }
-    });
+    ];
 
-    results.push({
-      addon: 'crm_marketing',
-      product_id: addonProduct.id,
-      price_id: addonPrice.id
-    });
+    for (const tier of bundledTiers) {
+      console.log(`Creating bundled product for: ${tier.id}`);
+      
+      const product = await stripe.products.create({
+        name: tier.name,
+        description: `${tier.name} Plan`,
+        metadata: {
+          plan_id: tier.id,
+          includes_crm: 'true'
+        }
+      });
+      console.log(`✓ Created product ${product.id} for ${tier.id}`);
+
+      // Create monthly price
+      const monthlyPrice = await stripe.prices.create({
+        product: product.id,
+        unit_amount: tier.monthlyPrice * 100,
+        currency: 'usd',
+        recurring: {
+          interval: 'month'
+        },
+        metadata: {
+          plan_id: tier.id,
+          billing_cycle: 'monthly'
+        }
+      });
+
+      // Create annual price
+      const annualPrice = await stripe.prices.create({
+        product: product.id,
+        unit_amount: tier.annualPrice * 100 * 12,
+        currency: 'usd',
+        recurring: {
+          interval: 'year'
+        },
+        metadata: {
+          plan_id: tier.id,
+          billing_cycle: 'annual'
+        }
+      });
+
+      results.push({
+        tier: tier.id,
+        product_id: product.id,
+        monthly_price_id: monthlyPrice.id,
+        annual_price_id: annualPrice.id
+      });
+    }
 
     // Store prices in a Settings entity for easy reference
     try {
