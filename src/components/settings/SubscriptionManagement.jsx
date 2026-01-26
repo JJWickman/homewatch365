@@ -345,7 +345,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
           </div>
 
           {/* Pricing Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {PRICING_TIERS.map((tier) => {
               const TierIcon = tier.icon;
               const price = billingCycle === 'monthly' ? tier.monthlyPrice : tier.annualPrice;
