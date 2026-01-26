@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +69,13 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
   const [promoSuccess, setPromoSuccess] = useState('');
   const [validatingPromo, setValidatingPromo] = useState(false);
 
+  // Re-validate promo when plan changes
+  useEffect(() => {
+    if (promoCode.trim() && promoSuccess) {
+      validatePromoCode();
+    }
+  }, [selectedPlan]);
+
   const validatePromoCode = async () => {
     if (!promoCode.trim()) {
       setPromoError('');
@@ -81,13 +88,16 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
     setPromoSuccess('');
 
     try {
-      // Call backend to validate promo code
-      // This would check if code exists, is active, not expired, etc.
-      const response = await fetch(`/api/validate-promo?code=${encodeURIComponent(promoCode)}`);
+      const response = await fetch(`/functions/validatePromoCode?code=${encodeURIComponent(promoCode)}`);
       const data = await response.json();
 
       if (data.valid) {
-        setPromoSuccess(`✓ ${data.benefit_description || 'Promo code applied!'}`);
+        // Check if promo excludes Enterprise and selected plan is Enterprise
+        if (data.excludes_enterprise && selectedPlan === 'enterprise') {
+          setPromoError('This promo code is not valid for Enterprise plan');
+        } else {
+          setPromoSuccess(`✓ ${data.benefit_description || 'Promo code applied!'}`);
+        }
       } else {
         setPromoError(data.message || 'Invalid promo code');
       }
