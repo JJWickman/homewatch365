@@ -137,7 +137,39 @@ export default function CompanyOnboarding() {
         is_default: true,
         is_active: true,
         sections: [
-...
+          {
+            name: 'Exterior',
+            order: 1,
+            items: [
+              { name: 'Front entrance & doors', check_type: 'pass_fail', requires_photo: true, order: 1 },
+              { name: 'Windows & screens', check_type: 'pass_fail', requires_photo: false, order: 2 },
+              { name: 'Landscaping condition', check_type: 'pass_fail', requires_photo: true, order: 3 },
+              { name: 'Pool/spa (if applicable)', check_type: 'pass_fail', requires_photo: true, order: 4 },
+              { name: 'Gutters & drainage', check_type: 'pass_fail', requires_photo: false, order: 5 }
+            ]
+          },
+          {
+            name: 'Interior - Main Areas',
+            order: 2,
+            items: [
+              { name: 'Foyer/entry', check_type: 'pass_fail', requires_photo: true, order: 1 },
+              { name: 'Living areas', check_type: 'pass_fail', requires_photo: true, order: 2 },
+              { name: 'Kitchen appliances', check_type: 'yes_no', requires_photo: false, order: 3 },
+              { name: 'Refrigerator/freezer', check_type: 'pass_fail', requires_photo: false, order: 4 },
+              { name: 'Pest inspection', check_type: 'yes_no', requires_photo: false, order: 5 }
+            ]
+          },
+          {
+            name: 'Systems & Utilities',
+            order: 3,
+            items: [
+              { name: 'HVAC operation', check_type: 'pass_fail', requires_photo: false, order: 1 },
+              { name: 'Thermostat setting', check_type: 'text', requires_photo: false, order: 2 },
+              { name: 'Water heater', check_type: 'pass_fail', requires_photo: false, order: 3 },
+              { name: 'Plumbing - no leaks', check_type: 'yes_no', requires_photo: false, order: 4 },
+              { name: 'Smoke/CO detectors', check_type: 'pass_fail', requires_photo: false, order: 5 }
+            ]
+          }
         ]
       });
 
