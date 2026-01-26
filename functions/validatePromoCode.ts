@@ -38,7 +38,12 @@ Deno.serve(async (req) => {
     // Build benefit description
     let benefit = '';
     if (promo.benefit_type === 'subscription_discount') {
-      benefit = `${promo.discount_percent}% discount on ${promo.applicable_plan || 'all'} plans`;
+      if (promo.applicable_plan) {
+        benefit = `${promo.discount_percent}% discount on ${promo.applicable_plan} plan`;
+      } else {
+        // Applies to all plans except Enterprise
+        benefit = `${promo.discount_percent}% discount (excludes Enterprise)`;
+      }
       if (promo.max_users) {
         benefit += ` (up to ${promo.max_users} users)`;
       }
@@ -51,7 +56,8 @@ Deno.serve(async (req) => {
     return Response.json({
       valid: true,
       promotion: promo,
-      benefit_description: benefit
+      benefit_description: benefit,
+      excludes_enterprise: !promo.applicable_plan || promo.code === 'FOUNDER'
     });
 
   } catch (error) {
