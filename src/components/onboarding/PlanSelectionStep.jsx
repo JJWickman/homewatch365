@@ -106,7 +106,7 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
       </div>
 
       {/* Plan Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {PLANS.map((plan) => (
           <button
             key={plan.id}
@@ -117,10 +117,15 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
           >
             <Card className={`h-full cursor-pointer ${
               selectedPlan === plan.id ? 'border-blue-500 border-2' : ''
-            }`}>
+            } ${plan.badge ? 'border-purple-300' : ''}`}>
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <Badge className="bg-blue-600 text-white">Most Popular</Badge>
+                </div>
+              )}
+              {plan.badge && !plan.popular && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-purple-600 text-white">{plan.badge}</Badge>
                 </div>
               )}
               <CardHeader className="pb-3">
