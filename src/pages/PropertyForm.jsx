@@ -561,33 +561,93 @@ export default function PropertyForm() {
 
       const { latitude, longitude } = position.coords;
       
-      // Fetch nearby properties from database
-      const allProperties = await base44.entities.Property.filter({ 
-        company_id: companyId, 
-        is_active: true 
-      });
-      
-      // Calculate distance for each property that has lat/lng
-      const propertiesWithDistance = allProperties
-        .filter(p => p.latitude && p.longitude)
-        .map(p => {
-          const distance = calculateDistance(latitude, longitude, p.latitude, p.longitude);
-          return { ...p, distance };
-        })
-        .sort((a, b) => a.distance - b.distance)
-        .slice(0, 5); // Get top 5 nearest
+      // Use Google Places Nearby Search to find properties
+      if (window.google && placesServiceRef.current) {
+        const location = new window.google.maps.LatLng(latitude, longitude);
+        
+        const request = {
+          location: location,
+          radius: 500, // Search within 500 meters
+          type: ['premise', 'street_address'] // Look for buildings/addresses
+        };
 
-      if (propertiesWithDistance.length > 0) {
-        setNearbyProperties(propertiesWithDistance);
-        setShowNearbyProperties(true);
-        toast.success(`Found ${propertiesWithDistance.length} nearby properties - select one`);
+        placesServiceRef.current.nearbySearch(request, (results, status) => {
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
+            // Get detailed info for each result
+            const propertyPromises = results.slice(0, 8).map(result => {
+              return new Promise((resolve) => {
+                placesServiceRef.current.getDetails({ placeId: result.place_id }, (place, detailStatus) => {
+                  if (detailStatus === window.google.maps.places.PlacesServiceStatus.OK && place) {
+                    let address = '';
+                    let city = '';
+                    let state = '';
+                    let zip = '';
+
+                    place.address_components?.forEach(component => {
+                      const types = component.types;
+                      if (types.includes('street_number')) {
+                        address = component.short_name + ' ' + address;
+                      }
+                      if (types.includes('route')) {
+                        address += component.short_name;
+                      }
+                      if (types.includes('locality')) {
+                        city = component.long_name;
+                      }
+                      if (types.includes('administrative_area_level_1')) {
+                        state = component.short_name;
+                      }
+                      if (types.includes('postal_code')) {
+                        zip = component.long_name;
+                      }
+                    });
+
+                    const lat = place.geometry.location.lat();
+                    const lng = place.geometry.location.lng();
+                    const distance = calculateDistance(latitude, longitude, lat, lng);
+
+                    resolve({
+                      placeId: place.place_id,
+                      name: place.name,
+                      address: address.trim(),
+                      city,
+                      state,
+                      zip,
+                      latitude: lat,
+                      longitude: lng,
+                      distance,
+                      formatted: place.formatted_address
+                    });
+                  } else {
+                    resolve(null);
+                  }
+                });
+              });
+            });
+
+            Promise.all(propertyPromises).then(properties => {
+              const validProperties = properties.filter(p => p && p.address).sort((a, b) => a.distance - b.distance);
+              if (validProperties.length > 0) {
+                setNearbyProperties(validProperties);
+                setShowNearbyProperties(true);
+                toast.success(`Found ${validProperties.length} nearby properties on Google Maps`);
+              } else {
+                toast.info('No properties found nearby');
+              }
+              setGettingLocation(false);
+            });
+          } else {
+            toast.info('No properties found nearby');
+            setGettingLocation(false);
+          }
+        });
       } else {
-        toast.info('No nearby properties found with location data');
+        toast.error('Google Maps not loaded yet');
+        setGettingLocation(false);
       }
     } catch (error) {
       console.error('Error getting location:', error);
       toast.error('Unable to get your location. Please enable location services.');
-    } finally {
       setGettingLocation(false);
     }
   };
@@ -605,44 +665,23 @@ export default function PropertyForm() {
   };
 
   const handleSelectNearbyProperty = async (property) => {
-    // Auto-populate form with selected property data
-    setFormData({
-      client_id: property.client_id || formData.client_id,
-      name: property.name || '',
-      address: property.address || '',
-      city: property.city || '',
-      state: property.state || '',
-      zip: property.zip || '',
+    // Auto-populate form with selected property address data
+    setFormData(prev => ({
+      ...prev,
+      address: property.address,
+      city: property.city,
+      state: property.state,
+      zip: property.zip,
       latitude: property.latitude,
-      longitude: property.longitude,
-      property_type: property.property_type || 'single_family',
-      status: property.status || 'seasonal',
-      square_feet: property.square_feet || '',
-      bedrooms: property.bedrooms || '',
-      bathrooms: property.bathrooms || '',
-      access_instructions: property.access_instructions || '',
-      alarm_code: property.alarm_code || '',
-      lockbox_code: property.lockbox_code || '',
-      gate_code: property.gate_code || '',
-      wifi_network: property.wifi_network || '',
-      wifi_password: property.wifi_password || '',
-      inspection_frequency: property.inspection_frequency || 'weekly',
-      assigned_staff: property.assigned_staff || [],
-      contractors: property.contractors || [],
-      primary_photo_url: property.primary_photo_url || '',
-      notes: property.notes || '',
-      emergency_contacts: property.emergency_contacts || [],
-      utilities: property.utilities || {}
-    });
-
-    if (property.primary_photo_url) {
-      setStreetViewUrl(property.primary_photo_url);
-      setImageSource('auto');
-    }
+      longitude: property.longitude
+    }));
 
     setShowNearbyProperties(false);
     setNearbyProperties([]);
-    toast.success('Property data loaded');
+    
+    // Fetch aerial view for the selected property
+    await validateAndFetchGoogleImage(property.address, property.city, property.state, property.zip, property.latitude, property.longitude);
+    toast.success('Property address loaded from Google Maps');
   };
 
   const validateAndFetchGoogleImage = async (address, city, state, zip, providedLat = null, providedLng = null) => {
@@ -1048,7 +1087,7 @@ export default function PropertyForm() {
                {showNearbyProperties && nearbyProperties.length > 0 && (
                  <div className="absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-lg shadow-lg z-50 mt-1 max-h-80 overflow-y-auto">
                    <div className="p-2">
-                     <p className="text-xs text-slate-500 px-2 py-1 font-medium">Select a property to auto-fill:</p>
+                     <p className="text-xs text-slate-500 px-2 py-1 font-medium">Properties from Google Maps:</p>
                      {nearbyProperties.map((property, index) => (
                        <div
                          key={index}
@@ -1058,11 +1097,11 @@ export default function PropertyForm() {
                          <div className="flex items-start justify-between gap-2">
                            <div className="flex-1">
                              <div className="font-medium text-sm text-slate-900">{property.name || property.address}</div>
-                             <div className="text-xs text-slate-600 mt-0.5">{property.address}</div>
+                             {property.address && <div className="text-xs text-slate-600 mt-0.5">{property.address}</div>}
                              <div className="text-xs text-slate-500">{property.city}, {property.state} {property.zip}</div>
                            </div>
-                           <div className="text-xs text-slate-500 shrink-0">
-                             {property.distance < 1 ? 
+                           <div className="text-xs text-blue-600 shrink-0">
+                             {property.distance < 0.1 ? 
                                `${(property.distance * 5280).toFixed(0)} ft` : 
                                `${property.distance.toFixed(1)} mi`
                              }
