@@ -369,7 +369,7 @@ export default function Layout({ children, currentPageName }) {
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('Settings')}>
+                    <Link to={createPageUrl('Settings') + '?tab=profile'}>
                       <UserCircle className="mr-2 h-4 w-4" />
                       Profile Settings
                     </Link>
