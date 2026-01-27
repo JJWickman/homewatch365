@@ -296,9 +296,13 @@ export default function SubscriptionManagement({ company, companyMember }) {
             <div className="text-center py-6">
               <p className="text-sm text-slate-500 mb-4">Access your Stripe billing portal to manage your subscription</p>
               <Button 
-                onClick={handleUpdatePaymentMethod}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleUpdatePaymentMethod();
+                }}
                 disabled={loadingCheckout}
                 className="bg-slate-900 hover:bg-slate-800"
+                type="button"
               >
                 {loadingCheckout ? 'Loading...' : 'Manage Subscription'}
               </Button>
