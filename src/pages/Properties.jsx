@@ -281,14 +281,15 @@ export default function Properties() {
           <StaticRouteMap 
             stops={filteredProperties
               .filter(p => p.latitude && p.longitude)
-              .map(p => ({
+              .map((p, index) => ({
                 latitude: p.latitude,
                 longitude: p.longitude,
-                label: p.name?.substring(0, 1).toUpperCase() || 'P'
+                name: p.name || p.address,
+                address: `${p.address}, ${p.city}, ${p.state}`
               }))}
           />
           <Card className="p-4">
-            <h3 className="font-semibold text-slate-900 mb-3">Properties on Map</h3>
+            <h3 className="font-semibold text-slate-900 mb-3">Properties ({filteredProperties.filter(p => p.latitude && p.longitude).length})</h3>
             <div className="space-y-2">
               {filteredProperties
                 .filter(p => p.latitude && p.longitude)
@@ -321,8 +322,8 @@ export default function Properties() {
         </div>
       )}
 
-      {/* Properties Grid / Empty State */}
-      {properties.length === 0 && !loading ? (
+      {/* Properties Grid / Empty State - Only show when map is hidden */}
+      {!showMap && properties.length === 0 && !loading ? (
         <Card>
           <EmptyState
             icon={Building2}
@@ -332,7 +333,7 @@ export default function Properties() {
             actionLabel="Add Property"
           />
         </Card>
-      ) : loading ? (
+      ) : !showMap && loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
             <Card key={i} className="overflow-hidden">
@@ -344,11 +345,11 @@ export default function Properties() {
             </Card>
           ))}
         </div>
-      ) : filteredProperties.length === 0 ? (
+      ) : !showMap && filteredProperties.length === 0 ? (
         <Card className="p-8 text-center text-slate-500">
           No properties match your search
         </Card>
-      ) : viewMode === 'list' ? (
+      ) : !showMap && viewMode === 'list' ? (
         <Card>
           <div className="divide-y">
             {/* Header Row */}
@@ -397,7 +398,7 @@ export default function Properties() {
             ))}
           </div>
         </Card>
-      ) : (
+      ) : !showMap ? (
         <div className={`grid gap-6 ${
           viewMode === 'large-tiles' 
             ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
@@ -407,7 +408,7 @@ export default function Properties() {
             <PropertyCard key={property.id} property={property} compact={viewMode === 'small-tiles'} />
           ))}
         </div>
-      )}
+      ) : null}
 
       {/* Deactivate Confirmation Dialog */}
       {deleteConfirm && (
