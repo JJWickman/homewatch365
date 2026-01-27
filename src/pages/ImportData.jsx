@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Users, Building2, Download } from 'lucide-react';
+import { Users, Building2, Download, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import PageHeader from '@/components/shared/PageHeader';
 import ImportWizard from '@/components/import/ImportWizard';
 
 export default function ImportData() {
   const navigate = useNavigate();
   const [companyId, setCompanyId] = useState(null);
+  const [companyMember, setCompanyMember] = useState(null);
   const [showImport, setShowImport] = useState(false);
   const [selectedEntity, setSelectedEntity] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -27,6 +29,7 @@ export default function ImportData() {
       
       if (members.length > 0) {
         setCompanyId(members[0].company_id);
+        setCompanyMember(members[0]);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -56,6 +59,25 @@ export default function ImportData() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+      </div>
+    );
+  }
+
+  const isAdmin = companyMember?.role === 'administrator' || companyMember?.is_owner;
+
+  if (!isAdmin) {
+    return (
+      <div>
+        <PageHeader
+          title="Import Data"
+          subtitle="Upload spreadsheets to bulk import clients and properties"
+        />
+        <Alert className="bg-red-50 border-red-200">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-900">
+            <strong>Access Denied:</strong> Only administrators can import data.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }

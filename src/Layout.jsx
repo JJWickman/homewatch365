@@ -55,13 +55,13 @@ const baseItems = [
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
   { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
   { name: 'Route Optimizer', icon: Route, page: 'RouteOptimizer' },
-  { name: 'Import Data', icon: Download, page: 'ImportData' },
   { name: 'Help & Tutorials', icon: BookOpen, page: 'HelpTutorials' },
 ];
 
-// Only show Billing for Administrators
+// Only show Billing and Import Data for Administrators
 if (memberRole === 'administrator' || memberRole === 'owner') {
   baseItems.splice(7, 0, { name: 'Billing', icon: DollarSign, page: 'Billing' });
+  baseItems.splice(8, 0, { name: 'Import Data', icon: Download, page: 'ImportData' });
 }
 
 // Show Marketing for Enterprise plan or if add-on is active
