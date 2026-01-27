@@ -188,11 +188,11 @@ export default function SubscriptionManagement({ company, companyMember }) {
         return_url: `${window.location.origin}/Settings?tab=billing&payment_updated=true`
       });
       if (response.data?.url) {
-        window.open(response.data.url, '_blank');
+        window.location.href = response.data.url;
       } else {
         alert('Failed to open billing portal. Please try again.');
+        setLoadingCheckout(false);
       }
-      setLoadingCheckout(false);
     } catch (error) {
       console.error('Error:', error);
       alert(`Error: ${error.message || 'Failed to open billing portal'}`);
