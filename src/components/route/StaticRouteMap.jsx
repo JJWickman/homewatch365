@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, ZoomControl, useMap } from 'react-leaflet';
 import { MapPin, Loader2 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -12,24 +12,29 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-export default function StaticRouteMap({ stops = [], startAddress }) {
-  const [mapCenter, setMapCenter] = useState([40.7128, -74.0060]); // Default NYC
-  const [mapZoom, setMapZoom] = useState(13);
+// Component to auto-fit bounds
+function MapBounds({ stops }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (stops.length > 0) {
+      const bounds = L.latLngBounds(stops.map(stop => [
+        parseFloat(stop.lat || stop.latitude),
+        parseFloat(stop.lng || stop.longitude)
+      ]));
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [stops, map]);
+  
+  return null;
+}
 
+export default function StaticRouteMap({ stops = [], startAddress }) {
   const validStops = stops.filter(s => {
     const lat = parseFloat(s.lat || s.latitude);
     const lng = parseFloat(s.lng || s.longitude);
     return !isNaN(lat) && !isNaN(lng);
   });
-
-  useEffect(() => {
-    if (validStops.length > 0) {
-      // Calculate center based on all stops
-      const avgLat = validStops.reduce((sum, stop) => sum + parseFloat(stop.lat || stop.latitude), 0) / validStops.length;
-      const avgLng = validStops.reduce((sum, stop) => sum + parseFloat(stop.lng || stop.longitude), 0) / validStops.length;
-      setMapCenter([avgLat, avgLng]);
-    }
-  }, [validStops.length]);
 
   // Create custom numbered icons for markers
   const createNumberedIcon = (number) => {
@@ -69,8 +74,8 @@ export default function StaticRouteMap({ stops = [], startAddress }) {
   return (
     <div className="w-full h-full rounded-lg overflow-hidden relative" style={{ minHeight: '400px', height: '500px' }}>
       <MapContainer
-        center={mapCenter}
-        zoom={mapZoom}
+        center={[40.7128, -74.0060]}
+        zoom={13}
         style={{ height: '100%', width: '100%' }}
         zoomControl={false}
       >
@@ -79,6 +84,7 @@ export default function StaticRouteMap({ stops = [], startAddress }) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <ZoomControl position="topright" />
+        <MapBounds stops={validStops} />
         
         {validStops.map((stop, index) => {
           const lat = parseFloat(stop.lat || stop.latitude);
