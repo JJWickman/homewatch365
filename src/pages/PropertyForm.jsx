@@ -59,6 +59,8 @@ export default function PropertyForm() {
   const [previewImageUrl, setPreviewImageUrl] = useState(null);
   const [nearbyAddresses, setNearbyAddresses] = useState([]);
   const [showNearbyAddresses, setShowNearbyAddresses] = useState(false);
+  const [nearbyProperties, setNearbyProperties] = useState([]);
+  const [showNearbyProperties, setShowNearbyProperties] = useState(false);
   const [enrichingData, setEnrichingData] = useState(false);
   const [showCreateClientDialog, setShowCreateClientDialog] = useState(false);
   const [newClientData, setNewClientData] = useState({ first_name: '', last_name: '', email: '' });
@@ -559,53 +561,28 @@ export default function PropertyForm() {
 
       const { latitude, longitude } = position.coords;
       
-      // Use Google's reverse geocoding to get multiple addresses
-      const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || 'AIzaSyBPbLVxQ6d5dBkDX_5MHQ9dHJZECXX';
-      const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
-      const response = await fetch(geocodingUrl);
-      const data = await response.json();
+      // Fetch nearby properties from database
+      const allProperties = await base44.entities.Property.filter({ 
+        company_id: companyId, 
+        is_active: true 
+      });
+      
+      // Calculate distance for each property that has lat/lng
+      const propertiesWithDistance = allProperties
+        .filter(p => p.latitude && p.longitude)
+        .map(p => {
+          const distance = calculateDistance(latitude, longitude, p.latitude, p.longitude);
+          return { ...p, distance };
+        })
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 5); // Get top 5 nearest
 
-      if (data.results && data.results.length > 0) {
-        // Get top 3 results
-        const topResults = data.results.slice(0, 3).map(result => {
-          let address = '';
-          let city = '';
-          let state = '';
-          let zip = '';
-
-          result.address_components?.forEach(component => {
-            const types = component.types;
-            if (types.includes('street_number')) {
-              address = component.short_name + ' ' + address;
-            }
-            if (types.includes('route')) {
-              address += component.short_name;
-            }
-            if (types.includes('locality')) {
-              city = component.long_name;
-            }
-            if (types.includes('administrative_area_level_1')) {
-              state = component.short_name;
-            }
-            if (types.includes('postal_code')) {
-              zip = component.long_name;
-            }
-          });
-
-          return {
-            address: address.trim(),
-            city,
-            state,
-            zip,
-            latitude,
-            longitude,
-            formatted: result.formatted_address
-          };
-        });
-
-        setNearbyAddresses(topResults);
-        setShowNearbyAddresses(true);
-        toast.success('Found nearby addresses - select one');
+      if (propertiesWithDistance.length > 0) {
+        setNearbyProperties(propertiesWithDistance);
+        setShowNearbyProperties(true);
+        toast.success(`Found ${propertiesWithDistance.length} nearby properties - select one`);
+      } else {
+        toast.info('No nearby properties found with location data');
       }
     } catch (error) {
       console.error('Error getting location:', error);
@@ -613,6 +590,59 @@ export default function PropertyForm() {
     } finally {
       setGettingLocation(false);
     }
+  };
+
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    // Haversine formula for distance calculation in miles
+    const R = 3959; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  const handleSelectNearbyProperty = async (property) => {
+    // Auto-populate form with selected property data
+    setFormData({
+      client_id: property.client_id || formData.client_id,
+      name: property.name || '',
+      address: property.address || '',
+      city: property.city || '',
+      state: property.state || '',
+      zip: property.zip || '',
+      latitude: property.latitude,
+      longitude: property.longitude,
+      property_type: property.property_type || 'single_family',
+      status: property.status || 'seasonal',
+      square_feet: property.square_feet || '',
+      bedrooms: property.bedrooms || '',
+      bathrooms: property.bathrooms || '',
+      access_instructions: property.access_instructions || '',
+      alarm_code: property.alarm_code || '',
+      lockbox_code: property.lockbox_code || '',
+      gate_code: property.gate_code || '',
+      wifi_network: property.wifi_network || '',
+      wifi_password: property.wifi_password || '',
+      inspection_frequency: property.inspection_frequency || 'weekly',
+      assigned_staff: property.assigned_staff || [],
+      contractors: property.contractors || [],
+      primary_photo_url: property.primary_photo_url || '',
+      notes: property.notes || '',
+      emergency_contacts: property.emergency_contacts || [],
+      utilities: property.utilities || {}
+    });
+
+    if (property.primary_photo_url) {
+      setStreetViewUrl(property.primary_photo_url);
+      setImageSource('auto');
+    }
+
+    setShowNearbyProperties(false);
+    setNearbyProperties([]);
+    toast.success('Property data loaded');
   };
 
   const validateAndFetchGoogleImage = async (address, city, state, zip, providedLat = null, providedLng = null) => {
@@ -1012,21 +1042,32 @@ export default function PropertyForm() {
                  className="mt-2 w-full"
                >
                  <MapPinCheckInside className="h-4 w-4 mr-2" />
-                 {gettingLocation ? 'Getting location...' : 'Use My Location'}
+                 {gettingLocation ? 'Finding nearby properties...' : 'Find Nearby Properties'}
                </Button>
 
-               {showNearbyAddresses && nearbyAddresses.length > 0 && (
-                 <div className="absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-lg shadow-lg z-50 mt-1">
+               {showNearbyProperties && nearbyProperties.length > 0 && (
+                 <div className="absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-lg shadow-lg z-50 mt-1 max-h-80 overflow-y-auto">
                    <div className="p-2">
-                     <p className="text-xs text-slate-500 px-2 py-1 font-medium">Select an address:</p>
-                     {nearbyAddresses.map((addr, index) => (
+                     <p className="text-xs text-slate-500 px-2 py-1 font-medium">Select a property to auto-fill:</p>
+                     {nearbyProperties.map((property, index) => (
                        <div
                          key={index}
-                         onClick={() => handleSelectNearbyAddress(addr)}
-                         className="px-3 py-2.5 cursor-pointer hover:bg-slate-50 rounded-md border-b border-slate-100 last:border-b-0 text-sm"
+                         onClick={() => handleSelectNearbyProperty(property)}
+                         className="px-3 py-2.5 cursor-pointer hover:bg-slate-50 rounded-md border-b border-slate-100 last:border-b-0"
                        >
-                         <div className="font-medium text-slate-900">{addr.address}</div>
-                         <div className="text-xs text-slate-500">{addr.city}, {addr.state} {addr.zip}</div>
+                         <div className="flex items-start justify-between gap-2">
+                           <div className="flex-1">
+                             <div className="font-medium text-sm text-slate-900">{property.name || property.address}</div>
+                             <div className="text-xs text-slate-600 mt-0.5">{property.address}</div>
+                             <div className="text-xs text-slate-500">{property.city}, {property.state} {property.zip}</div>
+                           </div>
+                           <div className="text-xs text-slate-500 shrink-0">
+                             {property.distance < 1 ? 
+                               `${(property.distance * 5280).toFixed(0)} ft` : 
+                               `${property.distance.toFixed(1)} mi`
+                             }
+                           </div>
+                         </div>
                        </div>
                      ))}
                    </div>
