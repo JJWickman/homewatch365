@@ -7,7 +7,7 @@ import OfflineBanner from '@/components/shared/OfflineBanner';
 import { 
         Home, Users, Building2, ClipboardCheck, Calendar, 
         FileText, Settings, Menu, X, LogOut, ChevronDown,
-        Bell, Search, Plus, Building, UserCircle, Megaphone, Briefcase, Route, BookOpen, DollarSign
+        Bell, Search, Plus, Building, UserCircle, Megaphone, Briefcase, Route, BookOpen, DollarSign, Download
       } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -55,6 +55,7 @@ const baseItems = [
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
   { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
   { name: 'Route Optimizer', icon: Route, page: 'RouteOptimizer' },
+  { name: 'Import Data', icon: Download, page: 'ImportData' },
   { name: 'Help & Tutorials', icon: BookOpen, page: 'HelpTutorials' },
 ];
 
