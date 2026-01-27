@@ -861,11 +861,43 @@ export default function Inspections() {
                    <SelectValue placeholder="Select property" />
                  </SelectTrigger>
                  <SelectContent>
-                   {properties.map((property) => (
-                     <SelectItem key={property.id} value={property.id}>
-                       {property.name || property.address}
-                     </SelectItem>
-                   ))}
+                   {properties.length === 0 ? (
+                     <div className="p-2">
+                       <Button
+                         onClick={() => {
+                           setShowNewDialog(false);
+                           navigate(createPageUrl('PropertyForm'));
+                         }}
+                         className="w-full bg-blue-600 hover:bg-blue-700"
+                         size="sm"
+                       >
+                         <Plus className="h-4 w-4 mr-2" />
+                         Create Property
+                       </Button>
+                     </div>
+                   ) : (
+                     <>
+                       {properties.map((property) => (
+                         <SelectItem key={property.id} value={property.id}>
+                           {property.name || property.address}
+                         </SelectItem>
+                       ))}
+                       <div className="p-2 border-t">
+                         <Button
+                           onClick={() => {
+                             setShowNewDialog(false);
+                             navigate(createPageUrl('PropertyForm'));
+                           }}
+                           variant="outline"
+                           className="w-full"
+                           size="sm"
+                         >
+                           <Plus className="h-4 w-4 mr-2" />
+                           Add New Property
+                         </Button>
+                       </div>
+                     </>
+                   )}
                  </SelectContent>
                </Select>
               </div>
