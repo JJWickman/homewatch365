@@ -166,8 +166,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
 
       console.log('Checkout response:', response.data);
       if (response.data?.url) {
-        window.open(response.data.url, '_blank');
-        setLoadingCheckout(false);
+        window.location.href = response.data.url;
       } else {
         console.error('No URL in response:', response.data);
         alert('Failed to create checkout session. Please try again.');
