@@ -434,7 +434,7 @@ export default function FinancialManagement({ companyId }) {
                           <span>{getBillingFrequencyLabel(product.billing_frequency)}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
                         <Button
                           variant="outline"
                           size="sm"
