@@ -879,7 +879,10 @@ export default function Inspections() {
                      <>
                        {properties.map((property) => (
                          <SelectItem key={property.id} value={property.id}>
-                           {property.name || property.address}
+                           <div className="flex flex-col">
+                             <span>{property.name || property.address}</span>
+                             <span className="text-xs text-slate-500">{property.city}, {property.state}</span>
+                           </div>
                          </SelectItem>
                        ))}
                        <div className="p-2 border-t">
