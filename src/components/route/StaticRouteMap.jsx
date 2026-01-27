@@ -35,7 +35,7 @@ export default function StaticRouteMap({ stops = [], startAddress }) {
     } else if (googleMapRef.current && validStops.length > 0) {
       updateMarkers();
     }
-  }, [mapLoaded, validStops.length]);
+  }, [mapLoaded, stops]);
 
   const initializeMap = () => {
     if (!window.google || !mapRef.current) return;
@@ -151,8 +151,8 @@ export default function StaticRouteMap({ stops = [], startAddress }) {
   }
 
   return (
-    <div className="w-full h-full rounded-lg overflow-hidden bg-slate-50 relative">
-      <div ref={mapRef} className="w-full h-full" />
+    <div className="w-full h-full rounded-lg overflow-hidden bg-slate-50 relative" style={{ minHeight: '400px' }}>
+      <div ref={mapRef} className="w-full h-full" style={{ minHeight: '400px' }} />
       
       {/* Custom Zoom Controls */}
       <div className="absolute top-3 right-3 flex flex-col gap-2">
