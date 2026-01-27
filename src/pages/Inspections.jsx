@@ -58,7 +58,7 @@ export default function Inspections() {
   
   // New visit dialog (inspection or follow-up)
   const [showNewDialog, setShowNewDialog] = useState(false);
-  const [visitType, setVisitType] = useState('inspection'); // 'inspection' or 'followup'
+  const [visitType, setVisitType] = useState('check-in'); // 'check-in' or 'followup'
   const [editingId, setEditingId] = useState(null);
   const [scheduleMode, setScheduleMode] = useState('manual'); // 'manual' or 'search'
   const [searchResults, setSearchResults] = useState([]);
@@ -73,7 +73,7 @@ export default function Inspections() {
     recurrence_frequency: 'weekly',
     recurrence_end_date: '',
     custom_name: '',
-    inspection_details: '',
+    checkin_details: '',
     followup_type: 'issue',
     followup_category: 'general',
     followup_priority: 'medium',
@@ -152,7 +152,7 @@ export default function Inspections() {
   const getVisitDetails = (visit) => {
     const details = [];
     
-    if (visit.visit_type === 'inspection') {
+    if (visit.visit_type === 'check-in') {
       if (visit.overall_status === 'issues_found' || visit.overall_status === 'urgent') {
         details.push('Issues found');
       }
@@ -320,7 +320,7 @@ export default function Inspections() {
   });
 
   const checkForScheduledInspection = () => {
-    if (newVisit.inspection_type !== 'drop_in') return false;
+    if (newVisit.checkin_type !== 'drop_in') return false;
     
     const selectedDate = parseISO(newVisit.scheduled_date);
     const weekStart = addDays(selectedDate, -selectedDate.getDay());
@@ -328,9 +328,9 @@ export default function Inspections() {
     
     const scheduledInSameWeek = visits.find(v => 
       v.property_id === newVisit.property_id &&
-      v.visit_type === 'inspection' &&
+      v.visit_type === 'check-in' &&
       v.status === 'scheduled' &&
-      v.inspection_type === 'routine'
+      v.checkin_type === 'routine'
     );
     
     if (scheduledInSameWeek) {
@@ -354,19 +354,19 @@ export default function Inspections() {
       const property = getProperty(newVisit.property_id);
       const staffMember = staff.find(s => s.user_email === newVisit.assigned_to);
 
-      if (visitType === 'inspection') {
+      if (visitType === 'check-in') {
         if (!editingId && checkForScheduledInspection()) {
           return;
         }
 
-        const isFlexibleType = ['other', 'customer_called_in', 'drop_in'].includes(newVisit.inspection_type);
+        const isFlexibleType = ['other', 'customer_called_in', 'drop_in'].includes(newVisit.checkin_type);
         
         const visitData = {
           company_id: companyId,
           property_id: newVisit.property_id,
           client_id: property?.client_id,
-          visit_type: 'inspection',
-          inspection_type: newVisit.inspection_type,
+          visit_type: 'check-in',
+          checkin_type: newVisit.checkin_type,
           template_id: !isFlexibleType ? (newVisit.template_id || null) : null,
           scheduled_date: newVisit.scheduled_date,
           scheduled_time: newVisit.scheduled_time || null,
@@ -374,8 +374,8 @@ export default function Inspections() {
           assigned_to_name: staffMember?.user_name || null,
           status: isFlexibleType ? 'completed' : 'scheduled',
           completed_at: isFlexibleType ? new Date().toISOString() : null,
-          ...(isFlexibleType && { summary_notes: newVisit.inspection_details || '' }),
-          ...(newVisit.custom_name && { custom_inspection_name: newVisit.custom_name })
+          ...(isFlexibleType && { summary_notes: newVisit.checkin_details || '' }),
+          ...(newVisit.custom_name && { custom_checkin_name: newVisit.custom_name })
         };
 
         if (editingId) {
@@ -440,19 +440,19 @@ export default function Inspections() {
     } finally {
       setShowNewDialog(false);
       setEditingId(null);
-      setVisitType('inspection');
+      setVisitType('check-in');
       setNewVisit({
         property_id: '',
         template_id: '',
         scheduled_date: format(new Date(), 'yyyy-MM-dd'),
         scheduled_time: '',
-        inspection_type: 'routine',
+        checkin_type: 'routine',
         assigned_to: '',
         is_recurring: false,
         recurrence_frequency: 'weekly',
         recurrence_end_date: '',
         custom_name: '',
-        inspection_details: '',
+        checkin_details: '',
         followup_type: 'issue',
         followup_category: 'general',
         followup_priority: 'medium',
@@ -470,19 +470,19 @@ export default function Inspections() {
   const handleEditVisit = (visit) => {
     setEditingId(visit.id);
     setVisitType(visit.visit_type);
-    if (visit.visit_type === 'inspection') {
+    if (visit.visit_type === 'check-in') {
       setNewVisit({
         property_id: visit.property_id,
         template_id: visit.template_id || '',
         scheduled_date: visit.scheduled_date,
         scheduled_time: visit.scheduled_time || '',
-        inspection_type: visit.inspection_type,
+        checkin_type: visit.checkin_type,
         assigned_to: visit.assigned_to || '',
         is_recurring: false,
         recurrence_frequency: 'weekly',
         recurrence_end_date: '',
-        custom_name: visit.custom_inspection_name || '',
-        inspection_details: visit.summary_notes || '',
+        custom_name: visit.custom_checkin_name || '',
+        checkin_details: visit.summary_notes || '',
         followup_type: 'issue',
         followup_category: 'general',
         followup_priority: 'medium',
@@ -498,13 +498,13 @@ export default function Inspections() {
         template_id: '',
         scheduled_date: format(new Date(), 'yyyy-MM-dd'),
         scheduled_time: '',
-        inspection_type: 'routine',
+        checkin_type: 'routine',
         assigned_to: visit.assigned_to || '',
         is_recurring: false,
         recurrence_frequency: 'weekly',
         recurrence_end_date: '',
         custom_name: '',
-        inspection_details: '',
+        checkin_details: '',
         followup_type: visit.followup_type,
         followup_category: visit.followup_category,
         followup_priority: visit.priority,
@@ -524,23 +524,23 @@ export default function Inspections() {
     const property = getProperty(newVisit.property_id);
     const staffMember = staff.find(s => s.user_email === newVisit.assigned_to);
     
-    const isFlexibleType = ['other', 'customer_called_in', 'drop_in'].includes(newVisit.inspection_type);
+    const isFlexibleType = ['other', 'customer_called_in', 'drop_in'].includes(newVisit.checkin_type);
     
-    const inspectionData = {
+    const checkinData = {
       company_id: companyId,
       property_id: newVisit.property_id,
       client_id: property?.client_id,
-      visit_type: 'inspection',
+      visit_type: 'check-in',
       template_id: !isFlexibleType ? (newVisit.template_id || null) : null,
       scheduled_date: newVisit.scheduled_date,
       scheduled_time: newVisit.scheduled_time || null,
-      inspection_type: newVisit.inspection_type,
+      checkin_type: newVisit.checkin_type,
       assigned_to: newVisit.assigned_to || null,
       assigned_to_name: staffMember?.user_name || null,
       status: 'completed',
       completed_at: new Date().toISOString(),
-      ...(isFlexibleType && { summary_notes: newVisit.inspection_details || '' }),
-      ...(newVisit.custom_name && { custom_inspection_name: newVisit.custom_name })
+      ...(isFlexibleType && { summary_notes: newVisit.checkin_details || '' }),
+      ...(newVisit.custom_name && { custom_checkin_name: newVisit.custom_name })
     };
     
     if (replace && scheduledInspectionToReplace) {
@@ -550,7 +550,7 @@ export default function Inspections() {
       });
     }
     
-    await base44.entities.Visit.create(inspectionData);
+    await base44.entities.Visit.create(checkinData);
     
     setShowReplaceDialog(false);
     setScheduledInspectionToReplace(null);
@@ -560,13 +560,13 @@ export default function Inspections() {
       template_id: '',
       scheduled_date: format(new Date(), 'yyyy-MM-dd'),
       scheduled_time: '',
-      inspection_type: 'routine',
+      checkin_type: 'routine',
       assigned_to: '',
       is_recurring: false,
       recurrence_frequency: 'weekly',
       recurrence_end_date: '',
       custom_name: '',
-      inspection_details: '',
+      checkin_details: '',
       followup_type: 'issue',
       followup_category: 'general',
       followup_priority: 'medium',
@@ -662,7 +662,7 @@ export default function Inspections() {
               <Eye className="h-4 w-4 mr-2" />
               View Details
             </DropdownMenuItem>
-            {visit.visit_type === 'inspection' && visit.status === 'scheduled' && (
+            {visit.visit_type === 'check-in' && visit.status === 'scheduled' && (
               <>
                 <DropdownMenuItem onClick={(e) => {
                   e.stopPropagation();
@@ -686,7 +686,7 @@ export default function Inspections() {
          title="Visits"
          subtitle={`${visits.length} total visits`}
          action={() => {
-           setVisitType('inspection');
+           setVisitType('check-in');
            setShowNewDialog(true);
          }}
          actionLabel="Schedule a Visit"
@@ -740,7 +740,7 @@ export default function Inspections() {
              </SelectTrigger>
              <SelectContent>
                <SelectItem value="all">All Types</SelectItem>
-               <SelectItem value="inspection">Inspection</SelectItem>
+               <SelectItem value="check-in">Check-In</SelectItem>
                <SelectItem value="followup">Follow-Up</SelectItem>
              </SelectContent>
            </Select>
@@ -769,7 +769,7 @@ export default function Inspections() {
             title="No visits yet"
             description="Schedule your first visit to start monitoring properties."
             action={() => {
-              setVisitType('inspection');
+              setVisitType('check-in');
               setShowNewDialog(true);
             }}
             actionLabel="Schedule a Visit"
@@ -790,7 +790,7 @@ export default function Inspections() {
          setShowNewDialog(open);
          if (!open) {
            setEditingId(null);
-           setVisitType('inspection');
+           setVisitType('check-in');
            setScheduleMode('manual');
            setSearchResults([]);
            setNewVisit({
@@ -798,13 +798,13 @@ export default function Inspections() {
              template_id: '',
              scheduled_date: format(new Date(), 'yyyy-MM-dd'),
              scheduled_time: '',
-             inspection_type: 'routine',
+             checkin_type: 'routine',
              assigned_to: '',
              is_recurring: false,
              recurrence_frequency: 'weekly',
              recurrence_end_date: '',
              custom_name: '',
-             inspection_details: '',
+             checkin_details: '',
              followup_type: 'issue',
              followup_category: 'general',
              followup_priority: 'medium',
@@ -820,7 +820,7 @@ export default function Inspections() {
            <DialogHeader>
              <DialogTitle>{editingId ? 'Edit Visit' : 'Schedule a Visit'}</DialogTitle>
              <DialogDescription>
-               {editingId ? 'Update visit details' : 'Create a new inspection or follow-up'}
+               {editingId ? 'Update visit details' : 'Create a new check-in or follow-up'}
              </DialogDescription>
            </DialogHeader>
 
@@ -910,7 +910,7 @@ export default function Inspections() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="inspection">Inspection</SelectItem>
+                    <SelectItem value="check-in">Check-In</SelectItem>
                     <SelectItem value="followup">Follow-Up</SelectItem>
                     <SelectItem value="pre_storm">Pre-Storm</SelectItem>
                     <SelectItem value="post_storm">Post-Storm</SelectItem>
@@ -920,12 +920,12 @@ export default function Inspections() {
 
               {scheduleMode === 'search' && !editingId && (
                <div className="space-y-4">
-                {visitType === 'inspection' && (
+                {visitType === 'check-in' && (
                   <div>
-                    <Label>Inspection Type *</Label>
+                    <Label>Check-In Type *</Label>
                     <Select
-                      value={newVisit.inspection_type}
-                      onValueChange={(value) => setNewVisit(prev => ({ ...prev, inspection_type: value }))}
+                      value={newVisit.checkin_type}
+                      onValueChange={(value) => setNewVisit(prev => ({ ...prev, checkin_type: value }))}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -933,7 +933,7 @@ export default function Inspections() {
                       <SelectContent>
                         <SelectItem value="routine">Routine</SelectItem>
                         <SelectItem value="other">Other</SelectItem>
-                        <SelectItem value="custom_client_request">Custom Client Request</SelectItem>
+                        <SelectItem value="customer_called_in">Customer Called-In</SelectItem>
                         <SelectItem value="drop_in">Drop-In</SelectItem>
                       </SelectContent>
                     </Select>
@@ -976,7 +976,7 @@ export default function Inspections() {
                       <button
                         key={idx}
                         onClick={() => {
-                          if (visitType === 'inspection') {
+                          if (visitType === 'check-in') {
                             setNewVisit(prev => ({
                               ...prev,
                               scheduled_date: result.date,
@@ -1005,7 +1005,7 @@ export default function Inspections() {
 
              {scheduleMode === 'manual' && (
               <>
-             {visitType === 'inspection' ? (
+             {visitType === 'check-in' ? (
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Date *</Label>
@@ -1059,13 +1059,13 @@ export default function Inspections() {
               </div>
             )}
 
-            {visitType === 'inspection' ? (
+            {visitType === 'check-in' ? (
             <>
               <div>
-                <Label>Inspection Type</Label>
+                <Label>Check-In Type</Label>
                 <Select
-                  value={newVisit.inspection_type}
-                  onValueChange={(value) => setNewVisit(prev => ({ ...prev, inspection_type: value, template_id: !['other', 'customer_called_in', 'drop_in'].includes(value) ? prev.template_id : '' }))}
+                  value={newVisit.checkin_type}
+                  onValueChange={(value) => setNewVisit(prev => ({ ...prev, checkin_type: value, template_id: !['other', 'customer_called_in', 'drop_in'].includes(value) ? prev.template_id : '' }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -1079,10 +1079,10 @@ export default function Inspections() {
                 </Select>
               </div>
 
-                 {newVisit.inspection_type === 'other' && (
+                 {newVisit.checkin_type === 'other' && (
                    <div className="space-y-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                      <div>
-                       <Label>Inspection Name</Label>
+                       <Label>Check-In Name</Label>
                        <Input
                          placeholder="e.g., Annual Maintenance Check"
                          value={newVisit.custom_name}
@@ -1090,11 +1090,11 @@ export default function Inspections() {
                        />
                      </div>
                      <div>
-                       <Label>What was inspected?</Label>
+                       <Label>What was checked?</Label>
                        <Textarea
-                         placeholder="Describe what was inspected..."
-                         value={newVisit.inspection_details}
-                         onChange={(e) => setNewVisit(prev => ({ ...prev, inspection_details: e.target.value }))}
+                         placeholder="Describe what was checked..."
+                         value={newVisit.checkin_details}
+                         onChange={(e) => setNewVisit(prev => ({ ...prev, checkin_details: e.target.value }))}
                          rows={2}
                        />
                      </div>
@@ -1102,14 +1102,14 @@ export default function Inspections() {
                    </div>
                  )}
 
-                 {newVisit.inspection_type === 'customer_called_in' && (
+                 {newVisit.checkin_type === 'customer_called_in' && (
                    <div className="space-y-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
                      <div>
-                       <Label>What was requested to inspect?</Label>
+                       <Label>What was requested to check?</Label>
                        <Textarea
                          placeholder="Describe what the client requested..."
-                         value={newVisit.inspection_details}
-                         onChange={(e) => setNewVisit(prev => ({ ...prev, inspection_details: e.target.value }))}
+                         value={newVisit.checkin_details}
+                         onChange={(e) => setNewVisit(prev => ({ ...prev, checkin_details: e.target.value }))}
                          rows={2}
                        />
                      </div>
@@ -1117,10 +1117,10 @@ export default function Inspections() {
                    </div>
                  )}
 
-                 {newVisit.inspection_type === 'drop_in' && (
+                 {newVisit.checkin_type === 'drop_in' && (
                    <div className="space-y-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                      <div>
-                       <Label>Inspection Name</Label>
+                       <Label>Check-In Name</Label>
                        <Input
                          placeholder="e.g., Quick Property Check"
                          value={newVisit.custom_name}
@@ -1128,7 +1128,7 @@ export default function Inspections() {
                        />
                      </div>
                      <p className="text-xs text-green-700">
-                       <strong>Drop-In:</strong> Unscheduled inspection during convenience visit. If a scheduled inspection exists for this week, you'll be offered to use this instead.
+                       <strong>Drop-In:</strong> Unscheduled check-in during convenience visit. If a scheduled check-in exists for this week, you'll be offered to use this instead.
                      </p>
                    </div>
                  )}
@@ -1191,7 +1191,7 @@ export default function Inspections() {
                     </Select>
                   </div>
 
-                  {visitType === 'inspection' && templates.length > 0 && !['other', 'customer_called_in', 'drop_in'].includes(newVisit.inspection_type) && (
+                  {visitType === 'check-in' && templates.length > 0 && !['other', 'customer_called_in', 'drop_in'].includes(newVisit.checkin_type) && (
                     <div>
                       <Label>Template</Label>
                       <Select
@@ -1212,11 +1212,11 @@ export default function Inspections() {
                     </div>
                   )}
 
-                  {visitType === 'inspection' && !['other', 'customer_called_in', 'drop_in'].includes(newVisit.inspection_type) && (
+                  {visitType === 'check-in' && !['other', 'customer_called_in', 'drop_in'].includes(newVisit.checkin_type) && (
                     <div className="flex items-center justify-between py-2">
                       <div>
-                        <Label>Recurring Inspection</Label>
-                        <p className="text-sm text-slate-500">Schedule multiple inspections</p>
+                        <Label>Recurring Check-In</Label>
+                        <p className="text-sm text-slate-500">Schedule multiple check-ins</p>
                       </div>
                       <Switch
                         checked={newVisit.is_recurring}
@@ -1225,7 +1225,7 @@ export default function Inspections() {
                     </div>
                   )}
 
-                  {visitType === 'inspection' && newVisit.is_recurring && (
+                  {visitType === 'check-in' && newVisit.is_recurring && (
                     <div className="space-y-4 p-4 bg-slate-50 rounded-lg">
                       <div>
                         <Label>Frequency</Label>
@@ -1266,12 +1266,12 @@ export default function Inspections() {
                 onClick={handleCreateVisit}
                 disabled={
                   !newVisit.property_id ||
-                  (visitType === 'inspection' && !newVisit.scheduled_date) ||
+                  (visitType === 'check-in' && !newVisit.scheduled_date) ||
                   (visitType === 'followup' && !newVisit.followup_due_date) ||
                   (visitType === 'followup' && !newVisit.followup_title) ||
                   creating ||
-                  (visitType === 'inspection' && newVisit.is_recurring && !newVisit.recurrence_end_date) ||
-                  (visitType === 'inspection' && ['other', 'customer_called_in'].includes(newVisit.inspection_type) && !newVisit.inspection_details)
+                  (visitType === 'check-in' && newVisit.is_recurring && !newVisit.recurrence_end_date) ||
+                  (visitType === 'check-in' && ['other', 'customer_called_in'].includes(newVisit.checkin_type) && !newVisit.checkin_details)
                 }
                 className="bg-slate-900 hover:bg-slate-800"
               >
@@ -1285,11 +1285,11 @@ export default function Inspections() {
       <Dialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Use Drop-In to Fulfill Scheduled Inspection?</DialogTitle>
+            <DialogTitle>Use Drop-In to Fulfill Scheduled Check-In?</DialogTitle>
             <DialogDescription>
-              There is a scheduled {scheduledInspectionToReplace?.type === 'routine' ? 'Routine' : scheduledInspectionToReplace?.type} inspection for this property on{' '}
+              There is a scheduled {scheduledInspectionToReplace?.checkin_type === 'routine' ? 'Routine' : scheduledInspectionToReplace?.checkin_type} check-in for this property on{' '}
               {scheduledInspectionToReplace && format(parseISO(scheduledInspectionToReplace.scheduled_date), 'MMM d, yyyy')}.
-              You can mark that scheduled inspection as complete and link this drop-in visit instead.
+              You can mark that scheduled check-in as complete and link this drop-in visit instead.
             </DialogDescription>
           </DialogHeader>
 
@@ -1306,7 +1306,7 @@ export default function Inspections() {
               disabled={creating}
               className="bg-slate-900 hover:bg-slate-800"
             >
-              Use Drop-In & Mark Scheduled Complete
+              Use Drop-In & Mark Check-In Complete
             </Button>
           </DialogFooter>
         </DialogContent>
