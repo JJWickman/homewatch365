@@ -84,19 +84,19 @@ export default function DataTable({
       </div>
 
       {/* Mobile Card View */}
-      <div className="md:hidden space-y-3">
+      <div className="md:hidden space-y-2">
         {data.map((row, i) => (
           <div 
             key={row.id || i}
             onClick={() => onRowClick && onRowClick(row)}
-            className={`border rounded-lg bg-white p-4 space-y-3 ${onRowClick ? 'cursor-pointer active:bg-slate-50' : ''}`}
+            className={`border rounded-lg bg-white p-3 space-y-1.5 ${onRowClick ? 'cursor-pointer active:bg-slate-50' : ''}`}
           >
             {columns.map((col, j) => (
-              <div key={j} className={col.cellClassName}>
-                <div className="text-xs font-medium text-slate-500 mb-1">{col.header}</div>
-                <div className="text-sm">
+              <div key={j} className={`flex items-center justify-between gap-2 ${col.cellClassName}`}>
+                <span className="text-xs font-medium text-slate-500 truncate">{col.header}:</span>
+                <span className="text-xs text-slate-900 text-right flex-1">
                   {col.cell ? col.cell(row) : row[col.accessor]}
-                </div>
+                </span>
               </div>
             ))}
           </div>
