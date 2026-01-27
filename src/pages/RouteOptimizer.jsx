@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import PageHeader from '@/components/shared/PageHeader';
 import { createPageUrl } from '@/utils';
+import StaticRouteMap from '@/components/route/StaticRouteMap';
 
 export default function RouteOptimizer() {
   const [companyId, setCompanyId] = useState(null);
@@ -307,56 +308,75 @@ export default function RouteOptimizer() {
 
       {/* Optimized Route */}
       {showOptimized && optimizedRoute && (
-        <Card className="mb-6 border-slate-900">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-sm">Optimized Route</CardTitle>
-                <CardDescription className="text-xs mt-1">
-                  Optimized based on scheduled times and locations
-                </CardDescription>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={exportToGoogleMaps}
-                >
-                  <Navigation className="h-4 w-4 mr-2" />
-                  Open in Google Maps
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowOptimized(false)}
-                  size="sm"
-                >
-                  Reset
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {optimizedRoute.optimized_stops.map((stop, idx) => (
-                <div key={idx} className="flex items-center gap-4 p-3 rounded-lg bg-slate-50 border border-slate-900">
-                  <div className="h-8 w-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-sm font-semibold shrink-0">
-                    {stop.order}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">{stop.name}</p>
-                    <p className="text-xs text-slate-500">{stop.address}</p>
-                  </div>
-                  {stop.scheduled_time && (
-                    <div className="flex items-center gap-1 text-xs text-slate-600 shrink-0">
-                      <Clock className="h-3 w-3" />
-                      {stop.scheduled_time}
-                    </div>
-                  )}
+        <>
+          {/* Map */}
+          <Card className="mb-6">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm">Route Map</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <StaticRouteMap 
+                stops={optimizedRoute.optimized_stops.map(stop => ({
+                  ...stop,
+                  property_name: stop.name
+                }))} 
+                startAddress={startType === 'home' ? startAddress : customStartAddress}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Route List */}
+          <Card className="mb-6 border-slate-900">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-sm">Optimized Route</CardTitle>
+                  <CardDescription className="text-xs mt-1">
+                    Optimized based on scheduled times and locations
+                  </CardDescription>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={exportToGoogleMaps}
+                  >
+                    <Navigation className="h-4 w-4 mr-2" />
+                    Open in Google Maps
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowOptimized(false)}
+                    size="sm"
+                  >
+                    Reset
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {optimizedRoute.optimized_stops.map((stop, idx) => (
+                  <div key={idx} className="flex items-center gap-4 p-3 rounded-lg bg-slate-50 border border-slate-900">
+                    <div className="h-8 w-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-sm font-semibold shrink-0">
+                      {stop.order}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm">{stop.name}</p>
+                      <p className="text-xs text-slate-500">{stop.address}</p>
+                    </div>
+                    {stop.scheduled_time && (
+                      <div className="flex items-center gap-1 text-xs text-slate-600 shrink-0">
+                        <Clock className="h-3 w-3" />
+                        {stop.scheduled_time}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </>
       )}
 
       {/* Summary Stats - Only show when optimized */}
