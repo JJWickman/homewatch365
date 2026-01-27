@@ -343,10 +343,10 @@ export default function FinancialManagement({ companyId }) {
                   {products.filter(p => p.type === 'subscription').map((product) => (
                     <div
                       key={product.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 transition-colors"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg hover:bg-slate-50 transition-colors gap-3"
                     >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-1">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-1 flex-wrap">
                           <h3 className="font-semibold">{product.name}</h3>
                           <Badge variant="outline" className="capitalize">
                             {product.inspection_frequency?.replace('_', '-')}
@@ -376,7 +376,7 @@ export default function FinancialManagement({ companyId }) {
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
                         <Button
                           variant="outline"
                           size="sm"
@@ -411,10 +411,10 @@ export default function FinancialManagement({ companyId }) {
                   {products.filter(p => p.type === 'addon').map((product) => (
                     <div
                       key={product.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 transition-colors"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg hover:bg-slate-50 transition-colors gap-3"
                     >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-1">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-1 flex-wrap">
                           <h3 className="font-semibold">{product.name}</h3>
                           <Badge variant="outline">Add-On</Badge>
                           {!product.is_active && (
