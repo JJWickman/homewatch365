@@ -67,7 +67,7 @@ export default function Inspections() {
     template_id: '',
     scheduled_date: format(new Date(), 'yyyy-MM-dd'),
     scheduled_time: '',
-    inspection_type: 'routine',
+    checkin_type: 'routine',
     assigned_to: '',
     is_recurring: false,
     recurrence_frequency: 'weekly',
