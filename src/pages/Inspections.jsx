@@ -669,7 +669,7 @@ export default function Inspections() {
                   navigate(createPageUrl('InspectionFlow') + `?id=${visit.id}`);
                 }}>
                   <Play className="h-4 w-4 mr-2" />
-                  Start Inspection
+                  Start Visit
                 </DropdownMenuItem>
               </>
             )}
@@ -698,7 +698,7 @@ export default function Inspections() {
          <div className="relative mb-4">
            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
            <Input
-             placeholder="Search inspections by property name or address..."
+             placeholder="Search visits by property name or address..."
              value={searchQuery}
              onChange={(e) => setSearchQuery(e.target.value)}
              className="pl-10 h-10 text-base"
@@ -1284,7 +1284,7 @@ export default function Inspections() {
         </DialogContent>
       </Dialog>
 
-      {/* Replace Scheduled Inspection Dialog */}
+      {/* Replace Scheduled Visit Dialog */}
       <Dialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
