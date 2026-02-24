@@ -42,9 +42,12 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Convert plans object to array and sort by a logical order
+    const planArray = Object.values(plans);
+    
     return Response.json({ 
       success: true,
-      plans: Object.values(plans)
+      plans: planArray
     });
   } catch (error) {
     console.error('Error fetching Stripe prices:', error);
