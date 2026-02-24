@@ -19,8 +19,8 @@ Deno.serve(async (req) => {
       return Response.json({ valid: false, message: 'Promo code is required' });
     }
 
-    // Find the promotion
-    const promotions = await base44.entities.Promotion.filter({ code: code });
+    // Find the promotion using service role for database access
+    const promotions = await base44.asServiceRole.entities.Promotion.filter({ code: code });
 
     if (promotions.length === 0) {
       return Response.json({ valid: false, message: 'Invalid promo code' });
