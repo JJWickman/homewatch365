@@ -47,8 +47,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Convert to array
-    const planArray = Object.values(plans);
+    // Convert to array and sort by monthly price (least to most expensive)
+    const planArray = Object.values(plans).sort((a, b) => {
+      const priceA = a.prices?.monthly?.amount || 0;
+      const priceB = b.prices?.monthly?.amount || 0;
+      return priceA - priceB;
+    });
     
     return Response.json({ 
       success: true,
