@@ -22,8 +22,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
-    // Create base44 client for service role operations
-    const base44 = createBase44ServiceClient();
+    // Create a minimal request object for base44 SDK initialization
+    // Webhooks don't have user context, so we use asServiceRole
+    const minimalReq = new Request('http://localhost', {
+      headers: {
+        'Base44-App-Id': Deno.env.get('BASE44_APP_ID') || 'default'
+      }
+    });
+    const base44 = createClientFromRequest(minimalReq);
 
     // Handle the event
     switch (event.type) {
