@@ -121,12 +121,6 @@ export default function SubscriptionManagement({ company, companyMember }) {
     }
   };
 
-  const handlePaymentSuccess = () => {
-    setShowPaymentDialog(false);
-    setLoadingCheckout(false);
-    loadPaymentMethod();
-  };
-
   const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'owner' || companyMember?.is_owner;
 
   if (!isAdmin) {
