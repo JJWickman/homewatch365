@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { price_id, company_id, subscription_plan, billing_cycle, return_url } = await req.json();
+    const { price_id, company_id, subscription_plan, billing_cycle, return_url, promo_code } = await req.json();
 
     // Get or create company
     const companies = await base44.asServiceRole.entities.Company.filter({ id: company_id });
@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
     }
 
     // Create checkout session with 14-day trial
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams = {
       customer: customerId,
       mode: 'subscription',
       payment_method_types: ['card'],
@@ -74,7 +74,14 @@ Deno.serve(async (req) => {
         }
       },
       allow_promotion_codes: true,
-    });
+    };
+
+    // Add promo code if provided
+    if (promo_code) {
+      sessionParams.discounts = [{ promotion_code: promo_code }];
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     return Response.json({ 
       url: session.url,
