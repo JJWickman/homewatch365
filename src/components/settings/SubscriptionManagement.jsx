@@ -185,43 +185,54 @@ export default function SubscriptionManagement({ company, companyMember }) {
           <CardDescription>Select a plan to upgrade or downgrade your subscription</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {PLANS.map((plan) => {
-              const isCurrent = company.subscription_plan === plan.id;
-              return (
-                <div
-                  key={plan.id}
-                  className={`relative rounded-lg border-2 p-4 transition-all ${
-                    isCurrent ? 'border-blue-600 bg-blue-50' : 'border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  {isCurrent && (
-                    <div className="absolute top-2 right-2">
-                      <Badge className="bg-blue-600">Current</Badge>
-                    </div>
-                  )}
-                  <h3 className="font-semibold text-slate-900">{plan.name}</h3>
-                  <p className="text-2xl font-bold text-slate-900 mt-2">{plan.price}</p>
-                  <p className="text-xs text-slate-500 mt-1">{plan.description}</p>
-                  <Button
-                    onClick={() => handlePlanChange(plan.id)}
-                    disabled={isCurrent || changingPlan}
-                    variant={isCurrent ? 'outline' : 'default'}
-                    className="w-full mt-4"
-                    size="sm"
+          {loadingPlans ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+            </div>
+          ) : plans.length === 0 ? (
+            <p className="text-sm text-slate-600">No plans available. Please configure plans in Stripe.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {plans.map((plan) => {
+                const isCurrent = company.subscription_plan === plan.id;
+                const monthlyPrice = plan.prices?.monthly?.amount;
+                return (
+                  <div
+                    key={plan.id}
+                    className={`relative rounded-lg border-2 p-4 transition-all ${
+                      isCurrent ? 'border-blue-600 bg-blue-50' : 'border-slate-200 hover:border-slate-300'
+                    }`}
                   >
-                    {isCurrent ? (
-                      <span className="flex items-center gap-2">
-                        <Check className="h-4 w-4" /> Current
-                      </span>
-                    ) : (
-                      'Select Plan'
+                    {isCurrent && (
+                      <div className="absolute top-2 right-2">
+                        <Badge className="bg-blue-600">Current</Badge>
+                      </div>
                     )}
-                  </Button>
-                </div>
-              );
-            })}
-          </div>
+                    <h3 className="font-semibold text-slate-900">{plan.name}</h3>
+                    <p className="text-2xl font-bold text-slate-900 mt-2">
+                      {monthlyPrice ? `$${monthlyPrice}` : 'Custom'}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-1">{plan.description}</p>
+                    <Button
+                      onClick={() => handlePlanChange(plan.id)}
+                      disabled={isCurrent || changingPlan}
+                      variant={isCurrent ? 'outline' : 'default'}
+                      className="w-full mt-4"
+                      size="sm"
+                    >
+                      {isCurrent ? (
+                        <span className="flex items-center gap-2">
+                          <Check className="h-4 w-4" /> Current
+                        </span>
+                      ) : (
+                        'Select Plan'
+                      )}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
