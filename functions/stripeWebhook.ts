@@ -22,9 +22,18 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
-    // For webhooks, create base44 client from the actual request
-    // The webhook comes from Stripe, not the app, but we still need app context
-    const base44 = createClientFromRequest(req);
+    // For webhooks, we need to add the Base44-App-Id header to the request
+    // so createClientFromRequest can properly initialize the SDK
+    const headersWithAppId = new Headers(req.headers);
+    headersWithAppId.set('Base44-App-Id', Deno.env.get('BASE44_APP_ID') || '');
+    
+    const modifiedReq = new Request(req.url, {
+      method: req.method,
+      headers: headersWithAppId,
+      body: body
+    });
+    
+    const base44 = createClientFromRequest(modifiedReq);
 
     // Handle the event
     switch (event.type) {
