@@ -7,8 +7,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CreditCard, AlertCircle, Check, Loader2 } from 'lucide-react';
 
 export default function SubscriptionManagement({ company, companyMember }) {
-  const [loadingPortal, setLoadingPortal] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState(null);
   const [changingPlan, setChangingPlan] = useState(false);
   const [plans, setPlans] = useState([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
