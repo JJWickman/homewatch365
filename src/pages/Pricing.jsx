@@ -145,6 +145,18 @@ export default function Pricing() {
     }
   };
 
+  const getPriceId = (tierId) => {
+    // Map UI plan IDs to Stripe price keys
+    const priceKeyMap = {
+      solopreneur: 'solopreneur_crm',
+      growth: 'growth_crm',
+      professional: 'professional_crm',
+      enterprise: 'enterprise'
+    };
+    const priceKey = priceKeyMap[tierId];
+    return stripePrices[priceKey]?.[billingCycle];
+  };
+
   const handleSelectPlan = async (tierId) => {
     if (!company) {
       console.error('No company found');
@@ -153,15 +165,14 @@ export default function Pricing() {
     
     setLoadingCheckout(true);
     try {
-      const priceId = stripePrices[tierId]?.[billingCycle];
+      const priceId = getPriceId(tierId);
       
       if (!priceId) {
-        alert('Stripe not configured. Please contact support or set up Stripe in Settings.');
+        alert('Unable to load pricing information. Please refresh the page and try again.');
         setLoadingCheckout(false);
         return;
       }
 
-      console.log('Creating checkout session:', { tierId, billingCycle, priceId });
       const response = await base44.functions.invoke('createCheckoutSession', {
         price_id: priceId,
         company_id: company.id,
@@ -170,11 +181,9 @@ export default function Pricing() {
         return_url: `${window.location.origin}/Settings?tab=billing`
       });
       
-      console.log('Checkout response:', response.data);
       if (response.data?.url) {
         window.location.href = response.data.url;
       } else {
-        console.error('No URL in response:', response.data);
         alert('Failed to create checkout session. Please try again.');
         setLoadingCheckout(false);
       }
