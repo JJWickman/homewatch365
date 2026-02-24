@@ -1,3 +1,23 @@
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+
+export default function Pricing() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect to Settings > Subscription tab
+    navigate(createPageUrl('Settings') + '?tab=subscription');
+  }, [navigate]);
+
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <p className="text-slate-600">Redirecting to subscription settings...</p>
+    </div>
+  );
+}
+
+/* ARCHIVED CODE - Use Settings > Subscription instead
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Check, X, Shield, Users, Briefcase, TrendingUp, Zap } from 'lucide-react';
