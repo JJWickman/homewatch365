@@ -68,8 +68,8 @@ Deno.serve(async (req) => {
         },
       ],
       subscription_data: subscriptionData,
-      success_url: return_url || `${new URL(req.url).origin}/Settings?tab=billing&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: return_url?.split('?')[0] || `${new URL(req.url).origin}/Settings?tab=billing`,
+      success_url: `${new URL(req.url).origin}/Dashboard`,
+      cancel_url: `${new URL(req.url).origin}/Settings?tab=billing`,
       metadata: {
         company_id: company.id,
         subscription_plan,
