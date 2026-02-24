@@ -189,7 +189,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
             </div>
-          ) : plans.length === 0 ? (
+          ) : !plans || plans.length === 0 ? (
             <p className="text-sm text-slate-600">No plans available. Please configure plans in Stripe.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
