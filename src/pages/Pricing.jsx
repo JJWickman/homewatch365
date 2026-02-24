@@ -189,7 +189,7 @@ export default function Pricing() {
     );
   }
 
-  const isOwner = companyMember?.role === 'owner';
+  const isOwner = companyMember?.is_owner || companyMember?.role === 'owner' || companyMember?.role === 'administrator';
 
   return (
     <div>
