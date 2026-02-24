@@ -182,8 +182,8 @@ export default function SubscriptionManagement({ company, companyMember }) {
                   {changingPlan ? 'Loading...' : isCurrent ? 'Current Plan' : 'Subscribe'}
                 </Button>
 
-                {/* Trial Notice */}
-                {company?.subscription_status === 'trial' && !isCurrent && (
+                {/* Trial Notice - only show if they haven't completed a trial yet */}
+                {!company?.trial_ends_at && !isCurrent && (
                   <p className="text-xs text-slate-500 text-center mt-4">14-day free trial included</p>
                 )}
               </div>
