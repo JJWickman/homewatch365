@@ -49,8 +49,12 @@ export default function TrialBanner({ company, companyMember }) {
           <strong>Trial Ending Soon:</strong> {daysRemaining} day{daysRemaining !== 1 ? 's' : ''} remaining in your free trial.
         </span>
         {companyMember?.is_owner && (
-          <Button asChild size="sm" className="bg-amber-600 hover:bg-amber-700 text-white ml-4">
-            <Link to={createPageUrl('Settings') + '?tab=subscription'}>View Plans</Link>
+          <Button 
+            onClick={() => navigate(createPageUrl('Settings') + '?tab=subscription')}
+            size="sm" 
+            className="bg-amber-600 hover:bg-amber-700 text-white ml-4"
+          >
+            View Plans
           </Button>
         )}
       </AlertDescription>
