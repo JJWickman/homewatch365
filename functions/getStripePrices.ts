@@ -4,45 +4,50 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 
 Deno.serve(async (req) => {
   try {
-    const prices = await stripe.prices.list({
+    // Fetch all active products first
+    const products = await stripe.products.list({
       active: true,
-      limit: 100,
-      expand: ['data.product']
+      limit: 100
     });
 
     // Organize products with their prices
     const plans = {};
     
-    for (const price of prices.data) {
-      const product = price.product;
+    for (const product of products.data) {
+      // Fetch prices for this product
+      const prices = await stripe.prices.list({
+        product: product.id,
+        active: true
+      });
+
       const planId = product.metadata?.plan_id || product.id;
       
-      if (!plans[planId]) {
-        plans[planId] = {
-          id: planId,
-          name: product.name,
-          description: product.description,
-          prices: {}
-        };
-      }
+      plans[planId] = {
+        id: planId,
+        name: product.name,
+        description: product.description,
+        prices: {}
+      };
       
-      // Store the monthly price (look for monthly billing)
-      if (price.recurring?.interval === 'month') {
-        plans[planId].prices.monthly = {
-          priceId: price.id,
-          amount: price.unit_amount / 100,
-          currency: price.currency
-        };
-      } else if (price.recurring?.interval === 'year') {
-        plans[planId].prices.yearly = {
-          priceId: price.id,
-          amount: price.unit_amount / 100,
-          currency: price.currency
-        };
+      // Organize prices by interval
+      for (const price of prices.data) {
+        if (price.recurring?.interval === 'month') {
+          plans[planId].prices.monthly = {
+            priceId: price.id,
+            amount: price.unit_amount / 100,
+            currency: price.currency
+          };
+        } else if (price.recurring?.interval === 'year') {
+          plans[planId].prices.yearly = {
+            priceId: price.id,
+            amount: price.unit_amount / 100,
+            currency: price.currency
+          };
+        }
       }
     }
 
-    // Convert plans object to array and sort by a logical order
+    // Convert to array
     const planArray = Object.values(plans);
     
     return Response.json({ 
