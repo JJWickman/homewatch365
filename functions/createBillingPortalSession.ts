@@ -17,13 +17,28 @@ Deno.serve(async (req) => {
 
     const { company_id, return_url } = body;
 
-    // Get company
-    const companies = await base44.entities.Company.filter({ id: company_id });
-    if (companies.length === 0) {
-      return Response.json({ error: 'Company not found' }, { status: 404 });
+    // Get company - either from body or from user's membership
+    let company;
+    
+    if (company_id) {
+      const companies = await base44.entities.Company.filter({ id: company_id });
+      if (companies.length === 0) {
+        return Response.json({ error: 'Company not found' }, { status: 404 });
+      }
+      company = companies[0];
+    } else {
+      // Get user's company membership
+      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
+      if (members.length === 0) {
+        return Response.json({ error: 'No company found for user' }, { status: 404 });
+      }
+      
+      const companies = await base44.entities.Company.filter({ id: members[0].company_id });
+      if (companies.length === 0) {
+        return Response.json({ error: 'Company not found' }, { status: 404 });
+      }
+      company = companies[0];
     }
-
-    const company = companies[0];
 
     // Create Stripe customer if it doesn't exist
     let customerId = company.stripe_customer_id;
