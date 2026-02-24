@@ -22,17 +22,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
-    // For webhooks, create a request with the app ID header
-    const headersWithAppId = new Headers(req.headers);
-    headersWithAppId.set('Base44-App-Id', Deno.env.get('BASE44_APP_ID'));
-    
-    const webhookReq = new Request(req.url, {
-      method: 'POST',
-      headers: headersWithAppId,
-      body: body
-    });
-    
-    const base44 = createClientFromRequest(webhookReq);
+    // For webhooks, use service role directly (no user auth required)
+    const base44 = createClientFromRequest(req);
 
     // Handle the event
     switch (event.type) {
