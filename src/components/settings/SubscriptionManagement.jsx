@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -19,7 +18,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
   const loadPlans = async () => {
     try {
       const response = await base44.functions.invoke('getStripePrices', {});
-      if (response.data.success) {
+      if (response.data.success && response.data.plans) {
         setPlans(response.data.plans);
       }
     } catch (error) {
@@ -34,10 +33,17 @@ export default function SubscriptionManagement({ company, companyMember }) {
 
     try {
       setChangingPlan(true);
-      await base44.entities.Company.update(company.id, {
-        subscription_plan: planId
+      const response = await base44.functions.invoke('createCheckoutSession', {
+        company_id: company.id,
+        plan_id: planId,
+        billing_cycle: billingCycle
       });
-      window.location.reload();
+      
+      if (response.data?.url) {
+        window.location.href = response.data.url;
+      } else {
+        alert('Failed to initiate checkout. Please try again.');
+      }
     } catch (error) {
       console.error('Error changing plan:', error);
       alert('Failed to change plan. Please try again.');
@@ -59,9 +65,27 @@ export default function SubscriptionManagement({ company, companyMember }) {
     );
   }
 
+  if (loadingPlans) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+      </div>
+    );
+  }
+
+  if (!plans || plans.length === 0) {
+    return (
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          No plans available. Please configure plans in Stripe.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
     <div className="space-y-8">
-      {/* Choose Your Plan Section */}
       <div>
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-slate-900">Choose Your Plan</h2>
@@ -69,7 +93,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
         </div>
 
         {/* Billing Cycle Toggle */}
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-12">
           <div className="inline-flex bg-slate-100 rounded-lg p-1">
             <button
               onClick={() => setBillingCycle('monthly')}
@@ -98,76 +122,68 @@ export default function SubscriptionManagement({ company, companyMember }) {
         </div>
 
         {/* Plans Grid */}
-        {loadingPlans ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
-          </div>
-        ) : !plans || plans.length === 0 ? (
-          <p className="text-sm text-slate-600 text-center">No plans available. Please configure plans in Stripe.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {plans.map((plan) => {
-              const isCurrent = company.subscription_plan === plan.id;
-              const price = billingCycle === 'monthly' 
-                ? plan.prices?.monthly?.amount 
-                : plan.prices?.yearly?.amount;
-              
-              return (
-                <div
-                  key={plan.id}
-                  className={`relative rounded-2xl border-2 p-6 transition-all ${
-                    isCurrent 
-                      ? 'border-green-500 bg-white shadow-lg' 
-                      : 'border-slate-200 hover:border-slate-300 bg-white'
-                  }`}
-                >
-                  {/* Badge */}
-                  {isCurrent && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-green-500 text-white px-3 py-1">Current Plan</Badge>
-                    </div>
-                  )}
-
-                  {/* Plan Name & Price */}
-                  <div className="mb-6">
-                    <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
-                    {price ? (
-                      <div className="mt-3">
-                        <span className="text-4xl font-bold text-slate-900">${price}</span>
-                        <span className="text-slate-600 ml-2">/mo</span>
-                      </div>
-                    ) : (
-                      <p className="text-xl font-bold text-slate-900 mt-3">Custom</p>
-                    )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {plans.map((plan) => {
+            const isCurrent = company.subscription_plan === plan.id;
+            const monthlyPrice = plan.prices?.monthly?.amount;
+            const yearlyPrice = plan.prices?.yearly?.amount;
+            const displayPrice = billingCycle === 'monthly' ? monthlyPrice : yearlyPrice;
+            
+            return (
+              <div
+                key={plan.id}
+                className={`relative rounded-2xl border-2 p-8 transition-all ${
+                  isCurrent 
+                    ? 'border-green-500 bg-white shadow-lg' 
+                    : 'border-slate-200 hover:border-slate-300 bg-white'
+                }`}
+              >
+                {/* Current Plan Badge */}
+                {isCurrent && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-green-500 text-white px-4 py-1">Current Plan</Badge>
                   </div>
+                )}
 
-                  {/* Description */}
-                  {plan.description && (
-                    <p className="text-sm text-slate-600 mb-6">{plan.description}</p>
-                  )}
-
-                  {/* CTA Button */}
-                  <Button
-                    onClick={() => handlePlanChange(plan.id)}
-                    disabled={isCurrent || changingPlan}
-                    className={`w-full mb-6 font-semibold ${
-                      isCurrent
-                        ? 'bg-slate-200 text-slate-600 cursor-not-allowed'
-                        : 'bg-slate-900 hover:bg-slate-800 text-white'
-                    }`}
-                  >
-                    {isCurrent ? 'Current Plan' : 'Subscribe'}
-                  </Button>
-
-                  {/* Trial Notice */}
-                  {company?.subscription_status === 'trial' && (
-                    <p className="text-xs text-slate-500 text-center">14-day free trial included</p>
+                {/* Plan Name & Price */}
+                <div className="mb-8">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-3">{plan.name}</h3>
+                  {displayPrice ? (
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-4xl font-bold text-slate-900">${displayPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                      <span className="text-slate-600">/mo</span>
+                    </div>
+                  ) : (
+                    <p className="text-xl font-bold text-slate-900">Custom Pricing</p>
                   )}
                 </div>
-              );
-            })}
-          </div>
-        )}
+
+                {/* Description */}
+                {plan.description && (
+                  <p className="text-sm text-slate-600 mb-8 line-clamp-2">{plan.description}</p>
+                )}
+
+                {/* CTA Button */}
+                <Button
+                  onClick={() => handlePlanChange(plan.id)}
+                  disabled={isCurrent || changingPlan}
+                  className={`w-full font-semibold py-2.5 transition-all ${
+                    isCurrent
+                      ? 'bg-slate-100 text-slate-600 cursor-not-allowed'
+                      : 'bg-slate-900 hover:bg-slate-800 text-white'
+                  }`}
+                >
+                  {changingPlan ? 'Loading...' : isCurrent ? 'Current Plan' : 'Subscribe'}
+                </Button>
+
+                {/* Trial Notice */}
+                {company?.subscription_status === 'trial' && !isCurrent && (
+                  <p className="text-xs text-slate-500 text-center mt-4">14-day free trial included</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
