@@ -186,6 +186,20 @@ export default function Layout({ children, currentPageName }) {
   const hasMarketingAccess = company?.subscription_plan === 'enterprise' || 
                              company?.marketing_addon_active === true ||
                              company?.subscription_plan?.endsWith('_crm');
+  // Check if trial has expired
+  useEffect(() => {
+    if (company && company.subscription_status === 'trial' && company.trial_ends_at) {
+      const trialEndDate = new Date(company.trial_ends_at);
+      const now = new Date();
+      const isTrialExpired = now > trialEndDate;
+
+      // If trial expired and not already on Settings page with subscription tab, redirect
+      if (isTrialExpired && !(currentPageName === 'Settings' && new URLSearchParams(window.location.search).get('tab') === 'subscription')) {
+        navigate(createPageUrl('Settings') + '?tab=subscription');
+      }
+    }
+  }, [company, currentPageName, navigate]);
+
   const isAdminOrOwner = companyMember?.role === 'administrator' || companyMember?.is_owner === true;
 
   let navigationItems = getNavigationItems(company?.subscription_plan, companyMember?.role);
