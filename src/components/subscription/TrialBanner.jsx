@@ -38,11 +38,12 @@ export default function TrialBanner({ company, companyMember }) {
           </span>
           {companyMember?.is_owner && (
             <Button 
-              onClick={() => navigate(createPageUrl('Settings') + '?tab=subscription')}
+              onClick={handleManageSubscription}
+              disabled={loading}
               size="sm" 
               className="bg-red-600 hover:bg-red-700 text-white ml-4"
             >
-              Manage Subscription
+              {loading ? 'Loading...' : 'Manage Subscription'}
             </Button>
           )}
         </AlertDescription>
