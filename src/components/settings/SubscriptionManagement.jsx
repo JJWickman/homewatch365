@@ -16,32 +16,13 @@ const PLANS = [
 export default function SubscriptionManagement({ company, companyMember }) {
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(null);
-  const [pricingPlans, setPricingPlans] = useState([]);
-  const [loadingPlans, setLoadingPlans] = useState(true);
+  const [changingPlan, setChangingPlan] = useState(false);
 
   useEffect(() => {
-    loadPricingPlans();
     if (company?.stripe_customer_id) {
       loadPaymentMethod();
     }
   }, [company?.stripe_customer_id]);
-
-  const loadPricingPlans = async () => {
-    try {
-      setLoadingPlans(true);
-      const response = await base44.functions.invoke('getStripePrices', {});
-      // Get all Stripe products with their metadata and prices
-      const pricesResponse = await fetch('https://api.stripe.com/v1/products?active=true&limit=100', {
-        headers: { 'Authorization': `Bearer ${Deno.env.get('STRIPE_SECRET_KEY')}` }
-      });
-      // For now, display a simple message that pricing is managed in Stripe
-      setPricingPlans([]);
-    } catch (error) {
-      console.error('Error loading pricing plans:', error);
-    } finally {
-      setLoadingPlans(false);
-    }
-  };
 
   const loadPaymentMethod = async () => {
     try {
@@ -53,6 +34,23 @@ export default function SubscriptionManagement({ company, companyMember }) {
       }
     } catch (error) {
       console.error('Error loading payment method:', error);
+    }
+  };
+
+  const handlePlanChange = async (planId) => {
+    if (planId === company.subscription_plan) return;
+
+    try {
+      setChangingPlan(true);
+      await base44.entities.Company.update(company.id, {
+        subscription_plan: planId
+      });
+      window.location.reload();
+    } catch (error) {
+      console.error('Error changing plan:', error);
+      alert('Failed to change plan. Please try again.');
+    } finally {
+      setChangingPlan(false);
     }
   };
 
