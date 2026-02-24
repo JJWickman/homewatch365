@@ -47,8 +47,23 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Convert to array and sort by monthly price (least to most expensive)
+    // Define the desired order (without _crm variants)
+    const planOrder = ['solopreneur', 'growth', 'professional', 'enterprise'];
+    
+    // Convert to array and sort by predefined order
     const planArray = Object.values(plans).sort((a, b) => {
+      const aBaseId = a.id.replace('_crm', '');
+      const bBaseId = b.id.replace('_crm', '');
+      
+      const aIndex = planOrder.indexOf(aBaseId);
+      const bIndex = planOrder.indexOf(bBaseId);
+      
+      // If both in order list, sort by order
+      if (aIndex !== -1 && bIndex !== -1) {
+        return aIndex - bIndex;
+      }
+      
+      // Fallback: sort by price
       const priceA = a.prices?.monthly?.amount || 0;
       const priceB = b.prices?.monthly?.amount || 0;
       return priceA - priceB;
