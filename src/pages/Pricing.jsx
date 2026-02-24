@@ -129,19 +129,28 @@ export default function Pricing() {
 
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [stripePrices, setStripePrices] = useState({});
+  const [pricesLoading, setPricesLoading] = useState(true);
+  const [pricesError, setPricesError] = useState(null);
 
   useEffect(() => {
     loadStripePrices();
   }, []);
 
   const loadStripePrices = async () => {
+    setPricesLoading(true);
+    setPricesError(null);
     try {
       const response = await base44.functions.invoke('getStripePrices');
-      if (response.data.success) {
+      if (response.data.success && response.data.prices) {
         setStripePrices(response.data.prices);
+      } else {
+        setPricesError('Failed to load pricing');
       }
     } catch (error) {
       console.error('Error loading Stripe prices:', error);
+      setPricesError('Failed to load pricing information');
+    } finally {
+      setPricesLoading(false);
     }
   };
 
