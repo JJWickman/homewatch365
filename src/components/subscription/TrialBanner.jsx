@@ -1,12 +1,25 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { AlertCircle, Clock } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { createPageUrl } from '@/utils';
+import { base44 } from '@/api/base44Client';
 
 export default function TrialBanner({ company, companyMember }) {
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const handleManageSubscription = async () => {
+    setLoading(true);
+    try {
+      const response = await base44.functions.invoke('createBillingPortalSession');
+      if (response.data?.url) {
+        window.location.href = response.data.url;
+      }
+    } catch (error) {
+      console.error('Error creating billing portal session:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   if (!company || company.subscription_status !== 'trial' || !company.trial_ends_at) {
     return null;
   }
