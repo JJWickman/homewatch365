@@ -1,11 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Clock } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { createPageUrl } from '@/utils';
-import { Link } from 'react-router-dom';
 
 export default function TrialBanner({ company, companyMember }) {
+  const navigate = useNavigate();
   if (!company || company.subscription_status !== 'trial' || !company.trial_ends_at) {
     return null;
   }
