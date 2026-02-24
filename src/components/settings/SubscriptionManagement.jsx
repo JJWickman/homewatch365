@@ -10,12 +10,28 @@ export default function SubscriptionManagement({ company, companyMember }) {
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [changingPlan, setChangingPlan] = useState(false);
+  const [plans, setPlans] = useState([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
 
   useEffect(() => {
+    loadPlans();
     if (company?.stripe_customer_id) {
       loadPaymentMethod();
     }
   }, [company?.stripe_customer_id]);
+
+  const loadPlans = async () => {
+    try {
+      const response = await base44.functions.invoke('getStripePrices', {});
+      if (response.data.success) {
+        setPlans(response.data.plans);
+      }
+    } catch (error) {
+      console.error('Error loading plans:', error);
+    } finally {
+      setLoadingPlans(false);
+    }
+  };
 
   const loadPaymentMethod = async () => {
     try {
