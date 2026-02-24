@@ -4,16 +4,6 @@ import Stripe from 'npm:stripe@17.5.0';
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
 
-// Initialize base44 for service role (used in webhooks)
-const createBase44ServiceClient = () => {
-  const dummyReq = new Request('http://localhost', {
-    headers: new Headers({
-      'Base44-App-Id': Deno.env.get('BASE44_APP_ID') || ''
-    })
-  });
-  return createClientFromRequest(dummyReq);
-};
-
 Deno.serve(async (req) => {
   try {
     const signature = req.headers.get('stripe-signature');
