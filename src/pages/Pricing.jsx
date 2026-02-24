@@ -146,7 +146,10 @@ export default function Pricing() {
   };
 
   const handleSelectPlan = async (tierId) => {
-    if (!company || !companyMember?.is_owner) return;
+    if (!company) {
+      console.error('No company found');
+      return;
+    }
     
     setLoadingCheckout(true);
     try {
@@ -154,23 +157,30 @@ export default function Pricing() {
       
       if (!priceId) {
         alert('Stripe not configured. Please contact support or set up Stripe in Settings.');
+        setLoadingCheckout(false);
         return;
       }
 
+      console.log('Creating checkout session:', { tierId, billingCycle, priceId });
       const response = await base44.functions.invoke('createCheckoutSession', {
         price_id: priceId,
         company_id: company.id,
         subscription_plan: tierId,
-        billing_cycle: billingCycle
+        billing_cycle: billingCycle,
+        return_url: `${window.location.origin}/Settings?tab=billing`
       });
       
-      if (response.data.url) {
+      console.log('Checkout response:', response.data);
+      if (response.data?.url) {
         window.location.href = response.data.url;
+      } else {
+        console.error('No URL in response:', response.data);
+        alert('Failed to create checkout session. Please try again.');
+        setLoadingCheckout(false);
       }
     } catch (error) {
       console.error('Error creating checkout:', error);
-      alert('Failed to start checkout. Please try again.');
-    } finally {
+      alert(`Failed to start checkout: ${error.message || 'Please try again.'}`);
       setLoadingCheckout(false);
     }
   };
