@@ -42,7 +42,21 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create checkout session with 14-day trial
+    // Create checkout session - only add trial for new customers
+    const isUpgrade = !!company.stripe_subscription_id;
+    const subscriptionData = {
+      metadata: {
+        company_id: company.id,
+        subscription_plan,
+        billing_cycle
+      }
+    };
+    
+    // Only include trial for new subscribers (not upgrading from trial)
+    if (!isUpgrade) {
+      subscriptionData.trial_period_days = 14;
+    }
+
     const sessionParams = {
       customer: customerId,
       mode: 'subscription',
@@ -54,14 +68,7 @@ Deno.serve(async (req) => {
           quantity: 1,
         },
       ],
-      subscription_data: {
-        trial_period_days: 14,
-        metadata: {
-          company_id: company.id,
-          subscription_plan,
-          billing_cycle
-        }
-      },
+      subscription_data: subscriptionData,
       success_url: return_url || `${new URL(req.url).origin}/Settings?tab=billing&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: return_url?.split('?')[0] || `${new URL(req.url).origin}/Settings?tab=billing`,
       metadata: {
