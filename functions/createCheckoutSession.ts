@@ -42,8 +42,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create checkout session - only add trial for new customers
-    const isUpgrade = !!company.stripe_subscription_id;
+    // Create checkout session - only add trial for new customers (not upgrading from trial)
     const subscriptionData = {
       metadata: {
         company_id: company.id,
@@ -52,8 +51,8 @@ Deno.serve(async (req) => {
       }
     };
     
-    // Only include trial for new subscribers (not upgrading from trial)
-    if (!isUpgrade) {
+    // Only include trial if they don't already have an active trial or subscription
+    if (company.subscription_status !== 'trial' && !company.stripe_subscription_id) {
       subscriptionData.trial_period_days = 14;
     }
 
