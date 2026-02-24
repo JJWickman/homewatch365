@@ -38,8 +38,12 @@ Deno.serve(async (req) => {
         id: `promo_${promotion.code.toLowerCase()}_${Date.now()}`,
       };
 
+      // Add discount or duration based on benefit type
       if (promotion.benefit_type === 'subscription_discount' && promotion.discount_percent > 0) {
         couponParams.percent_off = promotion.discount_percent;
+      } else if (promotion.benefit_type === 'extended_trial' && promotion.trial_days_added > 0) {
+        couponParams.duration = 'repeating';
+        couponParams.duration_in_months = Math.ceil(promotion.trial_days_added / 30);
       }
 
       if (promotion.expiry_date) {
