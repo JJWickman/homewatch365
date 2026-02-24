@@ -45,7 +45,7 @@ export default function TrialBanner({ company, companyMember }) {
         </span>
         {companyMember?.is_owner && (
           <Button asChild size="sm" className="bg-amber-600 hover:bg-amber-700 text-white ml-4">
-            <Link to={createPageUrl('Pricing')}>View Plans</Link>
+            <Link to={createPageUrl('Settings') + '?tab=subscription'}>View Plans</Link>
           </Button>
         )}
       </AlertDescription>
