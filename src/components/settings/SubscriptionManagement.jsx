@@ -14,10 +14,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
 
   useEffect(() => {
     loadPlans();
-    if (company?.stripe_customer_id) {
-      loadPaymentMethod();
-    }
-  }, [company?.stripe_customer_id]);
+  }, []);
 
   const loadPlans = async () => {
     try {
