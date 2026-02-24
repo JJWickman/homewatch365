@@ -473,8 +473,8 @@ export default function SubscriptionManagement({ company, companyMember }) {
                     </div>
                   </CardHeader>
                   
-                  <CardContent>
-                    <ul className="space-y-3 mb-6">
+                  <CardContent className="flex flex-col">
+                    <ul className="space-y-3 mb-6 flex-1">
                       {tier.features.map((feature, idx) => (
                         <li key={idx} className="flex items-start gap-2 text-sm">
                           <Check className="h-5 w-5 text-green-600 shrink-0" />
@@ -482,12 +482,20 @@ export default function SubscriptionManagement({ company, companyMember }) {
                         </li>
                       ))}
                     </ul>
-                    
-                    {company?.subscription_status === 'trial' && !isCurrentPlan && (
-                      <p className="text-xs text-center text-slate-500 mt-2">
-                        14-day free trial included
+
+                    {(company?.subscription_status === 'trial' || company?.subscription_status === 'past_due') && !isCurrentPlan && (
+                      <p className="text-xs text-center text-slate-500 mb-4">
+                        {company?.subscription_status === 'trial' && '14-day free trial included'}
                       </p>
                     )}
+
+                    <Button 
+                      onClick={() => handleSelectPlan(tier.id)}
+                      disabled={loadingCheckout || isCurrentPlan}
+                      className={`w-full ${isCurrentPlan ? 'bg-slate-300 text-slate-600' : 'bg-slate-900 hover:bg-slate-800 text-white'}`}
+                    >
+                      {isCurrentPlan ? 'Current Plan' : loadingCheckout ? 'Loading...' : 'Subscribe'}
+                    </Button>
                   </CardContent>
                 </Card>
               );
