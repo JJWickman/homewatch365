@@ -168,26 +168,13 @@ export default function SubscriptionManagement({ company, companyMember }) {
       {/* Pricing Reference */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Plan Pricing Reference</CardTitle>
+          <CardTitle className="text-lg">Available Plans</CardTitle>
+          <CardDescription>Pricing is managed in Stripe. View all available plans there.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {PRICING_TIERS.map((tier) => (
-              <div key={tier.id} className="p-4 border rounded-lg bg-slate-50">
-                <h3 className="font-semibold text-slate-900 mb-3">{tier.name}</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-600">Monthly:</span>
-                    <span className="font-medium text-slate-900">${tier.monthlyPrice}/mo</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-600">Annual:</span>
-                    <span className="font-medium text-slate-900">${tier.annualPrice}/mo</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <p className="text-sm text-slate-600">
+            All subscription plans and pricing are configured in Stripe. To view or modify available plans, visit your Stripe dashboard.
+          </p>
         </CardContent>
       </Card>
     </div>
