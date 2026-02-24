@@ -4,8 +4,16 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     
-    const url = new URL(req.url);
-    const code = url.searchParams.get('code')?.toUpperCase();
+    let code;
+    
+    // Handle both query params and JSON body
+    if (req.method === 'POST') {
+      const body = await req.json();
+      code = body.code?.toUpperCase();
+    } else {
+      const url = new URL(req.url);
+      code = url.searchParams.get('code')?.toUpperCase();
+    }
 
     if (!code) {
       return Response.json({ valid: false, message: 'Promo code is required' });
