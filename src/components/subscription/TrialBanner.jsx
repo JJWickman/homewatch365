@@ -64,11 +64,12 @@ export default function TrialBanner({ company, companyMember }) {
         </span>
         {companyMember?.is_owner && (
           <Button 
-            onClick={() => navigate(createPageUrl('Settings') + '?tab=subscription')}
+            onClick={handleManageSubscription}
+            disabled={loading}
             size="sm" 
             className="bg-amber-600 hover:bg-amber-700 text-white ml-4"
           >
-            View Plans
+            {loading ? 'Loading...' : 'View Plans'}
           </Button>
         )}
       </AlertDescription>
