@@ -12,6 +12,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
   const [changingPlan, setChangingPlan] = useState(false);
   const [plans, setPlans] = useState([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
+  const [billingCycle, setBillingCycle] = useState('monthly');
 
   useEffect(() => {
     loadPlans();
