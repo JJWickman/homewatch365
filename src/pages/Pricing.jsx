@@ -163,7 +163,9 @@ export default function Pricing() {
       enterprise: 'enterprise'
     };
     const priceKey = priceKeyMap[tierId];
-    return stripePrices[priceKey]?.[billingCycle];
+    const price = stripePrices[priceKey]?.[billingCycle];
+    console.log('Price lookup:', { tierId, priceKey, billingCycle, stripePrices, price });
+    return price;
   };
 
   const handleSelectPlan = async (tierId) => {
