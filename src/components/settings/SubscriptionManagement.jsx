@@ -46,26 +46,6 @@ export default function SubscriptionManagement({ company, companyMember }) {
     }
   };
 
-  const openBillingPortal = async () => {
-    try {
-      setLoadingPortal(true);
-      const response = await base44.functions.invoke('createBillingPortalSession', {
-        company_id: company.id,
-        return_url: `${window.location.origin}/Settings?tab=subscription`
-      });
-      if (response.data?.url) {
-        window.open(response.data.url, '_blank');
-      } else {
-        alert('Failed to open billing portal. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert(`Error: ${error.message || 'Failed to open billing portal'}`);
-    } finally {
-      setLoadingPortal(false);
-    }
-  };
-
   const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'owner' || companyMember?.is_owner;
 
   if (!isAdmin) {
