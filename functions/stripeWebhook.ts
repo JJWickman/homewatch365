@@ -22,18 +22,17 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
-    // For webhooks, we need to add the Base44-App-Id header to the request
-    // so createClientFromRequest can properly initialize the SDK
+    // For webhooks, create a request with the app ID header
     const headersWithAppId = new Headers(req.headers);
-    headersWithAppId.set('Base44-App-Id', Deno.env.get('BASE44_APP_ID') || '');
+    headersWithAppId.set('Base44-App-Id', Deno.env.get('BASE44_APP_ID'));
     
-    const modifiedReq = new Request(req.url, {
-      method: req.method,
+    const webhookReq = new Request(req.url, {
+      method: 'POST',
       headers: headersWithAppId,
       body: body
     });
     
-    const base44 = createClientFromRequest(modifiedReq);
+    const base44 = createClientFromRequest(webhookReq);
 
     // Handle the event
     switch (event.type) {
