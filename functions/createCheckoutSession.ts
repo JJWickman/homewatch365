@@ -47,6 +47,7 @@ Deno.serve(async (req) => {
       customer: customerId,
       mode: 'subscription',
       payment_method_types: ['card'],
+      payment_method_collection: 'if_required',
       line_items: [
         {
           price: price_id,
