@@ -7,7 +7,13 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
 
 Deno.serve(async (req) => {
   try {
-    const body = await req.json();
+    let body = {};
+    try {
+      body = await req.json();
+    } catch {
+      // Empty or invalid JSON body is okay
+    }
+    
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
