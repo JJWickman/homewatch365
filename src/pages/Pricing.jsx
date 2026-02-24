@@ -302,18 +302,13 @@ export default function Pricing() {
                 </ul>
                 
                 {isOwner && (
-                  <Button 
-                    onClick={() => handleSelectPlan(tier.id)}
-                    disabled={isCurrentPlan || loadingCheckout}
-                    className={`w-full ${tier.popular ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-900 hover:bg-slate-800'}`}
-                  >
-                    {loadingCheckout ? 'Loading...' : (isCurrentPlan ? 'Current Plan' : company?.subscription_status === 'trial' ? 'Start 14-Day Trial' : 'Subscribe')}
-                  </Button>
-                )}
-                {isOwner && company?.subscription_status === 'trial' && !isCurrentPlan && (
-                  <p className="text-xs text-center text-slate-500 mt-2">
-                    No credit card required for trial
-                  </p>
+                   <Button 
+                     onClick={() => handleSelectPlan(tier.id)}
+                     disabled={isCurrentPlan || loadingCheckout}
+                     className={`w-full ${tier.popular ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-900 hover:bg-slate-800'}`}
+                   >
+                     {loadingCheckout ? 'Loading...' : (isCurrentPlan ? 'Current Plan' : 'Subscribe')}
+                   </Button>
                 )}
               </CardContent>
             </Card>
