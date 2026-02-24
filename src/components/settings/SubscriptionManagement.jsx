@@ -79,43 +79,14 @@ const PRICING_TIERS = [
 ];
 
 export default function SubscriptionManagement({ company, companyMember }) {
-  const [billingCycle, setBillingCycle] = useState('monthly');
-  const [stripePrices, setStripePrices] = useState({});
-  const [loadingCheckout, setLoadingCheckout] = useState(false);
+  const [loadingPortal, setLoadingPortal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(null);
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [promoCode, setPromoCode] = useState('');
-  const [promoValidation, setPromoValidation] = useState(null);
-  const [validatingPromo, setValidatingPromo] = useState(false);
 
   useEffect(() => {
-    console.log('SubscriptionManagement: company =', company);
-    console.log('SubscriptionManagement: companyMember =', companyMember);
-    loadStripePrices();
     if (company?.stripe_customer_id) {
       loadPaymentMethod();
     }
-
-    // Check if returning from Stripe checkout
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('session_id') || urlParams.get('payment_updated') === 'true') {
-      // Reload after returning from Stripe to sync company data
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    }
   }, [company?.stripe_customer_id]);
-
-  const loadStripePrices = async () => {
-    try {
-      const response = await base44.functions.invoke('getStripePrices');
-      if (response.data.success) {
-        setStripePrices(response.data.prices);
-      }
-    } catch (error) {
-      console.error('Error loading Stripe prices:', error);
-    }
-  };
 
   const loadPaymentMethod = async () => {
     try {
@@ -130,109 +101,23 @@ export default function SubscriptionManagement({ company, companyMember }) {
     }
   };
 
-  const handleSelectPlan = (tierId) => {
-    if (!company) {
-      console.error('No company found');
-      return;
-    }
-
-    // If on trial or no active subscription, start new subscription directly
-    if (company.subscription_status === 'trial' || !company.stripe_subscription_id) {
-      startNewSubscription(tierId);
-    } else if (company.stripe_subscription_id) {
-      // If already subscribed, open Stripe billing portal
-      handleUpdatePaymentMethod();
-    }
-  };
-
-  const validatePromoCode = async () => {
-    if (!promoCode) {
-      setPromoValidation(null);
-      return;
-    }
-
-    setValidatingPromo(true);
+  const openBillingPortal = async () => {
     try {
-      const response = await base44.functions.invoke('validatePromoCode', {
-        code: promoCode
-      });
-      setPromoValidation(response.data);
-    } catch (error) {
-      setPromoValidation({ valid: false, message: 'Error validating code' });
-    } finally {
-      setValidatingPromo(false);
-    }
-  };
-
-  const startNewSubscription = async (tierId) => {
-    setLoadingCheckout(true);
-    try {
-      const priceId = stripePrices[tierId]?.[billingCycle];
-
-      if (!priceId) {
-        console.error('No price ID found for plan:', tierId, 'cycle:', billingCycle);
-        console.error('Available stripePrices:', stripePrices);
-        alert('Stripe products not configured yet. Please run "Create Stripe Products" from the Settings → Admin tab first.');
-        setLoadingCheckout(false);
-        return;
-      }
-
-      // Check if promo code is valid before proceeding
-      if (promoCode && !promoValidation?.valid) {
-        alert('Please enter a valid promo code.');
-        setLoadingCheckout(false);
-        return;
-      }
-
-      const checkoutParams = {
-        price_id: priceId,
-        company_id: company.id,
-        subscription_plan: tierId,
-        billing_cycle: billingCycle,
-        return_url: `${window.location.origin}/Settings?tab=billing`
-      };
-
-      // Add promo code if valid
-      if (promoValidation?.valid && promoValidation?.promotion?.stripe_promotion_code_id) {
-        checkoutParams.promo_code = promoValidation.promotion.stripe_promotion_code_id;
-      }
-
-      console.log('Creating checkout session for:', checkoutParams);
-      const response = await base44.functions.invoke('createCheckoutSession', checkoutParams);
-
-      console.log('Checkout response:', response.data);
-      if (response.data?.url) {
-        window.location.href = response.data.url;
-      } else {
-        console.error('No URL in response:', response.data);
-        alert('Failed to create checkout session. Please try again.');
-        setLoadingCheckout(false);
-      }
-    } catch (error) {
-      console.error('Error with checkout session:', error);
-      alert(`Error: ${error.message || 'Failed to process plan change. Please try again.'}`);
-      setLoadingCheckout(false);
-    }
-  };
-
-  const handleUpdatePaymentMethod = async () => {
-    try {
-      setLoadingCheckout(true);
+      setLoadingPortal(true);
       const response = await base44.functions.invoke('createBillingPortalSession', {
         company_id: company.id,
-        return_url: `${window.location.origin}/Settings?tab=billing&payment_updated=true`
+        return_url: `${window.location.origin}/Settings?tab=subscription`
       });
       if (response.data?.url) {
         window.open(response.data.url, '_blank');
-        setLoadingCheckout(false);
       } else {
         alert('Failed to open billing portal. Please try again.');
-        setLoadingCheckout(false);
       }
     } catch (error) {
       console.error('Error:', error);
       alert(`Error: ${error.message || 'Failed to open billing portal'}`);
-      setLoadingCheckout(false);
+    } finally {
+      setLoadingPortal(false);
     }
   };
 
