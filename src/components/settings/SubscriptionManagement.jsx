@@ -29,19 +29,6 @@ export default function SubscriptionManagement({ company, companyMember }) {
     }
   };
 
-  const loadPaymentMethod = async () => {
-    try {
-      const response = await base44.functions.invoke('getPaymentMethod', {
-        company_id: company.id
-      });
-      if (response.data.success && response.data.payment_method) {
-        setPaymentMethod(response.data.payment_method);
-      }
-    } catch (error) {
-      console.error('Error loading payment method:', error);
-    }
-  };
-
   const handlePlanChange = async (planId) => {
     if (planId === company.subscription_plan) return;
 
