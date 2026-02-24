@@ -6,8 +6,6 @@ const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
-    
     const signature = req.headers.get('stripe-signature');
     const body = await req.text();
     
@@ -23,6 +21,9 @@ Deno.serve(async (req) => {
       console.error('Webhook signature verification failed:', err.message);
       return Response.json({ error: 'Invalid signature' }, { status: 400 });
     }
+
+    // Now create the base44 client for service role operations (webhooks use service role)
+    const base44 = createClientFromRequest(req);
 
     // Handle the event
     switch (event.type) {
