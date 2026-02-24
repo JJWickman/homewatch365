@@ -322,11 +322,14 @@ export default function Pricing() {
                 {isOwner && (
                    <Button 
                      onClick={() => handleSelectPlan(tier.id)}
-                     disabled={isCurrentPlan || loadingCheckout}
+                     disabled={isCurrentPlan || loadingCheckout || pricesLoading}
                      className={`w-full ${tier.popular ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-900 hover:bg-slate-800'}`}
                    >
-                     {loadingCheckout ? 'Loading...' : (isCurrentPlan ? 'Current Plan' : 'Subscribe')}
+                     {loadingCheckout ? 'Loading...' : pricesLoading ? 'Loading Prices...' : (isCurrentPlan ? 'Current Plan' : 'Subscribe')}
                    </Button>
+                )}
+                {isOwner && pricesError && (
+                   <p className="text-xs text-center text-red-600 mt-2">{pricesError}</p>
                 )}
               </CardContent>
             </Card>
