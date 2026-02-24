@@ -5,82 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-import { Users, TrendingUp, Briefcase, Shield, Check, CreditCard, AlertCircle, X } from 'lucide-react';
-
-
-const PRICING_TIERS = [
-  {
-    id: 'solopreneur',
-    name: 'Solopreneur',
-    icon: Users,
-    monthlyPrice: 99,
-    annualPrice: 79,
-    features: ['Unlimited Clients', 'Unlimited Properties', 'Inspections & Scheduling', 'Follow-ups & Tasks'],
-    limits: { users: 1, admins: 1 }
-  },
-  {
-    id: 'solopreneur_crm',
-    name: 'Solopreneur + CRM',
-    icon: Users,
-    monthlyPrice: 149,
-    annualPrice: 119,
-    features: ['Everything in Solopreneur', 'CRM & Marketing Tools', 'Email Campaigns', 'SMS Marketing', 'Social Media Tools'],
-    limits: { users: 1, admins: 1 },
-    badge: 'CRM Bundle'
-  },
-  {
-    id: 'growth',
-    name: 'Growth',
-    icon: TrendingUp,
-    monthlyPrice: 199,
-    annualPrice: 159,
-    popular: true,
-    features: ['Everything in Solopreneur', 'Up to 5 Field Inspectors', '1 Admin User', 'Team Collaboration', 'Route Optimization'],
-    limits: { users: 5, admins: 1 }
-  },
-  {
-    id: 'growth_crm',
-    name: 'Growth + CRM',
-    icon: TrendingUp,
-    monthlyPrice: 248,
-    annualPrice: 198.40,
-    features: ['Everything in Growth', 'CRM & Marketing Tools', 'Email Campaigns', 'SMS Marketing', 'Social Media Tools'],
-    limits: { users: 5, admins: 1 },
-    badge: 'CRM Bundle'
-  },
-  {
-    id: 'professional',
-    name: 'Professional',
-    icon: Briefcase,
-    monthlyPrice: 249,
-    annualPrice: 199,
-    features: ['Everything in Growth', 'Up to 10 Team Members', '2 Admin Users', 'Priority Support', 'Route Optimization'],
-    limits: { users: 10, admins: 2 }
-  },
-  {
-    id: 'professional_crm',
-    name: 'Professional + CRM',
-    icon: Briefcase,
-    monthlyPrice: 299,
-    annualPrice: 239.20,
-    features: ['Everything in Professional', 'CRM & Marketing Tools', 'Email Campaigns', 'SMS Marketing', 'Social Media Tools'],
-    limits: { users: 10, admins: 2 },
-    badge: 'CRM Bundle'
-  },
-  {
-    id: 'enterprise',
-    name: 'Enterprise',
-    icon: Shield,
-    monthlyPrice: 499,
-    annualPrice: 399,
-    features: ['Everything in Professional', 'Up to 50 Team Members', '5 Admin Users', 'Contractor Management', 'CRM & Marketing Included'],
-    limits: { users: 50, admins: 5 }
-  }
-];
+import { CreditCard, AlertCircle } from 'lucide-react';
 
 export default function SubscriptionManagement({ company, companyMember }) {
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(null);
+  const [pricingPlans, setPricingPlans] = useState([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
 
   useEffect(() => {
     if (company?.stripe_customer_id) {
