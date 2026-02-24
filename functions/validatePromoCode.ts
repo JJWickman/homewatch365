@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
       valid: true,
       promotion: promo,
       benefit_description: benefit,
-      excludes_enterprise: !promo.applicable_plan || promo.code === 'FOUNDERS'
+      excludes_enterprise: !promo.applicable_plan || promo.code === 'FOUNDER'
     });
 
   } catch (error) {
