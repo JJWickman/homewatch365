@@ -84,6 +84,9 @@ export default function SubscriptionManagement({ company, companyMember }) {
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoValidation, setPromoValidation] = useState(null);
+  const [validatingPromo, setValidatingPromo] = useState(false);
 
   useEffect(() => {
     console.log('SubscriptionManagement: company =', company);
@@ -142,6 +145,25 @@ export default function SubscriptionManagement({ company, companyMember }) {
     }
   };
 
+  const validatePromoCode = async () => {
+    if (!promoCode) {
+      setPromoValidation(null);
+      return;
+    }
+
+    setValidatingPromo(true);
+    try {
+      const response = await base44.functions.invoke('validatePromoCode', {
+        code: promoCode
+      });
+      setPromoValidation(response.data);
+    } catch (error) {
+      setPromoValidation({ valid: false, message: 'Error validating code' });
+    } finally {
+      setValidatingPromo(false);
+    }
+  };
+
   const startNewSubscription = async (tierId) => {
     setLoadingCheckout(true);
     try {
@@ -155,14 +177,28 @@ export default function SubscriptionManagement({ company, companyMember }) {
         return;
       }
 
-      console.log('Creating checkout session for:', { tierId, priceId, billingCycle });
-      const response = await base44.functions.invoke('createCheckoutSession', {
+      // Check if promo code is valid before proceeding
+      if (promoCode && !promoValidation?.valid) {
+        alert('Please enter a valid promo code.');
+        setLoadingCheckout(false);
+        return;
+      }
+
+      const checkoutParams = {
         price_id: priceId,
         company_id: company.id,
         subscription_plan: tierId,
         billing_cycle: billingCycle,
         return_url: `${window.location.origin}/Settings?tab=billing`
-      });
+      };
+
+      // Add promo code if valid
+      if (promoValidation?.valid && promoValidation?.promotion?.stripe_promotion_code_id) {
+        checkoutParams.promo_code = promoValidation.promotion.stripe_promotion_code_id;
+      }
+
+      console.log('Creating checkout session for:', checkoutParams);
+      const response = await base44.functions.invoke('createCheckoutSession', checkoutParams);
 
       console.log('Checkout response:', response.data);
       if (response.data?.url) {
@@ -312,6 +348,48 @@ export default function SubscriptionManagement({ company, companyMember }) {
       </Card>
 
 
+
+      {/* Promo Code Section */}
+      <Card className="border-purple-200 bg-purple-50">
+        <CardHeader>
+          <CardTitle className="text-lg">Have a Promo Code?</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Enter promo code"
+                value={promoCode}
+                onChange={(e) => {
+                  setPromoCode(e.target.value.toUpperCase());
+                  setPromoValidation(null);
+                }}
+                className="w-full px-3 py-2 border rounded-lg text-sm bg-white"
+              />
+            </div>
+            <Button
+              onClick={validatePromoCode}
+              disabled={!promoCode || validatingPromo}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              {validatingPromo ? 'Validating...' : 'Apply'}
+            </Button>
+          </div>
+          {promoValidation && (
+            <div className={`mt-2 p-2 rounded text-sm ${promoValidation.valid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+              {promoValidation.valid ? (
+                <>
+                  <p className="font-medium">✓ {promoValidation.promotion?.code} applied</p>
+                  <p className="text-xs mt-1">{promoValidation.benefit_description}</p>
+                </>
+              ) : (
+                <p>{promoValidation.message}</p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Billing Cycle Toggle */}
       <Card>
