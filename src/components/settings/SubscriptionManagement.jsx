@@ -112,7 +112,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
               <div>
                 <p className="text-sm text-slate-600">Current Plan</p>
                 <p className="text-2xl font-bold capitalize text-slate-900">
-                  {PRICING_TIERS.find(t => t.id === company.subscription_plan)?.name || company.subscription_plan}
+                   {company.subscription_plan?.replace(/_/g, ' ')}
                 </p>
               </div>
               <Badge className="bg-blue-600 text-white">Active</Badge>
