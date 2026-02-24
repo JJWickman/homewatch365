@@ -163,9 +163,9 @@ export default function SubscriptionManagement({ company, companyMember }) {
             disabled={loadingPortal}
             className="w-full bg-slate-900 hover:bg-slate-800 text-white mt-4"
           >
-            {loadingPortal ? 'Opening...' : 'Manage Subscription in Stripe'}
+            {loadingPortal ? 'Opening...' : 'Manage Payment Method'}
           </Button>
-          <p className="text-xs text-slate-500 text-center mt-3">All billing changes are managed through Stripe</p>
+          <p className="text-xs text-slate-500 text-center mt-3">Payment processing is handled by Stripe</p>
         </CardContent>
       </Card>
 
