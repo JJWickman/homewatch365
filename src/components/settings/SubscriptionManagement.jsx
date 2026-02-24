@@ -98,144 +98,155 @@ export default function SubscriptionManagement({ company, companyMember }) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Current Plan Status */}
-      {company?.subscription_status === 'trial' && company.trial_ends_at && (
-        <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-amber-700">Free Trial Active</p>
-                <p className="text-2xl font-bold text-slate-900">
-                  {Math.ceil((new Date(company.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24))} days remaining
-                </p>
-                <p className="text-sm text-amber-600 mt-1">
-                  Trial ends {new Date(company.trial_ends_at).toLocaleDateString()}
-                </p>
-              </div>
-              <Badge className="bg-amber-600 text-white">Free Trial</Badge>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {company?.subscription_status === 'active' && (
-        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600">Current Plan</p>
-                <p className="text-2xl font-bold capitalize text-slate-900">
-                   {company.subscription_plan?.replace(/_/g, ' ')}
-                </p>
-              </div>
-              <Badge className="bg-blue-600 text-white">Active</Badge>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
+    <div className="space-y-8">
       {/* Billing Management Section */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
-            Manage Your Subscription
+            Payment Method
           </CardTitle>
-          <CardDescription>Update your plan, payment method, and billing details in the Stripe billing portal</CardDescription>
         </CardHeader>
         <CardContent>
           {paymentMethod ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-white border flex items-center justify-center">
-                    <CreditCard className="h-5 w-5 text-slate-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-slate-900">
-                      {paymentMethod.brand?.toUpperCase()} •••• {paymentMethod.last4}
-                    </p>
-                    <p className="text-sm text-slate-500">
-                      Expires {paymentMethod.exp_month}/{paymentMethod.exp_year}
-                    </p>
-                  </div>
+            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg mb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-white border flex items-center justify-center">
+                  <CreditCard className="h-5 w-5 text-slate-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-slate-900">
+                    {paymentMethod.brand?.toUpperCase()} •••• {paymentMethod.last4}
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    Expires {paymentMethod.exp_month}/{paymentMethod.exp_year}
+                  </p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="py-4 text-center">
-              <p className="text-sm text-slate-600 mb-2">Add a payment method to activate your subscription</p>
+            <div className="py-4 text-center mb-4">
+              <p className="text-sm text-slate-600">Add a payment method to activate your subscription</p>
             </div>
           )}
           <Button 
             onClick={openBillingPortal}
             disabled={loadingPortal}
-            className="w-full bg-slate-900 hover:bg-slate-800 text-white mt-4"
+            className="w-full bg-slate-900 hover:bg-slate-800 text-white"
           >
             {loadingPortal ? 'Opening...' : 'Manage Payment Method'}
           </Button>
-          <p className="text-xs text-slate-500 text-center mt-3">Payment processing is handled by Stripe</p>
         </CardContent>
       </Card>
 
-      {/* Available Plans */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Change Plan</CardTitle>
-          <CardDescription>Select a plan to upgrade or downgrade your subscription</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loadingPlans ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
-            </div>
-          ) : !plans || plans.length === 0 ? (
-            <p className="text-sm text-slate-600">No plans available. Please configure plans in Stripe.</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {plans.map((plan) => {
-                const isCurrent = company.subscription_plan === plan.id;
-                const monthlyPrice = plan.prices?.monthly?.amount;
-                return (
-                  <div
-                    key={plan.id}
-                    className={`relative rounded-lg border-2 p-4 transition-all ${
-                      isCurrent ? 'border-blue-600 bg-blue-50' : 'border-slate-200 hover:border-slate-300'
+      {/* Choose Your Plan Section */}
+      <div>
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-900">Choose Your Plan</h2>
+          <p className="text-slate-600 mt-1">Select the plan that best fits your needs</p>
+        </div>
+
+        {/* Billing Cycle Toggle */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex bg-slate-100 rounded-lg p-1">
+            <button
+              onClick={() => setBillingCycle('monthly')}
+              className={`px-6 py-2 rounded-md font-medium transition-all ${
+                billingCycle === 'monthly'
+                  ? 'bg-slate-900 text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setBillingCycle('yearly')}
+              className={`px-6 py-2 rounded-md font-medium transition-all flex items-center gap-2 ${
+                billingCycle === 'yearly'
+                  ? 'bg-slate-900 text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Annual
+              {billingCycle === 'yearly' && (
+                <Badge className="bg-green-500 text-white text-xs">Save 20%</Badge>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Plans Grid */}
+        {loadingPlans ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          </div>
+        ) : !plans || plans.length === 0 ? (
+          <p className="text-sm text-slate-600 text-center">No plans available. Please configure plans in Stripe.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {plans.map((plan) => {
+              const isCurrent = company.subscription_plan === plan.id;
+              const price = billingCycle === 'monthly' 
+                ? plan.prices?.monthly?.amount 
+                : plan.prices?.yearly?.amount;
+              
+              return (
+                <div
+                  key={plan.id}
+                  className={`relative rounded-2xl border-2 p-6 transition-all ${
+                    isCurrent 
+                      ? 'border-green-500 bg-white shadow-lg' 
+                      : 'border-slate-200 hover:border-slate-300 bg-white'
+                  }`}
+                >
+                  {/* Badge */}
+                  {isCurrent && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <Badge className="bg-green-500 text-white px-3 py-1">Current Plan</Badge>
+                    </div>
+                  )}
+
+                  {/* Plan Name & Price */}
+                  <div className="mb-6">
+                    <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
+                    {price ? (
+                      <div className="mt-3">
+                        <span className="text-4xl font-bold text-slate-900">${price}</span>
+                        <span className="text-slate-600 ml-2">/mo</span>
+                      </div>
+                    ) : (
+                      <p className="text-xl font-bold text-slate-900 mt-3">Custom</p>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  {plan.description && (
+                    <p className="text-sm text-slate-600 mb-6">{plan.description}</p>
+                  )}
+
+                  {/* CTA Button */}
+                  <Button
+                    onClick={() => handlePlanChange(plan.id)}
+                    disabled={isCurrent || changingPlan}
+                    className={`w-full mb-6 font-semibold ${
+                      isCurrent
+                        ? 'bg-slate-200 text-slate-600 cursor-not-allowed'
+                        : 'bg-slate-900 hover:bg-slate-800 text-white'
                     }`}
                   >
-                    {isCurrent && (
-                      <div className="absolute top-2 right-2">
-                        <Badge className="bg-blue-600">Current</Badge>
-                      </div>
-                    )}
-                    <h3 className="font-semibold text-slate-900">{plan.name}</h3>
-                    <p className="text-2xl font-bold text-slate-900 mt-2">
-                      {monthlyPrice ? `$${monthlyPrice}` : 'Custom'}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-1">{plan.description}</p>
-                    <Button
-                      onClick={() => handlePlanChange(plan.id)}
-                      disabled={isCurrent || changingPlan}
-                      variant={isCurrent ? 'outline' : 'default'}
-                      className="w-full mt-4"
-                      size="sm"
-                    >
-                      {isCurrent ? (
-                        <span className="flex items-center gap-2">
-                          <Check className="h-4 w-4" /> Current
-                        </span>
-                      ) : (
-                        'Select Plan'
-                      )}
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                    {isCurrent ? 'Current Plan' : 'Subscribe'}
+                  </Button>
+
+                  {/* Trial Notice */}
+                  {company?.subscription_status === 'trial' && (
+                    <p className="text-xs text-slate-500 text-center">14-day free trial included</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
