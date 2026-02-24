@@ -61,46 +61,6 @@ export default function SubscriptionManagement({ company, companyMember }) {
 
   return (
     <div className="space-y-8">
-      {/* Billing Management Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
-            Payment Method
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {paymentMethod ? (
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg mb-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-white border flex items-center justify-center">
-                  <CreditCard className="h-5 w-5 text-slate-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-slate-900">
-                    {paymentMethod.brand?.toUpperCase()} •••• {paymentMethod.last4}
-                  </p>
-                  <p className="text-sm text-slate-500">
-                    Expires {paymentMethod.exp_month}/{paymentMethod.exp_year}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="py-4 text-center mb-4">
-              <p className="text-sm text-slate-600">Add a payment method to activate your subscription</p>
-            </div>
-          )}
-          <Button 
-            onClick={openBillingPortal}
-            disabled={loadingPortal}
-            className="w-full bg-slate-900 hover:bg-slate-800 text-white"
-          >
-            {loadingPortal ? 'Opening...' : 'Manage Payment Method'}
-          </Button>
-        </CardContent>
-      </Card>
-
       {/* Choose Your Plan Section */}
       <div>
         <div className="mb-8">
