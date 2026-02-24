@@ -15,8 +15,6 @@ Deno.serve(async (req) => {
       code = url.searchParams.get('code')?.toUpperCase();
     }
 
-    console.log('Received code:', code, 'Type:', typeof code);
-    
     if (!code) {
       return Response.json({ valid: false, message: 'Promo code is required' });
     }
