@@ -24,8 +24,12 @@ export default function TrialBanner({ company, companyMember }) {
             <strong>Trial Expired:</strong> Your trial has ended. Subscribe to continue using Estate Watch.
           </span>
           {companyMember?.is_owner && (
-            <Button asChild size="sm" className="bg-red-600 hover:bg-red-700 text-white ml-4">
-              <Link to={createPageUrl('Settings') + '?tab=subscription'}>Manage Subscription</Link>
+            <Button 
+              onClick={() => navigate(createPageUrl('Settings') + '?tab=subscription')}
+              size="sm" 
+              className="bg-red-600 hover:bg-red-700 text-white ml-4"
+            >
+              Manage Subscription
             </Button>
           )}
         </AlertDescription>
