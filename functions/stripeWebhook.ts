@@ -32,8 +32,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
-    // Now create the base44 client for service role operations (webhooks use service role)
-    const base44 = createClientFromRequest(req);
+    // Create base44 client for service role operations
+    const base44 = createBase44ServiceClient();
 
     // Handle the event
     switch (event.type) {
