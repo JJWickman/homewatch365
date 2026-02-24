@@ -4,8 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CreditCard, AlertCircle, Check } from 'lucide-react';
 
-import { CreditCard, AlertCircle } from 'lucide-react';
+const PLANS = [
+  { id: 'solopreneur', name: 'Solopreneur', price: '$29', description: 'Perfect for getting started' },
+  { id: 'growth', name: 'Growth', price: '$99', description: 'Scale your operations' },
+  { id: 'professional', name: 'Professional', price: '$299', description: 'Advanced features & support' },
+  { id: 'enterprise', name: 'Enterprise', price: 'Custom', description: 'Full-featured solution' }
+];
 
 export default function SubscriptionManagement({ company, companyMember }) {
   const [loadingPortal, setLoadingPortal] = useState(false);
