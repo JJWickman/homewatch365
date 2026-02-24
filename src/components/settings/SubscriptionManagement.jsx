@@ -178,14 +178,14 @@ export default function SubscriptionManagement({ company, companyMember }) {
         </Card>
       )}
 
-      {/* Payment Method Section */}
+      {/* Billing Management Section */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
-            Subscription Management
+            Manage Your Subscription
           </CardTitle>
-          <CardDescription>Manage your subscription and payment information</CardDescription>
+          <CardDescription>Update your plan, payment method, and billing details in the Stripe billing portal</CardDescription>
         </CardHeader>
         <CardContent>
           {paymentMethod ? (
@@ -204,192 +204,23 @@ export default function SubscriptionManagement({ company, companyMember }) {
                     </p>
                   </div>
                 </div>
-                <Button 
-                  variant="outline"
-                  onClick={handleUpdatePaymentMethod}
-                  disabled={loadingCheckout}
-                >
-                  {loadingCheckout ? 'Loading...' : 'Manage Subscription'}
-                </Button>
               </div>
             </div>
           ) : (
-            <div className="text-center py-6">
-              <p className="text-sm text-slate-500 mb-4">Access your Stripe billing portal to manage your subscription</p>
-              <Button 
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleUpdatePaymentMethod();
-                }}
-                disabled={loadingCheckout}
-                className="bg-slate-900 hover:bg-slate-800"
-                type="button"
-              >
-                {loadingCheckout ? 'Loading...' : 'Manage Subscription'}
-              </Button>
+            <div className="py-4 text-center">
+              <p className="text-sm text-slate-600 mb-2">Add a payment method to activate your subscription</p>
             </div>
           )}
+          <Button 
+            onClick={openBillingPortal}
+            disabled={loadingPortal}
+            className="w-full bg-slate-900 hover:bg-slate-800 text-white mt-4"
+          >
+            {loadingPortal ? 'Opening...' : 'Manage Subscription in Stripe'}
+          </Button>
+          <p className="text-xs text-slate-500 text-center mt-3">All billing changes are managed through Stripe</p>
         </CardContent>
       </Card>
-
-
-
-      {/* Promo Code Section */}
-      <Card className="border-purple-200 bg-purple-50">
-        <CardHeader>
-          <CardTitle className="text-lg">Have a Promo Code?</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Enter promo code"
-                value={promoCode}
-                onChange={(e) => {
-                  setPromoCode(e.target.value.toUpperCase());
-                  setPromoValidation(null);
-                }}
-                className="w-full px-3 py-2 border rounded-lg text-sm bg-white"
-              />
-            </div>
-            <Button
-              onClick={validatePromoCode}
-              disabled={!promoCode || validatingPromo}
-              className="bg-purple-600 hover:bg-purple-700"
-            >
-              {validatingPromo ? 'Validating...' : 'Apply'}
-            </Button>
-          </div>
-          {promoValidation && (
-            <div className={`mt-2 p-2 rounded text-sm ${promoValidation.valid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              {promoValidation.valid ? (
-                <>
-                  <p className="font-medium">✓ {promoValidation.promotion?.code} applied</p>
-                  <p className="text-xs mt-1">{promoValidation.benefit_description}</p>
-                </>
-              ) : (
-                <p>{promoValidation.message}</p>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Billing Cycle Toggle */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Choose Your Plan</CardTitle>
-          <CardDescription>Select the plan that best fits your needs</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-center mb-6">
-            <div className="inline-flex items-center rounded-lg border p-1">
-              <button
-                onClick={() => setBillingCycle('monthly')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  billingCycle === 'monthly'
-                    ? 'bg-slate-900 text-white'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setBillingCycle('annual')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  billingCycle === 'annual'
-                    ? 'bg-slate-900 text-white'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Annual
-                <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                  Save 20%
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {/* Pricing Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {PRICING_TIERS.map((tier) => {
-              const TierIcon = tier.icon;
-              const price = billingCycle === 'monthly' ? tier.monthlyPrice : tier.annualPrice;
-              const isCurrentPlan = company?.subscription_plan === tier.id;
-              
-              return (
-                <Card 
-                  key={tier.id}
-                  className={`relative ${tier.popular ? 'border-2 border-blue-500 shadow-lg' : ''} ${isCurrentPlan ? 'ring-2 ring-green-500' : ''} ${tier.badge ? 'border-purple-300' : ''}`}
-                >
-                  {tier.popular && !isCurrentPlan && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-blue-600 text-white">Most Popular</Badge>
-                    </div>
-                  )}
-                  {tier.badge && !isCurrentPlan && !tier.popular && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-purple-600 text-white">{tier.badge}</Badge>
-                    </div>
-                  )}
-                  {isCurrentPlan && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-green-600 text-white">Current Plan</Badge>
-                    </div>
-                  )}
-                  
-                  <CardHeader className="text-center">
-                    <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center">
-                      <TierIcon className="h-6 w-6 text-slate-700" />
-                    </div>
-                    <CardTitle className="text-xl">{tier.name}</CardTitle>
-                    
-                    <div className="mt-4">
-                      <div className="flex items-baseline justify-center">
-                        <span className="text-4xl font-bold">${price}</span>
-                        <span className="text-slate-500 ml-2">/mo</span>
-                      </div>
-                      {billingCycle === 'annual' && (
-                        <p className="text-sm text-green-600 mt-2">
-                          Save ${(tier.monthlyPrice * 12) - (tier.annualPrice * 12)}/year
-                        </p>
-                      )}
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="flex flex-col">
-                    <ul className="space-y-3 mb-6 flex-1">
-                      {tier.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm">
-                          <Check className="h-5 w-5 text-green-600 shrink-0" />
-                          <span className="text-slate-700">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    {(company?.subscription_status === 'trial' || company?.subscription_status === 'past_due') && !isCurrentPlan && (
-                      <p className="text-xs text-center text-slate-500 mb-4">
-                        {company?.subscription_status === 'trial' && '14-day free trial included'}
-                      </p>
-                    )}
-
-                    <Button 
-                      onClick={() => handleSelectPlan(tier.id)}
-                      disabled={loadingCheckout || isCurrentPlan}
-                      className={`w-full ${isCurrentPlan ? 'bg-slate-300 text-slate-600' : 'bg-slate-900 hover:bg-slate-800 text-white'}`}
-                    >
-                      {isCurrentPlan ? 'Current Plan' : loadingCheckout ? 'Loading...' : 'Subscribe'}
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-
     </div>
-    );
-      }
+  );
+}
