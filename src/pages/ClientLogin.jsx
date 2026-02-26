@@ -68,8 +68,10 @@ export default function ClientLogin() {
         return;
       }
 
-      // Login successful - store session and redirect to portal
+      // Login successful - store session (include client ID for verification on portal)
+      sessionStorage.setItem('portal_client_id', clientData.id);
       sessionStorage.setItem('portal_client_email', clientData.portal_user_email);
+      sessionStorage.setItem('portal_session_token', Date.now().toString());
       toast.success('Login successful!');
       navigate(createPageUrl('ClientPortal'));
     } catch (error) {
