@@ -20,6 +20,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing company_id or price_id' }, { status: 400 });
     }
 
+    // Validate user has access to this company
+    const members = await base44.entities.CompanyMember.filter({ 
+      user_email: user.email,
+      company_id: company_id 
+    });
+
+    if (!members || members.length === 0) {
+      return Response.json({ error: 'Access denied' }, { status: 403 });
+    }
+
+    if (members[0].access_level !== 'admin' && !members[0].is_owner) {
+      return Response.json({ error: 'Admin access required' }, { status: 403 });
+    }
+
     // Get company details
     const companies = await base44.entities.Company.filter({ id: company_id });
     if (!companies || companies.length === 0) {
