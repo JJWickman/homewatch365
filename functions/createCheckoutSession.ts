@@ -14,7 +14,27 @@ Deno.serve(async (req) => {
 
     const { price_id, company_id, subscription_plan, billing_cycle, return_url, promo_code } = await req.json();
 
-    // Get or create company
+    // Validate required fields
+    if (!price_id || !company_id || !subscription_plan) {
+      return Response.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    // Validate user has access to this company
+    const members = await base44.entities.CompanyMember.filter({ 
+      user_email: user.email,
+      company_id: company_id 
+    });
+
+    if (!members || members.length === 0) {
+      return Response.json({ error: 'Access denied: You do not belong to this company' }, { status: 403 });
+    }
+
+    // Validate user is admin for subscription changes
+    if (members[0].access_level !== 'admin' && !members[0].is_owner) {
+      return Response.json({ error: 'Admin access required to change subscription' }, { status: 403 });
+    }
+
+    // Get company
     const companies = await base44.asServiceRole.entities.Company.filter({ id: company_id });
     const company = companies[0];
 
