@@ -35,12 +35,20 @@ export default function ClientPortal() {
 
   const loadPortalData = async () => {
     try {
-      // Check if user came from login (has session)
-      const params = new URLSearchParams(window.location.search);
+      // Validate session tokens
       const sessionEmail = sessionStorage.getItem('portal_client_email');
+      const sessionClientId = sessionStorage.getItem('portal_client_id');
+      const sessionToken = sessionStorage.getItem('portal_session_token');
       
-      if (!sessionEmail) {
-        // Not authenticated - redirect to login
+      if (!sessionEmail || !sessionClientId || !sessionToken) {
+        navigate(createPageUrl('ClientLogin'));
+        return;
+      }
+
+      // Verify session is recent (max 24 hours)
+      const sessionAge = Date.now() - parseInt(sessionToken);
+      if (sessionAge > 24 * 60 * 60 * 1000) {
+        sessionStorage.clear();
         navigate(createPageUrl('ClientLogin'));
         return;
       }
@@ -48,11 +56,11 @@ export default function ClientPortal() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      // Find client record by portal email
-      const clients = await base44.entities.Client.filter({ portal_user_email: sessionEmail });
+      // Find and verify client record
+      const clients = await base44.entities.Client.filter({ id: sessionClientId, portal_user_email: sessionEmail });
       
-      if (clients.length === 0) {
-        // Not a client - might be staff
+      if (clients.length === 0 || !clients[0].portal_access) {
+        sessionStorage.clear();
         setLoading(false);
         return;
       }
