@@ -37,22 +37,28 @@ export default function StandardInspectionView({
       </div>
 
       {/* Section Navigation */}
-      <div className="flex gap-2 overflow-x-auto py-2">
+      <div className="flex gap-1.5 overflow-x-auto py-2 no-scrollbar">
         {checklist.map((section, index) => {
+          const isActive = index === currentSectionIndex;
           const sectionComplete = section.items.every(i => i.status);
           return (
             <button
               key={index}
               onClick={() => setCurrentSectionIndex(index)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                index === currentSectionIndex
-                  ? 'bg-slate-900 text-white'
+              className={`flex items-center gap-1.5 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 shrink-0 ${
+                isActive
+                  ? 'bg-slate-900 text-white px-3'
                   : sectionComplete
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    ? 'bg-emerald-100 text-emerald-700 px-2.5'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 px-2.5'
               }`}
             >
-              {section.section_name}
+              <span className={`flex items-center justify-center rounded-full text-xs font-bold shrink-0 ${
+                isActive ? 'bg-white text-slate-900 h-5 w-5' : 'h-5 w-5 bg-white/50'
+              }`}>
+                {index + 1}
+              </span>
+              {isActive && <span className="text-sm">{section.section_name}</span>}
             </button>
           );
         })}
