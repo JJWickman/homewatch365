@@ -431,7 +431,7 @@ Your Property Management Team
                           onClick={() => navigate(createPageUrl('VisitFlow') + `?id=${inspection.id}`)}
                         >
                           <Play className="h-4 w-4 mr-2" />
-                          Start Checkin
+                          Start Check-In
                         </Button>
                       )}
                     </div>
