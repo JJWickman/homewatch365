@@ -187,7 +187,7 @@ export default function Schedule() {
     <div>
       <PageHeader
         title="Schedule"
-        subtitle="View and manage inspections and tasks"
+        subtitle="View and manage visits and tasks"
         action={() => navigate(createPageUrl('Inspections') + '?action=new')}
         actionLabel="New Visit"
         actionClassName="bg-black text-white hover:bg-slate-900"

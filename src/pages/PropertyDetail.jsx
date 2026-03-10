@@ -582,7 +582,7 @@ export default function PropertyDetail() {
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-slate-500">Inspection</span>
+                <span className="text-slate-500">Visit Frequency</span>
                 <span className="font-medium capitalize">{property.inspection_frequency?.replace('_', '-')}</span>
               </div>
             </CardContent>
@@ -775,7 +775,7 @@ export default function PropertyDetail() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Types</SelectItem>
-                        <SelectItem value="inspection">Inspections</SelectItem>
+                        <SelectItem value="inspection">Visits</SelectItem>
                         <SelectItem value="followup">Follow-Ups</SelectItem>
                       </SelectContent>
                     </Select>
@@ -802,7 +802,7 @@ export default function PropertyDetail() {
                         <div>
                           <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
                             <ClipboardCheck className="h-4 w-4 text-blue-600" />
-                            Inspections ({visitsByType.inspection.length})
+                            Visits ({visitsByType.inspection.length})
                           </h4>
                           <div className="space-y-2">
                             {visitsByType.inspection.map((visit) => (
