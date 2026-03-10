@@ -651,13 +651,11 @@ export default function PropertyDetail() {
                   />
                 </div>
                 </div>
-                {hasUnsavedChanges && (
                 <div className="flex justify-end pt-3 border-t border-slate-100">
                   <Button onClick={handleSave} disabled={saving} className="bg-red-600 hover:bg-red-700 text-white">
                     {saving ? 'Saving...' : 'Save'}
                   </Button>
                 </div>
-                )}
                 </CardContent>
                 </Card>
 
