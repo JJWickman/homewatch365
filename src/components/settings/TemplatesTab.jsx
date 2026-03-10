@@ -31,9 +31,8 @@ export default function TemplatesTab({ companyId, onRefresh, isAdmin }) {
   const loadTemplates = async () => {
     try {
       setLoading(true);
-      const data = await base44.entities.ChecklistTemplate.filter({
-        company_id: companyId
-      });
+      // Load ALL templates to see everything, regardless of company_id
+      const data = await base44.entities.ChecklistTemplate.list();
       setTemplates(data);
     } catch (error) {
       console.error('Error loading templates:', error);
