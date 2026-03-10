@@ -187,6 +187,7 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
   const [formData, setFormData] = useState(DEFAULT_HOME_WATCH_TEMPLATE);
   const [saving, setSaving] = useState(false);
   const [copyingDefault, setCopyingDefault] = useState(false);
+  const [copyingStandard, setCopyingStandard] = useState(false);
 
   const handleAdd = () => {
     setEditingId(null);
