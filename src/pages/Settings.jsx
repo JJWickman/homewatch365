@@ -146,7 +146,7 @@ export default function Settings() {
         const [companies, staffData, templatesData, customTypesData] = await Promise.all([
           base44.entities.Company.filter({ id: companyId }),
           base44.entities.CompanyMember.filter({ company_id: companyId }),
-          base44.entities.InspectionTemplate.filter({ company_id: companyId }),
+          base44.entities.VisitTemplate.filter({ company_id: companyId }),
           base44.entities.CustomContractorType.filter({ company_id: companyId })
         ]);
         
