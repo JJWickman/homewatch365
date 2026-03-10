@@ -659,20 +659,14 @@ export default function PropertyDetail() {
                   />
                 </div>
                 </div>
-                <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-                  {emergencyContactSaved && (
-                    <Button variant="outline" onClick={() => setEmergencyContactSaved(false)}>
+                <div className="flex justify-end pt-3 border-t border-slate-100">
+                  {emergencyContactSaved ? (
+                    <Button onClick={() => setEmergencyContactSaved(false)} className="bg-white hover:bg-slate-50 text-black border border-slate-300">
                       Change
                     </Button>
-                  )}
-                  {!emergencyContactSaved && (
+                  ) : (
                     <Button onClick={handleSave} disabled={saving} className="bg-red-600 hover:bg-red-700 text-white">
                       {saving ? 'Saving...' : 'Save'}
-                    </Button>
-                  )}
-                  {emergencyContactSaved && (
-                    <Button disabled className="bg-slate-900 hover:bg-slate-900 text-white cursor-default">
-                      Saved
                     </Button>
                   )}
                 </div>
