@@ -666,10 +666,10 @@ export default function Visits() {
               <>
                 <DropdownMenuItem onClick={(e) => {
                   e.stopPropagation();
-                  navigate(createPageUrl('VisitFlow') + `?id=${visit.id}`);
+                  navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${visit.property_id}`);
                 }}>
                   <Play className="h-4 w-4 mr-2" />
-                  Start Visit
+                  Start Checklist
                 </DropdownMenuItem>
               </>
             )}
