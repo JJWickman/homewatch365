@@ -64,7 +64,6 @@ import HelpTutorials from './pages/HelpTutorials';
 import Home from './pages/Home';
 import ImportData from './pages/ImportData';
 import InspectionDetail from './pages/InspectionDetail';
-import InspectionFlow from './pages/InspectionFlow';
 import Inspections from './pages/Inspections';
 import InvitationAccept from './pages/InvitationAccept';
 import InvoicePayment from './pages/InvoicePayment';
@@ -80,6 +79,7 @@ import Settings from './pages/Settings';
 import StripeSetup from './pages/StripeSetup';
 import SuperAdminConsole from './pages/SuperAdminConsole';
 import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
+import VisitFlow from './pages/VisitFlow';
 import __Layout from './Layout.jsx';
 
 
@@ -101,7 +101,6 @@ export const PAGES = {
     "Home": Home,
     "ImportData": ImportData,
     "InspectionDetail": InspectionDetail,
-    "InspectionFlow": InspectionFlow,
     "Inspections": Inspections,
     "InvitationAccept": InvitationAccept,
     "InvoicePayment": InvoicePayment,
@@ -117,6 +116,7 @@ export const PAGES = {
     "StripeSetup": StripeSetup,
     "SuperAdminConsole": SuperAdminConsole,
     "TestGoogleMapsAPI": TestGoogleMapsAPI,
+    "VisitFlow": VisitFlow,
 }
 
 export const pagesConfig = {

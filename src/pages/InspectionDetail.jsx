@@ -191,14 +191,14 @@ Your Property Management Team
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </Button>
-              <Button onClick={() => navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`)} className="bg-black text-white hover:bg-slate-900">
+              <Button onClick={() => navigate(createPageUrl('VisitFlow') + `?id=${inspection.id}`)} className="bg-black text-white hover:bg-slate-900">
                 <Play className="h-4 w-4 mr-2" />
                 Start Inspection
               </Button>
             </>
           )}
           {inspection.status === 'in_progress' && (
-            <Button onClick={() => navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`)} className="bg-black text-white hover:bg-slate-900">
+            <Button onClick={() => navigate(createPageUrl('VisitFlow') + `?id=${inspection.id}`)} className="bg-black text-white hover:bg-slate-900">
               <Play className="h-4 w-4 mr-2" />
               Continue Inspection
             </Button>
@@ -428,7 +428,7 @@ Your Property Management Team
                       {inspection.status === 'scheduled' && (
                         <Button 
                           className="mt-4 bg-black text-white hover:bg-slate-900"
-                          onClick={() => navigate(createPageUrl('InspectionFlow') + `?id=${inspection.id}`)}
+                          onClick={() => navigate(createPageUrl('VisitFlow') + `?id=${inspection.id}`)}
                         >
                           <Play className="h-4 w-4 mr-2" />
                           Start Inspection

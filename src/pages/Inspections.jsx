@@ -666,7 +666,7 @@ export default function Inspections() {
               <>
                 <DropdownMenuItem onClick={(e) => {
                   e.stopPropagation();
-                  navigate(createPageUrl('InspectionFlow') + `?id=${visit.id}`);
+                  navigate(createPageUrl('VisitFlow') + `?id=${visit.id}`);
                 }}>
                   <Play className="h-4 w-4 mr-2" />
                   Start Visit

@@ -66,7 +66,7 @@ const DEFAULT_CHECKLIST = [
   }
 ];
 
-export default function InspectionFlow() {
+export default function VisitFlow() {
   const navigate = useNavigate();
   const [visit, setVisit] = useState(null);
   const [property, setProperty] = useState(null);
@@ -104,13 +104,11 @@ export default function InspectionFlow() {
       setSummaryNotes(v.summary_notes || '');
       setOverallStatus(v.overall_status || 'all_clear');
 
-      // Load property
       if (v.property_id) {
         const props = await base44.entities.Property.filter({ id: v.property_id });
         if (props.length > 0) setProperty(props[0]);
       }
 
-      // Initialize checklist from saved data or template
       if (v.checklist_data && v.checklist_data.length > 0) {
         setChecklist(v.checklist_data);
       } else if (v.template_id) {
@@ -142,7 +140,6 @@ export default function InspectionFlow() {
         })));
       }
 
-      // Mark as in_progress if scheduled
       if (v.status === 'scheduled') {
         await base44.entities.Visit.update(id, { status: 'in_progress' });
       }
@@ -234,7 +231,6 @@ export default function InspectionFlow() {
         issues_found: issues
       });
 
-      // Create FollowUp records for flagged items
       for (const flagKey of flaggedItems) {
         const parts = flagKey.split('|');
         const [sectionIdx, itemIdx] = parts[0].split('-').map(Number);
