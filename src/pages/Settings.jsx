@@ -44,7 +44,7 @@ import PaymentMethodCard from '@/components/billing/PaymentMethodCard';
 import FinancialManagement from '@/components/settings/FinancialManagement';
 import PasswordResetDialog from '@/components/auth/PasswordResetDialog';
 import UserManagementSection from '@/components/settings/UserManagementSection';
-import InspectionTemplates from '@/components/settings/InspectionTemplates';
+import AllTemplates from '@/components/settings/AllTemplates';
 import PlanBillingConfiguration from '@/components/settings/PlanBillingConfiguration';
 import StripeConnectCard from '@/components/settings/StripeConnectCard';
 import SubscriptionManagement from '@/components/settings/SubscriptionManagement';
