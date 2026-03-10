@@ -207,9 +207,9 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
     setSaving(true);
     try {
       if (editingId) {
-        await base44.entities.InspectionTemplate.update(editingId, formData);
+        await base44.entities.VisitTemplate.update(editingId, formData);
       } else {
-        await base44.entities.InspectionTemplate.create({
+        await base44.entities.VisitTemplate.create({
           ...formData,
           company_id: companyId
         });
@@ -226,7 +226,7 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this template?')) {
       try {
-        await base44.entities.InspectionTemplate.delete(id);
+        await base44.entities.VisitTemplate.delete(id);
         onRefresh?.();
       } catch (error) {
         console.error('Error deleting template:', error);
