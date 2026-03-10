@@ -261,8 +261,67 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
   return (
     <div className="space-y-6">
       <Card>
-        
-
+        <CardHeader>
+          <CardTitle>Visit Templates</CardTitle>
+          <CardDescription>Manage templates for different visit types</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {templates.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-slate-600 mb-4">No visit templates yet.</p>
+                <Button onClick={handleAdd} className="bg-slate-900 hover:bg-slate-800">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Template
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-medium text-slate-900">{templates.length} Template{templates.length !== 1 ? 's' : ''}</h3>
+                  <Button onClick={handleAdd} className="bg-slate-900 hover:bg-slate-800" size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Template
+                  </Button>
+                </div>
+                {templates.map(template => (
+                  <Card key={template.id} className="bg-slate-50 hover:shadow-sm transition-shadow">
+                    <CardContent className="pt-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-slate-900">{template.name}</h4>
+                          <p className="text-sm text-slate-600 mt-1">{template.description}</p>
+                          <div className="flex gap-3 mt-2 text-xs text-slate-500">
+                            <span>Type: <Badge className="ml-1 capitalize inline">{template.type}</Badge></span>
+                            <span>{template.sections?.length || 0} sections</span>
+                            <span>{template.estimated_duration_minutes} min</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 ml-4 shrink-0">
+                          <Button variant="ghost" size="icon" onClick={() => handleView(template)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleEdit(template)}>
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleDelete(template.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
 
 
