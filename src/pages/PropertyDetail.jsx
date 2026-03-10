@@ -674,6 +674,7 @@ export default function PropertyDetail() {
               <TabsTrigger value="access">Access Info</TabsTrigger>
               <TabsTrigger value="visits">Visits</TabsTrigger>
               <TabsTrigger value="contractors">Contractors</TabsTrigger>
+              <TabsTrigger value="storm">Storm Protection</TabsTrigger>
               <TabsTrigger value="contacts">Contacts</TabsTrigger>
             </TabsList>
 
@@ -1064,6 +1065,56 @@ export default function PropertyDetail() {
                       );
                     })}
                   </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="storm">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-amber-500" />
+                    Storm Protection
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Storm Protection Description
+                    </label>
+                    <p className="text-xs text-slate-500 mb-2">
+                      Completely describe the storm protection, type of shutters, etc. that you have for your home.
+                    </p>
+                    <textarea
+                      value={property.storm_protection_description || ''}
+                      onChange={(e) => { setProperty({...property, storm_protection_description: e.target.value}); setHasUnsavedChanges(true); }}
+                      placeholder="e.g., Impact-resistant windows on all floors, accordion shutters on east-facing windows, roll-down shutters on garage..."
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm"
+                      rows={5}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Storm Panels / Installation Contractor
+                    </label>
+                    <p className="text-xs text-slate-500 mb-2">
+                      If you have storm panels, screens, or other storm protection that needs to be installed, please note the contractor that you have engaged.
+                    </p>
+                    <textarea
+                      value={property.storm_panels_notes || ''}
+                      onChange={(e) => { setProperty({...property, storm_panels_notes: e.target.value}); setHasUnsavedChanges(true); }}
+                      placeholder="e.g., Aluminum storm panels stored in garage — ABC Storm Services (555-123-4567) handles installation..."
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm"
+                      rows={4}
+                    />
+                  </div>
+                  {hasUnsavedChanges && (
+                    <div className="flex justify-end">
+                      <Button onClick={handleSave} disabled={saving} className="bg-slate-900 hover:bg-slate-800 text-white">
+                        {saving ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
