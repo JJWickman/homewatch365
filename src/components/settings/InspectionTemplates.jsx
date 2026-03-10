@@ -281,9 +281,9 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
         </CardHeader>
         <CardContent>
           {templates.length === 0 ? (
-            <div className="text-center py-8 text-slate-500">
-              <p>No inspection templates yet. Create one or use the default Home Watch template.</p>
-            </div>
+             <div className="text-center py-8 text-slate-500">
+               <p>No custom templates yet. Your platform's standard templates are available during visit setup.</p>
+             </div>
           ) : (
             <div className="space-y-3">
               {templates.map((template) => (
