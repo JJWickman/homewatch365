@@ -233,9 +233,9 @@ export default function VisitFlow() {
         summary_notes: summaryNotes,
         overall_status: overallStatus,
         photo_count: photoCount
-      });
+        });
 
-      navigate(createPageUrl('InspectionDetail') + `?id=${visit.id}`);
+        navigate(createPageUrl('VisitDetail') + `?id=${visit.id}`);
     } catch (error) {
       console.error('Error saving:', error);
       setSaving(false);
@@ -293,9 +293,9 @@ export default function VisitFlow() {
             due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
           });
         }
-      }
+        }
 
-      navigate(createPageUrl('InspectionDetail') + `?id=${visit.id}`);
+        navigate(createPageUrl('VisitDetail') + `?id=${visit.id}`);
     } catch (error) {
       console.error('Error completing visit:', error);
       setSaving(false);
