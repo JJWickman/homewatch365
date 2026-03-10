@@ -273,23 +273,11 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
             <CardDescription>Create and manage inspection checklists for your team</CardDescription>
           </div>
           <div className="flex gap-2 flex-wrap">
-            {!templates.some(t => t.name === 'Standard Checklist') && (
-              <Button onClick={handleAddStandardChecklist} disabled={copyingStandard} variant="outline">
-                <Copy className="h-4 w-4 mr-2" />
-                {copyingStandard ? 'Adding...' : 'Add Standard Checklist'}
-              </Button>
-            )}
-            {templates.length === 0 && (
-              <Button onClick={handleCopyDefault} disabled={copyingDefault} variant="outline">
-                <Copy className="h-4 w-4 mr-2" />
-                {copyingDefault ? 'Adding...' : 'Add Home Watch Template'}
-              </Button>
-            )}
-            <Button onClick={handleAdd} className="bg-slate-900 hover:bg-slate-800">
-              <Plus className="h-4 w-4 mr-2" />
-              New Template
-            </Button>
-          </div>
+             <Button onClick={handleAdd} className="bg-slate-900 hover:bg-slate-800">
+               <Plus className="h-4 w-4 mr-2" />
+               New Template
+             </Button>
+           </div>
         </CardHeader>
         <CardContent>
           {templates.length === 0 ? (
