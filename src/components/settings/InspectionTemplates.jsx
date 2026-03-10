@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import TemplateEditor from './TemplateEditor';
 
 const DEFAULT_STANDARD_CHECKLIST_TEMPLATE = {
   name: 'Standard Checklist',
