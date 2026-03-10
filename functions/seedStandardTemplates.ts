@@ -7,18 +7,8 @@ const SINGLE_FAMILY_TEMPLATE = {
   estimated_duration_minutes: 90,
   sections: [
     {
-      name: 'Equipment Locations',
-      order: 1,
-      items: [
-        { name: 'Water valve location', description: 'Note the location of water valve', order: 1, check_type: 'text', requires_note: true },
-        { name: 'Breaker Box Location', description: 'Note the location of breaker box', order: 2, check_type: 'text', requires_note: true },
-        { name: 'Water Heater Location', description: 'Note the location of water heater', order: 3, check_type: 'text', requires_note: true },
-        { name: 'Air Handler Location', description: 'Note the location of air handler', order: 4, check_type: 'text', requires_note: true },
-      ]
-    },
-    {
       name: 'Upon Arrival - Exterior Check',
-      order: 2,
+      order: 1,
       items: [
         { name: 'Mailbox', description: 'Check mailbox, remove newspapers, forward mail if requested', order: 1, check_type: 'pass_fail' },
         { name: 'Landscape', description: 'Exterior check of landscape for brown spots or dead plants', order: 2, check_type: 'pass_fail' },
@@ -31,7 +21,7 @@ const SINGLE_FAMILY_TEMPLATE = {
     },
     {
       name: 'Upon Arrival - Interior Check',
-      order: 3,
+      order: 2,
       items: [
         { name: 'Security system', description: 'Disarm security system', order: 1, check_type: 'pass_fail', requires_note: true, requires_photo: true },
         { name: 'Phone line', description: 'Test the phone line', order: 2, check_type: 'pass_fail' },
@@ -39,7 +29,7 @@ const SINGLE_FAMILY_TEMPLATE = {
     },
     {
       name: 'Water Zone Home Watch Method',
-      order: 4,
+      order: 3,
       items: [
         { name: 'Dishwasher', description: 'Short cycle on the dishwasher, check for visible leaks', order: 1, check_type: 'pass_fail', requires_note: true, requires_photo: true },
         { name: 'Garbage disposal', description: 'Operate the garbage disposal, check for proper operation and leaks', order: 2, check_type: 'pass_fail' },
@@ -57,7 +47,7 @@ const SINGLE_FAMILY_TEMPLATE = {
     },
     {
       name: 'AC System',
-      order: 5,
+      order: 4,
       items: [
         { name: 'Temperature and humidity', description: 'Record temperature and humidity in main room', order: 1, check_type: 'text', requires_note: true },
         { name: 'Thermostat', description: 'Lower the thermostat by a couple of degrees. AC system set to Auto-Cool?', order: 2, check_type: 'pass_fail', requires_note: true, requires_photo: true },
@@ -68,14 +58,14 @@ const SINGLE_FAMILY_TEMPLATE = {
     },
     {
       name: 'Observe and Report',
-      order: 6,
+      order: 5,
       items: [
         { name: 'Home Watch Mode', description: 'Is the residence in Home Watch Mode? (doors/closets open for air circulation, etc)', order: 1, check_type: 'pass_fail' },
       ]
     },
     {
       name: 'Storm Protection',
-      order: 7,
+      order: 6,
       items: [
         { name: 'Electric shutters', description: 'Exercise electric storm shutters and all OK?', order: 1, check_type: 'pass_fail', requires_note: true, requires_photo: true },
         { name: 'Shutter controls', description: 'Shutter wall switch in neutral position or shutter remote control tested', order: 2, check_type: 'pass_fail' },
@@ -83,7 +73,7 @@ const SINGLE_FAMILY_TEMPLATE = {
     },
     {
       name: 'Garage',
-      order: 8,
+      order: 7,
       items: [
         { name: 'Ceiling/Walls', description: 'Check visible ceiling, walls, baseboards for signs of damage', order: 1, check_type: 'pass_fail', requires_note: true, requires_photo: true },
         { name: 'Garage door', description: 'Exercise the garage door', order: 2, check_type: 'pass_fail', requires_note: true, requires_photo: true },
@@ -92,7 +82,7 @@ const SINGLE_FAMILY_TEMPLATE = {
     },
     {
       name: 'Departure',
-      order: 9,
+      order: 8,
       items: [
         { name: 'Thermostat', description: 'Thermostat(s) returned to proper setting', order: 1, check_type: 'pass_fail', requires_note: true, requires_photo: true },
         { name: 'Water OFF', description: 'Turn water OFF at the main supply valve - slowly and gingerly', order: 2, check_type: 'pass_fail', requires_note: true, requires_photo: true },
