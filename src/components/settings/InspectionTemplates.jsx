@@ -382,51 +382,16 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
 
       {/* Template Edit Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingId ? 'Edit Template' : 'New Inspection Template'}</DialogTitle>
             <DialogDescription>
-              Create a custom inspection checklist for your team
+              Create and customize your inspection checklist with sections and items
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
-            <div>
-              <Label>Template Name *</Label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Home Watch - Standard Inspection"
-              />
-            </div>
-
-            <div>
-              <Label>Description</Label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Describe what this template is used for"
-                className="min-h-20"
-              />
-            </div>
-
-            <div>
-              <Label>Type</Label>
-              <select
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md"
-              >
-                <option value="standard">Standard</option>
-                <option value="pre_storm">Pre-Storm</option>
-                <option value="post_storm">Post-Storm</option>
-              </select>
-            </div>
-
-            <div className="text-sm text-slate-600">
-              <p className="font-medium mb-2">Sections: {formData.sections?.length || 0}</p>
-              <p>Edit the default template directly or customize sections in the admin console.</p>
-            </div>
+          <div className="py-4">
+            <TemplateEditor template={formData} onChange={setFormData} />
           </div>
 
           <DialogFooter>
