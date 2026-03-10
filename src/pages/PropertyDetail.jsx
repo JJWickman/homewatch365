@@ -627,7 +627,7 @@ export default function PropertyDetail() {
                     value={property.emergency_notification_contact_name || ''}
                     onChange={(e) => { setProperty({...property, emergency_notification_contact_name: e.target.value}); setHasUnsavedChanges(true); }}
                     placeholder="Full name"
-                    className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 text-sm"
+                    className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 text-sm text-black"
                   />
                 </div>
                 <div>
@@ -637,7 +637,7 @@ export default function PropertyDetail() {
                     value={property.emergency_notification_contact_phone || ''}
                     onChange={(e) => { setProperty({...property, emergency_notification_contact_phone: e.target.value}); setHasUnsavedChanges(true); }}
                     placeholder="Phone number"
-                    className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 text-sm"
+                    className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 text-sm text-black"
                   />
                 </div>
                 <div>
@@ -647,7 +647,7 @@ export default function PropertyDetail() {
                     value={property.emergency_notification_contact_email || ''}
                     onChange={(e) => { setProperty({...property, emergency_notification_contact_email: e.target.value}); setHasUnsavedChanges(true); }}
                     placeholder="Email address"
-                    className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 text-sm"
+                    className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 text-sm text-black"
                   />
                 </div>
               </div>
@@ -784,7 +784,7 @@ export default function PropertyDetail() {
                           value={property.gate_code || ''}
                           onChange={(e) => { setProperty({...property, gate_code: e.target.value}); setHasUnsavedChanges(true); }}
                           placeholder="Enter gate code"
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 font-mono"
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 font-mono text-black"
                         />
                       </div>
                     )}
@@ -802,7 +802,7 @@ export default function PropertyDetail() {
                         value={property.hoa_name || ''}
                         onChange={(e) => { setProperty({...property, hoa_name: e.target.value}); setHasUnsavedChanges(true); }}
                         placeholder="HOA name (e.g., Sunset Bay HOA)"
-                        className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm"
+                        className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black"
                       />
                       <button
                         onClick={handleHoaSearch}
@@ -827,7 +827,7 @@ export default function PropertyDetail() {
                               value={property[field] || ''}
                               onChange={(e) => { setProperty({...property, [field]: e.target.value}); setHasUnsavedChanges(true); }}
                               placeholder={placeholder}
-                              className="flex-1 px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm"
+                               className="flex-1 px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black"
                             />
                           </div>
                         ))}
@@ -1136,7 +1136,7 @@ export default function PropertyDetail() {
                       value={property.storm_protection_description || ''}
                       onChange={(e) => { setProperty({...property, storm_protection_description: e.target.value}); setHasUnsavedChanges(true); }}
                       placeholder="e.g., Impact-resistant windows on all floors, accordion shutters on east-facing windows, roll-down shutters on garage..."
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black"
                       rows={5}
                     />
                   </div>
@@ -1151,7 +1151,7 @@ export default function PropertyDetail() {
                       value={property.storm_panels_notes || ''}
                       onChange={(e) => { setProperty({...property, storm_panels_notes: e.target.value}); setHasUnsavedChanges(true); }}
                       placeholder="e.g., Aluminum storm panels stored in garage — ABC Storm Services (555-123-4567) handles installation..."
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black"
                       rows={4}
                     />
                   </div>
@@ -1234,7 +1234,7 @@ export default function PropertyDetail() {
                 value={newTask.title}
                 onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                 placeholder="e.g., Fix roof leak"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
               />
             </div>
             <div>
@@ -1244,7 +1244,7 @@ export default function PropertyDetail() {
                 value={newTask.description}
                 onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
                 placeholder="Task details..."
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
                 rows={3}
               />
             </div>
@@ -1255,9 +1255,9 @@ export default function PropertyDetail() {
                   id="task-priority"
                   value={newTask.priority}
                   onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
-                >
-                  <option value="low">Low</option>
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
+                  >
+                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
                   <option value="urgent">Urgent</option>
@@ -1270,7 +1270,7 @@ export default function PropertyDetail() {
                   type="date"
                   value={newTask.due_date}
                   onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
                 />
               </div>
             </div>
@@ -1299,7 +1299,7 @@ export default function PropertyDetail() {
                 value={newContact.name}
                 onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
                 placeholder="Contact name"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
               />
             </div>
             <div>
@@ -1310,7 +1310,7 @@ export default function PropertyDetail() {
                 value={newContact.relationship}
                 onChange={(e) => setNewContact({ ...newContact, relationship: e.target.value })}
                 placeholder="e.g., Owner, Manager"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
               />
             </div>
             <div>
@@ -1321,7 +1321,7 @@ export default function PropertyDetail() {
                 value={newContact.phone}
                 onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
                 placeholder="Phone number"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
               />
             </div>
             <div>
@@ -1332,7 +1332,7 @@ export default function PropertyDetail() {
                 value={newContact.email}
                 onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
                 placeholder="Email address"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
               />
             </div>
             <div className="flex justify-end gap-3 pt-4">
