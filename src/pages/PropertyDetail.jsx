@@ -74,6 +74,7 @@ export default function PropertyDetail() {
   const [isNearProperty, setIsNearProperty] = useState(false);
   const [mapZoom, setMapZoom] = useState(17);
   const [searchingHoa, setSearchingHoa] = useState(false);
+  const [emergencyContactSaved, setEmergencyContactSaved] = useState(false);
 
   useEffect(() => {
     loadProperty();
@@ -379,7 +380,9 @@ export default function PropertyDetail() {
         storm_panels_notes: property.storm_panels_notes,
       });
       setHasUnsavedChanges(false);
+      setEmergencyContactSaved(true);
       toast.success('Property saved successfully');
+      setTimeout(() => setEmergencyContactSaved(false), 3000);
     } catch (error) {
       console.error('Error saving property:', error);
       toast.error('Failed to save property');
@@ -656,10 +659,22 @@ export default function PropertyDetail() {
                   />
                 </div>
                 </div>
-                <div className="flex justify-end pt-3 border-t border-slate-100">
-                  <Button onClick={handleSave} disabled={saving} className="bg-red-600 hover:bg-red-700 text-white">
-                    {saving ? 'Saving...' : 'Save'}
-                  </Button>
+                <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                  {emergencyContactSaved && (
+                    <Button variant="outline" onClick={() => setEmergencyContactSaved(false)}>
+                      Change
+                    </Button>
+                  )}
+                  {!emergencyContactSaved && (
+                    <Button onClick={handleSave} disabled={saving} className="bg-red-600 hover:bg-red-700 text-white">
+                      {saving ? 'Saving...' : 'Save'}
+                    </Button>
+                  )}
+                  {emergencyContactSaved && (
+                    <Button disabled className="bg-slate-900 hover:bg-slate-900 text-white cursor-default">
+                      Saved
+                    </Button>
+                  )}
                 </div>
                 </CardContent>
                 </Card>
