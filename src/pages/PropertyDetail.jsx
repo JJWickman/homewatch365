@@ -7,7 +7,8 @@ import {
   Building2, MapPin, User, Key, Wifi, Phone, 
   Edit, ClipboardCheck, Calendar, Clock, 
   AlertTriangle, CheckCircle2, FileText, Upload, Image, 
-  AlertCircle, Circle, Plus, ZoomIn, ZoomOut
+  AlertCircle, Circle, Plus, ZoomIn, ZoomOut,
+  Search, Loader2, Globe
 } from 'lucide-react';
 import {
   Select,
@@ -31,6 +32,18 @@ import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
 import { toast } from 'sonner';
+
+const CONTRACTOR_TYPES = [
+  { value: 'cleaning_service', label: 'Cleaning Service' },
+  { value: 'hvac', label: 'HVAC' },
+  { value: 'electrician', label: 'Electrician' },
+  { value: 'handyman', label: 'Handyman' },
+  { value: 'pest_control', label: 'Pest Control' },
+  { value: 'plumber', label: 'Plumber' },
+  { value: 'pool_service', label: 'Pool Service' },
+  { value: 'landscape', label: 'Landscape' },
+  { value: 'other', label: 'Other' },
+];
 
 export default function PropertyDetail() {
   const navigate = useNavigate();
@@ -60,6 +73,7 @@ export default function PropertyDetail() {
   const [gettingLocation, setGettingLocation] = useState(false);
   const [isNearProperty, setIsNearProperty] = useState(false);
   const [mapZoom, setMapZoom] = useState(17);
+  const [searchingHoa, setSearchingHoa] = useState(false);
 
   useEffect(() => {
     loadProperty();
@@ -351,7 +365,13 @@ export default function PropertyDetail() {
     setSaving(true);
     try {
       await base44.entities.Property.update(property.id, { 
-        primary_photo_url: property.primary_photo_url 
+        primary_photo_url: property.primary_photo_url,
+        hoa_name: property.hoa_name,
+        hoa_website: property.hoa_website,
+        hoa_email: property.hoa_email,
+        hoa_phone: property.hoa_phone,
+        security_gate: property.security_gate,
+        gate_code: property.gate_code,
       });
       setHasUnsavedChanges(false);
       toast.success('Property saved successfully');
@@ -381,6 +401,40 @@ export default function PropertyDetail() {
       toast.error('Failed to change owner');
     } finally {
       setChangingOwner(false);
+    }
+  };
+
+  const handleHoaSearch = async () => {
+    if (!property.hoa_name) return;
+    setSearchingHoa(true);
+    try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `Find official contact information for the Homeowners Association named "${property.hoa_name}". Return their official website URL, contact email, and phone number if available.`,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            website: { type: 'string' },
+            email: { type: 'string' },
+            phone: { type: 'string' }
+          }
+        }
+      });
+      if (result) {
+        setProperty(prev => ({
+          ...prev,
+          hoa_website: result.website || prev.hoa_website || '',
+          hoa_email: result.email || prev.hoa_email || '',
+          hoa_phone: result.phone || prev.hoa_phone || '',
+        }));
+        setHasUnsavedChanges(true);
+        toast.success('HOA information found!');
+      }
+    } catch (error) {
+      console.error('Error searching HOA:', error);
+      toast.error('Could not find HOA information');
+    } finally {
+      setSearchingHoa(false);
     }
   };
 
@@ -652,10 +706,83 @@ export default function PropertyDetail() {
                         <p className="font-mono font-semibold text-lg">{property.lockbox_code}</p>
                       </div>
                     )}
-                    {property.gate_code && (
-                      <div className="p-4 bg-slate-50 rounded-lg">
-                        <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Gate Code</p>
-                        <p className="font-mono font-semibold text-lg">{property.gate_code}</p>
+
+                  </div>
+
+                  {/* Security Gate */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Key className="h-4 w-4 text-slate-500" />
+                      <h4 className="text-sm font-medium text-slate-500">Security Gate</h4>
+                    </div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-sm text-slate-600">Has Security Gate?</span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => { setProperty({...property, security_gate: true}); setHasUnsavedChanges(true); }}
+                          className={`px-3 py-1 rounded text-sm font-medium transition-colors ${property.security_gate === true ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                        >Yes</button>
+                        <button
+                          onClick={() => { setProperty({...property, security_gate: false}); setHasUnsavedChanges(true); }}
+                          className={`px-3 py-1 rounded text-sm font-medium transition-colors ${property.security_gate === false ? 'bg-slate-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                        >No</button>
+                      </div>
+                    </div>
+                    {property.security_gate && (
+                      <div>
+                        <label className="text-xs text-slate-500 block mb-1">Gate Code</label>
+                        <input
+                          type="text"
+                          value={property.gate_code || ''}
+                          onChange={(e) => { setProperty({...property, gate_code: e.target.value}); setHasUnsavedChanges(true); }}
+                          placeholder="Enter gate code"
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 font-mono"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* HOA */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Globe className="h-4 w-4 text-slate-500" />
+                      <h4 className="text-sm font-medium text-slate-500">Homeowners Association</h4>
+                    </div>
+                    <div className="flex gap-2 mb-3">
+                      <input
+                        type="text"
+                        value={property.hoa_name || ''}
+                        onChange={(e) => { setProperty({...property, hoa_name: e.target.value}); setHasUnsavedChanges(true); }}
+                        placeholder="HOA name (e.g., Sunset Bay HOA)"
+                        className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm"
+                      />
+                      <button
+                        onClick={handleHoaSearch}
+                        disabled={searchingHoa || !property.hoa_name}
+                        className="px-3 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50 flex items-center gap-1.5 text-sm"
+                      >
+                        {searchingHoa ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                        Search
+                      </button>
+                    </div>
+                    {property.hoa_name && (
+                      <div className="space-y-2">
+                        {[
+                          { label: 'Website', field: 'hoa_website', type: 'url', placeholder: 'https://...' },
+                          { label: 'Email', field: 'hoa_email', type: 'email', placeholder: 'contact@hoa.com' },
+                          { label: 'Phone', field: 'hoa_phone', type: 'tel', placeholder: 'Phone number' },
+                        ].map(({ label, field, type, placeholder }) => (
+                          <div key={field} className="flex items-center gap-2">
+                            <span className="text-xs text-slate-500 w-16 shrink-0">{label}</span>
+                            <input
+                              type={type}
+                              value={property[field] || ''}
+                              onChange={(e) => { setProperty({...property, [field]: e.target.value}); setHasUnsavedChanges(true); }}
+                              placeholder={placeholder}
+                              className="flex-1 px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm"
+                            />
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -683,9 +810,7 @@ export default function PropertyDetail() {
                     </div>
                   )}
 
-                  {(!property.access_instructions && !property.alarm_code && !property.lockbox_code && !property.wifi_network) && (
-                   <p className="text-slate-400 italic text-center py-4">No access information provided</p>
-                  )}
+
 
                   {/* Static Map */}
                   {property.latitude && property.longitude && (
@@ -897,40 +1022,48 @@ export default function PropertyDetail() {
                   </Button>
                 </CardHeader>
                 <CardContent>
-                  {contractors.length === 0 ? (
-                    <p className="text-slate-400 italic text-center py-8">No contractors assigned</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {contractors.map((contractor) => (
-                        <div key={contractor.id} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                          <div className="flex items-start justify-between mb-2">
-                            <div>
-                              <p className="font-medium text-slate-900">{contractor.business_name}</p>
-                              <p className="text-sm text-amber-600 capitalize font-medium">
-                                {contractor.contractor_type.replace('_', ' ')}
-                              </p>
+                  <div className="space-y-3">
+                    {CONTRACTOR_TYPES.map(({ value, label }) => {
+                      const typeContractors = contractors.filter(c => c.contractor_type === value);
+                      return (
+                        <div key={value} className="border border-slate-200 rounded-lg overflow-hidden">
+                          <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+                            <span className="font-medium text-sm text-slate-700">{label}</span>
+                            {typeContractors.length === 0 ? (
+                              <span className="text-xs text-slate-400">Not assigned</span>
+                            ) : (
+                              <span className="text-xs text-emerald-600 font-medium">{typeContractors.length} assigned</span>
+                            )}
+                          </div>
+                          {typeContractors.length > 0 && (
+                            <div className="divide-y divide-slate-100">
+                              {typeContractors.map((contractor) => (
+                                <div key={contractor.id} className="px-4 py-3">
+                                  <p className="font-medium text-slate-900">{contractor.business_name}</p>
+                                  {contractor.contact_name && (
+                                    <p className="text-sm text-slate-500">Contact: {contractor.contact_name}</p>
+                                  )}
+                                  <div className="mt-2 space-y-1 text-sm">
+                                    {contractor.phone && (
+                                      <a href={`tel:${contractor.phone}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+                                        <Phone className="h-3.5 w-3.5" />
+                                        {contractor.phone}
+                                      </a>
+                                    )}
+                                    {contractor.email && (
+                                      <a href={`mailto:${contractor.email}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+                                        {contractor.email}
+                                      </a>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
                             </div>
-                          </div>
-                          {contractor.contact_name && (
-                            <p className="text-sm text-slate-600 mb-2">Contact: {contractor.contact_name}</p>
                           )}
-                          <div className="space-y-1 text-sm">
-                            {contractor.phone && (
-                              <a href={`tel:${contractor.phone}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
-                                <Phone className="h-3.5 w-3.5" />
-                                {contractor.phone}
-                              </a>
-                            )}
-                            {contractor.email && (
-                              <a href={`mailto:${contractor.email}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mt-1">
-                                {contractor.email}
-                              </a>
-                            )}
-                          </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      );
+                    })}
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
