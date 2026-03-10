@@ -48,6 +48,11 @@ export default function VisitChecklistMobile() {
       setLoading(true);
       user.current = await base44.auth.me();
 
+      if (!visitId || !propertyId) {
+        setError('Missing visit or property ID');
+        return;
+      }
+
       // Get visit and property
       const visits = await base44.entities.Visit.filter({ id: visitId });
       const properties = await base44.entities.Property.filter({ id: propertyId });
@@ -76,7 +81,7 @@ export default function VisitChecklistMobile() {
       });
 
       if (!templateResponse.data.template) {
-        setError('Checklist template not found. Please seed it first.');
+        setError('Checklist template not found. Please seed the Condo/Villa template first.');
         return;
       }
 
