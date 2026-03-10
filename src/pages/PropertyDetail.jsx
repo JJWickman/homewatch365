@@ -372,6 +372,11 @@ export default function PropertyDetail() {
         hoa_phone: property.hoa_phone,
         security_gate: property.security_gate,
         gate_code: property.gate_code,
+        emergency_notification_contact_name: property.emergency_notification_contact_name,
+        emergency_notification_contact_phone: property.emergency_notification_contact_phone,
+        emergency_notification_contact_email: property.emergency_notification_contact_email,
+        storm_protection_description: property.storm_protection_description,
+        storm_panels_notes: property.storm_panels_notes,
       });
       setHasUnsavedChanges(false);
       toast.success('Property saved successfully');
