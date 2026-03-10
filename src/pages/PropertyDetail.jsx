@@ -1100,37 +1100,39 @@ export default function PropertyDetail() {
                   <div className="space-y-4">
                     {CONTRACTOR_TYPES.map(({ value, label }) => {
                       const typeContractors = contractors.filter(c => c.contractor_type === value);
+                      const availableContractors = contractors.filter(c => c.contractor_type === value && !property.contractors?.includes(c.id));
                       return (
                         <div key={value} className="border border-slate-200 rounded-lg overflow-hidden">
                           <div className="px-4 py-3">
                             <label className="text-sm font-medium text-slate-700 block mb-2">{label}</label>
-                            <Select
-                              onValueChange={async (contractorId) => {
-                                const selectedContractor = contractors.find(c => c.id === contractorId);
-                                if (selectedContractor && !property.contractors?.includes(contractorId)) {
-                                  const updatedContractors = [...(property.contractors || []), contractorId];
-                                  await base44.entities.Property.update(property.id, { contractors: updatedContractors });
-                                  setProperty({ ...property, contractors: updatedContractors });
-                                  const contractorsData = await base44.entities.Contractor.filter({ 
-                                    id: { $in: updatedContractors } 
-                                  });
-                                  setContractors(contractorsData);
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder={`Select a ${label.toLowerCase()}`} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {contractors
-                                  .filter(c => c.contractor_type === value && !property.contractors?.includes(c.id))
-                                  .map(contractor => (
+                            <div className="flex gap-2">
+                              <Select
+                                onValueChange={async (contractorId) => {
+                                  if (contractorId === 'add-new') {
+                                    setSelectedContractorType(value);
+                                    setShowAddContractorDialog(true);
+                                  } else {
+                                    await handleAssignContractor(contractorId);
+                                  }
+                                }}
+                              >
+                                <SelectTrigger className="flex-1">
+                                  <SelectValue placeholder={`Select a ${label.toLowerCase()}`} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {availableContractors.map(contractor => (
                                     <SelectItem key={contractor.id} value={contractor.id}>
                                       {contractor.business_name}
                                     </SelectItem>
                                   ))}
-                              </SelectContent>
-                            </Select>
+                                  {availableContractors.length > 0 && <div className="mx-2 my-1 border-t border-slate-200" />}
+                                  <SelectItem value="add-new">
+                                    <Plus className="h-4 w-4 inline mr-2" />
+                                    Add New {label}
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
                           {typeContractors.length > 0 && (
                             <div className="divide-y divide-slate-100 border-t border-slate-200">
