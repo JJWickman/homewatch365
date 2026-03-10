@@ -84,6 +84,7 @@ import VisitFlow from './pages/VisitFlow';
 import Visits from './pages/Visits';
 import VisitChecklist from './pages/VisitChecklist';
 import VisitChecklistMobile from './pages/VisitChecklistMobile';
+import VisitChecklistPage from './pages/VisitChecklistPage';
 import __Layout from './Layout.jsx';
 
 
@@ -125,6 +126,7 @@ export const PAGES = {
     "Visits": Visits,
     "VisitChecklist": VisitChecklist,
     "VisitChecklistMobile": VisitChecklistMobile,
+    "VisitChecklistPage": VisitChecklistPage,
 }
 
 export const pagesConfig = {

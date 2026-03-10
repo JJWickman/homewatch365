@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { AlertCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,45 +8,24 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from '@/components/ui/select';
-import { AlertCircle, Camera, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 export default function ChecklistItemRow({
   item,
-  response,
+  response = {},
   onItemChange,
   onPhotoUpload
 }) {
+  const [showIssueDetails, setShowIssueDetails] = useState(response?.issue_flag || false);
   const [photoInputKey, setPhotoInputKey] = useState(0);
-
-  const handleResponseChange = (value) => {
-    onItemChange(item.id, {
-      ...response,
-      response_value: value,
-      issue_flag: value === 'issue'
-    });
-  };
-
-  const handleNumericChange = (e) => {
-    const val = parseFloat(e.target.value) || null;
-    onItemChange(item.id, { ...response, numeric_value: val });
-  };
-
-  const handleNoteChange = (e) => {
-    onItemChange(item.id, { ...response, note: e.target.value });
-  };
-
-  const handleSeverityChange = (val) => {
-    onItemChange(item.id, { ...response, severity: val });
-  };
 
   const handlePhotoUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     for (const file of files) {
       try {
-        // Create a FormData object for the file
-        const result = await base44.integrations.Core.UploadFile({ file });
+        const result = await onPhotoUpload(item.id, file);
         if (result?.file_url) {
           const photos = response?.photo_urls || [];
           onItemChange(item.id, {
@@ -61,240 +40,291 @@ export default function ChecklistItemRow({
     setPhotoInputKey(k => k + 1);
   };
 
-  const handleRemovePhoto = (index) => {
-    const photos = response?.photo_urls || [];
+  const removePhoto = (photoUrl) => {
+    const photos = (response?.photo_urls || []).filter(p => p !== photoUrl);
     onItemChange(item.id, {
       ...response,
-      photo_urls: photos.filter((_, i) => i !== index)
+      photo_urls: photos
     });
   };
 
-  // Instruction only - no input needed
-  if (item.response_type === 'instruction_only') {
+  // Response Type: ok_issue_na
+  if (item.response_type === 'ok_issue_na') {
+    const value = response?.response_value;
+
     return (
-      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-        <p className="text-sm text-blue-900 font-medium">{item.label}</p>
-        {item.instructions && (
-          <p className="text-xs text-blue-800 mt-1">{item.instructions}</p>
+      <div className="border border-slate-200 rounded-lg p-4 space-y-3">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <p className="font-medium text-sm text-slate-900">{item.label}</p>
+            {item.required && <Badge className="mt-1 text-xs">Required</Badge>}
+          </div>
+        </div>
+
+        {/* OK / Issue / N/A buttons */}
+        <div className="flex gap-2">
+          <Button
+            variant={value === 'ok' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              onItemChange(item.id, { ...response, response_value: 'ok', issue_flag: false });
+              setShowIssueDetails(false);
+            }}
+            className="flex-1"
+          >
+            OK
+          </Button>
+          <Button
+            variant={value === 'issue' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              onItemChange(item.id, { ...response, response_value: 'issue', issue_flag: true });
+              setShowIssueDetails(true);
+            }}
+            className="flex-1 bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+          >
+            Issue
+          </Button>
+          {item.allow_na && (
+            <Button
+              variant={value === 'na' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                onItemChange(item.id, { ...response, response_value: 'na', issue_flag: false });
+                setShowIssueDetails(false);
+              }}
+              className="flex-1"
+            >
+              N/A
+            </Button>
+          )}
+        </div>
+
+        {/* Issue details */}
+        {showIssueDetails && (
+          <div className="border-t pt-3 space-y-3 bg-red-50 p-3 rounded">
+            {/* Severity */}
+            {item.allow_severity && (
+              <div>
+                <label className="text-xs font-medium text-slate-700 block mb-1">
+                  Severity
+                </label>
+                <Select
+                  value={response?.severity || ''}
+                  onValueChange={(val) =>
+                    onItemChange(item.id, { ...response, severity: val })
+                  }
+                >
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue placeholder="Select severity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Note */}
+            <div>
+              <label className="text-xs font-medium text-slate-700 block mb-1">
+                Note {item.required && value === 'issue' && <span className="text-red-600">*</span>}
+              </label>
+              <Textarea
+                placeholder="Describe the issue..."
+                value={response?.note || ''}
+                onChange={(e) =>
+                  onItemChange(item.id, { ...response, note: e.target.value })
+                }
+                className="h-20 text-sm"
+              />
+            </div>
+
+            {/* Photo upload */}
+            {item.allow_photo && (
+              <div>
+                <label className="text-xs font-medium text-slate-700 block mb-1">
+                  Photos
+                </label>
+                <input
+                  key={photoInputKey}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handlePhotoUpload}
+                  className="text-sm"
+                />
+                {response?.photo_urls?.length > 0 && (
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {response.photo_urls.map((url, idx) => (
+                      <div key={idx} className="relative">
+                        <img
+                          src={url}
+                          alt={`Photo ${idx + 1}`}
+                          className="h-12 w-12 rounded object-cover border border-slate-300"
+                        />
+                        <button
+                          onClick={() => removePhoto(url)}
+                          className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Optional note when OK */}
+        {value === 'ok' && item.allow_note && (
+          <div>
+            <label className="text-xs font-medium text-slate-700 block mb-1">
+              Note (optional)
+            </label>
+            <Textarea
+              placeholder="Add a note..."
+              value={response?.note || ''}
+              onChange={(e) =>
+                onItemChange(item.id, { ...response, note: e.target.value })
+              }
+              className="h-16 text-sm"
+            />
+          </div>
+        )}
+
+        {/* Validation error */}
+        {item.required && !value && (
+          <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 p-2 rounded">
+            <AlertCircle className="h-3 w-3" />
+            Required field
+          </div>
+        )}
+
+        {/* Missing note when issue */}
+        {value === 'issue' && !response?.note && (
+          <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 p-2 rounded">
+            <AlertCircle className="h-3 w-3" />
+            Note required when issue is flagged
+          </div>
         )}
       </div>
     );
   }
 
-  return (
-    <div className="border border-slate-200 rounded-lg p-3 space-y-2.5">
-      {/* Item Label */}
-      <div>
-        <p className="text-sm font-medium text-slate-900">{item.label}</p>
-        {item.instructions && (
-          <p className="text-xs text-slate-600 mt-0.5">{item.instructions}</p>
-        )}
-      </div>
-
-      {/* OK / Issue / N/A Segmented Control */}
-      {item.response_type === 'ok_issue_na' && (
-        <div className="flex gap-2">
-          {['ok', 'issue', 'na'].map(val => (
-            <button
-              key={val}
-              onClick={() => handleResponseChange(val)}
-              className={`flex-1 py-2 px-3 rounded-lg font-medium text-sm transition-all ${
-                response?.response_value === val
-                  ? val === 'ok'
-                    ? 'bg-green-600 text-white'
-                    : val === 'issue'
-                    ? 'bg-red-600 text-white'
-                    : 'bg-amber-600 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              {val === 'ok' ? '✓ OK' : val === 'issue' ? '⚠ Issue' : 'N/A'}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Number Input */}
-      {item.response_type === 'number' && (
+  // Response Type: number
+  if (item.response_type === 'number') {
+    return (
+      <div className="border border-slate-200 rounded-lg p-4">
+        <label className="font-medium text-sm text-slate-900 block mb-2">
+          {item.label}
+        </label>
         <Input
           type="number"
-          inputMode="decimal"
-          value={response?.numeric_value || ''}
-          onChange={handleNumericChange}
           placeholder={item.placeholder || 'Enter value'}
-          className="text-lg"
+          value={response?.numeric_value || ''}
+          onChange={(e) =>
+            onItemChange(item.id, {
+              ...response,
+              numeric_value: e.target.value ? parseFloat(e.target.value) : null
+            })
+          }
+          className="text-sm"
         />
-      )}
+      </div>
+    );
+  }
 
-      {/* Percentage Input */}
-      {item.response_type === 'percentage' && (
+  // Response Type: percentage
+  if (item.response_type === 'percentage') {
+    return (
+      <div className="border border-slate-200 rounded-lg p-4">
+        <label className="font-medium text-sm text-slate-900 block mb-2">
+          {item.label}
+        </label>
         <div className="flex gap-2">
           <Input
             type="number"
-            inputMode="numeric"
             min="0"
             max="100"
+            placeholder="0-100"
             value={response?.numeric_value || ''}
-            onChange={handleNumericChange}
-            placeholder="0"
-            className="text-lg"
+            onChange={(e) =>
+              onItemChange(item.id, {
+                ...response,
+                numeric_value: e.target.value ? Math.min(100, Math.max(0, parseFloat(e.target.value))) : null
+              })
+            }
+            className="text-sm"
           />
-          <div className="flex items-center px-3 text-sm font-medium text-slate-600 bg-slate-50 rounded-lg border border-slate-200">
-            %
-          </div>
+          <span className="flex items-center text-slate-600">%</span>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Photo Only */}
-      {item.response_type === 'photo_only' && (
-        <div className="space-y-2">
-          <label className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50">
-            <Camera className="h-4 w-4 text-slate-600" />
-            <span className="text-sm text-slate-600 font-medium">Upload photo</span>
-            <input
-              key={photoInputKey}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handlePhotoUpload}
-              className="hidden"
-            />
-          </label>
-          {response?.photo_urls && response.photo_urls.length > 0 && (
-            <div className="grid grid-cols-2 gap-2">
-              {response.photo_urls.map((url, idx) => (
-                <div key={idx} className="relative group">
-                  <img src={url} alt={`Photo ${idx + 1}`} className="w-full h-20 object-cover rounded-lg" />
-                  <button
-                    onClick={() => handleRemovePhoto(idx)}
-                    className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+  // Response Type: photo_only
+  if (item.response_type === 'photo_only') {
+    return (
+      <div className="border border-slate-200 rounded-lg p-4 space-y-3">
+        <div>
+          <p className="font-medium text-sm text-slate-900">{item.label}</p>
+          {item.required && <Badge className="mt-1 text-xs">Required</Badge>}
         </div>
-      )}
 
-      {/* Issue Details (when Issue selected) */}
-      {response?.issue_flag && (
-        <div className="space-y-2 pt-2 border-t border-slate-200">
-          {/* Severity */}
-          {item.allow_severity && (
-            <div>
-              <label className="text-xs font-medium text-slate-700 block mb-1">Severity</label>
-              <Select value={response?.severity || ''} onValueChange={handleSeverityChange}>
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Select severity" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+        <input
+          key={photoInputKey}
+          type="file"
+          multiple
+          accept="image/*"
+          capture="environment"
+          onChange={handlePhotoUpload}
+          className="text-sm"
+        />
 
-          {/* Note */}
-          {item.allow_note && (
-            <div>
-              <label className="text-xs font-medium text-slate-700 block mb-1">
-                Issue details {item.allow_note && '*'}
-              </label>
-              <Textarea
-                value={response?.note || ''}
-                onChange={handleNoteChange}
-                placeholder="Describe the issue..."
-                className="text-sm min-h-20"
-              />
-            </div>
-          )}
-
-          {/* Photo */}
-          {item.allow_photo && (
-            <div>
-              <label className="text-xs font-medium text-slate-700 block mb-2">Photos</label>
-              <label className="flex items-center justify-center gap-2 p-2 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50">
-                <Camera className="h-4 w-4 text-slate-600" />
-                <span className="text-xs text-slate-600 font-medium">Add photos</span>
-                <input
-                  key={`issue-${photoInputKey}`}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handlePhotoUpload}
-                  className="hidden"
+        {response?.photo_urls?.length > 0 && (
+          <div className="flex gap-2 flex-wrap">
+            {response.photo_urls.map((url, idx) => (
+              <div key={idx} className="relative">
+                <img
+                  src={url}
+                  alt={`Photo ${idx + 1}`}
+                  className="h-16 w-16 rounded object-cover border border-slate-300"
                 />
-              </label>
-              {response?.photo_urls && response.photo_urls.length > 0 && (
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {response.photo_urls.map((url, idx) => (
-                    <div key={idx} className="relative group">
-                      <img src={url} alt={`Issue photo ${idx + 1}`} className="w-full h-16 object-cover rounded-lg" />
-                      <button
-                        onClick={() => handleRemovePhoto(idx)}
-                        className="absolute top-0.5 right-0.5 bg-red-600 text-white p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 className="h-2.5 w-2.5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+                <button
+                  onClick={() => removePhoto(url)}
+                  className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
-      {/* Optional Note (when not Issue) */}
-      {!response?.issue_flag && item.allow_note && response?.response_value && (
-        <div>
-          <label className="text-xs font-medium text-slate-700 block mb-1">Notes</label>
-          <Textarea
-            value={response?.note || ''}
-            onChange={handleNoteChange}
-            placeholder="Add any notes..."
-            className="text-sm min-h-16"
-          />
-        </div>
-      )}
+        {item.required && !response?.photo_urls?.length && (
+          <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 p-2 rounded">
+            <AlertCircle className="h-3 w-3" />
+            Photo required
+          </div>
+        )}
+      </div>
+    );
+  }
 
-      {/* Optional Photo (when not Issue) */}
-      {!response?.issue_flag && item.allow_photo && response?.response_value && (
-        <div>
-          <label className="text-xs font-medium text-slate-700 block mb-2">Photos</label>
-          <label className="flex items-center justify-center gap-2 p-2 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50">
-            <Camera className="h-4 w-4 text-slate-600" />
-            <span className="text-xs text-slate-600 font-medium">Add photos</span>
-            <input
-              key={`optional-${photoInputKey}`}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handlePhotoUpload}
-              className="hidden"
-            />
-          </label>
-          {response?.photo_urls && response.photo_urls.length > 0 && (
-            <div className="grid grid-cols-3 gap-1.5 mt-2">
-              {response.photo_urls.map((url, idx) => (
-                <div key={idx} className="relative group">
-                  <img src={url} alt={`Photo ${idx + 1}`} className="w-full h-14 object-cover rounded-lg" />
-                  <button
-                    onClick={() => handleRemovePhoto(idx)}
-                    className="absolute top-0.5 right-0.5 bg-red-600 text-white p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Trash2 className="h-2.5 w-2.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
+  // Response Type: instruction_only
+  if (item.response_type === 'instruction_only') {
+    return (
+      <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
+        <p className="text-sm text-blue-900">{item.label}</p>
+      </div>
+    );
+  }
+
+  return null;
 }
