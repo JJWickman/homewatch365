@@ -193,8 +193,8 @@ Your Property Management Team
               </Button>
               <Button onClick={() => navigate(createPageUrl('VisitFlow') + `?id=${inspection.id}`)} className="bg-black text-white hover:bg-slate-900">
                 <Play className="h-4 w-4 mr-2" />
-                Start Inspection
-              </Button>
+                 Start Checkin
+                </Button>
             </>
           )}
           {inspection.status === 'in_progress' && (
