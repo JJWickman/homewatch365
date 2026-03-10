@@ -268,7 +268,7 @@ export default function VisitChecklistMobile() {
       />
 
       <div className="flex-1 p-4 space-y-4">
-        {sections.map(section => (
+        {sections.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)).map(section => (
           <ChecklistSectionComponent
             key={section.id}
             section={section}
