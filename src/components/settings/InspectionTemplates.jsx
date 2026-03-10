@@ -23,19 +23,8 @@ const DEFAULT_STANDARD_CHECKLIST_TEMPLATE = {
   estimated_duration_minutes: 45,
   sections: [
     {
-      name: 'Key Equipment Locations',
-      order: 1,
-      items: [
-        { name: 'Breaker Box', description: 'Note location of breaker box', requires_photo: false, requires_note: true, check_type: 'text', order: 1 },
-        { name: 'Water Heater', description: 'Note location of water heater', requires_photo: false, requires_note: true, check_type: 'text', order: 2 },
-        { name: 'Air Handler', description: 'Note location of air handler', requires_photo: false, requires_note: true, check_type: 'text', order: 3 },
-        { name: 'Alarm Keypad', description: 'Note location of alarm keypad', requires_photo: false, requires_note: true, check_type: 'text', order: 4 },
-        { name: 'Other Important Features', description: 'Note any other important equipment locations', requires_photo: false, requires_note: true, check_type: 'text', order: 5 },
-      ]
-    },
-    {
       name: 'Upon Arrival',
-      order: 2,
+      order: 1,
       items: [
         { name: 'Mailbox', description: 'Remove mail and newspapers if requested', requires_photo: false, requires_note: true, check_type: 'yes_no', order: 1 },
         { name: 'Landscape', description: 'Note dry patches or signs of stress', requires_photo: true, requires_note: true, check_type: 'pass_fail', order: 2 },
@@ -46,7 +35,7 @@ const DEFAULT_STANDARD_CHECKLIST_TEMPLATE = {
     },
     {
       name: 'Inside the Home',
-      order: 3,
+      order: 2,
       items: [
         { name: 'Security System', description: 'Disarmed upon entry', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 1 },
         { name: 'Phone Line', description: 'Checked for signal (if applicable)', requires_photo: false, requires_note: true, check_type: 'yes_no', order: 2 },
@@ -54,7 +43,7 @@ const DEFAULT_STANDARD_CHECKLIST_TEMPLATE = {
     },
     {
       name: 'Water Zone – Appliances',
-      order: 4,
+      order: 3,
       items: [
         { name: 'Dishwasher', description: 'Operated and checked for leaks or issues', requires_photo: false, requires_note: true, check_type: 'pass_fail', order: 1 },
         { name: 'Garbage Disposal', description: 'Operated and checked for issues', requires_photo: false, requires_note: true, check_type: 'pass_fail', order: 2 },
@@ -69,7 +58,7 @@ const DEFAULT_STANDARD_CHECKLIST_TEMPLATE = {
     },
     {
       name: 'Bathrooms',
-      order: 5,
+      order: 4,
       items: [
         { name: 'Showers & Tubs', description: 'Water run gently; look for signs of leaks or grout discoloration', requires_photo: true, requires_note: true, check_type: 'pass_fail', order: 1 },
         { name: 'Toilets', description: 'Brushed, flushed, and monitored for leaks', requires_photo: false, requires_note: true, check_type: 'pass_fail', order: 2 },
@@ -78,7 +67,7 @@ const DEFAULT_STANDARD_CHECKLIST_TEMPLATE = {
     },
     {
       name: 'AC System',
-      order: 6,
+      order: 5,
       items: [
         { name: 'Temperature & Humidity', description: 'Record current temperature and humidity readings', requires_photo: false, requires_note: true, check_type: 'text', order: 1 },
         { name: 'Thermostat', description: 'Lowered slightly during visit', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 2 },
@@ -88,7 +77,7 @@ const DEFAULT_STANDARD_CHECKLIST_TEMPLATE = {
     },
     {
       name: 'Garage',
-      order: 7,
+      order: 6,
       items: [
         { name: 'Ceiling, Walls & Baseboards', description: 'Observed for damage or water marks', requires_photo: true, requires_note: true, check_type: 'pass_fail', order: 1 },
         { name: 'Garage Door', description: 'Operated unless storm bars are installed', requires_photo: false, requires_note: true, check_type: 'pass_fail', order: 2 },
@@ -97,7 +86,7 @@ const DEFAULT_STANDARD_CHECKLIST_TEMPLATE = {
     },
     {
       name: 'Home Watch Mode',
-      order: 8,
+      order: 7,
       items: [
         { name: 'Room/Closet/Pantry Doors', description: 'Open for airflow', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 1 },
         { name: 'Cabinet Doors Under Sinks', description: 'Left open', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 2 },
@@ -107,7 +96,7 @@ const DEFAULT_STANDARD_CHECKLIST_TEMPLATE = {
     },
     {
       name: 'Departure Tasks',
-      order: 9,
+      order: 8,
       items: [
         { name: 'Thermostat', description: 'Returned to pre-set level', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 1 },
         { name: 'Water Supply', description: 'Turned OFF at the main valve; lines drained', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 2 },
