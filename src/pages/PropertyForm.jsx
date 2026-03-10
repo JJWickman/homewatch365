@@ -83,12 +83,24 @@ export default function PropertyForm() {
     square_feet: '',
     bedrooms: '',
     bathrooms: '',
+    year_built: '',
+    lot_size: '',
     access_instructions: '',
     alarm_code: '',
     lockbox_code: '',
     gate_code: '',
+    security_gate: false,
     wifi_network: '',
     wifi_password: '',
+    hoa_name: '',
+    hoa_website: '',
+    hoa_email: '',
+    hoa_phone: '',
+    emergency_notification_contact_name: '',
+    emergency_notification_contact_phone: '',
+    emergency_notification_contact_email: '',
+    storm_protection_description: '',
+    storm_panels_notes: '',
     inspection_frequency: 'weekly',
     assigned_staff: [],
     contractors: [],
@@ -225,12 +237,24 @@ export default function PropertyForm() {
             square_feet: p.square_feet || '',
             bedrooms: p.bedrooms || '',
             bathrooms: p.bathrooms || '',
+            year_built: p.year_built || '',
+            lot_size: p.lot_size || '',
             access_instructions: p.access_instructions || '',
             alarm_code: p.alarm_code || '',
             lockbox_code: p.lockbox_code || '',
             gate_code: p.gate_code || '',
+            security_gate: p.security_gate || false,
             wifi_network: p.wifi_network || '',
             wifi_password: p.wifi_password || '',
+            hoa_name: p.hoa_name || '',
+            hoa_website: p.hoa_website || '',
+            hoa_email: p.hoa_email || '',
+            hoa_phone: p.hoa_phone || '',
+            emergency_notification_contact_name: p.emergency_notification_contact_name || '',
+            emergency_notification_contact_phone: p.emergency_notification_contact_phone || '',
+            emergency_notification_contact_email: p.emergency_notification_contact_email || '',
+            storm_protection_description: p.storm_protection_description || '',
+            storm_panels_notes: p.storm_panels_notes || '',
             inspection_frequency: p.inspection_frequency || 'weekly',
             assigned_staff: p.assigned_staff || [],
             contractors: p.contractors || [],
@@ -928,35 +952,55 @@ export default function PropertyForm() {
                  <p className="text-xs text-slate-500">Uses public property records</p>
                </div>
                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                 <div>
-                   <Label htmlFor="bedrooms">Bedrooms</Label>
-                   <Input
-                     id="bedrooms"
-                     type="number"
-                     value={formData.bedrooms}
-                     onChange={(e) => handleChange('bedrooms', e.target.value)}
-                   />
+                   <div>
+                     <Label htmlFor="bedrooms">Bedrooms</Label>
+                     <Input
+                       id="bedrooms"
+                       type="number"
+                       value={formData.bedrooms}
+                       onChange={(e) => handleChange('bedrooms', e.target.value)}
+                     />
+                   </div>
+                   <div>
+                     <Label htmlFor="bathrooms">Bathrooms</Label>
+                     <Input
+                       id="bathrooms"
+                       type="number"
+                       step="0.5"
+                       value={formData.bathrooms}
+                       onChange={(e) => handleChange('bathrooms', e.target.value)}
+                     />
+                   </div>
+                   <div>
+                     <Label htmlFor="square_feet">Square Feet</Label>
+                     <Input
+                       id="square_feet"
+                       type="number"
+                       value={formData.square_feet}
+                       onChange={(e) => handleChange('square_feet', e.target.value)}
+                     />
+                   </div>
                  </div>
-                 <div>
-                   <Label htmlFor="bathrooms">Bathrooms</Label>
-                   <Input
-                     id="bathrooms"
-                     type="number"
-                     step="0.5"
-                     value={formData.bathrooms}
-                     onChange={(e) => handleChange('bathrooms', e.target.value)}
-                   />
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                   <div>
+                     <Label htmlFor="year_built">Year Built</Label>
+                     <Input
+                       id="year_built"
+                       type="number"
+                       value={formData.year_built}
+                       onChange={(e) => handleChange('year_built', e.target.value)}
+                     />
+                   </div>
+                   <div>
+                     <Label htmlFor="lot_size">Lot Size</Label>
+                     <Input
+                       id="lot_size"
+                       value={formData.lot_size}
+                       onChange={(e) => handleChange('lot_size', e.target.value)}
+                       placeholder="e.g., 0.5 acres"
+                     />
+                   </div>
                  </div>
-                 <div>
-                   <Label htmlFor="square_feet">Square Feet</Label>
-                   <Input
-                     id="square_feet"
-                     type="number"
-                     value={formData.square_feet}
-                     onChange={(e) => handleChange('square_feet', e.target.value)}
-                   />
-                 </div>
-               </div>
              </div>
            </CardContent>
          </Card>
@@ -1234,8 +1278,155 @@ export default function PropertyForm() {
                 />
               </div>
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Security Gate */}
+            <div className="space-y-3 border-t pt-4">
+              <div className="flex items-center justify-between">
+                <Label>Security Gate</Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={formData.security_gate === true ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleChange('security_gate', true)}
+                    className={formData.security_gate === true ? 'bg-emerald-600' : ''}
+                  >
+                    Yes
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={formData.security_gate === false ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleChange('security_gate', false)}
+                    className={formData.security_gate === false ? 'bg-slate-600' : ''}
+                  >
+                    No
+                  </Button>
+                </div>
+              </div>
+              {formData.security_gate && (
+                <div>
+                  <Label htmlFor="gate_code">Gate Code</Label>
+                  <Input
+                    id="gate_code"
+                    value={formData.gate_code}
+                    onChange={(e) => handleChange('gate_code', e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* HOA */}
+            <div className="space-y-3 border-t pt-4">
+              <Label>Homeowners Association</Label>
+              <Input
+                placeholder="HOA Name"
+                value={formData.hoa_name}
+                onChange={(e) => handleChange('hoa_name', e.target.value)}
+              />
+              {formData.hoa_name && (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <Input
+                    type="url"
+                    placeholder="Website"
+                    value={formData.hoa_website}
+                    onChange={(e) => handleChange('hoa_website', e.target.value)}
+                  />
+                  <Input
+                    type="email"
+                    placeholder="Email"
+                    value={formData.hoa_email}
+                    onChange={(e) => handleChange('hoa_email', e.target.value)}
+                  />
+                  <Input
+                    type="tel"
+                    placeholder="Phone"
+                    value={formData.hoa_phone}
+                    onChange={(e) => handleChange('hoa_phone', e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+            </CardContent>
+            </Card>
+
+            {/* Emergency & Notification Contact */}
+            <Card>
+            <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-red-600" />
+              Emergency & Notification Contact
+            </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+            <p className="text-xs text-slate-500 leading-relaxed pb-3">
+              In the event the homeowner is unavailable during an emergency, the following person will be contacted.
+            </p>
+            <div>
+              <Label htmlFor="emergency_notification_contact_name">Contact Name</Label>
+              <Input
+                id="emergency_notification_contact_name"
+                value={formData.emergency_notification_contact_name}
+                onChange={(e) => handleChange('emergency_notification_contact_name', e.target.value)}
+                placeholder="Full name"
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="emergency_notification_contact_phone">Phone</Label>
+                <Input
+                  id="emergency_notification_contact_phone"
+                  type="tel"
+                  value={formData.emergency_notification_contact_phone}
+                  onChange={(e) => handleChange('emergency_notification_contact_phone', e.target.value)}
+                  placeholder="Phone number"
+                />
+              </div>
+              <div>
+                <Label htmlFor="emergency_notification_contact_email">Email</Label>
+                <Input
+                  id="emergency_notification_contact_email"
+                  type="email"
+                  value={formData.emergency_notification_contact_email}
+                  onChange={(e) => handleChange('emergency_notification_contact_email', e.target.value)}
+                  placeholder="Email address"
+                />
+              </div>
+            </div>
+            </CardContent>
+            </Card>
+
+            {/* Storm Protection */}
+            <Card>
+            <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Storm Protection
+            </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="storm_protection_description">Storm Protection Description</Label>
+              <Textarea
+                id="storm_protection_description"
+                value={formData.storm_protection_description}
+                onChange={(e) => handleChange('storm_protection_description', e.target.value)}
+                placeholder="Describe storm protection, shutters, etc..."
+                rows={3}
+              />
+            </div>
+            <div>
+              <Label htmlFor="storm_panels_notes">Storm Panels / Installation Contractor</Label>
+              <Textarea
+                id="storm_panels_notes"
+                value={formData.storm_panels_notes}
+                onChange={(e) => handleChange('storm_panels_notes', e.target.value)}
+                placeholder="Notes about storm panels and installation..."
+                rows={3}
+              />
+            </div>
+            </CardContent>
+            </Card>
 
         {/* Inspection Settings */}
         <Card>
