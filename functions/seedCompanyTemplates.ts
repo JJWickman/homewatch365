@@ -29,12 +29,12 @@ Deno.serve(async (req) => {
         active: true
       },
       {
-        name: 'Commercial Property',
-        code: 'commercial_standard',
+        name: 'High-Rise',
+        code: 'high_rise_standard',
         company_id: company.id,
-        property_type: 'commercial',
+        property_type: 'high_rise',
         category: 'home_watch_visit',
-        description: 'Standard property watch checklist for commercial properties',
+        description: 'Standard home watch visit checklist for high-rise properties',
         version: 1,
         active: true
       }
