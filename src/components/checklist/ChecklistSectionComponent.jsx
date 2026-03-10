@@ -52,7 +52,7 @@ export default function ChecklistSectionComponent({
 
       {expanded && (
         <CardContent className="p-4 space-y-3">
-          {items.map(item => (
+          {sortedItems.map(item => (
             <ChecklistItemRow
               key={item.id}
               item={item}
