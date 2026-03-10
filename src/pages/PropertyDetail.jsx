@@ -366,18 +366,22 @@ export default function PropertyDetail() {
     setSaving(true);
     try {
       await base44.entities.Property.update(property.id, { 
-        primary_photo_url: property.primary_photo_url,
-        hoa_name: property.hoa_name,
-        hoa_website: property.hoa_website,
-        hoa_email: property.hoa_email,
-        hoa_phone: property.hoa_phone,
-        security_gate: property.security_gate,
-        gate_code: property.gate_code,
-        emergency_notification_contact_name: property.emergency_notification_contact_name,
-        emergency_notification_contact_phone: property.emergency_notification_contact_phone,
-        emergency_notification_contact_email: property.emergency_notification_contact_email,
-        storm_protection_description: property.storm_protection_description,
-        storm_panels_notes: property.storm_panels_notes,
+       primary_photo_url: property.primary_photo_url,
+       hoa_name: property.hoa_name,
+       hoa_website: property.hoa_website,
+       hoa_email: property.hoa_email,
+       hoa_phone: property.hoa_phone,
+       security_gate: property.security_gate,
+       gate_code: property.gate_code,
+       emergency_notification_contact_name: property.emergency_notification_contact_name,
+       emergency_notification_contact_phone: property.emergency_notification_contact_phone,
+       emergency_notification_contact_email: property.emergency_notification_contact_email,
+       storm_protection_description: property.storm_protection_description,
+       storm_panels_notes: property.storm_panels_notes,
+       equipment_water_valve_location: property.equipment_water_valve_location,
+       equipment_breaker_box_location: property.equipment_breaker_box_location,
+       equipment_water_heater_location: property.equipment_water_heater_location,
+       equipment_air_handler_location: property.equipment_air_handler_location,
       });
       setHasUnsavedChanges(false);
       setEmergencyContactSaved(true);
@@ -716,6 +720,33 @@ export default function PropertyDetail() {
                       </div>
                     )}
 
+                  </div>
+
+                  {/* Equipment Locations */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Building2 className="h-4 w-4 text-slate-500" />
+                      <h4 className="text-sm font-medium text-slate-500">Equipment Locations</h4>
+                    </div>
+                    <div className="space-y-3">
+                      {[
+                        { label: 'Water Valve Location', field: 'equipment_water_valve_location', placeholder: 'e.g., Under kitchen sink, in garage' },
+                        { label: 'Breaker Box Location', field: 'equipment_breaker_box_location', placeholder: 'e.g., Garage wall, laundry room' },
+                        { label: 'Water Heater Location', field: 'equipment_water_heater_location', placeholder: 'e.g., Basement, garage' },
+                        { label: 'Air Handler Location', field: 'equipment_air_handler_location', placeholder: 'e.g., Attic, utility closet' },
+                      ].map(({ label, field, placeholder }) => (
+                        <div key={field}>
+                          <label className="text-xs text-slate-500 block mb-1">{label}</label>
+                          <input
+                            type="text"
+                            value={property[field] || ''}
+                            onChange={(e) => { setProperty({...property, [field]: e.target.value}); setHasUnsavedChanges(true); }}
+                            placeholder={placeholder}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black"
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Security Gate */}
