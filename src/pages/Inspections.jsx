@@ -96,7 +96,7 @@ export default function Inspections() {
     if (params.get('action') === 'new') {
       const propertyId = params.get('property_id');
       if (propertyId) {
-        setNewInspection(prev => ({ ...prev, property_id: propertyId }));
+        setNewVisit(prev => ({ ...prev, property_id: propertyId }));
       }
       setShowNewDialog(true);
     }
