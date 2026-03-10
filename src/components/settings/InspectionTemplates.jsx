@@ -249,6 +249,21 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
     }
   };
 
+  const handleAddStandardChecklist = async () => {
+    setCopyingStandard(true);
+    try {
+      await base44.entities.InspectionTemplate.create({
+        ...DEFAULT_STANDARD_CHECKLIST_TEMPLATE,
+        company_id: companyId
+      });
+      onRefresh?.();
+    } catch (error) {
+      console.error('Error adding standard checklist:', error);
+    } finally {
+      setCopyingStandard(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
