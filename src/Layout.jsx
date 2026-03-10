@@ -51,7 +51,7 @@ const baseItems = [
   { name: 'Dashboard', icon: Home, page: 'Dashboard' },
   { name: 'Clients', icon: Users, page: 'Clients' },
   { name: 'Properties', icon: Building2, page: 'Properties' },
-  { name: 'Visits', icon: ClipboardCheck, page: 'Inspections' }, // Page named Inspections but labeled as Visits
+  { name: 'Visits', icon: ClipboardCheck, page: 'Visits' },
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
   { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
   { name: 'Route Optimizer', icon: Route, page: 'RouteOptimizer' },

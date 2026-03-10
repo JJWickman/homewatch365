@@ -80,6 +80,8 @@ import StripeSetup from './pages/StripeSetup';
 import SuperAdminConsole from './pages/SuperAdminConsole';
 import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
 import VisitFlow from './pages/VisitFlow';
+import Visits from './pages/Visits';
+import VisitDetail from './pages/VisitDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -117,6 +119,8 @@ export const PAGES = {
     "SuperAdminConsole": SuperAdminConsole,
     "TestGoogleMapsAPI": TestGoogleMapsAPI,
     "VisitFlow": VisitFlow,
+    "Visits": Visits,
+    "VisitDetail": VisitDetail,
 }
 
 export const pagesConfig = {
