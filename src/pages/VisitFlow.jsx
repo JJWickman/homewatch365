@@ -25,45 +25,89 @@ import StandardInspectionView from '@/components/inspections/StandardInspectionV
 
 const DEFAULT_CHECKLIST = [
   {
-    section_name: 'Exterior',
+    section_name: 'Key Equipment',
     items: [
-      { name: 'Front entrance condition', check_type: 'pass_fail', requires_photo: true },
-      { name: 'Landscaping and lawn', check_type: 'pass_fail', requires_photo: true },
-      { name: 'Driveway / walkways clear', check_type: 'yes_no', requires_photo: false },
-      { name: 'Pool / spa condition', check_type: 'pass_fail', requires_photo: true },
-      { name: 'Outdoor furniture', check_type: 'pass_fail', requires_photo: false },
+      { name: 'Breaker Box: Location noted', check_type: 'text', requires_photo: true },
+      { name: 'Water Heater: Location noted', check_type: 'text', requires_photo: true },
+      { name: 'Air Handler: Location noted', check_type: 'text', requires_photo: true },
+      { name: 'Alarm Keypad: Location noted', check_type: 'text', requires_photo: true },
+      { name: 'Any Other Important Features', check_type: 'text', requires_photo: true },
     ]
   },
   {
-    section_name: 'Interior - Main Areas',
+    section_name: 'Upon Arrival',
     items: [
-      { name: 'Living room condition', check_type: 'pass_fail', requires_photo: true },
-      { name: 'Kitchen appliances working', check_type: 'yes_no', requires_photo: false },
-      { name: 'Refrigerator / freezer', check_type: 'pass_fail', requires_photo: false },
-      { name: 'Signs of pests', check_type: 'yes_no', requires_photo: false },
-      { name: 'Odors or mustiness', check_type: 'yes_no', requires_photo: false },
+      { name: 'Mailbox: Remove mail and newspapers if requested', check_type: 'yes_no', requires_photo: true },
+      { name: 'Landscape: Note dry patches or signs of stress', check_type: 'pass_fail', requires_photo: true },
+      { name: 'Signs of Rodents/Insects: Look for droppings or activity', check_type: 'yes_no', requires_photo: true },
+      { name: 'Water Supply: Slowly turned ON at the main valve', check_type: 'yes_no', requires_photo: true },
+      { name: 'Exterior Walk-Around: Observe windows, roof (from the ground), screens, AC unit, pavers, and pool cage', check_type: 'pass_fail', requires_photo: true },
     ]
   },
   {
-    section_name: 'Interior - Bedrooms & Baths',
+    section_name: 'Inside the Home',
     items: [
-      { name: 'Master bedroom', check_type: 'pass_fail', requires_photo: true },
-      { name: 'Guest bedrooms', check_type: 'pass_fail', requires_photo: false },
-      { name: 'Bathrooms - faucets working', check_type: 'yes_no', requires_photo: false },
-      { name: 'Bathrooms - no leaks', check_type: 'yes_no', requires_photo: false },
-      { name: 'Toilets functioning', check_type: 'yes_no', requires_photo: false },
+      { name: 'Security System: Disarmed', check_type: 'yes_no', requires_photo: true },
+      { name: 'Phone Line (if applicable): Checked for signal', check_type: 'yes_no', requires_photo: true },
     ]
   },
   {
-    section_name: 'Systems',
+    section_name: 'Water Zone™',
     items: [
-      { name: 'HVAC running properly', check_type: 'yes_no', requires_photo: false },
-      { name: 'Thermostat setting', check_type: 'text', requires_photo: false },
-      { name: 'Water heater', check_type: 'pass_fail', requires_photo: false },
-      { name: 'Smoke detectors', check_type: 'pass_fail', requires_photo: false },
-      { name: 'Security system', check_type: 'pass_fail', requires_photo: false },
+      { name: 'Dishwasher: Operated and checked', check_type: 'pass_fail', requires_photo: true },
+      { name: 'Garbage Disposal: Operated and checked', check_type: 'pass_fail', requires_photo: true },
+      { name: 'Washing Machine: Operated and checked', check_type: 'pass_fail', requires_photo: true },
+      { name: 'Clothes Dryer: Operated and checked', check_type: 'pass_fail', requires_photo: true },
+      { name: 'All Sinks: Operated and checked', check_type: 'pass_fail', requires_photo: true },
+      { name: 'Refrigerator/Freezer: Checked', check_type: 'pass_fail', requires_photo: true },
+      { name: 'Ice Maker: Emptied and turned off if needed', check_type: 'yes_no', requires_photo: true },
+      { name: 'Food Removal: Perishables and frozen items checked', check_type: 'yes_no', requires_photo: true },
+      { name: 'Wine Cooler/Wine Room: Temperature and moisture observed', check_type: 'pass_fail', requires_photo: true },
     ]
-  }
+  },
+  {
+    section_name: 'Bathrooms',
+    items: [
+      { name: 'Showers & Tubs: Water run gently; look for signs of leaks or grout discoloration', check_type: 'pass_fail', requires_photo: true },
+      { name: 'Toilets: Brushed, flushed, and monitored for leaks', check_type: 'pass_fail', requires_photo: true },
+      { name: 'Water Heater: Checked for leaks or rust (should be OFF or on Vacation Mode)', check_type: 'pass_fail', requires_photo: true },
+    ]
+  },
+  {
+    section_name: 'AC System',
+    items: [
+      { name: 'Temperature & Humidity: Recorded', check_type: 'text', requires_photo: true },
+      { name: 'Thermostat: Lowered slightly during visit', check_type: 'yes_no', requires_photo: true },
+      { name: 'Cooling: Confirmed cold air is flowing', check_type: 'yes_no', requires_photo: true },
+      { name: 'Filters & Secondary Pan (if accessible): Checked for buildup or water presence', check_type: 'pass_fail', requires_photo: true },
+    ]
+  },
+  {
+    section_name: 'Garage',
+    items: [
+      { name: 'Ceiling, Walls & Baseboards: Observed for damage or water marks', check_type: 'pass_fail', requires_photo: true },
+      { name: 'Garage Door: Operated unless storm bars are installed', check_type: 'yes_no', requires_photo: true },
+      { name: 'Breaker Box: Checked for proper function', check_type: 'pass_fail', requires_photo: true },
+    ]
+  },
+  {
+    section_name: 'Home Watch Mode',
+    items: [
+      { name: 'Room, closet, and pantry doors open for airflow', check_type: 'yes_no', requires_photo: true },
+      { name: 'Cabinet doors under sinks left open', check_type: 'yes_no', requires_photo: true },
+      { name: 'Toilet brush across the bowl to dry', check_type: 'yes_no', requires_photo: true },
+      { name: 'Sink drains left open', check_type: 'yes_no', requires_photo: true },
+    ]
+  },
+  {
+    section_name: 'Departure',
+    items: [
+      { name: 'Thermostat: Returned to pre-set level', check_type: 'yes_no', requires_photo: true },
+      { name: 'Water Supply: Turned OFF at the main valve; lines drained', check_type: 'yes_no', requires_photo: true },
+      { name: 'Security System: Re-armed', check_type: 'yes_no', requires_photo: true },
+      { name: 'Doors: Confirmed locked', check_type: 'yes_no', requires_photo: true },
+    ]
+  },
 ];
 
 export default function VisitFlow() {
@@ -296,6 +340,10 @@ export default function VisitFlow() {
 
       {/* Checklist */}
       <div className="px-4 py-6 lg:px-6 pb-28">
+        <div className="mb-4 text-center">
+          <h2 className="text-xl font-bold text-slate-900">Your Exceptional Home Watch Visit</h2>
+          <p className="text-xs text-slate-400 mt-1">Services may vary based on household equipment and homeowner requests.</p>
+        </div>
         <StandardInspectionView
           checklist={checklist}
           updateItem={updateItem}
