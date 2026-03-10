@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Edit2, Trash2, Copy, Check } from 'lucide-react';
+import { Plus, Edit2, Trash2, Copy, Check, Eye } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -183,6 +183,8 @@ const DEFAULT_HOME_WATCH_TEMPLATE = {
 
 export default function InspectionTemplates({ companyId, templates = [], onRefresh }) {
   const [showDialog, setShowDialog] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState(DEFAULT_HOME_WATCH_TEMPLATE);
   const [saving, setSaving] = useState(false);
@@ -193,6 +195,11 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
     setEditingId(null);
     setFormData(DEFAULT_HOME_WATCH_TEMPLATE);
     setShowDialog(true);
+  };
+
+  const handleView = (template) => {
+    setSelectedTemplate(template);
+    setShowDetailModal(true);
   };
 
   const handleEdit = (template) => {
@@ -297,10 +304,13 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(template)}>
+                    <Button variant="outline" size="sm" onClick={() => handleView(template)} title="View details">
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(template)} title="Edit template">
                       <Edit2 className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDelete(template.id)} className="text-red-600">
+                    <Button variant="outline" size="sm" onClick={() => handleDelete(template.id)} className="text-red-600" title="Delete template">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -310,6 +320,75 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
           )}
         </CardContent>
       </Card>
+
+      {/* Template Detail Modal */}
+      <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{selectedTemplate?.name}</DialogTitle>
+            <DialogDescription>{selectedTemplate?.description}</DialogDescription>
+          </DialogHeader>
+
+          {selectedTemplate && (
+            <div className="space-y-6 py-4">
+              <div className="flex gap-4 text-sm">
+                <div>
+                  <span className="text-slate-500">Type:</span>
+                  <Badge className="ml-2 capitalize">{selectedTemplate.type}</Badge>
+                </div>
+                <div>
+                  <span className="text-slate-500">Duration:</span>
+                  <Badge className="ml-2">{selectedTemplate.estimated_duration_minutes} min</Badge>
+                </div>
+                <div>
+                  <span className="text-slate-500">Sections:</span>
+                  <Badge className="ml-2">{selectedTemplate.sections?.length || 0}</Badge>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {selectedTemplate.sections?.map((section, sectionIdx) => (
+                  <Card key={sectionIdx} className="bg-slate-50">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base">{section.name}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {section.items?.map((item, itemIdx) => (
+                          <div key={itemIdx} className="text-sm p-2 bg-white rounded border border-slate-200">
+                            <p className="font-medium text-slate-900">{item.name}</p>
+                            {item.description && (
+                              <p className="text-slate-600 text-xs mt-1">{item.description}</p>
+                            )}
+                            <div className="flex gap-2 mt-2 flex-wrap text-xs">
+                              <Badge variant="outline" className="capitalize">{item.check_type}</Badge>
+                              {item.requires_note && <Badge variant="outline">Notes</Badge>}
+                              {item.requires_photo && <Badge variant="outline">Photo</Badge>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDetailModal(false)}>
+              Close
+            </Button>
+            <Button onClick={() => {
+              setShowDetailModal(false);
+              handleEdit(selectedTemplate);
+            }} className="bg-slate-900 hover:bg-slate-800">
+              <Edit2 className="h-4 w-4 mr-2" />
+              Edit Template
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Template Edit Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
