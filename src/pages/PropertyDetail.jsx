@@ -75,6 +75,10 @@ export default function PropertyDetail() {
   const [mapZoom, setMapZoom] = useState(17);
   const [searchingHoa, setSearchingHoa] = useState(false);
   const [emergencyContactSaved, setEmergencyContactSaved] = useState(false);
+  const [showAddContractorDialog, setShowAddContractorDialog] = useState(false);
+  const [selectedContractorType, setSelectedContractorType] = useState('');
+  const [contractorSearchResults, setContractorSearchResults] = useState([]);
+  const [searchingContractors, setSearchingContractors] = useState(false);
 
   useEffect(() => {
     loadProperty();
