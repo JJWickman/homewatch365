@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import StandardInspectionView from '@/components/inspections/StandardInspectionView';
+import { Card } from "@/components/ui/card";
 
 const DEFAULT_CHECKLIST = [
   {
@@ -132,16 +132,16 @@ export default function VisitFlow() {
     const id = params.get('id');
 
     if (!id) {
-      navigate(createPageUrl('Inspections'));
-      return;
-    }
+       navigate(createPageUrl('Visits'));
+       return;
+     }
 
-    try {
-      const visits = await base44.entities.Visit.filter({ id });
-      if (visits.length === 0) {
-        navigate(createPageUrl('Inspections'));
-        return;
-      }
+     try {
+       const visits = await base44.entities.Visit.filter({ id });
+       if (visits.length === 0) {
+         navigate(createPageUrl('Visits'));
+         return;
+       }
 
       const v = visits[0];
       setVisit(v);
@@ -344,16 +344,11 @@ export default function VisitFlow() {
           <h2 className="text-xl font-bold text-slate-900">Your Exceptional Home Watch Visit</h2>
           <p className="text-xs text-slate-400 mt-1">Services may vary based on household equipment and homeowner requests.</p>
         </div>
-        <StandardInspectionView
-          checklist={checklist}
-          updateItem={updateItem}
-          handlePhotoUpload={handlePhotoUpload}
-          uploading={uploading}
-          saving={saving}
-          saveProgress={saveProgress}
-          flaggedItems={flaggedItems}
-          setFlaggedItems={setFlaggedItems}
-        />
+        <Card>
+          <div className="p-4 text-center text-slate-600">
+            Checklist view component - integrate with checklist data
+          </div>
+        </Card>
       </div>
 
       {/* Complete Visit Dialog */}

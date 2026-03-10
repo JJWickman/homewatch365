@@ -328,10 +328,6 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
 
 
 
-
-
-
-
         
 
 
