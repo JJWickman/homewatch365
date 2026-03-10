@@ -615,65 +615,7 @@ export default function PropertyDetail() {
             </Card>
           )}
 
-          {/* Emergency Notification Contact */}
-          <Card className="border-red-200">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-red-700 flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-red-600" />
-                Emergency &amp; Notification Contact
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-xs text-slate-500 leading-relaxed border-b border-slate-100 pb-3">
-                In the event the homeowner is unavailable during an emergency, the following person will be contacted. This person has the authority to make a decision on behalf of the homeowner. If there is an emergency and the homeowner and emergency contact person is unavailable, we will endeavor to temporarily repair or stabilize the situation to the best of our ability, at the homeowner's expense.
-              </p>
-              <div className="space-y-2 pb-3">
-                <div>
-                  <label className="text-xs text-slate-500 block mb-1">Contact Name</label>
-                  <input
-                    type="text"
-                    value={property.emergency_notification_contact_name || ''}
-                    onChange={(e) => { setProperty({...property, emergency_notification_contact_name: e.target.value}); setHasUnsavedChanges(true); }}
-                    placeholder="Full name"
-                    className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 text-sm text-black"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-slate-500 block mb-1">Phone</label>
-                  <input
-                    type="tel"
-                    value={property.emergency_notification_contact_phone || ''}
-                    onChange={(e) => { setProperty({...property, emergency_notification_contact_phone: e.target.value}); setHasUnsavedChanges(true); }}
-                    placeholder="Phone number"
-                    className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 text-sm text-black"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-slate-500 block mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={property.emergency_notification_contact_email || ''}
-                    onChange={(e) => { setProperty({...property, emergency_notification_contact_email: e.target.value}); setHasUnsavedChanges(true); }}
-                    placeholder="Email address"
-                    className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 text-sm text-black"
-                  />
-                </div>
-                </div>
-                <div className="flex justify-end pt-3 border-t border-slate-100">
-                  {emergencyContactSaved ? (
-                    <Button onClick={() => setEmergencyContactSaved(false)} className="bg-white hover:bg-slate-50 text-black border border-slate-300">
-                      Change
-                    </Button>
-                  ) : (
-                    <Button onClick={handleSave} disabled={saving} className="bg-red-600 hover:bg-red-700 text-white">
-                      {saving ? 'Saving...' : 'Save'}
-                    </Button>
-                  )}
-                </div>
-                </CardContent>
-                </Card>
-
-                {/* Property Details */}
+          {/* Property Details */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-slate-500">Details</CardTitle>
