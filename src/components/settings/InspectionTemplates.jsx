@@ -16,6 +16,108 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 
+const DEFAULT_STANDARD_CHECKLIST_TEMPLATE = {
+  name: 'Standard Checklist',
+  description: 'Home Watch standard visit checklist covering arrival, water systems, HVAC, bathrooms, garage, and departure tasks.',
+  type: 'standard',
+  estimated_duration_minutes: 45,
+  sections: [
+    {
+      name: 'Key Equipment Locations',
+      order: 1,
+      items: [
+        { name: 'Breaker Box', description: 'Note location of breaker box', requires_photo: false, requires_note: true, check_type: 'text', order: 1 },
+        { name: 'Water Heater', description: 'Note location of water heater', requires_photo: false, requires_note: true, check_type: 'text', order: 2 },
+        { name: 'Air Handler', description: 'Note location of air handler', requires_photo: false, requires_note: true, check_type: 'text', order: 3 },
+        { name: 'Alarm Keypad', description: 'Note location of alarm keypad', requires_photo: false, requires_note: true, check_type: 'text', order: 4 },
+        { name: 'Other Important Features', description: 'Note any other important equipment locations', requires_photo: false, requires_note: true, check_type: 'text', order: 5 },
+      ]
+    },
+    {
+      name: 'Upon Arrival',
+      order: 2,
+      items: [
+        { name: 'Mailbox', description: 'Remove mail and newspapers if requested', requires_photo: false, requires_note: true, check_type: 'yes_no', order: 1 },
+        { name: 'Landscape', description: 'Note dry patches or signs of stress', requires_photo: true, requires_note: true, check_type: 'pass_fail', order: 2 },
+        { name: 'Signs of Rodents/Insects', description: 'Look for droppings or activity', requires_photo: true, requires_note: true, check_type: 'yes_no', order: 3 },
+        { name: 'Water Supply', description: 'Slowly turned ON at the main valve', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 4 },
+        { name: 'Exterior Walk-Around', description: 'Observe windows, roof (from the ground), screens, AC unit, pavers, and pool cage', requires_photo: true, requires_note: true, check_type: 'pass_fail', order: 5 },
+      ]
+    },
+    {
+      name: 'Inside the Home',
+      order: 3,
+      items: [
+        { name: 'Security System', description: 'Disarmed upon entry', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 1 },
+        { name: 'Phone Line', description: 'Checked for signal (if applicable)', requires_photo: false, requires_note: true, check_type: 'yes_no', order: 2 },
+      ]
+    },
+    {
+      name: 'Water Zone – Appliances',
+      order: 4,
+      items: [
+        { name: 'Dishwasher', description: 'Operated and checked for leaks or issues', requires_photo: false, requires_note: true, check_type: 'pass_fail', order: 1 },
+        { name: 'Garbage Disposal', description: 'Operated and checked for issues', requires_photo: false, requires_note: true, check_type: 'pass_fail', order: 2 },
+        { name: 'Washing Machine', description: 'Operated and checked for leaks', requires_photo: false, requires_note: true, check_type: 'pass_fail', order: 3 },
+        { name: 'Clothes Dryer', description: 'Checked for proper function', requires_photo: false, requires_note: true, check_type: 'pass_fail', order: 4 },
+        { name: 'All Sinks', description: 'Run water and check for leaks or clogs', requires_photo: false, requires_note: true, check_type: 'pass_fail', order: 5 },
+        { name: 'Refrigerator/Freezer', description: 'Temperature and condition checked', requires_photo: false, requires_note: true, check_type: 'pass_fail', order: 6 },
+        { name: 'Ice Maker', description: 'Emptied and turned off if needed', requires_photo: false, requires_note: true, check_type: 'yes_no', order: 7 },
+        { name: 'Food Removal', description: 'Perishables and frozen items removed if needed', requires_photo: false, requires_note: true, check_type: 'yes_no', order: 8 },
+        { name: 'Wine Cooler/Wine Room', description: 'Temperature and moisture observed', requires_photo: false, requires_note: true, check_type: 'pass_fail', order: 9 },
+      ]
+    },
+    {
+      name: 'Bathrooms',
+      order: 5,
+      items: [
+        { name: 'Showers & Tubs', description: 'Water run gently; look for signs of leaks or grout discoloration', requires_photo: true, requires_note: true, check_type: 'pass_fail', order: 1 },
+        { name: 'Toilets', description: 'Brushed, flushed, and monitored for leaks', requires_photo: false, requires_note: true, check_type: 'pass_fail', order: 2 },
+        { name: 'Water Heater', description: 'Checked for leaks or rust (should be OFF or on Vacation Mode)', requires_photo: true, requires_note: true, check_type: 'pass_fail', order: 3 },
+      ]
+    },
+    {
+      name: 'AC System',
+      order: 6,
+      items: [
+        { name: 'Temperature & Humidity', description: 'Record current temperature and humidity readings', requires_photo: false, requires_note: true, check_type: 'text', order: 1 },
+        { name: 'Thermostat', description: 'Lowered slightly during visit', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 2 },
+        { name: 'Cooling', description: 'Confirmed cold air is flowing', requires_photo: false, requires_note: true, check_type: 'pass_fail', order: 3 },
+        { name: 'Filters & Secondary Pan', description: 'Checked for buildup or water presence (if accessible)', requires_photo: true, requires_note: true, check_type: 'pass_fail', order: 4 },
+      ]
+    },
+    {
+      name: 'Garage',
+      order: 7,
+      items: [
+        { name: 'Ceiling, Walls & Baseboards', description: 'Observed for damage or water marks', requires_photo: true, requires_note: true, check_type: 'pass_fail', order: 1 },
+        { name: 'Garage Door', description: 'Operated unless storm bars are installed', requires_photo: false, requires_note: true, check_type: 'pass_fail', order: 2 },
+        { name: 'Breaker Box', description: 'Checked for proper function', requires_photo: false, requires_note: true, check_type: 'pass_fail', order: 3 },
+      ]
+    },
+    {
+      name: 'Home Watch Mode',
+      order: 8,
+      items: [
+        { name: 'Room/Closet/Pantry Doors', description: 'Open for airflow', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 1 },
+        { name: 'Cabinet Doors Under Sinks', description: 'Left open', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 2 },
+        { name: 'Toilet Brush', description: 'Placed across the bowl to dry', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 3 },
+        { name: 'Sink Drains', description: 'Left open', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 4 },
+      ]
+    },
+    {
+      name: 'Departure Tasks',
+      order: 9,
+      items: [
+        { name: 'Thermostat', description: 'Returned to pre-set level', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 1 },
+        { name: 'Water Supply', description: 'Turned OFF at the main valve; lines drained', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 2 },
+        { name: 'Security System', description: 'Re-armed', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 3 },
+        { name: 'Doors', description: 'Confirmed locked', requires_photo: false, requires_note: false, check_type: 'yes_no', order: 4 },
+      ]
+    },
+  ]
+};
+
 const DEFAULT_HOME_WATCH_TEMPLATE = {
   name: 'Home Watch - Standard Inspection',
   description: 'Standard home watch property inspection checklist',
