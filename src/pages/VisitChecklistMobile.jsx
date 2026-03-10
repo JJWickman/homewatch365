@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import ChecklistHeaderComponent from '@/components/checklist/ChecklistHeaderComponent';
 import ChecklistSectionComponent from '@/components/checklist/ChecklistSectionComponent';
