@@ -2,17 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { format } from 'date-fns';
-import { Building2, Save, Loader2, CheckCircle2 } from 'lucide-react';
+import { Building2, Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -23,22 +14,15 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import StandardInspectionView from '@/components/inspections/StandardInspectionView';
-import FlexibleInspectionView from '@/components/inspections/FlexibleInspectionView';
-import MobileInspectionView from '@/components/inspections/MobileInspectionView';
-import StatusBadge from '@/components/shared/StatusBadge';
 
-const INSPECTION_CATEGORIES = [
-  { id: 'plumbing', name: 'Plumbing', section: 'Plumbing' },
-  { id: 'electrical', name: 'Electrical', section: 'Electrical' },
-  { id: 'hvac', name: 'HVAC', section: 'HVAC' },
-  { id: 'roof', name: 'Roof', section: 'Roof' },
-  { id: 'appliances', name: 'Appliances', section: 'Appliances' },
-  { id: 'landscape', name: 'Landscape', section: 'Landscape' },
-  { id: 'lawn', name: 'Lawn', section: 'Lawn' }
-];
-
-// Default checklist if no template
 const DEFAULT_CHECKLIST = [
   {
     section_name: 'Exterior',
@@ -84,103 +68,86 @@ const DEFAULT_CHECKLIST = [
 
 export default function InspectionFlow() {
   const navigate = useNavigate();
-  const [inspection, setInspection] = useState(null);
+  const [visit, setVisit] = useState(null);
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  
   const [checklist, setChecklist] = useState([]);
   const [summaryNotes, setSummaryNotes] = useState('');
   const [overallStatus, setOverallStatus] = useState('all_clear');
-  const [photoUrls, setPhotoUrls] = useState([]);
-  const [mobileCategories, setMobileCategories] = useState([]);
-  const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [flaggedItems, setFlaggedItems] = useState(new Set());
-  
-  const isFlexibleType = inspection && ['other', 'custom_client_request', 'drop_in'].includes(inspection.type);
-  const isStandardType = inspection && ['routine', 'pre_storm', 'post_storm'].includes(inspection.type);
+  const [showCompleteDialog, setShowCompleteDialog] = useState(false);
 
   useEffect(() => {
-    loadInspection();
+    loadVisit();
   }, []);
 
-  const loadInspection = async () => {
+  const loadVisit = async () => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
-    
+
     if (!id) {
       navigate(createPageUrl('Inspections'));
       return;
     }
 
     try {
-      const inspectionData = await base44.entities.Inspection.filter({ id });
-      
-      if (inspectionData.length > 0) {
-         const insp = inspectionData[0];
-         setInspection(insp);
-         setSummaryNotes(insp.summary_notes || '');
-         setOverallStatus(insp.overall_status || 'all_clear');
+      const visits = await base44.entities.Visit.filter({ id });
+      if (visits.length === 0) {
+        navigate(createPageUrl('Inspections'));
+        return;
+      }
 
-         // Load property
-         const propertyData = await base44.entities.Property.filter({ id: insp.property_id });
-         if (propertyData.length > 0) setProperty(propertyData[0]);
+      const v = visits[0];
+      setVisit(v);
+      setSummaryNotes(v.summary_notes || '');
+      setOverallStatus(v.overall_status || 'all_clear');
 
-         const isFlexible = ['other', 'custom_client_request', 'drop_in'].includes(insp.type);
-         const isStandard = ['routine', 'pre_storm', 'post_storm'].includes(insp.type);
+      // Load property
+      if (v.property_id) {
+        const props = await base44.entities.Property.filter({ id: v.property_id });
+        if (props.length > 0) setProperty(props[0]);
+      }
 
-         if (isStandard) {
-           // Initialize mobile categories
-           setMobileCategories(INSPECTION_CATEGORIES.map(cat => ({
-             ...cat,
-             notes: '',
-             photos: []
-           })));
-         } else if (!isFlexible) {
-           // Initialize checklist for standard inspection types
-           if (insp.checklist_data && insp.checklist_data.length > 0) {
-             setChecklist(insp.checklist_data);
-           } else if (insp.template_id) {
-             const templates = await base44.entities.VisitTemplate.filter({ id: insp.template_id });
-             if (templates.length > 0 && templates[0].sections) {
-               setChecklist(templates[0].sections.map(s => ({
-                 section_name: s.name,
-                 items: s.items.map(item => ({
-                   name: item.name,
-                   check_type: item.check_type || 'pass_fail',
-                   requires_photo: item.requires_photo || false,
-                   status: '',
-                   value: '',
-                   notes: '',
-                   photo_urls: [],
-                   flagged: false
-                 }))
-               })));
-             } else {
-               setChecklist(DEFAULT_CHECKLIST.map(s => ({
-                 ...s,
-                 items: s.items.map(i => ({ ...i, status: '', value: '', notes: '', photo_urls: [], flagged: false }))
-               })));
-             }
-           } else {
-             setChecklist(DEFAULT_CHECKLIST.map(s => ({
-               ...s,
-               items: s.items.map(i => ({ ...i, status: '', value: '', notes: '', photo_urls: [], flagged: false }))
-             })));
-           }
-         }
+      // Initialize checklist from saved data or template
+      if (v.checklist_data && v.checklist_data.length > 0) {
+        setChecklist(v.checklist_data);
+      } else if (v.template_id) {
+        const templates = await base44.entities.VisitTemplate.filter({ id: v.template_id });
+        if (templates.length > 0 && templates[0].sections?.length > 0) {
+          setChecklist(templates[0].sections.map(s => ({
+            section_name: s.name,
+            items: (s.items || []).map(item => ({
+              name: item.name,
+              check_type: item.check_type || 'pass_fail',
+              requires_photo: item.requires_photo || false,
+              status: '',
+              value: '',
+              notes: '',
+              photo_urls: [],
+              flagged: false
+            }))
+          })));
+        } else {
+          setChecklist(DEFAULT_CHECKLIST.map(s => ({
+            ...s,
+            items: s.items.map(i => ({ ...i, status: '', value: '', notes: '', photo_urls: [], flagged: false }))
+          })));
+        }
+      } else {
+        setChecklist(DEFAULT_CHECKLIST.map(s => ({
+          ...s,
+          items: s.items.map(i => ({ ...i, status: '', value: '', notes: '', photo_urls: [], flagged: false }))
+        })));
+      }
 
-         // Mark as in_progress if scheduled
-         if (insp.status === 'scheduled') {
-           await base44.entities.Inspection.update(id, { 
-             status: 'in_progress',
-             started_at: new Date().toISOString()
-           });
-         }
-       }
+      // Mark as in_progress if scheduled
+      if (v.status === 'scheduled') {
+        await base44.entities.Visit.update(id, { status: 'in_progress' });
+      }
     } catch (error) {
-      console.error('Error loading inspection:', error);
+      console.error('Error loading visit:', error);
     } finally {
       setLoading(false);
     }
@@ -195,33 +162,17 @@ export default function InspectionFlow() {
     setChecklist(newChecklist);
   };
 
-  const handlePhotoUpload = async (sectionIndexOrCategoryId, itemIndex, e) => {
+  const handlePhotoUpload = async (sectionIndex, itemIndex, e) => {
     const file = e?.target?.files?.[0];
     if (!file) return;
-    
+
     setUploading(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      
-      if (isStandardType) {
-        // For mobile categories, add to category photo list
-        setMobileCategories(prev =>
-          prev.map(cat =>
-            cat.id === sectionIndexOrCategoryId
-              ? { ...cat, photos: [...(cat.photos || []), file_url] }
-              : cat
-          )
-        );
-      } else if (isFlexibleType) {
-        // For flexible types, add to general photo list
-        setPhotoUrls([...photoUrls, file_url]);
-      } else {
-        // For complex checklist types, add to checklist item
-        const newChecklist = [...checklist];
-        const currentPhotos = newChecklist[sectionIndexOrCategoryId].items[itemIndex].photo_urls || [];
-        newChecklist[sectionIndexOrCategoryId].items[itemIndex].photo_urls = [...currentPhotos, file_url];
-        setChecklist(newChecklist);
-      }
+      const newChecklist = [...checklist];
+      const currentPhotos = newChecklist[sectionIndex].items[itemIndex].photo_urls || [];
+      newChecklist[sectionIndex].items[itemIndex].photo_urls = [...currentPhotos, file_url];
+      setChecklist(newChecklist);
     } catch (error) {
       console.error('Error uploading photo:', error);
     } finally {
@@ -230,141 +181,52 @@ export default function InspectionFlow() {
   };
 
   const saveProgress = async () => {
-    if (!inspection) return;
-    
+    if (!visit) return;
     setSaving(true);
     try {
-      if (isStandardType) {
-        // For standard types, build checklist from mobile categories and generate AI report
-        const checklistData = mobileCategories.map(cat => ({
-          section_name: cat.section,
-          items: [{
-            name: cat.name,
-            status: cat.notes || cat.photos.length > 0 ? 'checked' : '',
-            notes: cat.notes,
-            photo_urls: cat.photos,
-            flagged: flaggedItems.has(`category-${cat.id}`)
-          }]
-        }));
+      const photoCount = checklist.reduce((sum, section) =>
+        sum + section.items.reduce((itemSum, item) => itemSum + (item.photo_urls?.length || 0), 0), 0);
 
-        const totalPhotos = mobileCategories.reduce((sum, cat) => sum + cat.photos.length, 0);
+      await base44.entities.Visit.update(visit.id, {
+        checklist_data: checklist,
+        summary_notes: summaryNotes,
+        overall_status: overallStatus,
+        photo_count: photoCount
+      });
 
-        // Save inspection first
-        await base44.entities.Inspection.update(inspection.id, {
-          status: 'completed',
-          completed_at: new Date().toISOString(),
-          checklist_data: checklistData,
-          photo_count: totalPhotos,
-          overall_status: overallStatus
-        });
-
-        // Create follow-ups for flagged items
-        for (const flagKey of flaggedItems) {
-          const [itemId, followUpType, priority, timeframe] = flagKey.split('|');
-          
-          if (itemId.startsWith('category-')) {
-            const categoryId = itemId.replace('category-', '');
-            const category = mobileCategories.find(c => c.id === categoryId);
-            if (category) {
-              // Calculate due date based on timeframe
-              let dueDate;
-              const today = new Date();
-              if (timeframe === 'asap') {
-                dueDate = today;
-              } else if (timeframe === 'within_week') {
-                dueDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-              } else {
-                dueDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
-              }
-
-              await base44.entities.FollowUp.create({
-                company_id: inspection.company_id,
-                property_id: inspection.property_id,
-                client_id: inspection.client_id,
-                inspection_id: inspection.id,
-                title: `${category.name} - Follow-up Required`,
-                description: category.notes || `Issue identified during routine inspection of ${category.name}`,
-                type: followUpType || 'inspection_followup',
-                priority: priority || 'medium',
-                status: 'open',
-                due_date: dueDate.toISOString().split('T')[0]
-              });
-            }
-          }
-        }
-
-        // Generate AI report
-        await base44.functions.invoke('generateInspectionReport', {
-          inspection_id: inspection.id
-        });
-      } else if (isFlexibleType) {
-        // For flexible types, save photos and notes
-        await base44.entities.Inspection.update(inspection.id, {
-          status: 'completed',
-          completed_at: new Date().toISOString(),
-          summary_notes: summaryNotes,
-          overall_status: overallStatus,
-          photo_count: photoUrls.length
-        });
-      } else {
-        // For complex checklist types
-        const photoCount = checklist.reduce((sum, section) => 
-          sum + section.items.reduce((itemSum, item) => itemSum + (item.photo_urls?.length || 0), 0), 0);
-        
-        await base44.entities.Inspection.update(inspection.id, {
-          checklist_data: checklist,
-          summary_notes: summaryNotes,
-          overall_status: overallStatus,
-          photo_count: photoCount
-        });
-      }
-      navigate(createPageUrl('InspectionDetail') + `?id=${inspection.id}`);
+      navigate(createPageUrl('InspectionDetail') + `?id=${visit.id}`);
     } catch (error) {
       console.error('Error saving:', error);
       setSaving(false);
     }
   };
 
-  const completeInspection = async () => {
-    if (!inspection) return;
-    
+  const completeVisit = async () => {
+    if (!visit) return;
     setSaving(true);
     try {
-      const photoCount = checklist.reduce((sum, section) => 
+      const photoCount = checklist.reduce((sum, section) =>
         sum + section.items.reduce((itemSum, item) => itemSum + (item.photo_urls?.length || 0), 0), 0);
-      
+
       const issues = [];
       checklist.forEach(section => {
         section.items.forEach(item => {
-          if (item.flagged) {
+          if (item.flagged || item.status === 'fail' || item.status === 'no') {
             issues.push({
               item_name: item.name,
-              description: item.notes || 'Issue flagged during inspection',
-              severity: 'medium',
+              section: section.section_name,
+              description: item.notes || `Issue found: ${item.name}`,
+              status: item.status,
               photo_url: item.photo_urls?.[0] || null
             });
           }
         });
       });
 
-      // Create Issue entity records for each flagged item
-      for (const issue of issues) {
-        await base44.entities.Issue.create({
-          company_id: inspection.company_id,
-          property_id: inspection.property_id,
-          client_id: inspection.client_id,
-          inspection_id: inspection.id,
-          title: issue.item_name,
-          description: issue.description,
-          status: 'open',
-          priority: issue.severity === 'high' ? 'high' : 'medium',
-          photo_urls: issue.photo_url ? [issue.photo_url] : []
-        });
-      }
-
-      await base44.entities.Inspection.update(inspection.id, {
+      await base44.entities.Visit.update(visit.id, {
         status: 'completed',
         completed_at: new Date().toISOString(),
+        completed_by: visit.assigned_to,
         checklist_data: checklist,
         summary_notes: summaryNotes,
         overall_status: overallStatus,
@@ -372,10 +234,30 @@ export default function InspectionFlow() {
         issues_found: issues
       });
 
-      navigate(createPageUrl('InspectionDetail') + `?id=${inspection.id}`);
+      // Create FollowUp records for flagged items
+      for (const flagKey of flaggedItems) {
+        const parts = flagKey.split('|');
+        const [sectionIdx, itemIdx] = parts[0].split('-').map(Number);
+        const section = checklist[sectionIdx];
+        const item = section?.items[itemIdx];
+        if (item) {
+          await base44.entities.FollowUp.create({
+            company_id: visit.company_id,
+            property_id: visit.property_id,
+            client_id: visit.client_id,
+            title: `${item.name} - Follow-up Required`,
+            description: item.notes || `Issue identified during check-in: ${item.name}`,
+            type: 'inspection_followup',
+            priority: 'medium',
+            status: 'open',
+            due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+          });
+        }
+      }
+
+      navigate(createPageUrl('InspectionDetail') + `?id=${visit.id}`);
     } catch (error) {
-      console.error('Error completing:', error);
-    } finally {
+      console.error('Error completing visit:', error);
       setSaving(false);
     }
   };
@@ -388,8 +270,10 @@ export default function InspectionFlow() {
     );
   }
 
+  if (!visit) return null;
+
   return (
-    <div className="max-w-2xl mx-auto -mx-4 lg:-mx-6">
+    <div className="max-w-2xl mx-auto">
       {/* Header */}
       <div className="bg-white sticky top-0 z-20 px-4 py-4 border-b lg:px-6">
         <div className="flex items-center justify-between">
@@ -402,105 +286,94 @@ export default function InspectionFlow() {
               <p className="text-sm text-slate-500">{property?.city}, {property?.state}</p>
             </div>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowCompleteDialog(true)}
+            className="text-emerald-700 border-emerald-300 hover:bg-emerald-50"
+          >
+            <CheckCircle2 className="h-4 w-4 mr-1" />
+            Complete
+          </Button>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="px-4 py-6 lg:px-6">
-        {isStandardType ? (
-          <MobileInspectionView
-              inspection={inspection}
-              categories={mobileCategories}
-              setCategories={setMobileCategories}
-              handlePhotoUpload={handlePhotoUpload}
-              uploading={uploading}
-              saving={saving}
-              saveProgress={saveProgress}
-              flaggedItems={flaggedItems}
-              setFlaggedItems={setFlaggedItems}
-            />
-        ) : isFlexibleType ? (
-          <FlexibleInspectionView
-            inspection={inspection}
-            photoUrls={photoUrls}
-            handlePhotoUpload={handlePhotoUpload}
-            summaryNotes={summaryNotes}
-            setSummaryNotes={setSummaryNotes}
-            uploading={uploading}
-            saving={saving}
-            saveProgress={saveProgress}
-          />
-        ) : (
-           <StandardInspectionView
-             checklist={checklist}
-             updateItem={updateItem}
-             handlePhotoUpload={handlePhotoUpload}
-             uploading={uploading}
-             saving={saving}
-             saveProgress={saveProgress}
-             flaggedItems={flaggedItems}
-             setFlaggedItems={setFlaggedItems}
-           />
-         )}
+      {/* Checklist */}
+      <div className="px-4 py-6 lg:px-6 pb-28">
+        <StandardInspectionView
+          checklist={checklist}
+          updateItem={updateItem}
+          handlePhotoUpload={handlePhotoUpload}
+          uploading={uploading}
+          saving={saving}
+          saveProgress={saveProgress}
+          flaggedItems={flaggedItems}
+          setFlaggedItems={setFlaggedItems}
+        />
       </div>
 
-      {/* Complete Dialog for Complex Checklist Inspections */}
-      {!isStandardType && !isFlexibleType && (
-        <Dialog open={showCompleteDialog} onOpenChange={setShowCompleteDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Complete Inspection</DialogTitle>
-              <DialogDescription>
-                Review and finalize the inspection report
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-4 py-4">
-              <div>
-                <Label>Overall Status</Label>
-                <Select value={overallStatus} onValueChange={setOverallStatus}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all_clear">All Clear - No Issues</SelectItem>
-                    <SelectItem value="issues_found">Issues Found</SelectItem>
-                    <SelectItem value="urgent">Urgent - Immediate Attention</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+      {/* Complete Visit Dialog */}
+      <Dialog open={showCompleteDialog} onOpenChange={setShowCompleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Complete Visit</DialogTitle>
+            <DialogDescription>
+              Finalize the check-in and save all checklist results.
+            </DialogDescription>
+          </DialogHeader>
 
-              <div>
-                <Label>Summary Notes</Label>
-                <Textarea
-                  value={summaryNotes}
-                  onChange={(e) => setSummaryNotes(e.target.value)}
-                  placeholder="Add a summary of the inspection..."
-                  rows={4}
-                />
-              </div>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Overall Status</Label>
+              <Select value={overallStatus} onValueChange={setOverallStatus}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all_clear">All Clear - No Issues</SelectItem>
+                  <SelectItem value="issues_found">Issues Found</SelectItem>
+                  <SelectItem value="urgent">Urgent - Immediate Attention</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowCompleteDialog(false)}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={completeInspection}
-                disabled={saving}
-                className="bg-emerald-600 hover:bg-emerald-700"
-              >
-                {saving ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
-                )}
-                Complete & Save
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+            <div>
+              <Label>Summary Notes</Label>
+              <Textarea
+                value={summaryNotes}
+                onChange={(e) => setSummaryNotes(e.target.value)}
+                placeholder="Add a summary of this visit..."
+                rows={4}
+              />
+            </div>
+
+            {flaggedItems.size > 0 && (
+              <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                {flaggedItems.size} flagged item{flaggedItems.size > 1 ? 's' : ''} will create follow-up tasks automatically.
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCompleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={completeVisit}
+              disabled={saving}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              {saving ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+              )}
+              Complete Visit
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
