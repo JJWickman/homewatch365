@@ -324,10 +324,6 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
       </Card>
 
 
-
-
-
-
         
 
 
@@ -359,9 +355,6 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
 
 
 
-
-
-      </Card>
 
       {/* Template Detail Modal */}
       <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
