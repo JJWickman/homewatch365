@@ -1052,50 +1052,82 @@ export default function PropertyDetail() {
                     <User className="h-5 w-5" />
                     Contractors
                   </CardTitle>
-                  <Button 
-                    size="sm" 
-                    onClick={() => navigate(createPageUrl('PropertyForm') + `?id=${property.id}#contractors`)}
-                    className="bg-slate-900 hover:bg-slate-800 text-white"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Assign
-                  </Button>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {CONTRACTOR_TYPES.map(({ value, label }) => {
                       const typeContractors = contractors.filter(c => c.contractor_type === value);
                       return (
                         <div key={value} className="border border-slate-200 rounded-lg overflow-hidden">
-                          <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-200">
-                            <span className="font-medium text-sm text-slate-700">{label}</span>
-                            {typeContractors.length === 0 ? (
-                              <span className="text-xs text-slate-400">Not assigned</span>
-                            ) : (
-                              <span className="text-xs text-emerald-600 font-medium">{typeContractors.length} assigned</span>
-                            )}
+                          <div className="px-4 py-3">
+                            <label className="text-sm font-medium text-slate-700 block mb-2">{label}</label>
+                            <Select
+                              onValueChange={async (contractorId) => {
+                                const selectedContractor = contractors.find(c => c.id === contractorId);
+                                if (selectedContractor && !property.contractors?.includes(contractorId)) {
+                                  const updatedContractors = [...(property.contractors || []), contractorId];
+                                  await base44.entities.Property.update(property.id, { contractors: updatedContractors });
+                                  setProperty({ ...property, contractors: updatedContractors });
+                                  const contractorsData = await base44.entities.Contractor.filter({ 
+                                    id: { $in: updatedContractors } 
+                                  });
+                                  setContractors(contractorsData);
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder={`Select a ${label.toLowerCase()}`} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {contractors
+                                  .filter(c => c.contractor_type === value && !property.contractors?.includes(c.id))
+                                  .map(contractor => (
+                                    <SelectItem key={contractor.id} value={contractor.id}>
+                                      {contractor.business_name}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
                           </div>
                           {typeContractors.length > 0 && (
-                            <div className="divide-y divide-slate-100">
+                            <div className="divide-y divide-slate-100 border-t border-slate-200">
                               {typeContractors.map((contractor) => (
-                                <div key={contractor.id} className="px-4 py-3">
-                                  <p className="font-medium text-slate-900">{contractor.business_name}</p>
-                                  {contractor.contact_name && (
-                                    <p className="text-sm text-slate-500">Contact: {contractor.contact_name}</p>
-                                  )}
-                                  <div className="mt-2 space-y-1 text-sm">
-                                    {contractor.phone && (
-                                      <a href={`tel:${contractor.phone}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
-                                        <Phone className="h-3.5 w-3.5" />
-                                        {contractor.phone}
-                                      </a>
+                                <div key={contractor.id} className="px-4 py-3 flex items-start justify-between">
+                                  <div>
+                                    <p className="font-medium text-slate-900">{contractor.business_name}</p>
+                                    {contractor.contact_name && (
+                                      <p className="text-sm text-slate-500">Contact: {contractor.contact_name}</p>
                                     )}
-                                    {contractor.email && (
-                                      <a href={`mailto:${contractor.email}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
-                                        {contractor.email}
-                                      </a>
-                                    )}
+                                    <div className="mt-2 space-y-1 text-sm">
+                                      {contractor.phone && (
+                                        <a href={`tel:${contractor.phone}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+                                          <Phone className="h-3.5 w-3.5" />
+                                          {contractor.phone}
+                                        </a>
+                                      )}
+                                      {contractor.email && (
+                                        <a href={`mailto:${contractor.email}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+                                          {contractor.email}
+                                        </a>
+                                      )}
+                                    </div>
                                   </div>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={async () => {
+                                      const updatedContractors = property.contractors?.filter(id => id !== contractor.id) || [];
+                                      await base44.entities.Property.update(property.id, { contractors: updatedContractors });
+                                      setProperty({ ...property, contractors: updatedContractors });
+                                      const contractorsData = await base44.entities.Contractor.filter({ 
+                                        id: { $in: updatedContractors } 
+                                      });
+                                      setContractors(contractorsData);
+                                    }}
+                                    className="text-red-600 hover:text-red-700"
+                                  >
+                                    Remove
+                                  </Button>
                                 </div>
                               ))}
                             </div>
