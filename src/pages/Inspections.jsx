@@ -129,7 +129,7 @@ export default function Inspections() {
           base44.entities.Visit.filter({ company_id: cId }, '-scheduled_date'),
           base44.entities.Property.filter({ company_id: cId, is_active: true }),
           base44.entities.Client.filter({ company_id: cId }),
-          base44.entities.InspectionTemplate.filter({ company_id: cId, is_active: true }),
+          base44.entities.VisitTemplate.filter({ company_id: cId, is_active: true }),
           base44.entities.CompanyMember.filter({ company_id: cId, is_active: true })
         ]);
         
