@@ -12,14 +12,17 @@ export default function ChecklistSectionComponent({
 }) {
   const [expanded, setExpanded] = useState(true);
 
+  // Sort items by sort_order
+  const sortedItems = [...items].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
   // Count completed items in this section
-  const completedCount = items.filter(item => {
+  const completedCount = sortedItems.filter(item => {
     if (item.response_type === 'instruction_only') return false;
     const resp = responses[item.id];
     return resp && (resp.response_value !== null || resp.numeric_value !== null || (resp.photo_urls && resp.photo_urls.length > 0));
   }).length;
 
-  const actionableItems = items.filter(i => i.response_type !== 'instruction_only');
+  const actionableItems = sortedItems.filter(i => i.response_type !== 'instruction_only');
 
   return (
     <Card className="mb-4">
