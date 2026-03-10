@@ -5,7 +5,8 @@ import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { 
   Building2, MapPin, Key, Wifi, Phone, Calendar,
-  Save, X, Upload, Plus, Trash2, User, MapPinCheckInside, Loader, ArrowRightLeft, ChevronDown
+  Save, X, Upload, Plus, Trash2, User, MapPinCheckInside, Loader, ArrowRightLeft, ChevronDown,
+  AlertCircle, AlertTriangle
 } from 'lucide-react';
 import {
   Dialog,
@@ -781,6 +782,7 @@ export default function PropertyForm() {
         square_feet: formData.square_feet ? parseFloat(formData.square_feet) : null,
         bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
         bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
+        year_built: formData.year_built ? parseInt(formData.year_built) : null,
         latitude: formData.latitude ? parseFloat(formData.latitude) : null,
         longitude: formData.longitude ? parseFloat(formData.longitude) : null,
         is_active: true
