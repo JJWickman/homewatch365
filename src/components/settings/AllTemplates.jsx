@@ -1,16 +1,6 @@
 import React from 'react';
-import ChecklistTemplatesSection from './ChecklistTemplatesSection';
-import InspectionTemplates from './InspectionTemplates';
+import TemplatesTab from './TemplatesTab';
 
 export default function AllTemplates({ companyId, isAdmin, templates, onRefresh }) {
-  return (
-    <div className="space-y-6">
-      <ChecklistTemplatesSection companyId={companyId} isAdmin={isAdmin} />
-      <InspectionTemplates 
-        companyId={companyId} 
-        templates={templates} 
-        onRefresh={onRefresh}
-      />
-    </div>
-  );
+  return <TemplatesTab companyId={companyId} isAdmin={isAdmin} onRefresh={onRefresh} />;
 }
