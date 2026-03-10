@@ -142,7 +142,7 @@ export default function InspectionFlow() {
            if (insp.checklist_data && insp.checklist_data.length > 0) {
              setChecklist(insp.checklist_data);
            } else if (insp.template_id) {
-             const templates = await base44.entities.InspectionTemplate.filter({ id: insp.template_id });
+             const templates = await base44.entities.VisitTemplate.filter({ id: insp.template_id });
              if (templates.length > 0 && templates[0].sections) {
                setChecklist(templates[0].sections.map(s => ({
                  section_name: s.name,

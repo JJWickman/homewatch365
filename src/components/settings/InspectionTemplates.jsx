@@ -237,7 +237,7 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
   const handleCopyDefault = async () => {
     setCopyingDefault(true);
     try {
-      await base44.entities.InspectionTemplate.create({
+      await base44.entities.VisitTemplate.create({
         ...DEFAULT_HOME_WATCH_TEMPLATE,
         company_id: companyId
       });
@@ -252,7 +252,7 @@ export default function InspectionTemplates({ companyId, templates = [], onRefre
   const handleAddStandardChecklist = async () => {
     setCopyingStandard(true);
     try {
-      await base44.entities.InspectionTemplate.create({
+      await base44.entities.VisitTemplate.create({
         ...DEFAULT_STANDARD_CHECKLIST_TEMPLATE,
         company_id: companyId
       });
