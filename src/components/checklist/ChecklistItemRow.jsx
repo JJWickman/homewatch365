@@ -45,12 +45,15 @@ export default function ChecklistItemRow({
     const files = Array.from(e.target.files || []);
     for (const file of files) {
       try {
+        // Create a FormData object for the file
         const result = await base44.integrations.Core.UploadFile({ file });
-        const photos = response?.photo_urls || [];
-        onItemChange(item.id, {
-          ...response,
-          photo_urls: [...photos, result.file_url]
-        });
+        if (result?.file_url) {
+          const photos = response?.photo_urls || [];
+          onItemChange(item.id, {
+            ...response,
+            photo_urls: [...photos, result.file_url]
+          });
+        }
       } catch (error) {
         console.error('Upload error:', error);
       }
