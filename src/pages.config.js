@@ -63,8 +63,6 @@ import ForgotPassword from './pages/ForgotPassword';
 import HelpTutorials from './pages/HelpTutorials';
 import Home from './pages/Home';
 import ImportData from './pages/ImportData';
-import InspectionDetail from './pages/InspectionDetail';
-import Inspections from './pages/Inspections';
 import InvitationAccept from './pages/InvitationAccept';
 import InvoicePayment from './pages/InvoicePayment';
 import Marketing from './pages/Marketing';
@@ -105,8 +103,6 @@ export const PAGES = {
     "HelpTutorials": HelpTutorials,
     "Home": Home,
     "ImportData": ImportData,
-    "InspectionDetail": InspectionDetail,
-    "Inspections": Inspections,
     "InvitationAccept": InvitationAccept,
     "InvoicePayment": InvoicePayment,
     "Marketing": Marketing,
