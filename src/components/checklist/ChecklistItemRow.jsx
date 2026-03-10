@@ -44,17 +44,12 @@ export default function ChecklistItemRow({
   const handlePhotoUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     for (const file of files) {
-      const formData = new FormData();
-      formData.append('file', file);
-
       try {
-        const res = await fetch('/api/upload', { method: 'POST', body: formData });
-        const data = await res.json();
-
+        const result = await base44.integrations.Core.UploadFile({ file });
         const photos = response?.photo_urls || [];
         onItemChange(item.id, {
           ...response,
-          photo_urls: [...photos, data.url]
+          photo_urls: [...photos, result.file_url]
         });
       } catch (error) {
         console.error('Upload error:', error);
