@@ -619,7 +619,7 @@ export default function PropertyDetail() {
               <p className="text-xs text-slate-500 leading-relaxed border-b border-slate-100 pb-3">
                 In the event the homeowner is unavailable during an emergency, the following person will be contacted. This person has the authority to make a decision on behalf of the homeowner. If there is an emergency and the homeowner and emergency contact person is unavailable, we will endeavor to temporarily repair or stabilize the situation to the best of our ability, at the homeowner's expense.
               </p>
-              <div className="space-y-2">
+              <div className="space-y-2 pb-3">
                 <div>
                   <label className="text-xs text-slate-500 block mb-1">Contact Name</label>
                   <input
@@ -650,11 +650,18 @@ export default function PropertyDetail() {
                     className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 text-sm text-black"
                   />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+                {hasUnsavedChanges && (
+                <div className="flex justify-end pt-3 border-t border-slate-100">
+                  <Button onClick={handleSave} disabled={saving} className="bg-red-600 hover:bg-red-700 text-white">
+                    {saving ? 'Saving...' : 'Save'}
+                  </Button>
+                </div>
+                )}
+                </CardContent>
+                </Card>
 
-          {/* Property Details */}
+                {/* Property Details */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-slate-500">Details</CardTitle>
