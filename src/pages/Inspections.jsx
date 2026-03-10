@@ -816,13 +816,14 @@ export default function Inspections() {
            });
          }
        }}>
-         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto rounded-2xl">
-           <DialogHeader>
-             <DialogTitle>{editingId ? 'Edit Visit' : 'Schedule a Visit'}</DialogTitle>
-             <DialogDescription>
+         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto rounded-2xl p-0">
+           <DialogHeader className="px-6 pt-6 pb-4 rounded-t-2xl bg-gradient-to-r from-blue-900 to-blue-800">
+             <DialogTitle className="text-white text-lg font-semibold">{editingId ? 'Edit Visit' : 'Schedule a Visit'}</DialogTitle>
+             <DialogDescription className="text-blue-200">
                {editingId ? 'Update visit details' : 'Create a new check-in or follow-up'}
              </DialogDescription>
            </DialogHeader>
+           <div className="px-6 pb-6">
 
            {!editingId && (
              <div className="flex gap-2 mb-4">
