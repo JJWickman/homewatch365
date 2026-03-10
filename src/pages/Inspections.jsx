@@ -816,7 +816,7 @@ export default function Inspections() {
            });
          }
        }}>
-         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto rounded-2xl">
            <DialogHeader>
              <DialogTitle>{editingId ? 'Edit Visit' : 'Schedule a Visit'}</DialogTitle>
              <DialogDescription>
