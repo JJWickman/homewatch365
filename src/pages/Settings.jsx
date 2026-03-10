@@ -1732,13 +1732,9 @@ ${company.name}
         </TabsContent>
 
         <TabsContent value="templates">
-          <InspectionTemplates 
-            companyId={company?.id} 
-            templates={templates} 
-            onRefresh={loadData}
-          />
+           <AllTemplates companyId={company?.id} isAdmin={isAdmin} templates={templates} onRefresh={loadData} />
         </TabsContent>
-      </Tabs>
+        </Tabs>
 
       {/* Invite Dialog */}
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
