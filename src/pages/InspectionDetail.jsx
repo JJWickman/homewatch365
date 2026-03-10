@@ -180,9 +180,9 @@ Your Property Management Team
   return (
     <div className="max-w-5xl mx-auto">
       <PageHeader
-        title={`Inspection - ${format(parseISO(inspection.scheduled_date), 'MMM d, yyyy')}`}
+        title={`Visit - ${format(parseISO(inspection.scheduled_date), 'MMM d, yyyy')}`}
         backLink="Inspections"
-        backLabel="Back to Inspections"
+        backLabel="Back to Visits"
       >
         <div className="flex gap-3">
           {inspection.status === 'scheduled' && (
@@ -200,7 +200,7 @@ Your Property Management Team
           {inspection.status === 'in_progress' && (
             <Button onClick={() => navigate(createPageUrl('VisitFlow') + `?id=${inspection.id}`)} className="bg-black text-white hover:bg-slate-900">
               <Play className="h-4 w-4 mr-2" />
-              Continue Inspection
+              Continue Visit
             </Button>
           )}
           {inspection.status === 'completed' && !inspection.client_notified && client && (
@@ -411,7 +411,7 @@ Your Property Management Team
         <div className="lg:col-span-2">
           <Tabs defaultValue="checklist">
             <TabsList className="w-full justify-start mb-4">
-              <TabsTrigger value="checklist">Inspection</TabsTrigger>
+              <TabsTrigger value="checklist">Visit</TabsTrigger>
               <TabsTrigger value="photos">Photos</TabsTrigger>
               {inspection.issues_found?.length > 0 && (
                 <TabsTrigger value="issues">Issues ({inspection.issues_found.length})</TabsTrigger>
@@ -431,7 +431,7 @@ Your Property Management Team
                           onClick={() => navigate(createPageUrl('VisitFlow') + `?id=${inspection.id}`)}
                         >
                           <Play className="h-4 w-4 mr-2" />
-                          Start Inspection
+                          Start Checkin
                         </Button>
                       )}
                     </div>
@@ -542,7 +542,7 @@ Your Property Management Team
                 <Card>
                   <CardContent className="pt-6">
                     <div className="flex justify-between items-center mb-4">
-                      <p className="text-sm text-slate-500">Issues from this inspection are tracked in the Issues page</p>
+                      <p className="text-sm text-slate-500">Issues from this visit are tracked in the Issues page</p>
                       <Link to={createPageUrl('Issues')}>
                         <Button variant="outline" size="sm">
                           <Eye className="h-4 w-4 mr-2" />
@@ -590,9 +590,9 @@ Your Property Management Team
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Inspection</DialogTitle>
+            <DialogTitle>Edit Visit</DialogTitle>
             <DialogDescription>
-              Update inspection details
+              Update visit details
             </DialogDescription>
           </DialogHeader>
           
