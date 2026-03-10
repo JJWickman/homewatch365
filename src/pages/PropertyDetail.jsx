@@ -507,6 +507,45 @@ export default function PropertyDetail() {
     }
   };
 
+  const handleSearchContractors = async (query) => {
+    if (!query || query.length < 2) {
+      setContractorSearchResults([]);
+      return;
+    }
+
+    setSearchingContractors(true);
+    try {
+      const response = await base44.functions.invoke('searchContractors', {
+        query,
+        contractor_type: selectedContractorType
+      });
+      setContractorSearchResults(response.data?.contractors || []);
+    } catch (error) {
+      console.error('Error searching contractors:', error);
+      toast.error('Failed to search contractors');
+      setContractorSearchResults([]);
+    } finally {
+      setSearchingContractors(false);
+    }
+  };
+
+  const handleAssignContractor = async (contractorId) => {
+    try {
+      const updatedContractors = [...(property.contractors || []), contractorId];
+      await base44.entities.Property.update(property.id, { contractors: updatedContractors });
+      setProperty({ ...property, contractors: updatedContractors });
+      const contractorsData = await base44.entities.Contractor.filter({ 
+        id: { $in: updatedContractors } 
+      });
+      setContractors(contractorsData);
+      setShowAddContractorDialog(false);
+      toast.success('Contractor assigned successfully');
+    } catch (error) {
+      console.error('Error assigning contractor:', error);
+      toast.error('Failed to assign contractor');
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto">
       <PageHeader
