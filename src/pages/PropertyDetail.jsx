@@ -79,6 +79,7 @@ export default function PropertyDetail() {
   const [selectedContractorType, setSelectedContractorType] = useState('');
   const [contractorSearchResults, setContractorSearchResults] = useState([]);
   const [searchingContractors, setSearchingContractors] = useState(false);
+  const [savingChecklist, setSavingChecklist] = useState(false);
 
   useEffect(() => {
     loadProperty();
@@ -529,6 +530,21 @@ export default function PropertyDetail() {
     }
   };
 
+  const handleSaveDefaultChecklist = async (templateKey) => {
+    setSavingChecklist(true);
+    const updatedCustomFields = { ...(property.custom_fields || {}), default_checklist: templateKey };
+    await base44.entities.Property.update(property.id, { custom_fields: updatedCustomFields });
+    setProperty({ ...property, custom_fields: updatedCustomFields });
+    setSavingChecklist(false);
+    toast.success('Default checklist saved');
+  };
+
+  const CHECKLIST_TEMPLATE_OPTIONS = [
+    { key: 'sfh', label: 'Single Family Home', page: 'SingleFamilyHomeChecklistPage' },
+    { key: 'condo', label: 'Condo / Villa', page: 'CondoVillaChecklistPage' },
+    { key: 'highrise', label: 'High Rise', page: 'HighRiseChecklistPage' },
+  ];
+
   const handleAssignContractor = async (contractorId) => {
     try {
       const updatedContractors = [...(property.contractors || []), contractorId];
@@ -973,6 +989,49 @@ export default function PropertyDetail() {
                   </TabsContent>
 
             <TabsContent value="visits">
+              {/* Default Checklist Selector */}
+              <Card className="mb-4">
+                <CardContent className="pt-5 pb-4">
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-700 mb-1">Default Check-In Checklist</p>
+                      <p className="text-xs text-slate-500 mb-3">Select the checklist template that opens by default when checking in at this property.</p>
+                      <div className="flex flex-wrap gap-2">
+                        {CHECKLIST_TEMPLATE_OPTIONS.map(opt => {
+                          const isSelected = (property.custom_fields?.default_checklist || '') === opt.key;
+                          return (
+                            <button
+                              key={opt.key}
+                              onClick={() => handleSaveDefaultChecklist(opt.key)}
+                              disabled={savingChecklist}
+                              className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
+                                isSelected
+                                  ? 'bg-slate-900 text-white border-slate-900'
+                                  : 'bg-white text-slate-600 border-slate-300 hover:border-slate-500'
+                              }`}
+                            >
+                              {opt.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    {property.custom_fields?.default_checklist && (() => {
+                      const opt = CHECKLIST_TEMPLATE_OPTIONS.find(o => o.key === property.custom_fields.default_checklist);
+                      return opt ? (
+                        <Button
+                          onClick={() => navigate(createPageUrl(opt.page) + `?property_id=${property.id}`)}
+                          className="bg-green-600 hover:bg-green-700 text-white shrink-0"
+                        >
+                          <ClipboardCheck className="h-4 w-4 mr-1.5" />
+                          Start Check-In
+                        </Button>
+                      ) : null;
+                    })()}
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg">Visits</CardTitle>
