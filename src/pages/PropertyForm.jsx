@@ -910,7 +910,7 @@ export default function PropertyForm() {
                      <SelectItem value="condo">Condo</SelectItem>
                      <SelectItem value="townhouse">Townhouse</SelectItem>
                      <SelectItem value="estate">Estate</SelectItem>
-                     <SelectItem value="commercial">Commercial</SelectItem>
+                     <SelectItem value="commercial">High-Rise or Multi-Family Complex</SelectItem>
                    </SelectContent>
                  </Select>
                </div>

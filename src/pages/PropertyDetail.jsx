@@ -670,7 +670,7 @@ export default function PropertyDetail() {
             <CardContent className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-slate-500">Type</span>
-                <span className="font-medium capitalize">{property.property_type?.replace('_', ' ')}</span>
+                <span className="font-medium capitalize">{property.property_type === 'commercial' ? 'High-Rise or Multi-Family Complex' : property.property_type?.replace('_', ' ')}</span>
               </div>
               {property.square_feet && (
                 <div className="flex justify-between">
