@@ -7,7 +7,7 @@ import OfflineBanner from '@/components/shared/OfflineBanner';
 import { 
         Home, Users, Building2, ClipboardCheck, Calendar, 
         FileText, Settings, Menu, X, LogOut, ChevronDown,
-        Bell, Search, Plus, Building, UserCircle, Megaphone, Briefcase, Route, BookOpen, DollarSign, Download
+        Bell, Search, Plus, Building, UserCircle, Megaphone, Briefcase, Route, BookOpen, DollarSign, Download, ClipboardList
       } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {

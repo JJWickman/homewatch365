@@ -83,6 +83,10 @@ import VisitChecklistPage from './pages/VisitChecklistPage';
 import VisitDetail from './pages/VisitDetail';
 import VisitFlow from './pages/VisitFlow';
 import Visits from './pages/Visits';
+import ChecklistFormsPage from './pages/ChecklistFormsPage';
+import SingleFamilyHomeChecklistPage from './pages/SingleFamilyHomeChecklistPage';
+import CondoVillaChecklistPage from './pages/CondoVillaChecklistPage';
+import HighRiseChecklistPage from './pages/HighRiseChecklistPage';
 import __Layout from './Layout.jsx';
 
 
@@ -123,6 +127,10 @@ export const PAGES = {
     "VisitDetail": VisitDetail,
     "VisitFlow": VisitFlow,
     "Visits": Visits,
+    "ChecklistFormsPage": ChecklistFormsPage,
+    "SingleFamilyHomeChecklistPage": SingleFamilyHomeChecklistPage,
+    "CondoVillaChecklistPage": CondoVillaChecklistPage,
+    "HighRiseChecklistPage": HighRiseChecklistPage,
 }
 
 export const pagesConfig = {
