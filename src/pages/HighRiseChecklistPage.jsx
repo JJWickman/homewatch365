@@ -1,105 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Save, Send, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Save, Send, CheckCircle2, Loader2 } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import MobileChecklistItem from '@/components/checklist/MobileChecklistItem';
-
-const SECTIONS = [
-  {
-    title: 'Upon Arrival',
-    items: [
-      { label: 'Check mailbox, remove newspapers, forward mail if requested', responseType: 'ok_issue_na' },
-      { label: 'Check for signs of rodents, insects, or other critters in common areas', responseType: 'ok_issue_na' },
-      { label: 'Turn the water ON at the main supply valve, slowly and gingerly', responseType: 'ok_issue_na' },
-      { label: 'Visual exterior check of balcony including windows, screens, and sliders', responseType: 'ok_issue_na' },
-    ],
-  },
-  {
-    title: 'Interior Check',
-    items: [
-      { label: 'Disarm security system', responseType: 'ok_issue_na' },
-      { label: 'Test the phone line', responseType: 'ok_issue_na' },
-      { label: 'Check balcony/lanai for debris or damage', responseType: 'ok_issue_na' },
-    ],
-  },
-  {
-    title: 'Water Zone Home Watch Method',
-    items: [
-      { label: 'Short cycle on the dishwasher, check for visible leaks', responseType: 'ok_issue_na' },
-      { label: 'Run the garbage disposal, check for proper operation and visible leaks', responseType: 'ok_issue_na' },
-      { label: 'Short cycle on the washing machine, check for visible leaks', responseType: 'ok_issue_na' },
-      { label: 'Operate clothes dryer', responseType: 'ok_issue_na' },
-      { label: 'Run water in sinks, check for visible leaks', responseType: 'ok_issue_na' },
-      { label: 'Check the refrigerator and freezer temp and for proper operation', responseType: 'ok_issue_na' },
-      { label: 'Ice maker emptied and OFF', responseType: 'ok_issue_na' },
-      { label: 'Perishable and frozen foods removed from fridge and freezer', responseType: 'ok_issue_na' },
-      { label: 'Bathrooms: Always careful and mindful of splashing water on glass enclosures', responseType: 'instruction_only' },
-      { label: 'Run water in showers and tubs, checking for visible leaks', responseType: 'ok_issue_na' },
-      { label: 'Always mindful of the valve at the wall as well as any discoloration of the tile grout', responseType: 'instruction_only' },
-      { label: 'Brush and flush toilets, check for visible leaks and signs of water damage', responseType: 'ok_issue_na' },
-      { label: 'Water heater should be OFF at the breaker or set to Vacation Mode.', responseType: 'instruction_only' },
-      { label: 'Check water heater for signs of visible leaks and rust', responseType: 'ok_issue_na' },
-    ],
-  },
-  {
-    title: 'AC System',
-    items: [
-      { label: 'Main room temperature', responseType: 'number' },
-      { label: 'Main room humidity', responseType: 'percentage' },
-      { label: 'Lower the thermostat(s) by a couple of degrees. Confirm AC system is set to Auto-Cool', responseType: 'ok_issue_na' },
-      { label: 'AC is blowing cold air', responseType: 'ok_issue_na' },
-      { label: 'AC filters, if accessible, checked', responseType: 'ok_issue_na' },
-      { label: 'Check for signs of visible leaks or water in the secondary pan, if accessible', responseType: 'ok_issue_na' },
-    ],
-  },
-  {
-    title: 'Observe and Report',
-    items: [
-      { label: 'Check visible ceilings for signs of water intrusion or other damage', responseType: 'ok_issue_na' },
-      { label: 'Check visible walls for signs of water intrusion or other damage', responseType: 'ok_issue_na' },
-      { label: 'Check visible baseboards for signs of water or other damage', responseType: 'ok_issue_na' },
-      { label: 'Check windows and sliders for damage or leaks, and make sure locked', responseType: 'ok_issue_na' },
-      { label: 'Ceiling fans are ON', responseType: 'ok_issue_na' },
-      { label: 'Check or test electronics only if requested by homeowner', responseType: 'ok_issue_na' },
-      { label: 'Check for signs of insects or rodents', responseType: 'ok_issue_na' },
-      { label: 'Home Watch Mode includes opening interior room doors and closets for air circulation, bathroom brush across bowl to dry, and cabinet doors open at water sources', responseType: 'instruction_only' },
-      { label: 'Is the residence in Home Watch Mode', responseType: 'ok_issue_na' },
-    ],
-  },
-  {
-    title: 'Storm Protection',
-    items: [
-      { label: 'Everything about storm protection will need to be customized for the property', responseType: 'instruction_only' },
-      { label: 'Exercise electric storm shutters', responseType: 'ok_issue_na' },
-      { label: 'Confirm shutter wall switch is neutral and operating properly, or shutter remote control tested', responseType: 'ok_issue_na' },
-    ],
-  },
-  {
-    title: 'Departure',
-    items: [
-      { label: 'Always take a few moments before leaving to listen for unusual sounds', responseType: 'instruction_only' },
-      { label: 'Thermostat(s) returned to proper setting', responseType: 'ok_issue_na' },
-      { label: 'Turn water OFF at the main supply valve, slowly and gingerly', responseType: 'ok_issue_na' },
-      { label: 'Photo of water valve in the OFF position', responseType: 'photo_only' },
-      { label: 'Security system armed', responseType: 'ok_issue_na' },
-      { label: 'Doors locked', responseType: 'ok_issue_na' },
-    ],
-  },
-];
+import { base44 } from '@/api/base44Client';
+import { HIGHRISE_SECTIONS } from '@/components/checklist/checklistDefaults';
 
 const STORAGE_KEY = 'draft_highrise_checklist';
 
 export default function HighRiseChecklistPage() {
+  const [sections, setSections] = useState(HIGHRISE_SECTIONS);
+  const [templateLoading, setTemplateLoading] = useState(true);
   const [responses, setResponses] = useState(() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
   });
   const [submitted, setSubmitted] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
 
-  const updateResponse = (sIdx, iIdx, val) => {
+  useEffect(() => {
+    const loadTemplate = async () => {
+      try {
+        const user = await base44.auth.me();
+        const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
+        if (members.length > 0) {
+          const companies = await base44.entities.Company.filter({ id: members[0].company_id });
+          const company = companies[0];
+          const published = company?.settings?.checklists?.highrise;
+          if (published?.published && published?.sections?.length > 0) {
+            setSections(published.sections);
+          }
+        }
+      } catch (e) {
+        // use defaults
+      } finally {
+        setTemplateLoading(false);
+      }
+    };
+    loadTemplate();
+  }, []);
+
+  const updateResponse = (sIdx, iIdx, val) =>
     setResponses(prev => ({ ...prev, [`${sIdx}_${iIdx}`]: val }));
-  };
 
   const saveDraft = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(responses));
@@ -112,9 +54,17 @@ export default function HighRiseChecklistPage() {
     setSubmitted(true);
   };
 
-  const totalActionable = SECTIONS.flatMap(s => s.items).filter(i => i.responseType !== 'instruction_only').length;
-  const completed = Object.values(responses).filter(r => r.value || r.numValue || (r.photos && r.photos.length > 0)).length;
+  const totalActionable = sections.flatMap(s => s.items).filter(i => i.responseType !== 'instruction_only').length;
+  const completed = Object.values(responses).filter(r => r.value || r.numValue || (r.photos?.length > 0)).length;
   const progress = totalActionable > 0 ? Math.round((completed / totalActionable) * 100) : 0;
+
+  if (templateLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+      </div>
+    );
+  }
 
   if (submitted) {
     return (
@@ -134,7 +84,6 @@ export default function HighRiseChecklistPage() {
   return (
     <>
       <div className="max-w-lg mx-auto pb-28">
-        {/* Header */}
         <div className="flex items-center gap-3 mb-5">
           <Link to={createPageUrl('ChecklistFormsPage')}>
             <Button variant="ghost" size="icon"><ArrowLeft className="w-5 h-5" /></Button>
@@ -145,7 +94,6 @@ export default function HighRiseChecklistPage() {
           </div>
         </div>
 
-        {/* Progress */}
         <div className="bg-white rounded-2xl border border-slate-200 p-4 mb-6 shadow-sm">
           <div className="flex justify-between mb-2">
             <span className="text-sm font-medium text-slate-600">Progress</span>
@@ -156,8 +104,7 @@ export default function HighRiseChecklistPage() {
           </div>
         </div>
 
-        {/* Sections */}
-        {SECTIONS.map((section, sIdx) => (
+        {sections.map((section, sIdx) => (
           <div key={sIdx} className="mb-6">
             <div className="flex items-center gap-2 mb-3">
               <div className="h-px flex-1 bg-slate-200" />
@@ -180,7 +127,6 @@ export default function HighRiseChecklistPage() {
         ))}
       </div>
 
-      {/* Fixed Bottom Bar */}
       <div className="fixed bottom-0 left-0 right-0 lg:left-64 bg-white border-t border-slate-200 shadow-lg z-20">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center gap-3">
           <div className="flex-1">

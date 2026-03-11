@@ -54,7 +54,6 @@ const baseItems = [
   { name: 'Visits', icon: ClipboardCheck, page: 'Visits' },
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
   { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
-  { name: 'Visit Checklists', icon: ClipboardList, page: 'ChecklistFormsPage' },
   { name: 'Route Optimizer', icon: Route, page: 'RouteOptimizer' },
   { name: 'Help & Tutorials', icon: BookOpen, page: 'HelpTutorials' },
 ];

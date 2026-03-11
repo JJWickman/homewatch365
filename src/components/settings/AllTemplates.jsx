@@ -1,6 +1,6 @@
 import React from 'react';
-import TemplatesTab from './TemplatesTab';
+import ChecklistTemplatesManager from './ChecklistTemplatesManager';
 
-export default function AllTemplates({ companyId, isAdmin, templates, onRefresh }) {
-  return <TemplatesTab companyId={companyId} isAdmin={isAdmin} onRefresh={onRefresh} />;
+export default function AllTemplates({ companyId, isAdmin }) {
+  return <ChecklistTemplatesManager companyId={companyId} isAdmin={isAdmin} />;
 }
