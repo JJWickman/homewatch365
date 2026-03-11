@@ -10,8 +10,12 @@ import { SFH_SECTIONS } from '@/components/checklist/checklistDefaults';
 const STORAGE_KEY = 'draft_sfh_checklist';
 
 export default function SingleFamilyHomeChecklistPage() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const propertyId = urlParams.get('property_id');
+
   const [sections, setSections] = useState(SFH_SECTIONS);
   const [templateLoading, setTemplateLoading] = useState(true);
+  const [propertyInfo, setPropertyInfo] = useState(null);
   const [responses, setResponses] = useState(() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
   });
@@ -29,6 +33,10 @@ export default function SingleFamilyHomeChecklistPage() {
           const published = company?.settings?.checklists?.sfh;
           if (published?.published && published?.sections?.length > 0) {
             setSections(published.sections);
+          }
+          if (propertyId) {
+            const props = await base44.entities.Property.filter({ id: propertyId });
+            if (props.length > 0) setPropertyInfo(props[0]);
           }
         }
       } catch (e) {
@@ -90,7 +98,9 @@ export default function SingleFamilyHomeChecklistPage() {
           </Link>
           <div>
             <h1 className="text-xl font-bold text-slate-900">Single Family Home</h1>
-            <p className="text-sm text-slate-500">Home Watch Visit Checklist</p>
+            <p className="text-sm text-slate-500">
+              {propertyInfo ? `${propertyInfo.name || propertyInfo.address}` : 'Home Watch Visit Checklist'}
+            </p>
           </div>
         </div>
 
