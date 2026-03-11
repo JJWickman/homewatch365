@@ -166,7 +166,7 @@ export default function TemplatesTab({ companyId, onRefresh, isAdmin }) {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-slate-900">{template.name}</h3>
+                      <h3 className="font-semibold text-slate-900">{template.name === 'Commercial Property' ? 'High-Rise' : template.name}</h3>
                       {template.active && (
                         <Badge className="bg-green-100 text-green-800">Active</Badge>
                       )}
