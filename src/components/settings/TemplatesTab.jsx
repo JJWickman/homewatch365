@@ -240,6 +240,12 @@ export default function TemplatesTab({ companyId, onRefresh, isAdmin }) {
 
               <div className="space-y-4">
                 <h3 className="font-semibold text-slate-900">Sections</h3>
+                {(!selectedTemplate.sections || selectedTemplate.sections.length === 0) && (
+                  <div className="text-center py-8 text-slate-500 border border-dashed border-slate-200 rounded-lg">
+                    <p className="font-medium">No sections defined yet</p>
+                    <p className="text-sm mt-1">This template hasn't been configured with checklist sections and items.</p>
+                  </div>
+                )}
                 {selectedTemplate.sections?.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)).map((section, idx) => (
                   <Card key={idx} className="bg-slate-50">
                     <CardHeader className="pb-3">
