@@ -989,7 +989,7 @@ export default function PropertyDetail() {
                     </Select>
                     <Button 
                       size="sm" 
-                      onClick={() => navigate(createPageUrl('Inspections') + `?action=new&property_id=${property.id}`)}
+                      onClick={() => navigate(createPageUrl('Visits') + `?action=new&property_id=${property.id}`)}
                       className="bg-black hover:bg-gray-900 text-white"
                     >
                       <Plus className="h-4 w-4 mr-1" />

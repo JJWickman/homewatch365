@@ -49,6 +49,7 @@
  */
 import Billing from './pages/Billing';
 import BillingTest from './pages/BillingTest';
+import ChecklistFormsPage from './pages/ChecklistFormsPage';
 import ClientDetail from './pages/ClientDetail';
 import ClientForm from './pages/ClientForm';
 import ClientInspectionView from './pages/ClientInspectionView';
@@ -56,11 +57,13 @@ import ClientLogin from './pages/ClientLogin';
 import ClientPortal from './pages/ClientPortal';
 import Clients from './pages/Clients';
 import CompanyOnboarding from './pages/CompanyOnboarding';
+import CondoVillaChecklistPage from './pages/CondoVillaChecklistPage';
 import Contractors from './pages/Contractors';
 import Dashboard from './pages/Dashboard';
 import DispatcherDashboard from './pages/DispatcherDashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import HelpTutorials from './pages/HelpTutorials';
+import HighRiseChecklistPage from './pages/HighRiseChecklistPage';
 import Home from './pages/Home';
 import ImportData from './pages/ImportData';
 import InvitationAccept from './pages/InvitationAccept';
@@ -74,6 +77,7 @@ import PropertyForm from './pages/PropertyForm';
 import RouteOptimizer from './pages/RouteOptimizer';
 import Schedule from './pages/Schedule';
 import Settings from './pages/Settings';
+import SingleFamilyHomeChecklistPage from './pages/SingleFamilyHomeChecklistPage';
 import StripeSetup from './pages/StripeSetup';
 import SuperAdminConsole from './pages/SuperAdminConsole';
 import TestGoogleMapsAPI from './pages/TestGoogleMapsAPI';
@@ -83,16 +87,13 @@ import VisitChecklistPage from './pages/VisitChecklistPage';
 import VisitDetail from './pages/VisitDetail';
 import VisitFlow from './pages/VisitFlow';
 import Visits from './pages/Visits';
-import ChecklistFormsPage from './pages/ChecklistFormsPage';
-import SingleFamilyHomeChecklistPage from './pages/SingleFamilyHomeChecklistPage';
-import CondoVillaChecklistPage from './pages/CondoVillaChecklistPage';
-import HighRiseChecklistPage from './pages/HighRiseChecklistPage';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Billing": Billing,
     "BillingTest": BillingTest,
+    "ChecklistFormsPage": ChecklistFormsPage,
     "ClientDetail": ClientDetail,
     "ClientForm": ClientForm,
     "ClientInspectionView": ClientInspectionView,
@@ -100,11 +101,13 @@ export const PAGES = {
     "ClientPortal": ClientPortal,
     "Clients": Clients,
     "CompanyOnboarding": CompanyOnboarding,
+    "CondoVillaChecklistPage": CondoVillaChecklistPage,
     "Contractors": Contractors,
     "Dashboard": Dashboard,
     "DispatcherDashboard": DispatcherDashboard,
     "ForgotPassword": ForgotPassword,
     "HelpTutorials": HelpTutorials,
+    "HighRiseChecklistPage": HighRiseChecklistPage,
     "Home": Home,
     "ImportData": ImportData,
     "InvitationAccept": InvitationAccept,
@@ -118,6 +121,7 @@ export const PAGES = {
     "RouteOptimizer": RouteOptimizer,
     "Schedule": Schedule,
     "Settings": Settings,
+    "SingleFamilyHomeChecklistPage": SingleFamilyHomeChecklistPage,
     "StripeSetup": StripeSetup,
     "SuperAdminConsole": SuperAdminConsole,
     "TestGoogleMapsAPI": TestGoogleMapsAPI,
@@ -127,10 +131,6 @@ export const PAGES = {
     "VisitDetail": VisitDetail,
     "VisitFlow": VisitFlow,
     "Visits": Visits,
-    "ChecklistFormsPage": ChecklistFormsPage,
-    "SingleFamilyHomeChecklistPage": SingleFamilyHomeChecklistPage,
-    "CondoVillaChecklistPage": CondoVillaChecklistPage,
-    "HighRiseChecklistPage": HighRiseChecklistPage,
 }
 
 export const pagesConfig = {
