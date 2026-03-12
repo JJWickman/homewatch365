@@ -86,95 +86,139 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Custom Checklist</DialogTitle>
+          <DialogTitle>
+            {step === 1 ? 'Create Custom Checklist' : 'Customize Your Checklist'}
+          </DialogTitle>
           <DialogDescription>
-            Select a template to get started
+            {step === 1 ? 'Select a template to get started' : 'Review and customize your checklist'}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          <div>
-            <p className="text-sm font-medium text-slate-700 mb-3">Property Type</p>
-            <div className={`${propertyTypeInfo.color} rounded-lg p-4 flex items-center gap-3`}>
-              <TypeIcon className="w-6 h-6 text-white" />
-              <div>
-                <p className="font-semibold text-white">{propertyTypeInfo.title}</p>
-                <p className="text-sm text-white/90">{property.name || property.address}</p>
+        {step === 1 ? (
+          // Step 1: Template Selection
+          <div className="space-y-6 py-4">
+            <div>
+              <p className="text-sm font-medium text-slate-700 mb-3">Property Type</p>
+              <div className={`${propertyTypeInfo.color} rounded-lg p-4 flex items-center gap-3`}>
+                <TypeIcon className="w-6 h-6 text-white" />
+                <div>
+                  <p className="font-semibold text-white">{propertyTypeInfo.title}</p>
+                  <p className="text-sm text-white/90">{property.name || property.address}</p>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div>
-            <p className="text-sm font-medium text-slate-700 mb-3">Choose a Standard Template</p>
-            <div className="grid grid-cols-1 gap-3">
-              {templates.map((template) => (
-                <Card
-                  key={template.id}
-                  onClick={() => setSelectedTemplate(template)}
-                  className={`cursor-pointer transition-all ${
-                    selectedTemplate?.id === template.id
-                      ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200'
-                      : 'border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-slate-900">{template.name}</p>
-                      <p className="text-sm text-slate-600 mt-1">{template.description}</p>
-                    </div>
-                    {selectedTemplate?.id === template.id && (
-                      <Check className="w-5 h-5 text-blue-600 shrink-0 ml-3" />
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+            <div>
+              <p className="text-sm font-medium text-slate-700 mb-3">Choose a Standard Template</p>
+              <div className="grid grid-cols-1 gap-3">
+                {templates.map((template) => (
+                  <Card
+                    key={template.id}
+                    onClick={() => setSelectedTemplate(template)}
+                    className={`cursor-pointer transition-all ${
+                      selectedTemplate?.id === template.id
+                        ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200'
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-slate-900">{template.name}</p>
+                        <p className="text-sm text-slate-600 mt-1">{template.description}</p>
+                      </div>
+                      {selectedTemplate?.id === template.id && (
+                        <Check className="w-5 h-5 text-blue-600 shrink-0 ml-3" />
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-slate-700 block mb-2">
+                Checklist Name
+              </label>
+              <Input
+                placeholder={`${property.name || property.address} Checklist`}
+                value={checklistName}
+                onChange={(e) => setChecklistName(e.target.value)}
+                className="h-10"
+                autoFocus
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Give this checklist a name to help you identify it later
+              </p>
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateChecklist}
+                disabled={!checklistName.trim() || !selectedTemplate || creating}
+                className="flex-1 text-slate-900"
+              >
+                {creating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    Next: Customize <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
+                )}
+              </Button>
             </div>
           </div>
+        ) : (
+          // Step 2: Confirmation
+          <div className="space-y-6 py-4">
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <Check className="w-5 h-5 text-emerald-600 shrink-0" />
+                <div>
+                  <p className="font-medium text-emerald-900">Checklist created successfully!</p>
+                  <p className="text-sm text-emerald-800 mt-1">Your checklist is ready to be customized in the full editor.</p>
+                </div>
+              </div>
+            </div>
 
-          <div>
-            <label className="text-sm font-medium text-slate-700 block mb-2">
-              Checklist Name
-            </label>
-            <Input
-              placeholder={`${property.name || property.address} Checklist`}
-              value={checklistName}
-              onChange={(e) => setChecklistName(e.target.value)}
-              className="h-10"
-              autoFocus
-            />
-            <p className="text-xs text-slate-500 mt-1">
-              Give this checklist a name to help you identify it later
-            </p>
-          </div>
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-slate-700">Summary</p>
+              <div className="bg-slate-50 rounded-lg p-4 space-y-2 text-sm">
+                <div><span className="text-slate-600">Property:</span> <span className="font-medium">{property.name || property.address}</span></div>
+                <div><span className="text-slate-600">Template:</span> <span className="font-medium">{selectedTemplate?.name}</span></div>
+                <div><span className="text-slate-600">Checklist Name:</span> <span className="font-medium">{checklistName}</span></div>
+                <div><span className="text-slate-600">Status:</span> <span className="font-medium text-emerald-600">Active</span></div>
+              </div>
+            </div>
 
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSaveAndActivate}
-              disabled={!checklistName.trim() || !selectedTemplate || creating}
-              className="flex-1 text-slate-900"
-            >
-              {creating ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  Create & Open Editor <Check className="w-4 h-4 ml-2" />
-                </>
-              )}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleCompleteWizard}
+                className="flex-1"
+              >
+                Done
+              </Button>
+              <Button
+                onClick={handleCompleteWizard}
+                className="flex-1 text-slate-900"
+              >
+                Open Editor <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </DialogContent>
     </Dialog>
   );
