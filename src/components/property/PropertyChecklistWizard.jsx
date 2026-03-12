@@ -241,41 +241,99 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
             </div>
           </div>
         ) : (
-          // Step 2: Confirmation
-          <div className="space-y-6 py-4">
-            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <Check className="w-5 h-5 text-emerald-600 shrink-0" />
-                <div>
-                  <p className="font-medium text-emerald-900">Checklist created successfully!</p>
-                  <p className="text-sm text-emerald-800 mt-1">Your checklist is ready to be customized in the full editor.</p>
-                </div>
+          // Step 2: Inline Editor
+          <div className="space-y-4 py-4">
+            {/* Header with save button */}
+            <div className="flex items-center justify-between gap-4 pb-4 border-b">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900">{checklistName}</h2>
+                <p className="text-sm text-slate-600">{property.name || property.address}</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {savedMsg && <span className="text-sm font-semibold text-green-600">{savedMsg}</span>}
+                <Button
+                  onClick={saveChecklist}
+                  disabled={saving}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Save className="w-4 h-4 mr-1.5" />}
+                  Save Checklist
+                </Button>
               </div>
             </div>
 
-            <div className="space-y-3">
-              <p className="text-sm font-medium text-slate-700">Summary</p>
-              <div className="bg-slate-50 rounded-lg p-4 space-y-2 text-sm">
-                <div><span className="text-slate-600">Property:</span> <span className="font-medium">{property.name || property.address}</span></div>
-                <div><span className="text-slate-600">Template:</span> <span className="font-medium">{selectedTemplate?.name}</span></div>
-                <div><span className="text-slate-600">Checklist Name:</span> <span className="font-medium">{checklistName}</span></div>
-                <div><span className="text-slate-600">Status:</span> <span className="font-medium text-emerald-600">Active</span></div>
-              </div>
-            </div>
+            {/* Sections editor */}
+            <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+              {sections.map((section, sIdx) => (
+                <Card key={sIdx} className="overflow-hidden">
+                  <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-slate-200">
+                    <button
+                      onClick={() => toggleSection(sIdx)}
+                      className="text-slate-400 hover:text-slate-700 shrink-0"
+                    >
+                      {expandedSections[sIdx]
+                        ? <ChevronDown className="w-4 h-4" />
+                        : <ChevronRight className="w-4 h-4" />}
+                    </button>
+                    <Input
+                      value={section.title}
+                      onChange={(e) => updateSectionTitle(sIdx, e.target.value)}
+                      className="flex-1 bg-transparent border-0 shadow-none font-semibold text-slate-700 h-8 px-1 focus:bg-white focus:border focus:shadow-sm rounded text-base"
+                    />
+                    <span className="text-xs text-slate-400 shrink-0">{section.items.length} items</span>
+                    <Button
+                      size="sm" variant="ghost"
+                      onClick={() => removeSection(sIdx)}
+                      className="text-red-400 hover:text-red-600 h-8 w-8 p-0 shrink-0"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
 
-            <div className="flex gap-2">
+                  {expandedSections[sIdx] && (
+                    <CardContent className="p-4 space-y-2 bg-white">
+                      {section.items.map((item, iIdx) => (
+                        <div key={iIdx} className="flex items-start gap-3 border border-slate-100 rounded-lg p-3 bg-slate-50/60">
+                          <div className="flex-1 space-y-2">
+                            <Input
+                              value={item.label}
+                              onChange={(e) => updateItem(sIdx, iIdx, 'label', e.target.value)}
+                              placeholder="Item label"
+                              className="text-sm h-9 font-medium"
+                            />
+                            <Input
+                              value={item.instructions || ''}
+                              onChange={(e) => updateItem(sIdx, iIdx, 'instructions', e.target.value)}
+                              placeholder="Instructions (optional)"
+                              className="text-xs h-8 text-slate-500"
+                            />
+                          </div>
+                          <Button
+                            size="sm" variant="ghost"
+                            onClick={() => removeItem(sIdx, iIdx)}
+                            className="text-red-400 hover:text-red-600 h-8 w-8 p-0 shrink-0 mt-0.5"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        size="sm" variant="outline"
+                        onClick={() => addItem(sIdx)}
+                        className="w-full h-8 text-xs border-dashed border-slate-300 text-slate-500"
+                      >
+                        <Plus className="w-3 h-3 mr-1" />Add Item
+                      </Button>
+                    </CardContent>
+                  )}
+                </Card>
+              ))}
               <Button
                 variant="outline"
-                onClick={handleCompleteWizard}
-                className="flex-1"
+                onClick={addSection}
+                className="w-full border-dashed border-slate-300 text-slate-600 h-9"
               >
-                Done
-              </Button>
-              <Button
-                onClick={handleOpenEditor}
-                className="flex-1 text-slate-900"
-              >
-                Open Editor <ArrowRight className="w-4 h-4 ml-2" />
+                <Plus className="w-4 h-4 mr-2" />Add Section
               </Button>
             </div>
           </div>
