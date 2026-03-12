@@ -23,6 +23,12 @@ const PROPERTY_TYPE_MAP = {
   'commercial': { key: 'highrise', title: 'Commercial', icon: Building2, color: 'bg-emerald-500' },
 };
 
+const TEMPLATE_CONFIGS = {
+  'sfh-template': { key: 'sfh', title: 'Single Family Home', icon: Home, color: 'bg-blue-500', defaultSections: SFH_SECTIONS },
+  'condo-template': { key: 'condo', title: 'Condo / Villa', icon: Building, color: 'bg-purple-500', defaultSections: CONDO_SECTIONS },
+  'highrise-template': { key: 'highrise', title: 'Commercial / Multi-Family', icon: Building2, color: 'bg-emerald-500', defaultSections: HIGHRISE_SECTIONS },
+};
+
 export default function PropertyChecklistWizard({ property, onClose, onComplete }) {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -32,6 +38,10 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
   const [creating, setCreating] = useState(false);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [newChecklistId, setNewChecklistId] = useState(null);
+  const [sections, setSections] = useState([]);
+  const [expandedSections, setExpandedSections] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [savedMsg, setSavedMsg] = useState('');
 
   // Three standard templates
   const STANDARD_TEMPLATES = [
