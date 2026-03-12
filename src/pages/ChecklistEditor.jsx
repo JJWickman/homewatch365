@@ -26,6 +26,8 @@ export default function ChecklistEditor() {
 
   const [company, setCompany] = useState(null);
   const [propertyChecklist, setPropertyChecklist] = useState(null);
+  const [property, setProperty] = useState(null);
+  const [client, setClient] = useState(null);
   const [sections, setSections] = useState([]);
   const [expandedSections, setExpandedSections] = useState({});
   const [loading, setLoading] = useState(true);
