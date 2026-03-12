@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
-  format, startOfWeek, endOfWeek, addDays, addWeeks, 
+  format, startOfWeek, endOfWeek, addDays, addWeeks, subDays,
   subWeeks, isSameDay, parseISO, startOfMonth, endOfMonth,
   eachDayOfInterval, getDay, isToday
 } from 'date-fns';
