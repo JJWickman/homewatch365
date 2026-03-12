@@ -1278,7 +1278,7 @@ ${company.name}
         </TabsContent>
 
         <TabsContent value="financial">
-           <FinancialManagement companyId={company?.id} />
+           <FinancialManagement companyId={company?.id} company={company} />
          </TabsContent>
 
          <TabsContent value="reviews" className="space-y-6">
