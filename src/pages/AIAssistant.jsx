@@ -5,7 +5,7 @@ import { Send, Plus, MessageSquare, Trash2, Bot } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 const AGENT_NAME = 'estate_assistant';
-const PERSONA_IMAGE = 'https://media.base44.com/images/public/696806e88e744d6cc803e3bb/3fdb92939_generated_image.png';
+const PERSONA_IMAGE = 'https://media.base44.com/images/public/696806e88e744d6cc803e3bb/96ac7664c_generated_image.png';
 
 export default function AIAssistant() {
   const [conversations, setConversations] = useState([]);
