@@ -249,6 +249,28 @@ export default function FinancialManagement({ companyId, company }) {
     }
   };
 
+  const handleSyncToStripe = async (product) => {
+    setSyncingId(product.id);
+    setSyncMessage(null);
+    try {
+      const response = await base44.functions.invoke('syncProductToStripe', {
+        product_service_id: product.id,
+        company_id: companyId
+      });
+      if (response.data.success) {
+        setSyncMessage({ type: 'success', text: response.data.message });
+        loadProducts();
+      } else {
+        setSyncMessage({ type: 'error', text: response.data.error || 'Sync failed' });
+      }
+    } catch (error) {
+      setSyncMessage({ type: 'error', text: error.message });
+    } finally {
+      setSyncingId(null);
+      setTimeout(() => setSyncMessage(null), 5000);
+    }
+  };
+
   const handleCreateSamples = async () => {
     setLoadingSample(true);
     try {
