@@ -121,7 +121,7 @@ export default function AIAssistant() {
           />
           <div>
             <p className="font-semibold text-slate-800 text-sm">My Home Watch Advocate</p>
-            <p className="text-xs text-slate-500">Property Management AI</p>
+
           </div>
           <div className="flex items-center gap-1.5 text-xs text-green-600 bg-green-50 rounded-full px-2 py-0.5 border border-green-200">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse inline-block" />
