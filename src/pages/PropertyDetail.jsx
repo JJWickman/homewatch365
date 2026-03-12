@@ -1138,7 +1138,7 @@ export default function PropertyDetail() {
             </TabsContent>
 
             <TabsContent value="checklist">
-              <PropertyChecklistConfigTab propertyId={property.id} companyId={property.company_id} />
+              <PropertyChecklistConfigTab propertyId={property.id} companyId={property.company_id} property={property} />
             </TabsContent>
 
             <TabsContent value="report">
