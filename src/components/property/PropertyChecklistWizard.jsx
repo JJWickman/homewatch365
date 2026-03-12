@@ -115,15 +115,16 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Create Custom Checklist</DialogTitle>
           <DialogDescription>
-            Step {step} of 2
+            Step {step} of 3
           </DialogDescription>
         </DialogHeader>
 
         {step === 1 ? (
+          // Step 1: Select Template
           <div className="space-y-6 py-4">
             <div>
               <p className="text-sm font-medium text-slate-700 mb-3">Property Type</p>
@@ -136,20 +137,92 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
               </div>
             </div>
 
+            <div>
+              <p className="text-sm font-medium text-slate-700 mb-3">Select a Template</p>
+              {loadingTemplates ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+                </div>
+              ) : templates.length === 0 ? (
+                <p className="text-sm text-slate-500 text-center py-6">No templates available for this property type</p>
+              ) : (
+                <div className="space-y-2">
+                  {templates.map((template) => (
+                    <Card
+                      key={template.id}
+                      onClick={() => setSelectedTemplate(template)}
+                      className={`cursor-pointer transition-all ${
+                        selectedTemplate?.id === template.id
+                          ? 'border-blue-600 bg-blue-50'
+                          : 'border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      <CardContent className="p-4 flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-slate-900">{template.name}</p>
+                          {template.description && (
+                            <p className="text-sm text-slate-600 mt-1">{template.description}</p>
+                          )}
+                        </div>
+                        {selectedTemplate?.id === template.id && (
+                          <Check className="w-5 h-5 text-blue-600 shrink-0" />
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => setStep(2)}
+                disabled={!selectedTemplate}
+                className="flex-1"
+              >
+                Continue <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+          </div>
+        ) : step === 2 ? (
+          // Step 2: Customize Template
+          <div className="space-y-6 py-4">
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+              <p className="text-sm font-medium text-slate-900">Selected Template</p>
+              <p className="text-sm text-slate-600 mt-1">{selectedTemplate?.name}</p>
+            </div>
+
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <p className="text-sm text-blue-900">
-                This checklist will be customized for <strong>{propertyTypeInfo.title}</strong> properties. You can modify sections and items to match this property's specific needs.
+                Step 2 allows you to customize sections and items from the template to match this property's specific needs. This will open in the full editor after you name your checklist.
               </p>
             </div>
 
-            <Button
-              onClick={() => setStep(2)}
-              className="w-full"
-            >
-              Continue <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setStep(1)}
+                className="flex-1"
+              >
+                Back
+              </Button>
+              <Button
+                onClick={() => setStep(3)}
+                className="flex-1"
+              >
+                Continue <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
           </div>
         ) : (
+          // Step 3: Save and Activate
           <div className="space-y-4 py-4">
             <div>
               <label className="text-sm font-medium text-slate-700 block mb-2">
@@ -167,37 +240,39 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
               </p>
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-              <p className="text-sm font-medium text-slate-900 mb-2">Summary</p>
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-2">
+              <p className="text-sm font-medium text-slate-900">Summary</p>
               <ul className="text-sm text-slate-600 space-y-1">
                 <li>• Property: {property.name || property.address}</li>
                 <li>• Type: {propertyTypeInfo.title}</li>
-                <li>• Name: {checklistName || '(Not set)'}</li>
+                <li>• Template: {selectedTemplate?.name}</li>
+                <li>• Name: <span className="font-medium">{checklistName || '(Not set)'}</span></li>
+                <li>• Status: <span className="font-medium text-emerald-600">Will be active</span></li>
               </ul>
             </div>
 
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={() => setStep(1)}
+                onClick={() => setStep(2)}
                 className="flex-1"
                 disabled={creating}
               >
                 Back
               </Button>
               <Button
-                onClick={handleCreate}
+                onClick={handleSaveAndActivate}
                 disabled={!checklistName.trim() || creating}
                 className="flex-1"
               >
                 {creating ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Creating...
+                    Saving...
                   </>
                 ) : (
                   <>
-                    Create <ArrowRight className="w-4 h-4 ml-2" />
+                    Save & Activate <Check className="w-4 h-4 ml-2" />
                   </>
                 )}
               </Button>
