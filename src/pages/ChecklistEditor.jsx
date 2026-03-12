@@ -157,15 +157,29 @@ export default function ChecklistEditor() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(createPageUrl('Settings') + '?tab=templates')}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => {
+              if (checklistId && propertyId) {
+                navigate(createPageUrl('PropertyDetail') + `?id=${propertyId}`);
+              } else {
+                navigate(createPageUrl('Settings') + '?tab=templates');
+              }
+            }}
+          >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className={`${template.color} w-10 h-10 rounded-xl flex items-center justify-center shrink-0`}>
             <Icon className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-900">{template.title} Checklist</h1>
-            <p className="text-sm text-slate-500">{template.subtitle}</p>
+            <h1 className="text-xl font-bold text-slate-900">
+              {propertyChecklist ? `${propertyChecklist.name}` : `${template.title} Checklist`}
+            </h1>
+            <p className="text-sm text-slate-500">
+              {propertyChecklist ? 'Property-specific checklist' : template.subtitle}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
