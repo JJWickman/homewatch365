@@ -142,15 +142,18 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
     }
   };
 
+  const templateConfig = selectedTemplate ? TEMPLATE_CONFIGS[selectedTemplate.id] : null;
+  const TypeIcon = templateConfig?.icon;
+
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className={`${step === 2 ? 'max-w-4xl' : 'max-w-2xl'} max-h-[90vh] overflow-y-auto`}>
         <DialogHeader>
           <DialogTitle>
             {step === 1 ? 'Create Custom Checklist' : 'Customize Your Checklist'}
           </DialogTitle>
           <DialogDescription>
-            {step === 1 ? 'Select a template to get started' : 'Review and customize your checklist'}
+            {step === 1 ? 'Select a template to get started' : 'Edit sections and items for this checklist'}
           </DialogDescription>
         </DialogHeader>
 
