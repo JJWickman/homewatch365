@@ -37,6 +37,12 @@ export default function ClientDetail() {
   const [showPortalDialog, setShowPortalDialog] = useState(false);
   const [portalEmail, setPortalEmail] = useState('');
   const [savingPortal, setSavingPortal] = useState(false);
+  const [copiedUrl, setCopiedUrl] = useState(false);
+  const [copiedPin, setCopiedPin] = useState(false);
+  const [showPin, setShowPin] = useState(false);
+  const [editingPin, setEditingPin] = useState(false);
+  const [newPin, setNewPin] = useState('');
+  const [savingPin, setSavingPin] = useState(false);
   const [serviceSubscription, setServiceSubscription] = useState(null);
   const [additionalProducts, setAdditionalProducts] = useState([]);
 
