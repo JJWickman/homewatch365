@@ -110,7 +110,7 @@ export default function ChecklistTemplatesManager({ companyId, isAdmin }) {
                   </p>
                 </div>
                 <Button
-                  onClick={() => openEditor(t.key, t.defaultSections)}
+                  onClick={() => navigate(createPageUrl('ChecklistEditor') + `?type=${t.key}`)}
                   variant="outline"
                   className="shrink-0"
                 >
