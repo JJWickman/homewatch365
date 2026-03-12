@@ -59,6 +59,11 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
+      <Route path="/ChecklistEditor" element={
+        <LayoutWrapper currentPageName="ChecklistEditor">
+          <ChecklistEditor />
+        </LayoutWrapper>
+      } />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
