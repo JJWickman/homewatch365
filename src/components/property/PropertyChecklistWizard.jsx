@@ -221,7 +221,7 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
                 Done
               </Button>
               <Button
-                onClick={handleCompleteWizard}
+                onClick={handleOpenEditor}
                 className="flex-1 text-slate-900"
               >
                 Open Editor <ArrowRight className="w-4 h-4 ml-2" />
