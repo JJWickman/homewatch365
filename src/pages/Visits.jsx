@@ -317,6 +317,13 @@ export default function Visits() {
     const matchesWeek = params.get('filter') !== 'week' || (visit.scheduled_date >= weekStart && visit.scheduled_date <= weekEnd);
     
     return matchesSearch && matchesStatus && matchesVisitType && matchesAssigned && matchesProperty && matchesWeek;
+  }).sort((a, b) => {
+    // Upcoming/open: sort ascending (soonest first); completed/all: sort descending (most recent first)
+    const isUpcomingView = statusFilter === 'scheduled,open' || statusFilter === 'scheduled' || statusFilter === 'open';
+    if (isUpcomingView) {
+      return a.scheduled_date > b.scheduled_date ? 1 : -1;
+    }
+    return a.scheduled_date < b.scheduled_date ? 1 : -1;
   });
 
   const checkForScheduledVisit = () => {
