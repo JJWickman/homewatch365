@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Loader2, Save, Copy, Trash2 } from 'lucide-react';
+import { AlertCircle, Loader2, Save, Copy, Trash2, Edit3 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
+  const navigate = useNavigate();
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [checklist, setChecklist] = useState(null);
@@ -60,13 +63,19 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
   const handleTemplateSelect = async (template) => {
     setSelectedTemplate(template);
     setChecklistName(`${template.name} - ${new Date().toLocaleDateString()}`);
-    
-    // Load template sections and items
-    const templateSections = await base44.entities.ChecklistTemplateSection.filter({
-      template_id: template.id
-    });
-    
-    setSections(templateSections);
+  };
+
+  const handleEditChecklist = async () => {
+    if (!selectedTemplate) {
+      toast.error('Please select a template');
+      return;
+    }
+
+    // Navigate to ChecklistEditor with template and property context
+    navigate(
+      createPageUrl('ChecklistEditor') + 
+      `?templateId=${selectedTemplate.id}&propertyId=${propertyId}&companyId=${companyId}&mode=customize`
+    );
   };
 
   const handleSectionUpdate = (sectionIndex, field, value) => {
@@ -258,21 +267,11 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
       {selectedTemplate && (
         <div className="flex gap-3">
           <Button 
-            onClick={handleSaveChecklist}
-            disabled={saving || !checklistName.trim()}
+            onClick={handleEditChecklist}
             className="flex-1 bg-blue-600 hover:bg-blue-700"
           >
-            {saving ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                {checklist ? 'Update Checklist' : 'Create Checklist'}
-              </>
-            )}
+            <Edit3 className="h-4 w-4 mr-2" />
+            {checklist ? 'Edit Checklist' : 'Create & Customize Checklist'}
           </Button>
 
           {checklist && (
