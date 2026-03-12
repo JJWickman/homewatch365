@@ -37,7 +37,7 @@ export default function ChecklistEditor() {
 
   useEffect(() => {
     loadData();
-  }, [templateKey]);
+  }, [templateKey, checklistId]);
 
   const loadData = async () => {
     setLoading(true);
@@ -48,10 +48,27 @@ export default function ChecklistEditor() {
       const companies = await base44.entities.Company.filter({ id: members[0].company_id });
       const c = companies[0];
       setCompany(c);
-      const saved = c?.settings?.checklists?.[templateKey];
-      const raw = (saved?.sections?.length > 0)
-        ? JSON.parse(JSON.stringify(saved.sections))
-        : JSON.parse(JSON.stringify(template.defaultSections));
+
+      let raw;
+      
+      // If editing a property-specific checklist
+      if (checklistId) {
+        const checklists = await base44.entities.PropertyChecklist.filter({ id: checklistId });
+        if (checklists.length > 0) {
+          const pChecklist = checklists[0];
+          setPropertyChecklist(pChecklist);
+          raw = pChecklist.customized_sections?.length > 0
+            ? JSON.parse(JSON.stringify(pChecklist.customized_sections))
+            : JSON.parse(JSON.stringify(template.defaultSections));
+        }
+      } else {
+        // Editing company template
+        const saved = c?.settings?.checklists?.[templateKey];
+        raw = (saved?.sections?.length > 0)
+          ? JSON.parse(JSON.stringify(saved.sections))
+          : JSON.parse(JSON.stringify(template.defaultSections));
+      }
+      
       raw.forEach(s => s.items.forEach(item => {
         if (item.instructions === undefined) item.instructions = '';
       }));
