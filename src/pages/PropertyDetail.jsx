@@ -1036,38 +1036,6 @@ export default function PropertyDetail() {
                   </TabsContent>
 
             <TabsContent value="visits">
-              {/* Default Checklist Selector */}
-              <Card className="mb-4">
-                <CardContent className="pt-5 pb-4">
-                  <div className="flex items-start justify-between gap-4 flex-wrap">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-700 mb-1">Default Check-In Checklist</p>
-                      <p className="text-xs text-slate-500 mb-3">Select the checklist template that opens by default when checking in at this property.</p>
-                      <div className="flex flex-wrap gap-2">
-                        {CHECKLIST_TEMPLATE_OPTIONS.map(opt => {
-                          const isSelected = (property.custom_fields?.default_checklist || '') === opt.key;
-                          return (
-                            <button
-                              key={opt.key}
-                              onClick={() => handleSaveDefaultChecklist(opt.key)}
-                              disabled={savingChecklist}
-                              className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
-                                isSelected
-                                  ? 'bg-slate-900 text-white border-slate-900'
-                                  : 'bg-white text-slate-600 border-slate-300 hover:border-slate-500'
-                              }`}
-                            >
-                              {opt.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                  </div>
-                </CardContent>
-              </Card>
-
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg">Visits</CardTitle>
