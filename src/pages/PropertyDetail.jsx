@@ -742,9 +742,10 @@ export default function PropertyDetail() {
         {/* Main Content */}
         <div className="lg:col-span-2">
           <Tabs defaultValue="access">
-            <TabsList className="w-full justify-start mb-4">
+            <TabsList className="w-full justify-start mb-4 flex-wrap">
               <TabsTrigger value="access">Access Info</TabsTrigger>
               <TabsTrigger value="visits">Visits</TabsTrigger>
+              <TabsTrigger value="report">Report</TabsTrigger>
               <TabsTrigger value="contractors">Contractors</TabsTrigger>
               <TabsTrigger value="storm">Storm Protection</TabsTrigger>
               <TabsTrigger value="contacts">Contacts</TabsTrigger>
