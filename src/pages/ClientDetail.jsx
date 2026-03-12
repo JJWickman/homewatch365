@@ -369,64 +369,64 @@ export default function ClientDetail() {
                 </span>
               </div>
 
-              {client.portal_access && client.portal_user_email && (
+              {client.portal_access && (
                 <>
-                  {/* Portal URL */}
-                  <div>
-                    <p className="text-xs text-slate-500 mb-1">Portal Login URL</p>
-                    <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5">
-                      <p className="font-mono text-xs text-slate-600 flex-1 truncate">{portalUrl}</p>
-                      <button
-                        onClick={handleCopyUrl}
-                        className="shrink-0 text-slate-400 hover:text-slate-700 transition-colors"
-                        title="Copy URL"
-                      >
-                        {copiedUrl ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
-                      </button>
-                    </div>
-                  </div>
+                   {/* Portal URL */}
+                   <div>
+                     <p className="text-xs text-slate-500 mb-1">Portal Login URL</p>
+                     <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5">
+                       <p className="font-mono text-xs text-slate-600 flex-1 truncate">{portalUrl}</p>
+                       <button
+                         onClick={handleCopyUrl}
+                         className="shrink-0 text-slate-400 hover:text-slate-700 transition-colors"
+                         title="Copy URL"
+                       >
+                         {copiedUrl ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                       </button>
+                     </div>
+                   </div>
 
-                  {/* Portal PIN */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-xs text-slate-500 flex items-center gap-1"><KeyRound className="h-3 w-3" /> Portal PIN</p>
-                      <button
-                        onClick={() => { setEditingPin(!editingPin); setNewPin(''); }}
-                        className="text-xs text-blue-600 hover:underline"
-                      >
-                        {editingPin ? 'Cancel' : (client.portal_pin ? 'Change' : 'Set PIN')}
-                      </button>
-                    </div>
+                   {/* Portal PIN */}
+                   <div>
+                     <div className="flex items-center justify-between mb-1">
+                       <p className="text-xs text-slate-500 flex items-center gap-1"><KeyRound className="h-3 w-3" /> Portal PIN</p>
+                       <button
+                         onClick={() => { setEditingPin(!editingPin); setNewPin(''); }}
+                         className="text-xs text-blue-600 hover:underline"
+                       >
+                         {editingPin ? 'Cancel' : (client.portal_pin ? 'Change' : 'Set PIN')}
+                       </button>
+                     </div>
 
-                    {editingPin ? (
-                      <div className="flex gap-1.5 items-center">
-                        <input
-                          type="number"
-                          value={newPin}
-                          onChange={(e) => setNewPin(e.target.value.slice(0, 6))}
-                          placeholder="6-digit PIN"
-                          className="flex-1 px-2 py-1.5 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-slate-900"
-                        />
-                        <Button size="sm" onClick={handleSavePin} disabled={savingPin} className="bg-slate-900 hover:bg-slate-800 h-8">
-                          {savingPin ? '...' : 'Save'}
-                        </Button>
-                      </div>
-                    ) : client.portal_pin ? (
-                      <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5">
-                        <p className="font-mono text-sm text-slate-700 flex-1 tracking-widest">
-                          {showPin ? client.portal_pin : '••••••'}
-                        </p>
-                        <button onClick={() => setShowPin(!showPin)} className="text-slate-400 hover:text-slate-700 shrink-0">
-                          {showPin ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                        </button>
-                        <button onClick={handleCopyPin} className="text-slate-400 hover:text-slate-700 shrink-0">
-                          {copiedPin ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
-                        </button>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-orange-600 bg-orange-50 border border-orange-200 rounded px-2 py-1">No PIN set — client cannot log in</p>
-                    )}
-                  </div>
+                     {editingPin ? (
+                       <div className="flex gap-1.5 items-center">
+                         <input
+                           type="number"
+                           value={newPin}
+                           onChange={(e) => setNewPin(e.target.value.slice(0, 6))}
+                           placeholder="6-digit PIN"
+                           className="flex-1 px-2 py-1.5 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-slate-900"
+                         />
+                         <Button size="sm" onClick={handleSavePin} disabled={savingPin} className="bg-slate-900 hover:bg-slate-800 h-8">
+                           {savingPin ? '...' : 'Save'}
+                         </Button>
+                       </div>
+                     ) : client.portal_pin ? (
+                       <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5">
+                         <p className="font-mono text-sm text-slate-700 flex-1 tracking-widest">
+                           {showPin ? client.portal_pin : '••••••'}
+                         </p>
+                         <button onClick={() => setShowPin(!showPin)} className="text-slate-400 hover:text-slate-700 shrink-0">
+                           {showPin ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                         </button>
+                         <button onClick={handleCopyPin} className="text-slate-400 hover:text-slate-700 shrink-0">
+                           {copiedPin ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                         </button>
+                       </div>
+                     ) : (
+                       <p className="text-xs text-orange-600 bg-orange-50 border border-orange-200 rounded px-2 py-1">No PIN set — client cannot log in</p>
+                     )}
+                   </div>
                 </>
               )}
 
