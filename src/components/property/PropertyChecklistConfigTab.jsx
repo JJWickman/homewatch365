@@ -27,14 +27,14 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Load all checklist templates
+      // Load all checklist templates for company
       const allTemplates = await base44.entities.ChecklistTemplate.filter({ 
         company_id: companyId,
         active: true 
       });
       setTemplates(allTemplates);
 
-      // Try to load existing property checklist
+      // Try to load existing property-specific checklist
       const existingChecklists = await base44.entities.PropertyChecklist.filter({
         property_id: propertyId,
         company_id: companyId,
@@ -47,7 +47,7 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
         setChecklistName(existingChecklist.name || 'Custom Checklist');
         setSections(existingChecklist.customized_sections || []);
         
-        // Load template data for display
+        // Load template that this property checklist is based on
         const templateData = await base44.entities.ChecklistTemplate.filter({
           id: existingChecklist.template_id
         });
