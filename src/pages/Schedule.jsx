@@ -208,9 +208,11 @@ export default function Schedule() {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <h2 className="text-lg font-semibold min-w-[200px] text-center">
-                {view === 'week' 
-                  ? `${format(startOfWeek(currentDate), 'MMM d')} - ${format(endOfWeek(currentDate), 'MMM d, yyyy')}`
-                  : format(currentDate, 'MMMM yyyy')
+                {view === 'day'
+                  ? format(currentDate, 'EEEE, MMM d, yyyy')
+                  : view === 'week' 
+                    ? `${format(startOfWeek(currentDate), 'MMM d')} - ${format(endOfWeek(currentDate), 'MMM d, yyyy')}`
+                    : format(currentDate, 'MMMM yyyy')
                 }
               </h2>
               <Button variant="outline" size="icon" onClick={navigateNext}>
