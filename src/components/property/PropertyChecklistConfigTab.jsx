@@ -63,20 +63,60 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
   };
 
   const handleTemplateSelect = async (template) => {
+    // If already has a checklist, just show which template it's using
+    if (checklist) {
+      toast.info('Property already has a custom checklist. Delete it to use a different template.');
+      return;
+    }
     setSelectedTemplate(template);
     setChecklistName(`${template.name} - ${new Date().toLocaleDateString()}`);
   };
 
-  const handleEditChecklist = async () => {
-    if (!selectedTemplate) {
-      toast.error('Please select a template');
+  const handleCreatePropertyChecklist = async () => {
+    if (!selectedTemplate || !checklistName.trim()) {
+      toast.error('Please select a template and enter a name');
       return;
     }
 
-    // Navigate to ChecklistEditor with template and property context
+    // Tenant isolation security check
+    if (!companyId || !propertyId) {
+      toast.error('Security validation failed');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      // Create property-specific checklist copy from the MAIN template
+      const newChecklist = await base44.entities.PropertyChecklist.create({
+        company_id: companyId,
+        property_id: propertyId,
+        template_id: selectedTemplate.id,
+        name: checklistName,
+        customized_sections: [], // Start empty, user can customize
+        is_active: true
+      });
+      
+      setChecklist(newChecklist);
+      toast.success(`Property checklist created! You can now customize it.`);
+      await loadData();
+    } catch (error) {
+      console.error('Error creating checklist:', error);
+      toast.error('Failed to create property checklist');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEditPropertyChecklist = async () => {
+    if (!checklist) {
+      toast.error('Please create a property checklist first');
+      return;
+    }
+
+    // Navigate to ChecklistEditor to customize the property-specific checklist
     navigate(
       createPageUrl('ChecklistEditor') + 
-      `?templateId=${selectedTemplate.id}&propertyId=${propertyId}&companyId=${companyId}&mode=customize`
+      `?checklistId=${checklist.id}&propertyId=${propertyId}&companyId=${companyId}&mode=customize`
     );
   };
 
