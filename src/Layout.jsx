@@ -134,25 +134,31 @@ export default function Layout({ children, currentPageName }) {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      // Check if user has a company - if not, they need onboarding
-      const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-
-      // If user has no company and not already on onboarding page, redirect to onboarding
-      if (members.length === 0 && currentPageName !== 'CompanyOnboarding') {
-        navigate(createPageUrl('CompanyOnboarding'));
+      // Check if user has company_id (tenant isolation - required field)
+      if (!currentUser.company_id) {
+        if (currentPageName !== 'CompanyOnboarding') {
+          navigate(createPageUrl('CompanyOnboarding'));
+        }
         return;
       }
 
-      // If user has onboarding_completed field, check it
-      if (currentUser.onboarding_completed !== true && members.length > 0 && currentPageName !== 'CompanyOnboarding') {
+      // Check if user has completed onboarding
+      if (currentUser.onboarding_completed !== true && currentPageName !== 'CompanyOnboarding') {
         navigate(createPageUrl('CompanyOnboarding'));
         return;
       }
       
-      // Load company membership (reuse members already fetched)
-      setCompanyMember(members[0]);
+      // Load user's CompanyMember record (role/permissions)
+      const members = await base44.entities.CompanyMember.filter({ 
+        company_id: currentUser.company_id,
+        user_email: currentUser.email 
+      });
+      if (members.length > 0) {
+        setCompanyMember(members[0]);
+      }
+
       // Load company details
-      const companies = await base44.entities.Company.filter({ id: members[0].company_id });
+      const companies = await base44.entities.Company.filter({ id: currentUser.company_id });
       if (companies.length > 0) {
         setCompany(companies[0]);
       }
