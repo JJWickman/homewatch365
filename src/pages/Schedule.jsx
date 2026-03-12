@@ -243,6 +243,7 @@ export default function Schedule() {
               </Select>
               <Tabs value={view} onValueChange={setView}>
                 <TabsList>
+                  <TabsTrigger value="day">Day</TabsTrigger>
                   <TabsTrigger value="week">Week</TabsTrigger>
                   <TabsTrigger value="month">Month</TabsTrigger>
                 </TabsList>
