@@ -237,80 +237,12 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
 
   return (
     <div className="space-y-6">
-      {/* Template Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Select Template</CardTitle>
-          <CardDescription>
-            Choose a standard checklist template to customize for this property
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {templates.length === 0 ? (
-            <p className="text-slate-500 text-sm">No templates available</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {templates.map((template) => (
-                <button
-                  key={template.id}
-                  onClick={() => handleTemplateSelect(template)}
-                  className={`p-4 rounded-lg border-2 text-left transition-all ${
-                    selectedTemplate?.id === template.id
-                      ? 'border-blue-600 bg-blue-50'
-                      : 'border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  <h4 className="font-medium">{template.name}</h4>
-                  {template.description && (
-                    <p className="text-sm text-slate-600 mt-1">{template.description}</p>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Checklist Name */}
-      {selectedTemplate && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Checklist Name</CardTitle>
-            <CardDescription>
-              Give this property-specific checklist a unique name
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Input
-              value={checklistName}
-              onChange={(e) => setChecklistName(e.target.value)}
-              placeholder="e.g., Miami Beach House - 2026"
-              className="text-black"
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Property Checklist Actions */}
-      {!checklist && selectedTemplate && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Create Property Checklist</CardTitle>
-            <CardDescription>
-              Create a property-specific copy of "{selectedTemplate.name}" that you can customize
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={handleCreatePropertyChecklist}
-              disabled={saving}
-              className="w-full bg-blue-600 hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              {saving ? 'Creating...' : 'Create Property Checklist'}
-            </Button>
-          </CardContent>
-        </Card>
+      {showWizard && property && (
+        <PropertyChecklistWizard
+          property={property}
+          onClose={() => setShowWizard(false)}
+          onComplete={() => loadData()}
+        />
       )}
 
       {/* Edit Existing Property Checklist */}
