@@ -184,22 +184,24 @@ export default function ChecklistEditor() {
         </div>
         <div className="flex items-center gap-2">
           {savedMsg && <span className="text-sm font-semibold text-green-600">{savedMsg}</span>}
-          <Button
-            variant="outline"
-            onClick={() => saveTemplate(false)}
-            disabled={saving}
-            className="border-amber-300 text-amber-700 hover:bg-amber-50"
-          >
-            {saving ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Save className="w-4 h-4 mr-1.5" />}
-            Save Draft
-          </Button>
+          {!propertyChecklist && (
+            <Button
+              variant="outline"
+              onClick={() => saveTemplate(false)}
+              disabled={saving}
+              className="border-amber-300 text-amber-700 hover:bg-amber-50"
+            >
+              {saving ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Save className="w-4 h-4 mr-1.5" />}
+              Save Draft
+            </Button>
+          )}
           <Button
             onClick={() => saveTemplate(true)}
             disabled={saving}
             className="bg-green-600 hover:bg-green-700 text-white"
           >
             {saving ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Globe className="w-4 h-4 mr-1.5" />}
-            Publish
+            {propertyChecklist ? 'Save Changes' : 'Publish'}
           </Button>
         </div>
       </div>
