@@ -1138,6 +1138,10 @@ export default function PropertyDetail() {
               </Card>
             </TabsContent>
 
+            <TabsContent value="report">
+              <PropertyReportTab visits={visits} />
+            </TabsContent>
+
             <TabsContent value="contractors">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
