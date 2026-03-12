@@ -108,7 +108,9 @@ export default function Schedule() {
   };
 
   const navigatePrev = () => {
-    if (view === 'week') {
+    if (view === 'day') {
+      setCurrentDate(subDays(currentDate, 1));
+    } else if (view === 'week') {
       setCurrentDate(subWeeks(currentDate, 1));
     } else {
       setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
@@ -116,7 +118,9 @@ export default function Schedule() {
   };
 
   const navigateNext = () => {
-    if (view === 'week') {
+    if (view === 'day') {
+      setCurrentDate(addDays(currentDate, 1));
+    } else if (view === 'week') {
       setCurrentDate(addWeeks(currentDate, 1));
     } else {
       setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
