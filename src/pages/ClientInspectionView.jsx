@@ -34,9 +34,15 @@ export default function ClientInspectionView() {
     }
 
     try {
-      const user = await base44.auth.me();
-      const clients = await base44.entities.Client.filter({ portal_user_email: user.email });
-      
+      const sessionEmail = sessionStorage.getItem('portal_client_email');
+      const sessionClientId = sessionStorage.getItem('portal_client_id');
+      if (!sessionEmail || !sessionClientId) {
+        navigate(createPageUrl('ClientLogin'));
+        return;
+      }
+
+      const clients = await base44.entities.Client.filter({ id: sessionClientId, portal_user_email: sessionEmail });
+
       if (clients.length === 0) {
         navigate(createPageUrl('ClientPortal'));
         return;
