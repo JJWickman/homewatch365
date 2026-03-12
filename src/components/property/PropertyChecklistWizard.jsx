@@ -143,7 +143,6 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
   };
 
   const templateConfig = selectedTemplate ? TEMPLATE_CONFIGS[selectedTemplate.id] : null;
-  const TypeIcon = templateConfig?.icon;
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
