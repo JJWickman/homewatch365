@@ -60,8 +60,6 @@ export default function ChecklistTemplatesManager({ companyId, isAdmin }) {
     );
   }
 
-  const currentTemplate = TEMPLATES.find(t => t.key === editing);
-
   return (
     <div className="space-y-4">
       <div className="mb-2">
