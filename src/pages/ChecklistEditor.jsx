@@ -81,18 +81,35 @@ export default function ChecklistEditor() {
 
   const saveTemplate = async (published) => {
     setSaving(true);
-    const checklists = company?.settings?.checklists || {};
-    const updatedChecklists = {
-      ...checklists,
-      [templateKey]: { sections, published, updatedAt: new Date().toISOString() }
-    };
-    const updatedSettings = { ...(company.settings || {}), checklists: updatedChecklists };
-    await base44.entities.Company.update(company.id, { settings: updatedSettings });
-    setCompany(prev => ({ ...prev, settings: updatedSettings }));
-    setSaving(false);
-    setSavedMsg(published ? 'Published!' : 'Draft saved!');
-    setTimeout(() => setSavedMsg(''), 2500);
-    if (published) navigate(createPageUrl('Settings') + '?tab=templates');
+    try {
+      if (checklistId && propertyChecklist) {
+        // Save to PropertyChecklist
+        await base44.entities.PropertyChecklist.update(checklistId, {
+          customized_sections: sections
+        });
+        setSavedMsg('Saved!');
+        setTimeout(() => setSavedMsg(''), 2500);
+        // Return to property detail after editing property checklist
+        if (published && propertyId) {
+          navigate(createPageUrl('PropertyDetail') + `?id=${propertyId}`);
+        }
+      } else {
+        // Save to Company template
+        const checklists = company?.settings?.checklists || {};
+        const updatedChecklists = {
+          ...checklists,
+          [templateKey]: { sections, published, updatedAt: new Date().toISOString() }
+        };
+        const updatedSettings = { ...(company.settings || {}), checklists: updatedChecklists };
+        await base44.entities.Company.update(company.id, { settings: updatedSettings });
+        setCompany(prev => ({ ...prev, settings: updatedSettings }));
+        setSavedMsg(published ? 'Published!' : 'Draft saved!');
+        setTimeout(() => setSavedMsg(''), 2500);
+        if (published) navigate(createPageUrl('Settings') + '?tab=templates');
+      }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const updateSectionTitle = (sIdx, title) =>
