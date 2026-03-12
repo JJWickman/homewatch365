@@ -1016,18 +1016,7 @@ export default function PropertyDetail() {
                         })}
                       </div>
                     </div>
-                    {property.custom_fields?.default_checklist && (() => {
-                      const opt = CHECKLIST_TEMPLATE_OPTIONS.find(o => o.key === property.custom_fields.default_checklist);
-                      return opt ? (
-                        <Button
-                          onClick={() => navigate(createPageUrl(opt.page) + `?property_id=${property.id}`)}
-                          className="bg-green-600 hover:bg-green-700 text-white shrink-0"
-                        >
-                          <ClipboardCheck className="h-4 w-4 mr-1.5" />
-                          Start Check-In
-                        </Button>
-                      ) : null;
-                    })()}
+
                   </div>
                 </CardContent>
               </Card>
