@@ -499,6 +499,15 @@ export default function FinancialManagement({ companyId, company }) {
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => handleSyncToStripe(product)}
+                          disabled={syncingId === product.id}
+                          title={product.stripe_price_id ? 'Re-sync to Stripe' : 'Sync to Stripe'}
+                        >
+                          <RefreshCw className={`h-4 w-4 ${syncingId === product.id ? 'animate-spin' : product.stripe_price_id ? 'text-green-600' : ''}`} />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => handleEditProduct(product)}
                         >
                           <Edit2 className="h-4 w-4" />
