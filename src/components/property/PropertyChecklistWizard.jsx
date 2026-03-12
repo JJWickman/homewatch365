@@ -71,7 +71,8 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
         is_active: true
       });
 
-      setStep(3);
+      setNewChecklistId(newChecklist.id);
+      setStep(2);
     } catch (error) {
       console.error('Error saving checklist:', error);
       setCreating(false);
