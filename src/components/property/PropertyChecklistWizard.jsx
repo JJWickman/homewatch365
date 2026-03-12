@@ -23,6 +23,7 @@ const PROPERTY_TYPE_MAP = {
 };
 
 export default function PropertyChecklistWizard({ property, onClose, onComplete }) {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
