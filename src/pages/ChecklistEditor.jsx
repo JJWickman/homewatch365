@@ -59,6 +59,17 @@ export default function ChecklistEditor() {
         if (checklists.length > 0) {
           const pChecklist = checklists[0];
           setPropertyChecklist(pChecklist);
+          
+          // Load property and client info
+          const properties = await base44.entities.Property.filter({ id: pChecklist.property_id });
+          if (properties.length > 0) {
+            setProperty(properties[0]);
+            const clients = await base44.entities.Client.filter({ id: properties[0].client_id });
+            if (clients.length > 0) {
+              setClient(clients[0]);
+            }
+          }
+          
           raw = pChecklist.customized_sections?.length > 0
             ? JSON.parse(JSON.stringify(pChecklist.customized_sections))
             : JSON.parse(JSON.stringify(template.defaultSections));
