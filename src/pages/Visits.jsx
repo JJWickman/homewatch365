@@ -592,6 +592,14 @@ export default function Visits() {
     loadData();
   };
 
+  const handleCheckInNow = (propertyId) => {
+    const propertyChecklist = checklists.find(c => c.property_id === propertyId);
+    if (propertyChecklist) {
+      navigate(createPageUrl('VisitChecklistMobile') + `?property_id=${propertyId}&checklist_id=${propertyChecklist.id}&mode=checkin_now`);
+    }
+    setShowCheckInNow(false);
+  };
+
   const columns = [
     {
       header: 'Property',
