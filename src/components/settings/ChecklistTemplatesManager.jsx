@@ -62,6 +62,18 @@ export default function ChecklistTemplatesManager({ companyId, isAdmin }) {
 
   return (
     <div className="space-y-4">
+      {/* Home Watch Academy Banner */}
+      <div className="flex flex-col items-center justify-center bg-white border border-slate-200 rounded-xl px-6 py-5 shadow-sm text-center">
+        <img
+          src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/b9e08eb9c_image.png"
+          alt="Home Watch Academy"
+          className="h-16 w-auto object-contain mb-3"
+        />
+        <p className="text-sm font-semibold text-slate-600 tracking-wide uppercase">
+          Registered by Home Watch Academy
+        </p>
+      </div>
+
       <div className="mb-2">
         <p className="text-sm text-slate-500">
           Manage the 3 standard home watch checklist templates. Edit items, add notes, then publish to make the template live for field users.
