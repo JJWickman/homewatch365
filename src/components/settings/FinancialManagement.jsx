@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Edit2, Trash2, DollarSign, Package, Check } from 'lucide-react';
+import { Plus, Edit2, Trash2, DollarSign, Package, Check, RefreshCw, ExternalLink } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import ProductServiceWizard from './ProductServiceWizard';
 import { Input } from "@/components/ui/input";
