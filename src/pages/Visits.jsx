@@ -712,6 +712,17 @@ export default function Visits() {
          actionLabel="Schedule a Visit"
          actionClassName="bg-black text-white hover:bg-slate-900"
        />
+       
+       {/* Check-In Now Button */}
+       <div className="mb-6 flex gap-2 justify-end">
+         <Button
+           onClick={() => setShowCheckInNow(true)}
+           className="bg-amber-600 hover:bg-amber-700 text-white"
+         >
+           <Zap className="w-4 h-4 mr-2" />
+           Check-In Now
+         </Button>
+       </div>
 
       {/* Search */}
        <Card className="mb-6 p-4">
