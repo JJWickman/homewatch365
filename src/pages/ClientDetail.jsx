@@ -6,7 +6,8 @@ import { format } from 'date-fns';
 import { 
   Mail, Phone, MapPin, Building2, ClipboardCheck, 
   Edit, Plus, Calendar, DollarSign, ExternalLink,
-  FileText, Clock, CheckCircle2, Upload, Download, Trash2, File, Lock
+  FileText, Clock, CheckCircle2, Upload, Download, Trash2, File, Lock,
+  Copy, Check, Eye, EyeOff, KeyRound
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
