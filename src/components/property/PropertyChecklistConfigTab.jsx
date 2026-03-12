@@ -11,7 +11,7 @@ import { AlertCircle, Loader2, Save, Copy, Trash2, Edit3, Plus } from 'lucide-re
 import { toast } from 'sonner';
 import PropertyChecklistWizard from './PropertyChecklistWizard';
 
-export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
+export default function PropertyChecklistConfigTab({ propertyId, companyId, property }) {
   const navigate = useNavigate();
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -20,6 +20,7 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
   const [saving, setSaving] = useState(false);
   const [checklistName, setChecklistName] = useState('');
   const [sections, setSections] = useState([]);
+  const [showWizard, setShowWizard] = useState(false);
 
   useEffect(() => {
     loadData();
