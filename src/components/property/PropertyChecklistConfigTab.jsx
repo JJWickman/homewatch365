@@ -245,8 +245,27 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
         />
       )}
 
-      {/* Edit Existing Property Checklist */}
-      {checklist && (
+      {/* Create or Edit */}
+      {!checklist ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Create Property Checklist</CardTitle>
+            <CardDescription>
+              Create a custom checklist for this property
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => setShowWizard(true)}
+              disabled={!property}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Start Checklist Setup
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
         <div className="space-y-4">
           <Card>
             <CardHeader>
@@ -274,17 +293,13 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
               </div>
             </CardContent>
           </Card>
+          <Alert className="bg-green-50 border-green-200">
+            <AlertCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-900">
+              <strong>Active Checklist:</strong> {checklistName}
+            </AlertDescription>
+          </Alert>
         </div>
-      )}
-
-      {/* Status */}
-      {checklist && (
-        <Alert className="bg-green-50 border-green-200">
-          <AlertCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-900">
-            <strong>Active Checklist:</strong> {checklistName}
-          </AlertDescription>
-        </Alert>
       )}
     </div>
   );
