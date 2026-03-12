@@ -163,7 +163,7 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
             <Button
               onClick={handleSaveAndActivate}
               disabled={!checklistName.trim() || !selectedTemplate || creating}
-              className="flex-1"
+              className="flex-1 text-slate-900"
             >
               {creating ? (
                 <>
