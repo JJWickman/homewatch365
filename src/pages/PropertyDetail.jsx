@@ -81,6 +81,8 @@ export default function PropertyDetail() {
   const [selectedContractorType, setSelectedContractorType] = useState('');
   const [contractorSearchResults, setContractorSearchResults] = useState([]);
   const [searchingContractors, setSearchingContractors] = useState(false);
+  const [showContractorSearchModal, setShowContractorSearchModal] = useState(false);
+  const [allProperties, setAllProperties] = useState([]);
   const [savingChecklist, setSavingChecklist] = useState(false);
 
   useEffect(() => {
