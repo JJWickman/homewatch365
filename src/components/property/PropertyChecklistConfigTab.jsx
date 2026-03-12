@@ -35,15 +35,17 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
       setTemplates(allTemplates);
 
       // Try to load existing property checklist
-      const existingChecklists = await base44.entities.ChecklistSubmission.filter({
+      const existingChecklists = await base44.entities.PropertyChecklist.filter({
         property_id: propertyId,
-        company_id: companyId
+        company_id: companyId,
+        is_active: true
       });
 
       if (existingChecklists.length > 0) {
         const existingChecklist = existingChecklists[0];
         setChecklist(existingChecklist);
         setChecklistName(existingChecklist.name || 'Custom Checklist');
+        setSections(existingChecklist.customized_sections || []);
         
         // Load template data for display
         const templateData = await base44.entities.ChecklistTemplate.filter({
@@ -97,18 +99,17 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
         property_id: propertyId,
         template_id: selectedTemplate.id,
         name: checklistName,
-        sections: sections,
-        created_at: new Date().toISOString(),
-        status: 'active'
+        customized_sections: sections,
+        is_active: true
       };
 
       if (checklist?.id) {
         // Update existing
-        await base44.entities.ChecklistSubmission.update(checklist.id, checklistData);
+        await base44.entities.PropertyChecklist.update(checklist.id, checklistData);
         toast.success('Checklist updated successfully');
       } else {
         // Create new
-        const created = await base44.entities.ChecklistSubmission.create(checklistData);
+        const created = await base44.entities.PropertyChecklist.create(checklistData);
         setChecklist(created);
         toast.success('Custom checklist created successfully');
       }
@@ -129,16 +130,15 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
     try {
       // Create a copy with a new name
       const newChecklistData = {
-        ...checklist,
+        company_id: checklist.company_id,
+        property_id: checklist.property_id,
+        template_id: checklist.template_id,
         name: `${checklist.name} (Copy)`,
-        created_at: new Date().toISOString()
+        customized_sections: checklist.customized_sections,
+        is_active: true
       };
-      
-      delete newChecklistData.id;
-      delete newChecklistData.created_date;
-      delete newChecklistData.updated_date;
 
-      await base44.entities.ChecklistSubmission.create(newChecklistData);
+      await base44.entities.PropertyChecklist.create(newChecklistData);
       toast.success('Checklist duplicated');
       await loadData();
     } catch (error) {
@@ -153,7 +153,7 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
     if (!checklist || !window.confirm('Delete this custom checklist?')) return;
     
     try {
-      await base44.entities.ChecklistSubmission.delete(checklist.id);
+      await base44.entities.PropertyChecklist.delete(checklist.id);
       setChecklist(null);
       setSelectedTemplate(null);
       setSections([]);
