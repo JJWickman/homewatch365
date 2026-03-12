@@ -80,6 +80,15 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
     }
   };
 
+  const handleOpenEditor = () => {
+    onComplete?.();
+    onClose?.();
+    navigate(
+      createPageUrl('ChecklistEditor') + 
+      `?checklistId=${newChecklistId}&propertyId=${property.id}`
+    );
+  };
+
   const handleCompleteWizard = () => {
     onComplete?.();
     onClose?.();
