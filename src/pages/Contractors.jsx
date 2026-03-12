@@ -556,32 +556,31 @@ export default function Contractors() {
           </DialogHeader>
           
           <div className="space-y-3 pt-2">
-            <Button
+            <button
               onClick={handleSearchAdd}
-              className="w-full h-auto py-4 flex-col items-start gap-2 bg-slate-900 hover:bg-slate-800"
+              className="w-full text-left p-4 rounded-lg bg-slate-900 hover:bg-slate-800 text-white transition-colors"
             >
-              <div className="flex items-center gap-2 w-full">
-                <Search className="h-5 w-5" />
-                <span className="font-semibold">Search for Contractors</span>
+              <div className="flex items-center gap-2 mb-1">
+                <Search className="h-4 w-4 shrink-0" />
+                <span className="font-semibold text-sm">Search for Contractors</span>
               </div>
-              <span className="text-xs text-slate-300 font-normal">
+              <p className="text-xs text-slate-400 pl-6">
                 Search Google Business, Facebook, and Yelp for contractors near a property
-              </span>
-            </Button>
+              </p>
+            </button>
 
-            <Button
+            <button
               onClick={handleManualAdd}
-              variant="outline"
-              className="w-full h-auto py-4 flex-col items-start gap-2"
+              className="w-full text-left p-4 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
             >
-              <div className="flex items-center gap-2 w-full">
-                <Plus className="h-5 w-5" />
-                <span className="font-semibold">Add Manually</span>
+              <div className="flex items-center gap-2 mb-1">
+                <Plus className="h-4 w-4 shrink-0 text-slate-700" />
+                <span className="font-semibold text-sm text-slate-900">Add Manually</span>
               </div>
-              <span className="text-xs text-slate-500 font-normal">
+              <p className="text-xs text-slate-500 pl-6">
                 Enter contractor information manually
-              </span>
-            </Button>
+              </p>
+            </button>
           </div>
         </DialogContent>
       </Dialog>
