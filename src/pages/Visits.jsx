@@ -5,7 +5,7 @@ import { createPageUrl } from '@/utils';
 import { format, parseISO, isToday, isTomorrow, isPast, addDays, addWeeks, addMonths, startOfWeek, endOfWeek } from 'date-fns';
 import { 
   ClipboardCheck, Search, Plus, Building2, Calendar,
-  Filter, Eye, Play, MoreVertical, User, MapPin, Clock
+  Filter, Eye, Play, MoreVertical, User, MapPin, Clock, Zap
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
