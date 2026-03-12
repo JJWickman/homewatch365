@@ -115,7 +115,7 @@ const VisitTypesConfig = ({ visitTypes, onChange }) => {
   );
 };
 
-export default function FinancialManagement({ companyId }) {
+export default function FinancialManagement({ companyId, company }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
@@ -124,6 +124,8 @@ export default function FinancialManagement({ companyId }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingProduct, setDeletingProduct] = useState(null);
   const [loadingSample, setLoadingSample] = useState(false);
+  const [syncingId, setSyncingId] = useState(null);
+  const [syncMessage, setSyncMessage] = useState(null);
   
   const [formData, setFormData] = useState({
     name: '',
