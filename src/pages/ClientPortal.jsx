@@ -1,31 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { format } from 'date-fns';
-import { 
-  Building2, ClipboardCheck, Calendar, MapPin, 
-  CheckCircle2, AlertTriangle, LogOut, User,
-  Eye, FileText, Clock, Download, Play, File, CreditCard
+import {
+  Building2, LogOut, User, Home, ClipboardCheck,
+  DollarSign, Clock, LayoutList
 } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import StatusBadge from '@/components/shared/StatusBadge';
+import PortalVisitsTab from '@/components/portal/PortalVisitsTab';
+import PortalTimelineTab from '@/components/portal/PortalTimelineTab';
+import PortalBillingTab from '@/components/portal/PortalBillingTab';
+
+const TABS = [
+  { id: 'home', label: 'Home', icon: Home },
+  { id: 'visits', label: 'Visits', icon: ClipboardCheck },
+  { id: 'timeline', label: 'Timeline', icon: LayoutList },
+  { id: 'billing', label: 'Billing', icon: DollarSign },
+];
 
 export default function ClientPortal() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
   const [client, setClient] = useState(null);
   const [company, setCompany] = useState(null);
   const [properties, setProperties] = useState([]);
   const [visits, setVisits] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [serviceSubscription, setServiceSubscription] = useState(null);
   const [additionalProducts, setAdditionalProducts] = useState([]);
-  const [currentStatement, setCurrentStatement] = useState(null);
   const [allStatements, setAllStatements] = useState([]);
+  const [activeTab, setActiveTab] = useState('home');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedStatement, setSelectedStatement] = useState(null);
 
@@ -35,17 +42,15 @@ export default function ClientPortal() {
 
   const loadPortalData = async () => {
     try {
-      // Validate session tokens
       const sessionEmail = sessionStorage.getItem('portal_client_email');
       const sessionClientId = sessionStorage.getItem('portal_client_id');
       const sessionToken = sessionStorage.getItem('portal_session_token');
-      
+
       if (!sessionEmail || !sessionClientId || !sessionToken) {
         navigate(createPageUrl('ClientLogin'));
         return;
       }
 
-      // Verify session is recent (max 24 hours)
       const sessionAge = Date.now() - parseInt(sessionToken);
       if (sessionAge > 24 * 60 * 60 * 1000) {
         sessionStorage.clear();
@@ -53,12 +58,8 @@ export default function ClientPortal() {
         return;
       }
 
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
-
-      // Find and verify client record
       const clients = await base44.entities.Client.filter({ id: sessionClientId, portal_user_email: sessionEmail });
-      
+
       if (clients.length === 0 || !clients[0].portal_access) {
         sessionStorage.clear();
         setLoading(false);
@@ -68,44 +69,28 @@ export default function ClientPortal() {
       const clientData = clients[0];
       setClient(clientData);
 
-      // Load related data
       const [companiesData, propertiesData, visitsData] = await Promise.all([
         base44.entities.Company.filter({ id: clientData.company_id }),
         base44.entities.Property.filter({ client_id: clientData.id }),
-        base44.entities.Visit.filter({ client_id: clientData.id, status: 'completed' }, '-scheduled_date', 20)
+        base44.entities.Visit.filter({ client_id: clientData.id }, '-scheduled_date', 50)
       ]);
 
-      if (companiesData.length > 0) {
-        setCompany(companiesData[0]);
-      }
+      if (companiesData.length > 0) setCompany(companiesData[0]);
       setProperties(propertiesData);
       setVisits(visitsData);
 
-      // Load service subscription
       if (clientData.service_subscription_id) {
         const services = await base44.entities.ProductService.filter({ id: clientData.service_subscription_id });
-        if (services.length > 0) {
-          setServiceSubscription(services[0]);
-        }
+        if (services.length > 0) setServiceSubscription(services[0]);
       }
 
-      // Load additional products
-      if (clientData.additional_products && clientData.additional_products.length > 0) {
+      if (clientData.additional_products?.length > 0) {
         const allProducts = await base44.entities.ProductService.list();
-        const selectedProducts = allProducts.filter(p => clientData.additional_products.includes(p.id));
-        setAdditionalProducts(selectedProducts);
+        setAdditionalProducts(allProducts.filter(p => clientData.additional_products.includes(p.id)));
       }
 
-      // Load all statements
-      const allStmt = await base44.entities.MonthlyStatement.filter({ client_id: clientData.id }, '-billing_month');
-      setAllStatements(allStmt);
-
-      // Load current month's statement
-      const currentMonth = new Date().toISOString().slice(0, 7);
-      const current = allStmt.find(s => s.billing_month === currentMonth);
-      if (current) {
-        setCurrentStatement(current);
-      }
+      const stmts = await base44.entities.MonthlyStatement.filter({ client_id: clientData.id }, '-billing_month');
+      setAllStatements(stmts);
 
     } catch (error) {
       console.error('Error loading portal:', error);
@@ -115,22 +100,13 @@ export default function ClientPortal() {
   };
 
   const handleLogout = () => {
-    base44.auth.logout();
+    sessionStorage.clear();
+    navigate(createPageUrl('ClientLogin'));
   };
 
   const handleDownloadInvoice = async (statementId) => {
-    try {
-      const response = await base44.functions.invoke('generateInvoicePDF', {
-        statement_id: statementId
-      });
-      
-      if (response.data.success) {
-        window.open(response.data.pdf_url, '_blank');
-      }
-    } catch (error) {
-      console.error('Error downloading invoice:', error);
-      alert('Failed to download invoice');
-    }
+    const response = await base44.functions.invoke('generateInvoicePDF', { statement_id: statementId });
+    if (response.data?.success) window.open(response.data.pdf_url, '_blank');
   };
 
   const handlePayInvoice = (statement) => {
@@ -141,7 +117,7 @@ export default function ClientPortal() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -153,12 +129,9 @@ export default function ClientPortal() {
           <CardContent className="pt-8 pb-8">
             <User className="h-12 w-12 mx-auto text-slate-300 mb-4" />
             <h2 className="text-xl font-semibold mb-2">Access Not Found</h2>
-            <p className="text-slate-500 mb-6">
-              Your account is not linked to a client portal. Please contact your property management company.
-            </p>
+            <p className="text-slate-500 mb-6">Your account is not linked to a portal. Please contact your property manager.</p>
             <Button variant="outline" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Log Out
+              <LogOut className="h-4 w-4 mr-2" /> Log Out
             </Button>
           </CardContent>
         </Card>
@@ -166,411 +139,248 @@ export default function ClientPortal() {
     );
   }
 
-  const getInitials = () => {
-    return `${client.first_name?.[0] || ''}${client.last_name?.[0] || ''}`.toUpperCase();
-  };
+  const completedVisits = visits.filter(v => v.status === 'completed');
+  const upcomingVisits = visits.filter(v => ['scheduled', 'open'].includes(v.status));
+  const initials = `${client.first_name?.[0] || ''}${client.last_name?.[0] || ''}`.toUpperCase();
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-100">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <header className="bg-white border-b sticky top-0 z-10 shadow-sm">
+        <div className="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {company?.logo_url ? (
-              <img src={company.logo_url} alt={company.name} className="h-8 w-8 rounded" />
+              <img src={company.logo_url} alt={company.name} className="h-8 w-auto max-w-[120px] object-contain" />
             ) : (
               <div className="h-8 w-8 rounded bg-slate-900 flex items-center justify-center">
                 <Building2 className="h-5 w-5 text-white" />
               </div>
             )}
-            <span className="font-semibold">{company?.name || 'Property Portal'}</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:block text-right">
+              <p className="text-sm font-medium text-slate-900">{client.first_name} {client.last_name}</p>
+              <p className="text-xs text-slate-500">{client.portal_user_email}</p>
+            </div>
             <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-slate-900 text-white text-xs">
-                {getInitials()}
-              </AvatarFallback>
+              <AvatarFallback className="bg-blue-600 text-white text-xs">{initials}</AvatarFallback>
             </Avatar>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4 text-slate-500" />
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8">
-        {/* Welcome */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-slate-900">
-            Welcome, {client.first_name}
-          </h1>
-          <p className="text-slate-500">View your property inspections and reports</p>
+      {/* Tab Nav */}
+      <div className="bg-white border-b sticky top-16 z-10">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="flex">
+            {TABS.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-1.5 px-4 py-3.5 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                <tab.icon className="h-4 w-4" />
+                <span className="hidden sm:inline">{tab.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
+      </div>
 
-        {/* Service Details & Invoice */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Service Subscription */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Your Service Plan</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {serviceSubscription ? (
-                <>
-                  <div>
-                    <p className="text-sm text-slate-500 mb-1">Subscription</p>
-                    <p className="font-semibold text-lg">{serviceSubscription.name}</p>
-                    <p className="text-sm text-slate-600">{serviceSubscription.description}</p>
-                  </div>
-                  
-                  {additionalProducts.length > 0 && (
-                    <div className="border-t pt-3">
-                      <p className="text-sm text-slate-500 mb-2">Add-ons</p>
-                      <div className="space-y-2">
-                        {additionalProducts.map(product => (
-                          <div key={product.id} className="flex justify-between items-center">
-                            <span className="text-sm font-medium">{product.name}</span>
-                            <span className="text-sm text-slate-600">${product.price.toFixed(2)}/mo</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="border-t pt-3">
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold">Monthly Total</span>
-                      <span className="font-bold text-xl text-blue-600">
-                        ${(() => {
-                          let total = serviceSubscription?.price || 0;
-                          additionalProducts.forEach(p => total += p.price);
-                          return total.toFixed(2);
-                        })()}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-1 capitalize">
-                      Billed {client.billing_frequency || 'monthly'}
-                    </p>
-                  </div>
-                </>
+      <main className="max-w-2xl mx-auto px-4 py-6">
+        {/* HOME TAB */}
+        {activeTab === 'home' && (
+          <div className="space-y-5">
+            {/* Welcome card */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-5 text-white">
+              <p className="text-blue-100 text-sm mb-1">Welcome back,</p>
+              <h1 className="text-2xl font-bold">{client.first_name} {client.last_name}</h1>
+              <p className="text-blue-200 text-sm mt-2">{company?.name || 'Your Property Manager'}</p>
+            </div>
+
+            {/* Quick stats */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-white rounded-xl p-4 text-center border shadow-sm">
+                <p className="text-2xl font-bold text-slate-900">{properties.length}</p>
+                <p className="text-xs text-slate-500 mt-0.5">Properties</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 text-center border shadow-sm">
+                <p className="text-2xl font-bold text-emerald-600">{completedVisits.length}</p>
+                <p className="text-xs text-slate-500 mt-0.5">Completed</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 text-center border shadow-sm">
+                <p className="text-2xl font-bold text-blue-600">{upcomingVisits.length}</p>
+                <p className="text-xs text-slate-500 mt-0.5">Upcoming</p>
+              </div>
+            </div>
+
+            {/* Properties */}
+            <section>
+              <h2 className="font-semibold text-slate-900 mb-3">Your Properties</h2>
+              {properties.length === 0 ? (
+                <Card className="bg-white"><CardContent className="py-8 text-center text-slate-400 text-sm">No properties on file</CardContent></Card>
               ) : (
-                <p className="text-slate-500 text-sm">No active subscription</p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Billing & Invoices */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Billing & Invoices</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {allStatements.length > 0 ? (
                 <div className="space-y-3">
-                  {allStatements.slice(0, 3).map((statement) => (
-                    <div 
-                      key={statement.id}
-                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm">
-                            {format(new Date(statement.billing_month + '-01'), 'MMMM yyyy')}
-                          </span>
-                          <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
-                            statement.status === 'paid' 
-                              ? 'bg-green-100 text-green-700'
-                              : statement.status === 'sent'
-                              ? 'bg-blue-100 text-blue-700'
-                              : 'bg-slate-100 text-slate-700'
-                          }`}>
-                            {statement.status === 'paid' && <CheckCircle2 className="h-3 w-3" />}
-                            <span className="capitalize">{statement.status}</span>
+                  {properties.map(property => (
+                    <div key={property.id} className="bg-white rounded-xl border shadow-sm overflow-hidden">
+                      {property.primary_photo_url && (
+                        <div className="h-32 bg-slate-100">
+                          <img src={property.primary_photo_url} alt="" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-semibold text-slate-900">{property.name || property.address}</p>
+                            <p className="text-sm text-slate-500">{property.address}</p>
+                            <p className="text-sm text-slate-500">{property.city}, {property.state} {property.zip}</p>
                           </div>
+                          <StatusBadge status={property.status} />
                         </div>
-                        <div className="text-sm text-slate-600 mt-1">
-                          Total: <span className="font-semibold">${statement.total.toFixed(2)}</span>
-                        </div>
-                      </div>
-                      <div className="flex gap-2 ml-3">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDownloadInvoice(statement.id)}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        {statement.status !== 'paid' && (
-                          <Button
-                            size="sm"
-                            className="bg-blue-600 hover:bg-blue-700"
-                            onClick={() => handlePayInvoice(statement)}
-                          >
-                            <CreditCard className="h-4 w-4 mr-1" />
-                            Pay
-                          </Button>
+                        {property.visit_frequency && (
+                          <div className="flex items-center gap-1 mt-2 text-xs text-slate-500">
+                            <Clock className="h-3 w-3" />
+                            {property.visit_frequency.replace('_', '-')} visits
+                          </div>
                         )}
                       </div>
                     </div>
                   ))}
-
-                  {allStatements.length > 3 && (
-                    <div className="text-center pt-3 border-t">
-                      <p className="text-xs text-slate-500">
-                        Showing 3 of {allStatements.length} invoices
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <FileText className="h-8 w-8 mx-auto text-slate-300 mb-2" />
-                  <p className="text-slate-500 text-sm">No invoices yet</p>
-                  <p className="text-slate-400 text-xs mt-1">Invoices will appear here once generated</p>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </div>
+            </section>
 
-        {/* Properties */}
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold mb-4">Your Properties</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {properties.map((property) => (
-              <Card key={property.id} className="overflow-hidden">
-                <div className="aspect-video bg-slate-100">
-                  {property.primary_photo_url ? (
-                    <img 
-                      src={property.primary_photo_url} 
-                      alt={property.name || property.address}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Building2 className="h-8 w-8 text-slate-300" />
-                    </div>
-                  )}
+            {/* Recent visit */}
+            {completedVisits.length > 0 && (
+              <section>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="font-semibold text-slate-900">Most Recent Visit</h2>
+                  <button onClick={() => setActiveTab('timeline')} className="text-sm text-blue-600 font-medium">View all →</button>
                 </div>
-                <CardContent className="p-4">
-                  <h3 className="font-medium">{property.name || property.address}</h3>
-                  <div className="flex items-center gap-1 text-sm text-slate-500 mt-1">
-                    <MapPin className="h-3.5 w-3.5" />
-                    {property.city}, {property.state}
-                  </div>
-                  <div className="flex items-center justify-between mt-3">
-                    <StatusBadge status={property.status} />
-                    <span className="text-sm text-slate-500 capitalize">
-                      {property.inspection_frequency?.replace('_', '-')}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* Documents & Media */}
-        {client.files && client.files.length > 0 && (
-          <section className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">Documents & Media</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {client.files.map((file, index) => {
-                const isVideo = file.type?.startsWith('video/') || file.name?.match(/\.(mp4|mov|avi|webm)$/i);
-                const isImage = file.type?.startsWith('image/') || file.name?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-                
-                return (
-                  <Card key={index} className="overflow-hidden">
-                    {isVideo ? (
-                      <div className="aspect-video bg-slate-900 relative">
-                        <video 
-                          src={file.url} 
-                          className="w-full h-full object-contain"
-                          controls
-                        />
-                      </div>
-                    ) : isImage ? (
-                      <div className="aspect-video bg-slate-100">
-                        <img 
-                          src={file.url} 
-                          alt={file.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="aspect-video bg-slate-100 flex items-center justify-center">
-                        <File className="h-12 w-12 text-slate-300" />
-                      </div>
-                    )}
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{file.name}</p>
-                          {file.uploaded_at && (
-                            <p className="text-xs text-slate-500">
-                              {format(new Date(file.uploaded_at), 'MMM d, yyyy')}
-                            </p>
-                          )}
+                {(() => {
+                  const latest = completedVisits[0];
+                  const property = properties.find(p => p.id === latest.property_id);
+                  const isAllClear = latest.overall_status === 'all_clear';
+                  return (
+                    <button
+                      onClick={() => setActiveTab('timeline')}
+                      className="w-full text-left bg-white rounded-xl border shadow-sm p-4 hover:border-blue-200 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${isAllClear ? 'bg-emerald-100' : 'bg-amber-100'}`}>
+                          {isAllClear
+                            ? <ClipboardCheck className="h-5 w-5 text-emerald-600" />
+                            : <ClipboardCheck className="h-5 w-5 text-amber-600" />}
                         </div>
-                        <a 
-                          href={file.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                        >
-                          <Download className="h-4 w-4 text-slate-500" />
-                        </a>
+                        <div className="flex-1">
+                          <p className="font-medium text-slate-900">{property?.name || property?.address}</p>
+                          <p className="text-sm text-slate-500">{format(new Date(latest.scheduled_date), 'MMMM d, yyyy')}</p>
+                        </div>
+                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${isAllClear ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                          {isAllClear ? 'All Clear' : 'Issues Found'}
+                        </span>
                       </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </section>
+                      {latest.summary_notes && (
+                        <p className="text-sm text-slate-500 mt-3 line-clamp-2">{latest.summary_notes}</p>
+                      )}
+                    </button>
+                  );
+                })()}
+              </section>
+            )}
+
+            {/* Company contact */}
+            {company && (
+              <div className="bg-white rounded-xl border shadow-sm p-4">
+                <p className="font-semibold text-slate-900 mb-2 text-sm">Your Property Manager</p>
+                <p className="text-sm font-medium">{company.name}</p>
+                <div className="space-y-1 mt-1">
+                  {company.phone && <a href={`tel:${company.phone}`} className="block text-sm text-blue-600">{company.phone}</a>}
+                  {company.email && <a href={`mailto:${company.email}`} className="block text-sm text-blue-600">{company.email}</a>}
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
-        {/* Recent Visits */}
-        <section>
-          <h2 className="text-lg font-semibold mb-4">Recent Visits</h2>
-          {visits.length === 0 ? (
-            <Card className="p-8 text-center">
-              <ClipboardCheck className="h-10 w-10 mx-auto text-slate-300 mb-2" />
-              <p className="text-slate-500">No completed visits yet</p>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {visits.map((visit) => {
-                const property = properties.find(p => p.id === visit.property_id);
-                return (
-                  <Card 
-                    key={visit.id}
-                    className="cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => navigate(createPageUrl('ClientInspectionView') + `?id=${visit.id}`)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${
-                            visit.overall_status === 'all_clear' 
-                              ? 'bg-emerald-100' 
-                              : 'bg-amber-100'
-                          }`}>
-                            {visit.overall_status === 'all_clear' ? (
-                              <CheckCircle2 className="h-6 w-6 text-emerald-600" />
-                            ) : (
-                              <AlertTriangle className="h-6 w-6 text-amber-600" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-medium">{property?.name || property?.address}</p>
-                            <div className="flex items-center gap-3 text-sm text-slate-500">
-                              <span className="flex items-center gap-1">
-                                <Calendar className="h-3.5 w-3.5" />
-                                {format(new Date(visit.scheduled_date), 'MMM d, yyyy')}
-                              </span>
-                              <span className="capitalize">{visit.visit_type}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <StatusBadge status={visit.overall_status || visit.status} />
-                          <Eye className="h-4 w-4 text-slate-400" />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </section>
+        {/* VISITS TAB */}
+        {activeTab === 'visits' && (
+          <PortalVisitsTab
+            visits={visits}
+            properties={properties}
+            onSelectVisit={() => setActiveTab('timeline')}
+          />
+        )}
+
+        {/* TIMELINE TAB */}
+        {activeTab === 'timeline' && (
+          <PortalTimelineTab visits={visits} properties={properties} />
+        )}
+
+        {/* BILLING TAB */}
+        {activeTab === 'billing' && (
+          <PortalBillingTab
+            client={client}
+            serviceSubscription={serviceSubscription}
+            additionalProducts={additionalProducts}
+            allStatements={allStatements}
+            onDownloadInvoice={handleDownloadInvoice}
+            onPayInvoice={handlePayInvoice}
+          />
+        )}
       </main>
+
+      {/* Footer */}
+      <footer className="border-t bg-white mt-8">
+        <div className="max-w-2xl mx-auto px-4 py-6 text-center">
+          <a href="https://www.estatewatch365.com" target="_blank" rel="noopener noreferrer">
+            <img
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/c534cf318_NewEstateWatchLogo.png"
+              alt="Estate Watch 365"
+              className="h-10 w-auto object-contain mx-auto opacity-70"
+            />
+          </a>
+          {company?.phone && (
+            <p className="text-xs text-slate-400 mt-2">{company.name} · {company.phone}</p>
+          )}
+        </div>
+      </footer>
 
       {/* Payment Modal */}
       {showPaymentModal && selectedStatement && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <Card className="max-w-md w-full">
-            <CardHeader>
-              <CardTitle>Pay Invoice</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <Card className="max-w-sm w-full">
+            <CardContent className="pt-6 space-y-4">
+              <h3 className="font-semibold text-lg">Pay Invoice</h3>
               <div className="bg-slate-50 p-4 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-slate-600">Period</span>
                   <span className="font-medium">{format(new Date(selectedStatement.billing_month + '-01'), 'MMMM yyyy')}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold">Amount Due</span>
-                  <span className="text-2xl font-bold text-blue-600">${selectedStatement.total.toFixed(2)}</span>
+                  <span className="font-semibold">Amount Due</span>
+                  <span className="text-2xl font-bold text-blue-600">${(selectedStatement.total || 0).toFixed(2)}</span>
                 </div>
               </div>
-              
-              <div className="space-y-2">
-                <Button 
-                  className="w-full bg-blue-600 hover:bg-blue-700"
-                  onClick={() => {
-                    window.open(`${window.location.origin}/InvoicePayment?statement_id=${selectedStatement.id}`, '_blank');
-                    setShowPaymentModal(false);
-                  }}
-                >
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  Pay Securely
-                </Button>
-                <Button 
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setShowPaymentModal(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700"
+                onClick={() => {
+                  window.open(`${window.location.origin}/InvoicePayment?statement_id=${selectedStatement.id}`, '_blank');
+                  setShowPaymentModal(false);
+                }}>
+                Pay Securely
+              </Button>
+              <Button variant="outline" className="w-full" onClick={() => setShowPaymentModal(false)}>Cancel</Button>
             </CardContent>
           </Card>
         </div>
       )}
-
-      {/* Footer */}
-      <footer className="border-t bg-white mt-12">
-        <div className="max-w-5xl mx-auto px-4 py-8">
-          <div className="flex flex-col items-center text-center space-y-4">
-            {company?.logo_url && (
-              <img 
-                src={company.logo_url} 
-                alt={company.name} 
-                className="h-12 w-auto object-contain"
-              />
-            )}
-            <div>
-              <p className="font-semibold text-slate-900">{company?.name}</p>
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mt-2 text-sm text-slate-600">
-                {company?.phone && (
-                  <a href={`tel:${company.phone}`} className="hover:text-slate-900">
-                    {company.phone}
-                  </a>
-                )}
-                {company?.email && (
-                  <>
-                    {company?.phone && <span className="hidden sm:inline">•</span>}
-                    <a href={`mailto:${company.email}`} className="hover:text-slate-900">
-                      {company.email}
-                    </a>
-                  </>
-                )}
-              </div>
-              {company?.address && (
-                <p className="text-xs text-slate-500 mt-2">
-                  {company.address}, {company.city}, {company.state} {company.zip}
-                </p>
-              )}
-            </div>
-            <img 
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/c534cf318_NewEstateWatchLogo.png" 
-              alt="Estate Watch 365" 
-              className="h-8 w-auto object-contain opacity-60" 
-            />
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
