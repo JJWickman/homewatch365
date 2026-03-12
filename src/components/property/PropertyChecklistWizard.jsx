@@ -162,7 +162,7 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
             <div>
               <p className="text-sm font-medium text-slate-700 mb-3">Property Type</p>
               <div className={`${propertyTypeInfo.color} rounded-lg p-4 flex items-center gap-3`}>
-                <TypeIcon className="w-6 h-6 text-white" />
+                {propertyTypeInfo.icon && <propertyTypeInfo.icon className="w-6 h-6 text-white" />}
                 <div>
                   <p className="font-semibold text-white">{propertyTypeInfo.title}</p>
                   <p className="text-sm text-white/90">{property.name || property.address}</p>
