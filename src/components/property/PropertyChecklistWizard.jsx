@@ -61,33 +61,14 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
     
     setCreating(true);
     try {
-      // Load template sections and items
-      const sections = await base44.entities.ChecklistTemplateSection.filter({ 
-        template_id: selectedTemplate.id 
-      }, 'sort_order');
-
-      const sectionData = await Promise.all(
-        sections.map(async (section) => {
-          const items = await base44.entities.ChecklistTemplateItem.filter({ 
-            template_id: selectedTemplate.id,
-            section_id: section.id 
-          }, 'sort_order');
-          
-          return {
-            ...section,
-            items: items
-          };
-        })
-      );
-
-      // Create property-specific checklist
+      // Create property-specific checklist with selected standard template
       const newChecklist = await base44.entities.PropertyChecklist.create({
         company_id: property.company_id,
         property_id: property.id,
         template_id: selectedTemplate.id,
         name: checklistName,
         description: `Custom checklist for ${property.name || property.address}`,
-        customized_sections: sectionData,
+        customized_sections: [],
         is_active: true
       });
 
