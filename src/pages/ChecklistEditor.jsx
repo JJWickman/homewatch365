@@ -21,8 +21,11 @@ export default function ChecklistEditor() {
   const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
   const templateKey = urlParams.get('type') || 'sfh';
+  const checklistId = urlParams.get('checklistId'); // Property-specific checklist
+  const propertyId = urlParams.get('propertyId');
 
   const [company, setCompany] = useState(null);
+  const [propertyChecklist, setPropertyChecklist] = useState(null);
   const [sections, setSections] = useState([]);
   const [expandedSections, setExpandedSections] = useState({});
   const [loading, setLoading] = useState(true);
