@@ -1191,7 +1191,7 @@ export default function PropertyDetail() {
                                 onValueChange={async (contractorId) => {
                                   if (contractorId === 'add-new') {
                                     setSelectedContractorType(value);
-                                    setShowAddContractorDialog(true);
+                                    setShowContractorSearchModal(true);
                                   } else {
                                     await handleAssignContractor(contractorId);
                                   }
