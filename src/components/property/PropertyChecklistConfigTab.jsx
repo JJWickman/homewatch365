@@ -92,10 +92,16 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
       return;
     }
 
+    // Tenant isolation security check
+    if (!companyId || !propertyId) {
+      toast.error('Security validation failed');
+      return;
+    }
+
     setSaving(true);
     try {
       const checklistData = {
-        company_id: companyId,
+        company_id: companyId, // Always enforce company_id for tenant isolation
         property_id: propertyId,
         template_id: selectedTemplate.id,
         name: checklistName,
@@ -104,7 +110,10 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
       };
 
       if (checklist?.id) {
-        // Update existing
+        // Verify ownership before update (security)
+        if (checklist.company_id !== companyId) {
+          throw new Error('Unauthorized: Company mismatch');
+        }
         await base44.entities.PropertyChecklist.update(checklist.id, checklistData);
         toast.success('Checklist updated successfully');
       } else {
@@ -126,9 +135,15 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
   const handleDuplicateChecklist = async () => {
     if (!checklist) return;
     
+    // Tenant isolation security check
+    if (checklist.company_id !== companyId) {
+      toast.error('Unauthorized: Cannot duplicate checklist from another company');
+      return;
+    }
+    
     setSaving(true);
     try {
-      // Create a copy with a new name
+      // Create a copy with a new name - preserve company_id for tenant isolation
       const newChecklistData = {
         company_id: checklist.company_id,
         property_id: checklist.property_id,
@@ -151,6 +166,12 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
 
   const handleDeleteChecklist = async () => {
     if (!checklist || !window.confirm('Delete this custom checklist?')) return;
+    
+    // Tenant isolation security check
+    if (checklist.company_id !== companyId) {
+      toast.error('Unauthorized: Cannot delete checklist from another company');
+      return;
+    }
     
     try {
       await base44.entities.PropertyChecklist.delete(checklist.id);
