@@ -87,6 +87,9 @@ export default function Visits() {
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const [scheduledVisitToReplace, setScheduledVisitToReplace] = useState(null);
   const [followUpsData, setFollowUpsData] = useState([]);
+  const [showCheckInNow, setShowCheckInNow] = useState(false);
+  const [checkInNowProperty, setCheckInNowProperty] = useState(null);
+  const [checklists, setChecklists] = useState([]);
 
   useEffect(() => {
     loadData();
