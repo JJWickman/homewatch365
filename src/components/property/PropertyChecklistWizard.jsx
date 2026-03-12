@@ -152,7 +152,7 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-shrink-0 sticky bottom-0 bg-white pt-4">
             <Button
               variant="outline"
               onClick={onClose}
