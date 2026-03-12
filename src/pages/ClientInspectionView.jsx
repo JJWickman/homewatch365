@@ -42,7 +42,7 @@ export default function ClientInspectionView() {
         return;
       }
 
-      const inspectionData = await base44.entities.Inspection.filter({ id, client_id: clients[0].id });
+      const inspectionData = await base44.entities.Visit.filter({ id, client_id: clients[0].id });
       
       if (inspectionData.length === 0) {
         navigate(createPageUrl('ClientPortal'));
