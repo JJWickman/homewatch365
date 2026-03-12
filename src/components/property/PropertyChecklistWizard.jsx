@@ -63,24 +63,38 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
   const propertyTypeInfo = PROPERTY_TYPE_MAP[property.property_type] || PROPERTY_TYPE_MAP['single_family'];
   const TypeIcon = propertyTypeInfo.icon;
 
-  const handleCreate = async () => {
-    if (!checklistName.trim()) return;
+  const handleSaveAndActivate = async () => {
+    if (!checklistName.trim() || !selectedTemplate) return;
     
     setCreating(true);
     try {
-      const user = await base44.auth.me();
-      const members = await base44.entities.CompanyMember.filter({ 
-        company_id: property.company_id,
-        user_email: user.email 
-      });
-      
+      // Load template sections and items
+      const sections = await base44.entities.ChecklistTemplateSection.filter({ 
+        template_id: selectedTemplate.id 
+      }, 'sort_order');
+
+      const sectionData = await Promise.all(
+        sections.map(async (section) => {
+          const items = await base44.entities.ChecklistTemplateItem.filter({ 
+            template_id: selectedTemplate.id,
+            section_id: section.id 
+          }, 'sort_order');
+          
+          return {
+            ...section,
+            items: items
+          };
+        })
+      );
+
+      // Create property-specific checklist
       const newChecklist = await base44.entities.PropertyChecklist.create({
         company_id: property.company_id,
         property_id: property.id,
-        template_id: `${propertyTypeInfo.key}-template`,
+        template_id: selectedTemplate.id,
         name: checklistName,
         description: `Custom checklist for ${property.name || property.address}`,
-        customized_sections: [],
+        customized_sections: sectionData,
         is_active: true
       });
 
@@ -90,8 +104,10 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
       // Navigate to editor with the property context
       navigate(
         createPageUrl('ChecklistEditor') + 
-        `?checklistId=${newChecklist.id}&propertyId=${property.id}&type=${propertyTypeInfo.key}`
+        `?checklistId=${newChecklist.id}&propertyId=${property.id}`
       );
+    } catch (error) {
+      console.error('Error saving checklist:', error);
     } finally {
       setCreating(false);
     }
