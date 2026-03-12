@@ -205,39 +205,61 @@ export default function ChecklistEditor() {
               <CardContent className="p-4 space-y-2 bg-white">
                 {section.items.map((item, iIdx) => (
                   <div key={iIdx} className="flex items-start gap-3 border border-slate-100 rounded-lg p-3 bg-slate-50/60 hover:bg-slate-50">
-                    <div className="flex-1 space-y-2">
+                    <div className="flex-1 space-y-3">
                       <Input
                         value={item.label}
                         onChange={(e) => updateItem(sIdx, iIdx, 'label', e.target.value)}
                         placeholder="Item label"
-                        className="text-sm h-9 font-medium"
+                        className="text-sm h-10 font-medium"
                       />
-                      <div className="flex flex-wrap gap-2">
-                        {Object.entries(RESPONSE_TYPE_LABELS).map(([v, l]) => (
-                          <button
-                            key={v}
-                            type="button"
-                            onClick={() => updateItem(sIdx, iIdx, 'responseType', v)}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors min-h-[44px] ${
-                              item.responseType === v
-                                ? 'bg-blue-600 text-white border-blue-600'
-                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                            }`}
-                          >
-                            <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
-                              item.responseType === v ? 'border-white bg-white' : 'border-slate-400'
-                            }`}>
-                              {item.responseType === v && <span className="w-2 h-2 rounded-full bg-blue-600 block" />}
-                            </span>
-                            {l}
-                          </button>
+
+                      {/* Response options preview — always OK / Issue / N/A */}
+                      <div className="flex gap-2">
+                        {['OK', 'Issue', 'N/A'].map(opt => (
+                          <div key={opt} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium flex-1 justify-center ${
+                            opt === 'Issue' ? 'border-red-200 bg-red-50 text-red-600' :
+                            opt === 'OK' ? 'border-green-200 bg-green-50 text-green-700' :
+                            'border-slate-200 bg-slate-50 text-slate-500'
+                          }`}>
+                            <span className="w-4 h-4 rounded border-2 border-current flex items-center justify-center shrink-0" />
+                            {opt}
+                          </div>
                         ))}
                       </div>
+
+                      {/* If "Issue" — require note and/or photo */}
+                      <div className="flex gap-3 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={() => updateItem(sIdx, iIdx, 'require_note', !item.require_note)}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors min-h-[44px] ${
+                            item.require_note
+                              ? 'bg-orange-500 text-white border-orange-500'
+                              : 'bg-white text-slate-600 border-slate-200'
+                          }`}
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                          Require Note if Issue
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateItem(sIdx, iIdx, 'require_photo', !item.require_photo)}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors min-h-[44px] ${
+                            item.require_photo
+                              ? 'bg-orange-500 text-white border-orange-500'
+                              : 'bg-white text-slate-600 border-slate-200'
+                          }`}
+                        >
+                          <Camera className="w-4 h-4" />
+                          Require Photo if Issue
+                        </button>
+                      </div>
+
                       <Input
                         value={item.instructions || ''}
                         onChange={(e) => updateItem(sIdx, iIdx, 'instructions', e.target.value)}
                         placeholder="Instructions / notes for field user (optional)"
-                        className="text-xs h-8 text-slate-500"
+                        className="text-xs h-9 text-slate-500"
                       />
                     </div>
                     <Button
