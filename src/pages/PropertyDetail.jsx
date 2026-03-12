@@ -540,20 +540,7 @@ export default function PropertyDetail() {
     }
   };
 
-  const handleSaveDefaultChecklist = async (templateKey) => {
-    setSavingChecklist(true);
-    const updatedCustomFields = { ...(property.custom_fields || {}), default_checklist: templateKey };
-    await base44.entities.Property.update(property.id, { custom_fields: updatedCustomFields });
-    setProperty({ ...property, custom_fields: updatedCustomFields });
-    setSavingChecklist(false);
-    toast.success('Default checklist saved');
-  };
 
-  const CHECKLIST_TEMPLATE_OPTIONS = [
-    { key: 'sfh', label: 'Single Family Home', page: 'SingleFamilyHomeChecklistPage' },
-    { key: 'condo', label: 'Condo / Villa', page: 'CondoVillaChecklistPage' },
-    { key: 'highrise', label: 'High Rise', page: 'HighRiseChecklistPage' },
-  ];
 
   const handleAssignContractor = async (contractorId) => {
     try {
