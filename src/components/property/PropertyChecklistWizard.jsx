@@ -56,7 +56,7 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
   const propertyTypeInfo = PROPERTY_TYPE_MAP[property.property_type] || PROPERTY_TYPE_MAP['single_family'];
   const TypeIcon = propertyTypeInfo.icon;
 
-  const handleSaveAndActivate = async () => {
+  const handleCreateChecklist = async () => {
     if (!checklistName.trim() || !selectedTemplate) return;
     
     setCreating(true);
@@ -72,19 +72,16 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
         is_active: true
       });
 
-      onComplete?.();
-      onClose?.();
-      
-      // Navigate to editor with the property context
-      navigate(
-        createPageUrl('ChecklistEditor') + 
-        `?checklistId=${newChecklist.id}&propertyId=${property.id}`
-      );
+      setStep(3);
     } catch (error) {
       console.error('Error saving checklist:', error);
-    } finally {
       setCreating(false);
     }
+  };
+
+  const handleCompleteWizard = () => {
+    onComplete?.();
+    onClose?.();
   };
 
   return (
