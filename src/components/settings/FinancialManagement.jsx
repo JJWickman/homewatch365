@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Plus, Edit2, Trash2, DollarSign, Package, Check, RefreshCw, ExternalLink } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import ProductServiceWizard from './ProductServiceWizard';
+import PriceConfigurator from './PriceConfigurator';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -131,13 +132,10 @@ export default function FinancialManagement({ companyId, company }) {
     name: '',
     description: '',
     type: 'subscription',
-    inspection_frequency: 'weekly',
-    price: '',
+    pricing_model: 'flat_rate',
+    base_price: '',
     billing_frequency: 'monthly',
-    included_pre_storm_visits: 0,
-    included_post_storm_visits: 0,
-    is_active: true,
-    included_visit_types: []
+    is_active: true
   });
 
   const MAX_PRODUCTS = 25;
@@ -187,19 +185,16 @@ export default function FinancialManagement({ companyId, company }) {
       name: product.name,
       description: product.description || '',
       type: product.type,
-      inspection_frequency: product.inspection_frequency || 'weekly',
-      price: product.price.toString(),
+      pricing_model: product.pricing_model || 'flat_rate',
+      base_price: product.base_price?.toString() || '',
       billing_frequency: product.billing_frequency,
-      included_pre_storm_visits: product.included_pre_storm_visits || 0,
-      included_post_storm_visits: product.included_post_storm_visits || 0,
-      is_active: product.is_active,
-      included_visit_types: product.included_visit_types || []
+      is_active: product.is_active
     });
     setShowDialog(true);
   };
 
   const handleSaveProduct = async () => {
-    if (!formData.name || !formData.price) {
+    if (!formData.name || !formData.base_price) {
       alert('Please fill in all required fields');
       return;
     }
@@ -209,17 +204,11 @@ export default function FinancialManagement({ companyId, company }) {
       name: formData.name,
       description: formData.description,
       type: formData.type,
-      price: parseFloat(formData.price),
+      pricing_model: formData.pricing_model,
+      base_price: parseFloat(formData.base_price),
       billing_frequency: formData.billing_frequency,
-      is_active: formData.is_active,
-      included_visit_types: formData.included_visit_types
+      is_active: formData.is_active
     };
-
-    if (formData.type === 'subscription') {
-      productData.inspection_frequency = formData.inspection_frequency;
-      productData.included_pre_storm_visits = parseInt(formData.included_pre_storm_visits) || 0;
-      productData.included_post_storm_visits = parseInt(formData.included_post_storm_visits) || 0;
-    }
 
     try {
       if (editingProduct) {
@@ -413,20 +402,14 @@ export default function FinancialManagement({ companyId, company }) {
                           <p className="text-sm text-slate-600 mb-2">{product.description}</p>
                         )}
                         <div className="flex items-center gap-4 text-sm text-slate-500">
-                          <span className="font-medium text-slate-900">
-                            ${product.price.toFixed(2)}
-                          </span>
-                          <span>•</span>
-                          <span>{getBillingFrequencyLabel(product.billing_frequency)}</span>
-                          {(product.included_pre_storm_visits > 0 || product.included_post_storm_visits > 0) && (
-                            <>
-                              <span>•</span>
-                              <span>
-                                {product.included_pre_storm_visits} Pre-Storm, {product.included_post_storm_visits} Post-Storm
-                              </span>
-                            </>
-                          )}
-                        </div>
+                           <span className="font-medium text-slate-900">
+                             ${product.base_price?.toFixed(2) || '0.00'}
+                           </span>
+                           <span>•</span>
+                           <span>{getBillingFrequencyLabel(product.billing_frequency)}</span>
+                           <span>•</span>
+                           <span className="capitalize">{product.pricing_model?.replace('_', ' ')}</span>
+                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <Button
@@ -488,12 +471,14 @@ export default function FinancialManagement({ companyId, company }) {
                           <p className="text-sm text-slate-600 mb-2">{product.description}</p>
                         )}
                         <div className="flex items-center gap-4 text-sm text-slate-500">
-                          <span className="font-medium text-slate-900">
-                            ${product.price.toFixed(2)}
-                          </span>
-                          <span>•</span>
-                          <span>{getBillingFrequencyLabel(product.billing_frequency)}</span>
-                        </div>
+                           <span className="font-medium text-slate-900">
+                             ${product.base_price?.toFixed(2) || '0.00'}
+                           </span>
+                           <span>•</span>
+                           <span>{getBillingFrequencyLabel(product.billing_frequency)}</span>
+                           <span>•</span>
+                           <span className="capitalize">{product.pricing_model?.replace('_', ' ')}</span>
+                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <Button
@@ -566,7 +551,7 @@ export default function FinancialManagement({ companyId, company }) {
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Weekly Inspection"
+                placeholder="e.g., Premium Weekly Watch"
               />
             </div>
 
@@ -596,84 +581,30 @@ export default function FinancialManagement({ companyId, company }) {
               </Select>
             </div>
 
-            {formData.type === 'subscription' && (
-              <div>
-                <Label>Inspection Frequency *</Label>
-                <Select
-                  value={formData.inspection_frequency}
-                  onValueChange={(value) => setFormData({ ...formData, inspection_frequency: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="bi_weekly">Bi-Weekly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label>Monthly Price *</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    placeholder="0.00"
-                    className="pl-7"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label>Billing Frequency</Label>
-                <Select
-                  value={formData.billing_frequency}
-                  onValueChange={(value) => setFormData({ ...formData, billing_frequency: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                    <SelectItem value="quarterly">Quarterly</SelectItem>
-                    <SelectItem value="annually">Annually</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label>Billing Frequency</Label>
+              <Select
+                value={formData.billing_frequency}
+                onValueChange={(value) => setFormData({ ...formData, billing_frequency: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="one_time">One-Time</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                  <SelectItem value="annually">Annually</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            {formData.type === 'subscription' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label>Included Pre-Storm Visits</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    value={formData.included_pre_storm_visits}
-                    onChange={(e) => setFormData({ ...formData, included_pre_storm_visits: e.target.value })}
-                    placeholder="0"
-                  />
-                </div>
-                <div>
-                  <Label>Included Post-Storm Visits</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    value={formData.included_post_storm_visits}
-                    onChange={(e) => setFormData({ ...formData, included_post_storm_visits: e.target.value })}
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-            )}
+            <div className="border-t pt-4">
+              <PriceConfigurator 
+                product={formData} 
+                onChange={setFormData}
+              />
+            </div>
 
             <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
               <input
@@ -687,17 +618,6 @@ export default function FinancialManagement({ companyId, company }) {
                 Active (available for billing)
               </Label>
             </div>
-
-            {formData.type === 'subscription' && (
-              <div className="border-t pt-4">
-                <Label className="text-base font-semibold">Additional Visit Types Configuration</Label>
-                <p className="text-xs text-slate-500 mt-1 mb-3">Configure billing for other inspection types and follow-ups</p>
-                <VisitTypesConfig
-                  visitTypes={formData.included_visit_types}
-                  onChange={(types) => setFormData({ ...formData, included_visit_types: types })}
-                />
-              </div>
-            )}
           </div>
 
           <DialogFooter>
@@ -705,12 +625,12 @@ export default function FinancialManagement({ companyId, company }) {
               Cancel
             </Button>
             <Button 
-              onClick={handleSaveProduct}
-              disabled={!formData.name || !formData.price}
-              className="bg-slate-900 hover:bg-slate-800"
-            >
-              {editingProduct ? 'Update' : 'Add'} {formData.type === 'subscription' ? 'Subscription Plan' : 'Add-On Service'}
-            </Button>
+               onClick={handleSaveProduct}
+               disabled={!formData.name || !formData.base_price}
+               className="bg-slate-900 hover:bg-slate-800"
+             >
+               {editingProduct ? 'Update' : 'Add'} {formData.type === 'subscription' ? 'Subscription Plan' : 'Add-On Service'}
+             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
