@@ -245,23 +245,35 @@ export default function ChecklistEditor() {
         </div>
       )}
 
-      {/* Template selector tabs */}
-      <div className="flex gap-2 mb-6 flex-wrap">
-        {TEMPLATES.map(t => (
-          <button
-            key={t.key}
-            onClick={() => navigate(createPageUrl('ChecklistEditor') + `?type=${t.key}`)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
-              t.key === templateKey
-                ? 'bg-slate-900 text-white border-slate-900'
-                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <t.icon className="w-4 h-4" />
-            {t.title}
-          </button>
-        ))}
-      </div>
+      {/* Template selector or type display */}
+      {propertyChecklist ? (
+        <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 mb-6">
+          <p className="text-sm text-slate-600 mb-2">Property Type</p>
+          <div className="flex items-center gap-2">
+            <div className={`${template.color} w-8 h-8 rounded-lg flex items-center justify-center`}>
+              <Icon className="w-4 h-4 text-white" />
+            </div>
+            <p className="text-base font-semibold text-slate-900">{template.title}</p>
+          </div>
+        </div>
+      ) : (
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {TEMPLATES.map(t => (
+            <button
+              key={t.key}
+              onClick={() => navigate(createPageUrl('ChecklistEditor') + `?type=${t.key}`)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                t.key === templateKey
+                  ? 'bg-slate-900 text-white border-slate-900'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              <t.icon className="w-4 h-4" />
+              {t.title}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Sections */}
       <div className="space-y-3">
