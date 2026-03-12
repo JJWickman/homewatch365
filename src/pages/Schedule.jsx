@@ -253,6 +253,77 @@ export default function Schedule() {
         </CardContent>
       </Card>
 
+      {/* Day View */}
+      {view === 'day' && (
+        <Card className="overflow-hidden">
+          <div className="p-4">
+            <div className={`text-center mb-4 pb-3 border-b ${isToday(currentDate) ? 'text-blue-700' : 'text-slate-700'}`}>
+              <p className="text-xl font-bold">{format(currentDate, 'EEEE')}</p>
+              <p className="text-slate-500">{format(currentDate, 'MMMM d, yyyy')}</p>
+            </div>
+            {getItemsForDate(currentDate).length === 0 ? (
+              <div className="text-center py-12 text-slate-400">
+                <Calendar className="h-10 w-10 mx-auto mb-2 opacity-40" />
+                <p>No visits scheduled for this day</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {getItemsForDate(currentDate).map((visit) => {
+                  const property = getProperty(visit.property_id);
+                  const isFollowUp = visit.visit_type === 'followup';
+                  return (
+                    <Link
+                      key={visit.id}
+                      to={createPageUrl('VisitDetail') + `?id=${visit.id}`}
+                      className={`flex items-start gap-4 p-4 rounded-lg border transition-colors hover:opacity-80 ${
+                        visit.status === 'completed'
+                          ? 'bg-emerald-50 border-emerald-200'
+                          : visit.status === 'in_progress'
+                            ? 'bg-amber-50 border-amber-200'
+                            : isFollowUp && visit.priority === 'urgent'
+                              ? 'bg-red-50 border-red-200'
+                              : isFollowUp
+                                ? 'bg-purple-50 border-purple-200'
+                                : 'bg-blue-50 border-blue-200'
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-slate-900 truncate">
+                          {property?.name || property?.address || visit.title}
+                        </p>
+                        {property && visit.title && (
+                          <p className="text-sm text-slate-600 truncate">{visit.title}</p>
+                        )}
+                        <div className="flex items-center gap-3 mt-1 text-sm text-slate-500">
+                          <span className="capitalize">
+                            {isFollowUp
+                              ? (visit.followup_type?.replace(/_/g, ' ') || 'Follow-Up')
+                              : (visit.checkin_type?.replace(/_/g, ' ') || 'Check-In')}
+                          </span>
+                          {visit.assigned_to_name && (
+                            <span className="flex items-center gap-1">
+                              <User className="h-3.5 w-3.5" />
+                              {visit.assigned_to_name}
+                            </span>
+                          )}
+                          {visit.scheduled_time && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3.5 w-3.5" />
+                              {visit.scheduled_time}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <StatusBadge status={visit.status} />
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
       {/* Week View */}
       {view === 'week' && (
         <Card className="overflow-hidden">
