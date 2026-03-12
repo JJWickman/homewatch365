@@ -289,70 +289,57 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
         </Card>
       )}
 
-      {/* Sections Editor */}
-      {sections.length > 0 && (
+      {/* Property Checklist Actions */}
+      {!checklist && selectedTemplate && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Customize Sections</CardTitle>
+            <CardTitle className="text-base">Create Property Checklist</CardTitle>
             <CardDescription>
-              Edit or remove sections for this property's checklist
+              Create a property-specific copy of "{selectedTemplate.name}" that you can customize
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {sections.map((section, idx) => (
-              <div key={idx} className="p-4 border rounded-lg space-y-3">
-                <div>
-                  <Label className="text-sm">Section Title</Label>
-                  <Input
-                    value={section.title}
-                    onChange={(e) => handleSectionUpdate(idx, 'title', e.target.value)}
-                    className="mt-1 text-black"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm">Description</Label>
-                  <Input
-                    value={section.description || ''}
-                    onChange={(e) => handleSectionUpdate(idx, 'description', e.target.value)}
-                    placeholder="Optional section description"
-                    className="mt-1 text-black"
-                  />
-                </div>
-              </div>
-            ))}
+          <CardContent>
+            <Button 
+              onClick={handleCreatePropertyChecklist}
+              disabled={saving}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {saving ? 'Creating...' : 'Create Property Checklist'}
+            </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Actions */}
-      {selectedTemplate && (
-        <div className="flex gap-3">
-          <Button 
-            onClick={handleEditChecklist}
-            className="flex-1 bg-blue-600 hover:bg-blue-700"
-          >
-            <Edit3 className="h-4 w-4 mr-2" />
-            {checklist ? 'Edit Checklist' : 'Create & Customize Checklist'}
-          </Button>
-
-          {checklist && (
-            <>
-              <Button 
-                onClick={handleDuplicateChecklist}
-                variant="outline"
-              >
-                <Copy className="h-4 w-4 mr-2" />
-                Duplicate
-              </Button>
-              <Button 
-                onClick={handleDeleteChecklist}
-                variant="destructive"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
-            </>
-          )}
+      {/* Edit Existing Property Checklist */}
+      {checklist && (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Property Checklist</CardTitle>
+              <CardDescription>
+                {checklistName}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-3">
+                <Button 
+                  onClick={handleEditPropertyChecklist}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  <Edit3 className="h-4 w-4 mr-2" />
+                  Customize Checklist
+                </Button>
+                <Button 
+                  onClick={handleDeleteChecklist}
+                  variant="destructive"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
