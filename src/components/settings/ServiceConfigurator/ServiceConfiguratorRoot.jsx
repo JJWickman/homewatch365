@@ -1,108 +1,52 @@
 import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Package, DollarSign, Plus } from 'lucide-react';
-import ServiceBasicInfo from './sections/ServiceBasicInfo';
-import PricingModelSelector from './sections/PricingModelSelector';
-import TierBuilder from './sections/TierBuilder';
-import AddOnManager from './sections/AddOnManager';
-import ServicePreview from './sections/ServicePreview';
+import { DollarSign } from 'lucide-react';
+import PricingConfigurationBuilder from './sections/PricingConfigurationBuilder';
+import PricingConfigurationPreview from './sections/PricingConfigurationPreview';
 
-export default function ServiceConfiguratorRoot({ companyId, onSave, initialService = null }) {
-  const [service, setService] = useState(initialService || {
-    name: '',
-    description: '',
-    type: 'subscription', // subscription | addon
-    pricing_model: 'flat_rate', // flat_rate | tiered | usage_based
-    base_price: '',
-    billing_frequency: 'monthly', // monthly | quarterly | annually | one_time
-    is_active: true,
-    pricing_tiers: [],
-    usage_unit: '',
-    add_ons: []
+export default function ServiceConfiguratorRoot({ companyId, onSave }) {
+  const [config, setConfig] = useState({
+    base_price: 60,
+    water_zone_price: 15,
+    visit_frequencies: [
+      { id: 'freq_1', label: '4-5 per Month', visits_per_month: 4.5, is_active: true },
+      { id: 'freq_2', label: '3 per Month', visits_per_month: 3, is_active: true },
+      { id: 'freq_3', label: '2 per Month', visits_per_month: 2, is_active: true }
+    ],
+    add_ons: [
+      { id: 'addon_1', name: 'Vendor Key-In Service', price: 60, unit: 'per service', is_active: true },
+      { id: 'addon_2', name: 'Concierge Services', price: 60, unit: 'per hour', is_active: true },
+      { id: 'addon_3', name: 'Car Drive', price: 45, unit: 'per car/per drive', is_active: true },
+      { id: 'addon_4', name: 'Handyman Service and Cleaning', price: null, unit: 'as incurred', is_active: true },
+      { id: 'addon_5', name: 'Emergency Visits', price: null, unit: 'tiered by time', is_active: true },
+      { id: 'addon_6', name: 'Pre & Post-Storm Visit', price: 75, unit: 'per visit', is_active: true }
+    ]
   });
 
-  const [activeTab, setActiveTab] = useState('basic');
-
-  const handleServiceUpdate = useCallback((updates) => {
-    setService(prev => ({ ...prev, ...updates }));
+  const handleConfigUpdate = useCallback((updates) => {
+    setConfig(prev => ({ ...prev, ...updates }));
   }, []);
-
-  const isValid = {
-    basic: service.name && service.type,
-    pricing: service.base_price,
-    tiers: service.pricing_model !== 'tiered' || (service.pricing_tiers?.length > 0),
-    complete: service.name && service.type && service.base_price
-  };
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5" />
-            Service Configuration
+            <DollarSign className="h-5 w-5" />
+            Pricing Configuration Model
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="basic" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                <span className="hidden sm:inline">Basic</span>
-              </TabsTrigger>
-              <TabsTrigger value="pricing" className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
-                <span className="hidden sm:inline">Pricing</span>
-              </TabsTrigger>
-              <TabsTrigger value="tiers" disabled={service.pricing_model !== 'tiered'} className="flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                <span className="hidden sm:inline">Tiers</span>
-              </TabsTrigger>
-              <TabsTrigger value="addons" className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Add-ons</span>
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="basic" className="space-y-4">
-              <ServiceBasicInfo 
-                service={service}
-                onUpdate={handleServiceUpdate}
-              />
-            </TabsContent>
-
-            <TabsContent value="pricing" className="space-y-4">
-              <PricingModelSelector 
-                service={service}
-                onUpdate={handleServiceUpdate}
-              />
-            </TabsContent>
-
-            <TabsContent value="tiers" className="space-y-4">
-              {service.pricing_model === 'tiered' && (
-                <TierBuilder 
-                  tiers={service.pricing_tiers || []}
-                  onUpdate={(tiers) => handleServiceUpdate({ pricing_tiers: tiers })}
-                />
-              )}
-            </TabsContent>
-
-            <TabsContent value="addons" className="space-y-4">
-              <AddOnManager 
-                addOns={service.add_ons || []}
-                onUpdate={(addOns) => handleServiceUpdate({ add_ons: addOns })}
-              />
-            </TabsContent>
-          </Tabs>
+        <CardContent className="space-y-6">
+          <PricingConfigurationBuilder 
+            config={config}
+            onUpdate={handleConfigUpdate}
+          />
         </CardContent>
       </Card>
 
-      {/* Preview & Summary */}
-      <ServicePreview 
-        service={service}
+      <PricingConfigurationPreview 
+        config={config}
         onSave={onSave}
-        isValid={isValid.complete}
         companyId={companyId}
       />
     </div>

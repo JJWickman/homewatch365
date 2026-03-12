@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
-import { DollarSign } from 'lucide-react';
+import React from 'react';
 import HomeWatchAcademyDisclaimer from './HomeWatchAcademyDisclaimer';
 import ServiceConfiguratorRoot from './ServiceConfigurator/ServiceConfiguratorRoot';
 import { Input } from "@/components/ui/input";
@@ -116,17 +114,11 @@ const VisitTypesConfig = ({ visitTypes, onChange }) => {
 };
 
 export default function FinancialManagement({ companyId, company }) {
-  const handleConfiguratorSave = (newService) => {
-    // After service is saved, you can reload or update local state
-    console.log('Service saved:', newService);
-  };
-
   return (
     <div className="space-y-6">
       <HomeWatchAcademyDisclaimer />
       <ServiceConfiguratorRoot 
         companyId={companyId}
-        onSave={handleConfiguratorSave}
       />
     </div>
   );
