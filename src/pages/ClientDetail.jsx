@@ -221,6 +221,39 @@ export default function ClientDetail() {
     }
   };
 
+  const portalUrl = `${window.location.origin}/ClientPortal?email=${encodeURIComponent(client?.portal_user_email || '')}`;
+
+  const handleCopyUrl = () => {
+    navigator.clipboard.writeText(portalUrl);
+    setCopiedUrl(true);
+    setTimeout(() => setCopiedUrl(false), 2000);
+  };
+
+  const handleCopyPin = () => {
+    navigator.clipboard.writeText(client.portal_pin || '');
+    setCopiedPin(true);
+    setTimeout(() => setCopiedPin(false), 2000);
+  };
+
+  const handleSavePin = async () => {
+    if (newPin.length !== 6 || !/^\d+$/.test(newPin)) {
+      toast.error('PIN must be exactly 6 digits');
+      return;
+    }
+    setSavingPin(true);
+    try {
+      await base44.entities.Client.update(client.id, { portal_pin: newPin });
+      setClient({ ...client, portal_pin: newPin });
+      setEditingPin(false);
+      setNewPin('');
+      toast.success('PIN updated');
+    } catch (e) {
+      toast.error('Failed to update PIN');
+    } finally {
+      setSavingPin(false);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto">
       <PageHeader
