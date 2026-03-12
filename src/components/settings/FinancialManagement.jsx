@@ -331,6 +331,34 @@ export default function FinancialManagement({ companyId, company }) {
           </Button>
         </CardHeader>
         <CardContent>
+          {/* Stripe Sync Status Banner */}
+          {!company?.stripe_connect_account_id && (
+            <Alert className="mb-4 bg-amber-50 border-amber-200">
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-900">
+                <strong>Stripe not connected.</strong> Connect your Stripe account in the Payment Methods section to sync products and accept online payments from clients.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {company?.stripe_connect_account_id && (
+            <Alert className="mb-4 bg-green-50 border-green-200">
+              <Check className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-900">
+                <strong>Stripe connected.</strong> Use the "Sync to Stripe" button on each product to push pricing to your Stripe account for client billing.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {syncMessage && (
+            <Alert className={`mb-4 ${syncMessage.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+              <AlertCircle className={`h-4 w-4 ${syncMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`} />
+              <AlertDescription className={syncMessage.type === 'success' ? 'text-green-900' : 'text-red-900'}>
+                {syncMessage.text}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {products.length >= MAX_PRODUCTS && (
             <Alert className="mb-4 bg-amber-50 border-amber-200">
               <AlertCircle className="h-4 w-4 text-amber-600" />
