@@ -1495,54 +1495,15 @@ export default function PropertyDetail() {
         </DialogContent>
       </Dialog>
 
-      {/* Add Contractor Dialog */}
-      <Dialog open={showAddContractorDialog} onOpenChange={setShowAddContractorDialog}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Add {CONTRACTOR_TYPES.find(t => t.value === selectedContractorType)?.label}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="contractor-search">Search Contractor</Label>
-              <div className="flex gap-2">
-                <input
-                  id="contractor-search"
-                  type="text"
-                  placeholder="Search by name or type..."
-                  onChange={(e) => handleSearchContractors(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
-                />
-                {searchingContractors && <Loader2 className="h-5 w-5 animate-spin text-slate-400" />}
-              </div>
-            </div>
-
-            {contractorSearchResults.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm text-slate-600">Search Results</p>
-                <div className="border border-slate-200 rounded-lg max-h-64 overflow-y-auto">
-                  {contractorSearchResults.map((result) => (
-                    <button
-                      key={result.id}
-                      onClick={() => handleAssignContractor(result.id)}
-                      className="w-full text-left px-4 py-3 hover:bg-slate-50 border-b border-slate-100 last:border-b-0 transition-colors"
-                    >
-                      <p className="font-medium text-slate-900">{result.business_name}</p>
-                      <p className="text-sm text-slate-500">{result.contact_name}</p>
-                      {result.phone && <p className="text-xs text-slate-400">{result.phone}</p>}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="flex justify-end gap-3 pt-4">
-              <Button variant="outline" onClick={() => setShowAddContractorDialog(false)}>
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Add Contractor via Google Search Modal */}
+      <ContractorSearchDialog
+        open={showContractorSearchModal}
+        onOpenChange={setShowContractorSearchModal}
+        onSelect={handleContractorSearchSelect}
+        properties={allProperties}
+        companyId={property?.company_id}
+        currentProperty={property}
+      />
 
       {/* Change Owner Dialog */}
       <Dialog open={showChangeOwnerDialog} onOpenChange={setShowChangeOwnerDialog}>
