@@ -570,6 +570,26 @@ export default function PropertyDetail() {
     }
   };
 
+  const handleContractorSearchSelect = async (contractorData) => {
+    try {
+      // Override the contractor_type with the selected type if set
+      const typeToUse = selectedContractorType || contractorData.contractor_type;
+      const newContractor = await base44.entities.Contractor.create({
+        ...contractorData,
+        contractor_type: typeToUse,
+        company_id: property.company_id,
+        hourly_rate: contractorData.hourly_rate ? parseFloat(contractorData.hourly_rate) : null,
+        is_active: true
+      });
+      await handleAssignContractor(newContractor.id);
+      setShowContractorSearchModal(false);
+      toast.success('Contractor added and assigned!');
+    } catch (error) {
+      console.error('Error adding contractor from search:', error);
+      toast.error('Failed to add contractor');
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto">
       <PageHeader
