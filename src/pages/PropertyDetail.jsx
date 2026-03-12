@@ -32,6 +32,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
 import PropertyReportTab from '@/components/property/PropertyReportTab';
+import ContractorSearchDialog from '@/components/contractors/ContractorSearchDialog.jsx';
 import { toast } from 'sonner';
 
 const CONTRACTOR_TYPES = [
