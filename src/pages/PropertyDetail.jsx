@@ -263,6 +263,10 @@ export default function PropertyDetail() {
           });
           setContractors(contractorsData);
         }
+
+        // Load all properties for contractor search dialog
+        const allPropsData = await base44.entities.Property.filter({ company_id: prop.company_id });
+        setAllProperties(allPropsData);
       }
     } catch (error) {
       console.error('Error loading property:', error);
