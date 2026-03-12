@@ -116,11 +116,11 @@ export default function AIAssistant() {
         <div className="bg-white/80 backdrop-blur rounded-xl border border-white/40 shadow p-4 flex flex-col items-center gap-2 text-center">
           <img
             src={PERSONA_IMAGE}
-            alt="EW365 Assistant"
+            alt="My Home Watch Advocate"
             className="w-20 h-20 rounded-full object-cover ring-4 ring-blue-900/20 shadow-lg"
           />
           <div>
-            <p className="font-semibold text-slate-800 text-sm">EW365 Assistant</p>
+            <p className="font-semibold text-slate-800 text-sm">My Home Watch Advocate</p>
             <p className="text-xs text-slate-500">Property Management AI</p>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-green-600 bg-green-50 rounded-full px-2 py-0.5 border border-green-200">
@@ -166,7 +166,7 @@ export default function AIAssistant() {
         <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-100/60 bg-white/60 shrink-0">
           <img src={PERSONA_IMAGE} alt="EW365" className="h-9 w-9 rounded-full object-cover ring-2 ring-blue-900/20" />
           <div>
-            <p className="font-semibold text-slate-800 text-sm">EW365 Assistant</p>
+            <p className="font-semibold text-slate-800 text-sm">My Home Watch Advocate</p>
             <p className="text-xs text-slate-400">Ask about properties, visits, clients & more</p>
           </div>
         </div>
