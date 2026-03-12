@@ -81,12 +81,11 @@ export default function Dashboard() {
      setCompanyMember(members[0]);
      const companyId = members[0]?.company_id;
 
-     const [companies, clients, properties, visits, activities, transactions] = await Promise.all([
+     const [companies, clients, properties, visits, transactions] = await Promise.all([
       base44.entities.Company.filter({ id: companyId }),
        base44.entities.Client.filter({ company_id: companyId, is_active: true }),
        base44.entities.Property.filter({ company_id: companyId, is_active: true }),
-       base44.entities.Visit.filter({ company_id: companyId }),
-       base44.entities.ActivityLog.filter({ company_id: companyId }, '-created_date', 10),
+       base44.entities.Visit.filter({ company_id: companyId }, '-updated_date', 100),
        base44.entities.ClientTransaction.filter({ company_id: companyId })
      ]);
 
@@ -146,8 +145,24 @@ export default function Dashboard() {
         return { ...visit, property: props[0], client: cls[0] };
       }));
 
+      // Build recent activity from visits (last 10 updates)
+      const recentVisits = visits.slice(0, 10).map(v => {
+        const client = clients.find(c => c.id === v.client_id);
+        const property = properties.find(p => p.id === v.property_id);
+        return {
+          id: v.id,
+          user_name: v.completed_by || v.assigned_to_name || 'Field Staff',
+          action: v.status === 'completed' ? 'complet' : 'updat',
+          entity_name: `${property?.name || property?.address || 'Property'} - ${v.visit_type}`,
+          entity_type: 'visit',
+          entity_id: v.id,
+          created_date: v.updated_date || v.created_date,
+          details: `${client?.first_name} ${client?.last_name} (${v.status})`
+        };
+      });
+
       setTodayInspections(enrichedVisits);
-      setRecentActivity(activities);
+      setRecentActivity(recentVisits);
       setCheckingOnboarding(false);
 
     } catch (error) {
@@ -164,10 +179,13 @@ export default function Dashboard() {
   };
 
   const getActivityLink = (activity) => {
+    if (activity.entity_type === 'visit') {
+      return createPageUrl('VisitDetail') + `?id=${activity.entity_id}`;
+    }
+    
     const entityTypeMap = {
       'client': 'ClientDetail',
       'property': 'PropertyDetail',
-      'inspection': 'VisitDetail',
       'task': 'Visits',
       'staff': 'Settings',
       'billing': 'Dashboard',
