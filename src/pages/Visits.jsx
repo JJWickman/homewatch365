@@ -128,12 +128,13 @@ export default function Visits() {
           setAssignedFilter('me');
         }
         
-        const [visitsData, propertiesData, clientsData, templatesData, staffData] = await Promise.all([
+        const [visitsData, propertiesData, clientsData, templatesData, staffData, checklistsData] = await Promise.all([
           base44.entities.Visit.filter({ company_id: cId }, '-scheduled_date'),
           base44.entities.Property.filter({ company_id: cId, is_active: true }),
           base44.entities.Client.filter({ company_id: cId }),
           base44.entities.VisitTemplate.filter({ company_id: cId, is_active: true }),
-          base44.entities.CompanyMember.filter({ company_id: cId, is_active: true })
+          base44.entities.CompanyMember.filter({ company_id: cId, is_active: true }),
+          base44.entities.PropertyChecklist.filter({ company_id: cId, is_active: true })
         ]);
         
         setVisits(visitsData);
@@ -141,6 +142,7 @@ export default function Visits() {
         setClients(clientsData);
         setTemplates(templatesData);
         setStaff(staffData);
+        setChecklists(checklistsData);
       }
     } catch (error) {
       console.error('Error loading data:', error);
