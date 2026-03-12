@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Loader2, Save, Copy, Trash2, Edit3, Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import PropertyChecklistWizard from './PropertyChecklistWizard';
 
 export default function PropertyChecklistConfigTab({ propertyId, companyId }) {
   const navigate = useNavigate();
