@@ -34,28 +34,24 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invitation already used' }, { status: 400 });
     }
 
-    // Register the user
-    const registerResponse = await base44.asServiceRole.functions.invoke('registerUser', {
-      email: invitation.invitee_email,
-      password: password,
+    // Step 1: Invite user to app
+    await base44.asServiceRole.users.inviteUser(invitation.invitee_email, 'user');
+
+    // Step 2: Set user's company_id to the inviter's company (tenant isolation)
+    await base44.asServiceRole.auth.updateUser(invitation.invitee_email, {
+      company_id: invitation.company_id,
       full_name: full_name
     });
 
-    if (!registerResponse.data.success) {
-      return Response.json({ error: registerResponse.data.error || 'Failed to create account' }, { status: 400 });
-    }
-
-    // Activate the CompanyMember
-    const members = await base44.asServiceRole.entities.CompanyMember.filter({
+    // Step 3: Create CompanyMember for this user with the role specified in invitation
+    const newMember = await base44.asServiceRole.entities.CompanyMember.create({
       company_id: invitation.company_id,
-      user_email: invitation.invitee_email
+      user_email: invitation.invitee_email,
+      user_name: full_name,
+      role: invitation.role || 'field_inspector',
+      access_level: invitation.access_level || 'user',
+      is_active: true
     });
-
-    if (members.length > 0) {
-      await base44.asServiceRole.entities.CompanyMember.update(members[0].id, {
-        is_active: true
-      });
-    }
 
     // Mark invitation as accepted
     await base44.asServiceRole.entities.Invitation.update(invitation.id, {
