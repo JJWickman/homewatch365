@@ -610,6 +610,20 @@ export default function PropertyDetail() {
         </Button>
       </PageHeader>
 
+      {/* Floating Save Button */}
+      {hasUnsavedChanges && (
+        <div className="fixed bottom-6 right-6 z-40">
+          <Button 
+            onClick={handleSave} 
+            disabled={saving}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg"
+            size="lg"
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </div>
+      )}
+
       {/* Hero Image */}
       <Card className="mb-6 overflow-hidden">
         <div className="aspect-[3/1] bg-slate-100 relative flex items-center justify-center">
