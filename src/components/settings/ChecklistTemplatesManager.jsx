@@ -25,14 +25,10 @@ const RESPONSE_TYPE_LABELS = {
 };
 
 export default function ChecklistTemplatesManager({ companyId, isAdmin }) {
+  const navigate = useNavigate();
   const [company, setCompany] = useState(null);
   const [checklists, setChecklists] = useState({});
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(null); // 'sfh' | 'condo' | 'highrise'
-  const [editingSections, setEditingSections] = useState([]);
-  const [expandedSections, setExpandedSections] = useState({});
-  const [saving, setSaving] = useState(false);
-  const [savedMsg, setSavedMsg] = useState('');
 
   useEffect(() => {
     if (companyId) loadCompany();
@@ -45,69 +41,6 @@ export default function ChecklistTemplatesManager({ companyId, isAdmin }) {
     setChecklists(c?.settings?.checklists || {});
     setLoading(false);
   };
-
-  const openEditor = (templateKey, defaultSections) => {
-    const saved = checklists[templateKey];
-    const raw = (saved?.sections?.length > 0)
-      ? JSON.parse(JSON.stringify(saved.sections))
-      : JSON.parse(JSON.stringify(defaultSections));
-    // Normalize: ensure all items have instructions field
-    raw.forEach(s => s.items.forEach(item => {
-      if (item.instructions === undefined) item.instructions = '';
-    }));
-    setEditing(templateKey);
-    setEditingSections(raw);
-    setExpandedSections(Object.fromEntries(raw.map((_, i) => [i, true])));
-  };
-
-  const saveTemplate = async (published) => {
-    setSaving(true);
-    const updatedChecklists = {
-      ...checklists,
-      [editing]: {
-        sections: editingSections,
-        published,
-        updatedAt: new Date().toISOString(),
-      }
-    };
-    const updatedSettings = { ...(company.settings || {}), checklists: updatedChecklists };
-    await base44.entities.Company.update(company.id, { settings: updatedSettings });
-    setChecklists(updatedChecklists);
-    setCompany(prev => ({ ...prev, settings: updatedSettings }));
-    setSaving(false);
-    setSavedMsg(published ? 'Published!' : 'Draft saved!');
-    setTimeout(() => setSavedMsg(''), 2500);
-    if (published) setEditing(null);
-  };
-
-  // --- Editor mutation helpers ---
-  const updateSectionTitle = (sIdx, title) =>
-    setEditingSections(prev => prev.map((s, i) => i === sIdx ? { ...s, title } : s));
-
-  const removeSection = (sIdx) =>
-    setEditingSections(prev => prev.filter((_, i) => i !== sIdx));
-
-  const addSection = () =>
-    setEditingSections(prev => [...prev, { title: 'New Section', items: [{ label: 'New item', responseType: 'ok_issue_na', instructions: '' }] }]);
-
-  const updateItem = (sIdx, iIdx, field, value) =>
-    setEditingSections(prev => prev.map((s, si) => si !== sIdx ? s : {
-      ...s,
-      items: s.items.map((item, ii) => ii !== iIdx ? item : { ...item, [field]: value })
-    }));
-
-  const removeItem = (sIdx, iIdx) =>
-    setEditingSections(prev => prev.map((s, si) => si !== sIdx ? s : {
-      ...s, items: s.items.filter((_, ii) => ii !== iIdx)
-    }));
-
-  const addItem = (sIdx) =>
-    setEditingSections(prev => prev.map((s, si) => si !== sIdx ? s : {
-      ...s, items: [...s.items, { label: 'New item', responseType: 'ok_issue_na', instructions: '' }]
-    }));
-
-  const toggleSection = (sIdx) =>
-    setExpandedSections(prev => ({ ...prev, [sIdx]: !prev[sIdx] }));
 
   if (!isAdmin) {
     return (
