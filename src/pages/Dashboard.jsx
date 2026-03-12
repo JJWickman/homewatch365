@@ -167,8 +167,8 @@ export default function Dashboard() {
     const entityTypeMap = {
       'client': 'ClientDetail',
       'property': 'PropertyDetail',
-      'inspection': 'InspectionDetail',
-      'task': 'Inspections',
+      'inspection': 'VisitDetail',
+      'task': 'Visits',
       'staff': 'Settings',
       'billing': 'Dashboard',
       'template': 'Settings',
@@ -203,7 +203,7 @@ export default function Dashboard() {
           </h1>
           <p className="text-slate-500 mt-1">Here's what's happening with your properties today.</p>
         </div>
-        <Link to={createPageUrl('Inspections') + '?action=new'}>
+        <Link to={createPageUrl('Visits') + '?action=new'}>
           <Button className="bg-black text-white hover:bg-slate-900">
             <Calendar className="h-4 w-4 mr-2" />
             Book a Visit
@@ -231,9 +231,9 @@ export default function Dashboard() {
             iconBg="bg-emerald-50"
           />
         </Link>
-        <Link to={createPageUrl('Inspections') + '?filter=week'} className="cursor-pointer h-full">
+        <Link to={createPageUrl('Visits')} className="cursor-pointer h-full">
           <StatsCard
-            title="This Week"
+            title="Visits This Week"
             value={`${stats.completedThisWeek}/${stats.inspectionsThisWeek}`}
             icon={ClipboardCheck}
             iconColor="text-amber-600"
@@ -241,7 +241,7 @@ export default function Dashboard() {
             className="[&_p.text-2xl]:mt-10"
           />
         </Link>
-        <Link to={createPageUrl('FollowUps') + '?priority=high,urgent'} className="cursor-pointer h-full">
+        <Link to={createPageUrl('Visits') + '?filter=followup'} className="cursor-pointer h-full">
           <StatsCard
             title="Urgent Issues"
             value={stats.issuesFound}
@@ -279,8 +279,8 @@ export default function Dashboard() {
             <div className="space-y-3">
               {todayInspections.map((visit) => (
                 <Link 
-                  key={visit.id} 
-                  to={createPageUrl('InspectionDetail') + `?id=${visit.id}`}
+                 key={visit.id} 
+                 to={createPageUrl('VisitDetail') + `?id=${visit.id}`}
                   className="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200"
                 >
                   <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
@@ -378,7 +378,7 @@ export default function Dashboard() {
               </p>
               <p className="text-sm text-amber-700">Review and address these issues as soon as possible.</p>
             </div>
-            <Link to={createPageUrl('FollowUps') + '?type=issue&priority=high'}>
+            <Link to={createPageUrl('Visits') + '?filter=followup'}>
               <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100">
                 View Issues
               </Button>
