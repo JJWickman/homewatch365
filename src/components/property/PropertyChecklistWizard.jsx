@@ -83,6 +83,12 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
         is_active: true
       });
 
+      // Initialize sections for editor
+      const templateConfig = TEMPLATE_CONFIGS[selectedTemplate.id];
+      setSections(JSON.parse(JSON.stringify(templateConfig.defaultSections)));
+      setExpandedSections(Object.fromEntries(
+        templateConfig.defaultSections.map((_, i) => [i, true])
+      ));
       setNewChecklistId(newChecklist.id);
       setStep(2);
     } catch (error) {
@@ -91,18 +97,49 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
     }
   };
 
-  const handleOpenEditor = () => {
-    onComplete?.();
-    onClose?.();
-    navigate(
-      createPageUrl('ChecklistEditor') + 
-      `?checklistId=${newChecklistId}&propertyId=${property.id}`
-    );
+  const updateSectionTitle = (sIdx, title) =>
+    setSections(prev => prev.map((s, i) => i === sIdx ? { ...s, title } : s));
+
+  const removeSection = (sIdx) =>
+    setSections(prev => prev.filter((_, i) => i !== sIdx));
+
+  const addSection = () => {
+    setSections(prev => [...prev, { title: 'New Section', items: [{ label: 'New item', responseType: 'ok_issue_na', instructions: '' }] }]);
   };
 
-  const handleCompleteWizard = () => {
-    onComplete?.();
-    onClose?.();
+  const updateItem = (sIdx, iIdx, field, value) =>
+    setSections(prev => prev.map((s, si) => si !== sIdx ? s : {
+      ...s, items: s.items.map((item, ii) => ii !== iIdx ? item : { ...item, [field]: value })
+    }));
+
+  const removeItem = (sIdx, iIdx) =>
+    setSections(prev => prev.map((s, si) => si !== sIdx ? s : {
+      ...s, items: s.items.filter((_, ii) => ii !== iIdx)
+    }));
+
+  const addItem = (sIdx) =>
+    setSections(prev => prev.map((s, si) => si !== sIdx ? s : {
+      ...s, items: [...s.items, { label: 'New item', responseType: 'ok_issue_na', instructions: '' }]
+    }));
+
+  const toggleSection = (sIdx) =>
+    setExpandedSections(prev => ({ ...prev, [sIdx]: !prev[sIdx] }));
+
+  const saveChecklist = async () => {
+    setSaving(true);
+    try {
+      await base44.entities.PropertyChecklist.update(newChecklistId, {
+        customized_sections: sections
+      });
+      setSavedMsg('Saved!');
+      setTimeout(() => setSavedMsg(''), 2500);
+      onComplete?.();
+      onClose?.();
+    } catch (error) {
+      console.error('Error saving:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
