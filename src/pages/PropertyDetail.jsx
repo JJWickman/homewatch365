@@ -33,6 +33,7 @@ import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
 import PropertyReportTab from '@/components/property/PropertyReportTab';
 import PropertyPricingTab from '@/components/property/PropertyPricingTab';
+import PropertyChecklistConfigTab from '@/components/property/PropertyChecklistConfigTab';
 import ContractorSearchDialog from '@/components/contractors/ContractorSearchDialog.jsx';
 import { toast } from 'sonner';
 
@@ -773,6 +774,7 @@ export default function PropertyDetail() {
             <TabsList className="w-full justify-start mb-4 flex-wrap">
               <TabsTrigger value="access">Access Info</TabsTrigger>
               <TabsTrigger value="visits">Visits</TabsTrigger>
+              <TabsTrigger value="checklist">Checklist</TabsTrigger>
               <TabsTrigger value="report">Report</TabsTrigger>
               <TabsTrigger value="pricing">Pricing</TabsTrigger>
               <TabsTrigger value="contractors">Contractors</TabsTrigger>
@@ -1165,6 +1167,10 @@ export default function PropertyDetail() {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="checklist">
+              <PropertyChecklistConfigTab propertyId={property.id} companyId={property.company_id} />
             </TabsContent>
 
             <TabsContent value="report">
