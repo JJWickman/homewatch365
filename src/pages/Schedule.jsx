@@ -164,9 +164,11 @@ export default function Schedule() {
                 <div className="font-medium truncate">
                   {isInspection ? (property?.name || property?.address?.slice(0, 15)) : visit.title}
                 </div>
-                {visit.scheduled_time && (
-                  <div className="text-[10px] opacity-75">{visit.scheduled_time}</div>
-                )}
+                <div className="text-[10px] opacity-75 capitalize">
+                  {visit.visit_type === 'followup' 
+                    ? (visit.followup_type?.replace(/_/g, ' ') || 'Follow-Up')
+                    : (visit.checkin_type?.replace(/_/g, ' ') || visit.visit_type?.replace(/-/g, ' ') || 'Check-In')}
+                </div>
               </Link>
             );
           })}
