@@ -224,20 +224,26 @@ export default function ChecklistEditor() {
                         placeholder="Item label"
                         className="text-sm h-9 font-medium"
                       />
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Select
-                          value={item.responseType}
-                          onValueChange={(v) => updateItem(sIdx, iIdx, 'responseType', v)}
-                        >
-                          <SelectTrigger className="h-8 text-xs w-auto min-w-[200px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.entries(RESPONSE_TYPE_LABELS).map(([v, l]) => (
-                              <SelectItem key={v} value={v} className="text-xs">{l}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                      <div className="flex flex-wrap gap-2">
+                        {Object.entries(RESPONSE_TYPE_LABELS).map(([v, l]) => (
+                          <button
+                            key={v}
+                            type="button"
+                            onClick={() => updateItem(sIdx, iIdx, 'responseType', v)}
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors min-h-[44px] ${
+                              item.responseType === v
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                            }`}
+                          >
+                            <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
+                              item.responseType === v ? 'border-white bg-white' : 'border-slate-400'
+                            }`}>
+                              {item.responseType === v && <span className="w-2 h-2 rounded-full bg-blue-600 block" />}
+                            </span>
+                            {l}
+                          </button>
+                        ))}
                       </div>
                       <Input
                         value={item.instructions || ''}
