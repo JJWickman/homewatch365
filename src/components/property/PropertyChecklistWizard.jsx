@@ -32,34 +32,26 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
   const [creating, setCreating] = useState(false);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
 
-  useEffect(() => {
-    loadTemplates();
-  }, []);
+  // Three standard templates
+  const STANDARD_TEMPLATES = [
+    { id: 'sfh-template', name: 'Single Family Home', description: 'Standard checklist for single family homes and estates', propertyTypes: ['single_family', 'estate'] },
+    { id: 'condo-template', name: 'Condo / Villa', description: 'Checklist for condos, villas, and townhouses', propertyTypes: ['condo', 'townhouse'] },
+    { id: 'highrise-template', name: 'Commercial / Multi-Family', description: 'Checklist for commercial properties and high-rise buildings', propertyTypes: ['commercial'] },
+  ];
 
-  const loadTemplates = async () => {
-    try {
-      // Load all company templates regardless of active status
-      const allTemplates = await base44.entities.ChecklistTemplate.filter({ 
-        company_id: property.company_id
-      });
-      
-      // Filter by property type—match exact type or fallback mappings
-      const relevantTemplates = allTemplates.filter(t => 
-        t.property_type === property.property_type || 
-        (property.property_type === 'townhouse' && t.property_type === 'condo_villa') ||
-        (property.property_type === 'estate' && t.property_type === 'single_family')
-      );
-      
-      setTemplates(relevantTemplates);
-      if (relevantTemplates.length > 0) {
-        setSelectedTemplate(relevantTemplates[0]);
-      }
-    } catch (error) {
-      console.error('Error loading templates:', error);
-    } finally {
-      setLoadingTemplates(false);
+  useEffect(() => {
+    // Auto-select template based on property type
+    const autoSelected = STANDARD_TEMPLATES.find(t => 
+      t.propertyTypes.includes(property.property_type)
+    );
+    setTemplates(STANDARD_TEMPLATES);
+    if (autoSelected) {
+      setSelectedTemplate(autoSelected);
+    } else {
+      setSelectedTemplate(STANDARD_TEMPLATES[0]);
     }
-  };
+    setLoadingTemplates(false);
+  }, []);
 
   const propertyTypeInfo = PROPERTY_TYPE_MAP[property.property_type] || PROPERTY_TYPE_MAP['single_family'];
   const TypeIcon = propertyTypeInfo.icon;
