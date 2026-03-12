@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2, DollarSign, Package, Check, RefreshCw, ExternalLin
 import { Button } from "@/components/ui/button";
 import ProductServiceWizard from './ProductServiceWizard';
 import PriceConfigurator from './PriceConfigurator';
+import HomeWatchAcademyDisclaimer from './HomeWatchAcademyDisclaimer';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -297,6 +298,8 @@ export default function FinancialManagement({ companyId, company }) {
 
   return (
     <div className="space-y-6">
+      <HomeWatchAcademyDisclaimer />
+      
       <Card>
         <CardHeader className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
           <div>
