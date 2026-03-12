@@ -153,6 +153,18 @@ export default function ChecklistEditor() {
         </div>
       </div>
 
+      {/* Home Watch Academy Banner */}
+      <div className="flex flex-col items-center justify-center bg-white border border-slate-200 rounded-xl px-6 py-5 mb-6 shadow-sm text-center">
+        <img
+          src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/b9e08eb9c_image.png"
+          alt="Home Watch Academy"
+          className="h-16 w-auto object-contain mb-3"
+        />
+        <p className="text-sm font-semibold text-slate-600 tracking-wide uppercase">
+          Registered by Home Watch Academy
+        </p>
+      </div>
+
       {/* Template selector tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
         {TEMPLATES.map(t => (
