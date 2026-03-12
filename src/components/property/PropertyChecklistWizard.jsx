@@ -38,17 +38,18 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
 
   const loadTemplates = async () => {
     try {
-      const propertyTypeInfo = PROPERTY_TYPE_MAP[property.property_type] || PROPERTY_TYPE_MAP['single_family'];
+      // Load all company templates regardless of active status
       const allTemplates = await base44.entities.ChecklistTemplate.filter({ 
-        company_id: property.company_id,
-        active: true
+        company_id: property.company_id
       });
-      // Filter templates by property type
+      
+      // Filter by property type—match exact type or fallback mappings
       const relevantTemplates = allTemplates.filter(t => 
         t.property_type === property.property_type || 
         (property.property_type === 'townhouse' && t.property_type === 'condo_villa') ||
         (property.property_type === 'estate' && t.property_type === 'single_family')
       );
+      
       setTemplates(relevantTemplates);
       if (relevantTemplates.length > 0) {
         setSelectedTemplate(relevantTemplates[0]);
