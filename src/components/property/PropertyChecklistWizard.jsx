@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPageUrl } from '@/utils';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Building, Home, Building2, X, ArrowRight, Loader2 } from 'lucide-react';
+import { Building, Home, Building2, X, ArrowRight, Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -24,8 +25,40 @@ const PROPERTY_TYPE_MAP = {
 export default function PropertyChecklistWizard({ property, onClose, onComplete }) {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [checklistName, setChecklistName] = useState('');
+  const [customSections, setCustomSections] = useState([]);
   const [creating, setCreating] = useState(false);
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
+
+  useEffect(() => {
+    loadTemplates();
+  }, []);
+
+  const loadTemplates = async () => {
+    try {
+      const propertyTypeInfo = PROPERTY_TYPE_MAP[property.property_type] || PROPERTY_TYPE_MAP['single_family'];
+      const allTemplates = await base44.entities.ChecklistTemplate.filter({ 
+        company_id: property.company_id,
+        active: true
+      });
+      // Filter templates by property type
+      const relevantTemplates = allTemplates.filter(t => 
+        t.property_type === property.property_type || 
+        (property.property_type === 'townhouse' && t.property_type === 'condo_villa') ||
+        (property.property_type === 'estate' && t.property_type === 'single_family')
+      );
+      setTemplates(relevantTemplates);
+      if (relevantTemplates.length > 0) {
+        setSelectedTemplate(relevantTemplates[0]);
+      }
+    } catch (error) {
+      console.error('Error loading templates:', error);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
 
   const propertyTypeInfo = PROPERTY_TYPE_MAP[property.property_type] || PROPERTY_TYPE_MAP['single_family'];
   const TypeIcon = propertyTypeInfo.icon;
