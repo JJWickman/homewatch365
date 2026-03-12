@@ -219,17 +219,31 @@ export default function ChecklistEditor() {
         </div>
       </div>
 
-      {/* Home Watch Academy Banner */}
-      <div className="flex flex-col items-center justify-center bg-white border border-slate-200 rounded-xl px-6 py-5 mb-6 shadow-sm text-center">
-        <img
-          src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/b9e08eb9c_image.png"
-          alt="Home Watch Academy"
-          className="h-16 w-auto object-contain mb-3"
-        />
-        <p className="text-sm font-semibold text-slate-600 tracking-wide uppercase">
-          Registered by Home Watch Academy
-        </p>
-      </div>
+      {/* Property Context Banner */}
+      {propertyChecklist && property && client ? (
+        <div className="flex flex-col items-center justify-center bg-blue-50 border border-blue-200 rounded-xl px-6 py-5 mb-6 shadow-sm text-center">
+          <p className="text-sm font-semibold text-blue-900 mb-1">
+            {client.first_name} {client.last_name}
+          </p>
+          <p className="text-base font-bold text-blue-950 mb-2">
+            {property.name || property.address}
+          </p>
+          <p className="text-xs text-blue-700">
+            {property.address}, {property.city}, {property.state} {property.zip}
+          </p>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center bg-white border border-slate-200 rounded-xl px-6 py-5 mb-6 shadow-sm text-center">
+          <img
+            src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/b9e08eb9c_image.png"
+            alt="Home Watch Academy"
+            className="h-16 w-auto object-contain mb-3"
+          />
+          <p className="text-sm font-semibold text-slate-600 tracking-wide uppercase">
+            Registered by Home Watch Academy
+          </p>
+        </div>
+      )}
 
       {/* Template selector tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
