@@ -4,11 +4,10 @@ import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import {
   Home, Building, Building2, Save, Globe, Plus, Trash2,
-  ChevronDown, ChevronRight, Loader2, ArrowLeft, GripVertical
+  ChevronDown, ChevronRight, Loader2, ArrowLeft, MessageSquare, Camera
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { SFH_SECTIONS, CONDO_SECTIONS, HIGHRISE_SECTIONS } from '@/components/checklist/checklistDefaults';
 
@@ -17,14 +16,6 @@ const TEMPLATES = [
   { key: 'condo', title: 'Condo / Villa', subtitle: 'Home Watch Visit Checklist', icon: Building, color: 'bg-purple-500', defaultSections: CONDO_SECTIONS },
   { key: 'highrise', title: 'High Rise', subtitle: 'Home Watch Visit Checklist', icon: Building2, color: 'bg-emerald-500', defaultSections: HIGHRISE_SECTIONS },
 ];
-
-const RESPONSE_TYPE_LABELS = {
-  ok_issue_na: 'OK / Issue / N/A',
-  number: 'Number (e.g. temperature)',
-  percentage: 'Percentage (e.g. humidity)',
-  photo_only: 'Photo Only',
-  instruction_only: 'Advisory / Instruction',
-};
 
 export default function ChecklistEditor() {
   const navigate = useNavigate();
