@@ -609,7 +609,7 @@ export default function PropertyDetail() {
                 status: 'in_progress',
                 template_id: propertyChecklist.template_id || null
               });
-              navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${property.id}`);
+              navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${property.id}&checklist_id=${propertyChecklist.id}`);
             }}
           >
             <Zap className="h-4 w-4 mr-2" />
