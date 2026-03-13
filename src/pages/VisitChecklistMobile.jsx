@@ -16,6 +16,7 @@ export default function VisitChecklistMobile() {
   const searchParams = new URLSearchParams(window.location.search);
   const visitId = searchParams.get('visit_id');
   const propertyId = searchParams.get('property_id');
+  const checklistId = searchParams.get('checklist_id');
 
   // State
   const [loading, setLoading] = useState(true);
