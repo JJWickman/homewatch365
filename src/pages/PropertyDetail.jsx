@@ -649,7 +649,24 @@ export default function PropertyDetail() {
             <div className="text-slate-400">No photo uploaded</div>
           )}
           <div className="absolute top-4 right-4 flex gap-2">
-            <StatusBadge status={property.status} />
+            <div className="relative group">
+              <button
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => {
+                  const statuses = ['occupied', 'vacant', 'seasonal', 'for_sale'];
+                  const next = statuses[(statuses.indexOf(property.status) + 1) % statuses.length];
+                  setProperty({ ...property, status: next });
+                  base44.entities.Property.update(property.id, { status: next });
+                  toast.success(`Status updated to ${next.replace('_', ' ')}`);
+                }}
+                title="Click to change status"
+              >
+                <StatusBadge status={property.status} />
+              </button>
+              <div className="absolute right-0 top-full mt-1 bg-black/70 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                Click to change
+              </div>
+            </div>
           </div>
           <div className="absolute bottom-4 right-4 flex gap-2">
             <input
