@@ -592,10 +592,21 @@ export default function Visits() {
     loadData();
   };
 
-  const handleCheckInNow = (propertyId) => {
+  const handleCheckInNow = async (propertyId) => {
     const propertyChecklist = checklists.find(c => c.property_id === propertyId);
     if (propertyChecklist) {
-      navigate(createPageUrl('VisitChecklistMobile') + `?property_id=${propertyId}&checklist_id=${propertyChecklist.id}&mode=checkin_now`);
+      const prop = properties.find(p => p.id === propertyId);
+      const visit = await base44.entities.Visit.create({
+        company_id: companyId,
+        property_id: propertyId,
+        client_id: prop?.client_id || null,
+        visit_type: 'check-in',
+        checkin_type: 'routine',
+        scheduled_date: format(new Date(), 'yyyy-MM-dd'),
+        status: 'in_progress',
+        template_id: propertyChecklist.template_id || null
+      });
+      navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${propertyId}`);
     }
     setShowCheckInNow(false);
   };
