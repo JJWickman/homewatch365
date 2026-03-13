@@ -54,102 +54,78 @@ export default function VisitChecklistMobile() {
         return;
       }
 
-      // Resolve template_code from property checklist
-      let resolvedTemplateCode = null;
-
-      // Try checklist_id first, then fall back to property_id lookup
-      const checklistFilter = checklistId
+      // Step 1: Load the property's unique checklist directly
+      const checklistRecords = checklistId
         ? await base44.entities.PropertyChecklist.filter({ id: checklistId })
-        : await base44.entities.PropertyChecklist.filter({ property_id: propertyId });
+        : await base44.entities.PropertyChecklist.filter({ property_id: propertyId, is_active: true });
 
-      if (checklistFilter.length > 0 && checklistFilter[0].template_id) {
-        const rawTemplateRef = checklistFilter[0].template_id;
-
-        // Check if it looks like a UUID (contains hyphens and is long)
-        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawTemplateRef);
-
-        if (isUUID) {
-          // It's a real UUID — look up the template to get its code
-          const byId = await base44.entities.ChecklistTemplate.filter({ id: rawTemplateRef });
-          if (byId.length > 0) resolvedTemplateCode = byId[0].code;
-        } else {
-          // It's already a code string — try looking it up by code to confirm it exists
-          const byCode = await base44.entities.ChecklistTemplate.filter({ code: rawTemplateRef });
-          if (byCode.length > 0) {
-            resolvedTemplateCode = byCode[0].code;
-          } else {
-            // Use the value directly as the template code (may be a partial/legacy code)
-            resolvedTemplateCode = rawTemplateRef;
-          }
-        }
-      }
-
-      if (!resolvedTemplateCode) {
-        setError('No default checklist is saved for this property. Please configure a checklist in the Property settings first.');
+      if (!checklistRecords.length) {
+        setError('No checklist configured for this property. Please set one up in the Property settings.');
         return;
       }
 
-      // Get visit and property
-      const visits = await base44.entities.Visit.filter({ id: visitId });
-      const properties = await base44.entities.Property.filter({ id: propertyId });
+      const propertyChecklist = checklistRecords[0];
+
+      // Step 2: Load visit, property, template, and sections in parallel
+      const [visits, properties, templateList, sectionsList] = await Promise.all([
+        base44.entities.Visit.filter({ id: visitId }),
+        base44.entities.Property.filter({ id: propertyId }),
+        base44.entities.ChecklistTemplate.filter({ id: propertyChecklist.template_id }),
+        base44.entities.ChecklistTemplateSection.filter({ template_id: propertyChecklist.template_id })
+      ]);
 
       if (!visits.length || !properties.length) {
         setError('Visit or property not found');
         return;
       }
-
-      const visitData = visits[0];
-      const propertyData = properties[0];
-      setVisit(visitData);
-      setProperty(propertyData);
-
-      // Get company
-      const companies = await base44.entities.Company.filter({ id: propertyData.company_id });
-      company.current = companies[0];
-
-      // Load template and checklist
-      const templateResponse = await base44.functions.invoke('checklistHelpers', {
-        action: 'getTemplate',
-        payload: {
-          template_code: resolvedTemplateCode,
-          company_id: propertyData.company_id
-        }
-      });
-
-      if (!templateResponse.data.template) {
-        setError('Checklist template not found for this property. Please contact your administrator.');
+      if (!templateList.length) {
+        setError('Checklist template not found');
         return;
       }
 
-      setTemplate(templateResponse.data.template);
-      setSections(templateResponse.data.sections || []);
-      setItemsBySection(templateResponse.data.itemsBySection || {});
+      setVisit(visits[0]);
+      setProperty(properties[0]);
+      setTemplate(templateList[0]);
 
-      // Get or create submission
-      const submissionResponse = await base44.functions.invoke('checklistHelpers', {
-        action: 'getOrCreateSubmission',
-        payload: {
+      const companies = await base44.entities.Company.filter({ id: properties[0].company_id });
+      company.current = companies[0];
+
+      // Step 3: Load items for each section
+      const sortedSections = sectionsList.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      setSections(sortedSections);
+
+      const itemsMap = {};
+      await Promise.all(sortedSections.map(async (section) => {
+        const items = await base44.entities.ChecklistTemplateItem.filter({ section_id: section.id });
+        itemsMap[section.id] = items.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      }));
+      setItemsBySection(itemsMap);
+
+      // Step 4: Get or create submission for this visit
+      const existingSubmissions = await base44.entities.ChecklistSubmission.filter({ visit_id: visitId });
+      let sub;
+      if (existingSubmissions.length > 0) {
+        sub = existingSubmissions[0];
+      } else {
+        sub = await base44.entities.ChecklistSubmission.create({
+          template_id: propertyChecklist.template_id,
           visit_id: visitId,
           property_id: propertyId,
-          template_code: resolvedTemplateCode,
-          company_id: propertyData.company_id,
-          assigned_resource_id: user.current.email
-        }
-      });
-
-      const sub = submissionResponse.data.submission;
-      setSubmission(sub);
-
-      // Load existing responses
-      const responseMap = {};
-      if (submissionResponse.data.items) {
-        submissionResponse.data.items.forEach(item => {
-          responseMap[item.template_item_id] = item;
+          company_id: properties[0].company_id,
+          assigned_resource_id: user.current.email,
+          status: 'draft',
+          started_at: new Date().toISOString(),
+          completion_percent: 0
         });
       }
+      setSubmission(sub);
+
+      // Step 5: Load existing responses
+      const existingItems = await base44.entities.ChecklistSubmissionItem.filter({ submission_id: sub.id });
+      const responseMap = {};
+      existingItems.forEach(item => { responseMap[item.template_item_id] = item; });
       setResponses(responseMap);
 
-      // Calculate completion
       updateCompletion(sub.id);
     } catch (err) {
       console.error('Load error:', err);
