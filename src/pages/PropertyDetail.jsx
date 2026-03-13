@@ -1379,7 +1379,7 @@ export default function PropertyDetail() {
                 value={newTask.title}
                 onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                 placeholder="e.g., Fix roof leak"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
               />
             </div>
             <div>
@@ -1389,7 +1389,7 @@ export default function PropertyDetail() {
                 value={newTask.description}
                 onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
                 placeholder="Task details..."
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
                 rows={3}
               />
             </div>
@@ -1400,7 +1400,7 @@ export default function PropertyDetail() {
                   id="task-priority"
                   value={newTask.priority}
                   onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
                   >
                    <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -1415,16 +1415,16 @@ export default function PropertyDetail() {
                   type="date"
                   value={newTask.due_date}
                   onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-3 pt-4">
-              <Button variant="outline" onClick={() => setShowAddTask(false)}>Cancel</Button>
-              <Button onClick={handleAddTask} disabled={savingTask} className="bg-slate-900 hover:bg-slate-800">
-                {savingTask ? 'Creating...' : 'Create Follow-Up'}
-              </Button>
-            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-2 pb-6">
+            <Button variant="outline" onClick={() => setShowAddTask(false)}>Cancel</Button>
+            <Button onClick={handleAddTask} disabled={savingTask} className="bg-slate-900 hover:bg-slate-800">
+              {savingTask ? 'Creating...' : 'Create Follow-Up'}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
