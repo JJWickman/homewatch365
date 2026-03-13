@@ -54,6 +54,18 @@ export default function VisitChecklistMobile() {
         return;
       }
 
+      // Resolve template_code from property checklist if checklist_id provided
+      let resolvedTemplateCode = 'condo_villa_home_watch_visit';
+      if (checklistId) {
+        const checklists = await base44.entities.PropertyChecklist.filter({ id: checklistId });
+        if (checklists.length > 0 && checklists[0].template_id) {
+          const templates = await base44.entities.ChecklistTemplate.filter({ id: checklists[0].template_id });
+          if (templates.length > 0 && templates[0].code) {
+            resolvedTemplateCode = templates[0].code;
+          }
+        }
+      }
+
       // Get visit and property
       const visits = await base44.entities.Visit.filter({ id: visitId });
       const properties = await base44.entities.Property.filter({ id: propertyId });
