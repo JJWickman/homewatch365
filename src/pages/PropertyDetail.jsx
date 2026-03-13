@@ -1426,6 +1426,7 @@ export default function PropertyDetail() {
               {savingTask ? 'Creating...' : 'Create Follow-Up'}
             </Button>
           </div>
+          </div>
         </DialogContent>
       </Dialog>
 
