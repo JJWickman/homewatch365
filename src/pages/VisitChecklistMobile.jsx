@@ -54,61 +54,67 @@ export default function VisitChecklistMobile() {
         return;
       }
 
-      // Step 1: Load the property's unique checklist directly
-      const checklistRecords = checklistId
-        ? await base44.entities.PropertyChecklist.filter({ id: checklistId })
-        : await base44.entities.PropertyChecklist.filter({ property_id: propertyId, is_active: true });
+      // Step 1: Load the property's unique checklist and basic data in parallel
+      const [checklistRecords, visits, properties] = await Promise.all([
+        checklistId
+          ? base44.entities.PropertyChecklist.filter({ id: checklistId })
+          : base44.entities.PropertyChecklist.filter({ property_id: propertyId, is_active: true }),
+        base44.entities.Visit.filter({ id: visitId }),
+        base44.entities.Property.filter({ id: propertyId })
+      ]);
 
       if (!checklistRecords.length) {
         setError('No checklist configured for this property. Please set one up in the Property settings.');
         return;
       }
-
-      const propertyChecklist = checklistRecords[0];
-
-      // Step 2: Load visit, property, template, and sections in parallel
-      const [visits, properties, templateList, sectionsList] = await Promise.all([
-        base44.entities.Visit.filter({ id: visitId }),
-        base44.entities.Property.filter({ id: propertyId }),
-        base44.entities.ChecklistTemplate.filter({ id: propertyChecklist.template_id }),
-        base44.entities.ChecklistTemplateSection.filter({ template_id: propertyChecklist.template_id })
-      ]);
-
       if (!visits.length || !properties.length) {
         setError('Visit or property not found');
         return;
       }
-      if (!templateList.length) {
-        setError('Checklist template not found');
-        return;
-      }
 
+      const propertyChecklist = checklistRecords[0];
       setVisit(visits[0]);
       setProperty(properties[0]);
-      setTemplate(templateList[0]);
+      setTemplate({ name: propertyChecklist.name, id: propertyChecklist.id });
 
       const companies = await base44.entities.Company.filter({ id: properties[0].company_id });
       company.current = companies[0];
 
-      // Step 3: Load items for each section
-      const sortedSections = sectionsList.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-      setSections(sortedSections);
+      // Step 2: Build sections and items directly from customized_sections on the PropertyChecklist
+      // Each section has: { title, items: [{ label, responseType, instructions }] }
+      const rawSections = propertyChecklist.customized_sections || [];
+      const builtSections = rawSections.map((sec, sIdx) => ({
+        id: `${propertyChecklist.id}-sec-${sIdx}`,
+        title: sec.title,
+        sort_order: sIdx
+      }));
+      setSections(builtSections);
 
       const itemsMap = {};
-      await Promise.all(sortedSections.map(async (section) => {
-        const items = await base44.entities.ChecklistTemplateItem.filter({ section_id: section.id });
-        itemsMap[section.id] = items.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-      }));
+      builtSections.forEach((sec, sIdx) => {
+        const rawItems = rawSections[sIdx].items || [];
+        itemsMap[sec.id] = rawItems.map((item, iIdx) => ({
+          id: `${sec.id}-item-${iIdx}`,
+          section_id: sec.id,
+          label: item.label,
+          response_type: item.responseType || 'ok_issue_na',
+          instructions: item.instructions || '',
+          sort_order: iIdx,
+          allow_na: true,
+          allow_note: true,
+          allow_photo: true
+        }));
+      });
       setItemsBySection(itemsMap);
 
-      // Step 4: Get or create submission for this visit
+      // Step 3: Get or create submission for this visit
       const existingSubmissions = await base44.entities.ChecklistSubmission.filter({ visit_id: visitId });
       let sub;
       if (existingSubmissions.length > 0) {
         sub = existingSubmissions[0];
       } else {
         sub = await base44.entities.ChecklistSubmission.create({
-          template_id: propertyChecklist.template_id,
+          template_id: propertyChecklist.id,
           visit_id: visitId,
           property_id: propertyId,
           company_id: properties[0].company_id,
@@ -120,7 +126,7 @@ export default function VisitChecklistMobile() {
       }
       setSubmission(sub);
 
-      // Step 5: Load existing responses
+      // Step 4: Load existing responses
       const existingItems = await base44.entities.ChecklistSubmissionItem.filter({ submission_id: sub.id });
       const responseMap = {};
       existingItems.forEach(item => { responseMap[item.template_item_id] = item; });
