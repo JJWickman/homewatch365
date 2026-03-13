@@ -598,7 +598,19 @@ export default function PropertyDetail() {
         {propertyChecklist && (
           <Button
             className="bg-amber-600 hover:bg-amber-700 text-white"
-            onClick={() => navigate(createPageUrl('VisitChecklistMobile') + `?property_id=${property.id}&checklist_id=${propertyChecklist.id}&mode=checkin_now`)}
+            onClick={async () => {
+              const visit = await base44.entities.Visit.create({
+                company_id: property.company_id,
+                property_id: property.id,
+                client_id: property.client_id || null,
+                visit_type: 'check-in',
+                checkin_type: 'routine',
+                scheduled_date: new Date().toISOString().split('T')[0],
+                status: 'in_progress',
+                template_id: propertyChecklist.template_id || null
+              });
+              navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${property.id}`);
+            }}
           >
             <Zap className="h-4 w-4 mr-2" />
             Check-In Now
