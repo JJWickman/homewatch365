@@ -1431,11 +1431,11 @@ export default function PropertyDetail() {
 
       {/* Add Emergency Contact Dialog */}
       <Dialog open={showAddContact} onOpenChange={setShowAddContact}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Add Emergency Contact</DialogTitle>
+        <DialogContent className="sm:max-w-md rounded-2xl p-0 bg-white/90 backdrop-blur-xl border border-white/30 shadow-2xl">
+          <DialogHeader className="rounded-t-2xl bg-slate-900 px-6 pt-6 pb-4">
+            <DialogTitle className="text-white text-lg font-semibold">Add Emergency Contact</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 px-6 pt-4">
             <div>
               <Label htmlFor="contact-name">Name *</Label>
               <input
@@ -1444,7 +1444,7 @@ export default function PropertyDetail() {
                 value={newContact.name}
                 onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
                 placeholder="Contact name"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
               />
             </div>
             <div>
@@ -1455,7 +1455,7 @@ export default function PropertyDetail() {
                 value={newContact.relationship}
                 onChange={(e) => setNewContact({ ...newContact, relationship: e.target.value })}
                 placeholder="e.g., Owner, Manager"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
               />
             </div>
             <div>
@@ -1466,7 +1466,7 @@ export default function PropertyDetail() {
                 value={newContact.phone}
                 onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
                 placeholder="Phone number"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
               />
             </div>
             <div>
@@ -1477,10 +1477,10 @@ export default function PropertyDetail() {
                 value={newContact.email}
                 onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
                 placeholder="Email address"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
               />
             </div>
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-3 pt-2 pb-6">
               <Button variant="outline" onClick={() => setShowAddContact(false)}>Cancel</Button>
               <Button onClick={handleAddContact} disabled={savingContact} className="bg-slate-900 hover:bg-slate-800">
                 {savingContact ? 'Adding...' : 'Add Contact'}
