@@ -150,14 +150,13 @@ export default function VisitChecklistMobile() {
 
   const saveItemResponse = useCallback(async (submissionId, templateItemId, payload) => {
     try {
-      await base44.functions.invoke('checklistHelpers', {
-        action: 'saveItemResponse',
-        payload: {
-          submission_id: submissionId,
-          template_item_id: templateItemId,
-          ...payload
-        }
-      });
+      const existing = await base44.entities.ChecklistSubmissionItem.filter({ submission_id: submissionId, template_item_id: templateItemId });
+      const itemData = { submission_id: submissionId, template_item_id: templateItemId, ...payload };
+      if (existing.length > 0) {
+        await base44.entities.ChecklistSubmissionItem.update(existing[0].id, itemData);
+      } else {
+        await base44.entities.ChecklistSubmissionItem.create(itemData);
+      }
     } catch (err) {
       console.error('Save error:', err);
       setSaveStatus('error');
