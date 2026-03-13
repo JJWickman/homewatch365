@@ -108,7 +108,7 @@ export default function VisitChecklistMobile() {
         payload: {
           visit_id: visitId,
           property_id: propertyId,
-          template_code: 'condo_villa_home_watch_visit',
+          template_code: resolvedTemplateCode,
           company_id: propertyData.company_id,
           assigned_resource_id: user.current.email
         }
