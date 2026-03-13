@@ -110,7 +110,7 @@ export default function VisitChecklistMobile() {
       });
 
       if (!templateResponse.data.template) {
-        setError('Checklist template not found. Please seed the Condo/Villa template first.');
+        setError('Checklist template not found for this property. Please contact your administrator.');
         return;
       }
 
