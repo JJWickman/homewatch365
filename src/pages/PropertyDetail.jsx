@@ -595,6 +595,15 @@ export default function PropertyDetail() {
             {saving ? 'Saving...' : 'Save'}
           </Button>
         )}
+        {propertyChecklist && (
+          <Button
+            className="bg-amber-600 hover:bg-amber-700 text-white"
+            onClick={() => navigate(createPageUrl('VisitChecklistMobile') + `?property_id=${property.id}&checklist_id=${propertyChecklist.id}&mode=checkin_now`)}
+          >
+            <Zap className="h-4 w-4 mr-2" />
+            Check-In Now
+          </Button>
+        )}
         <Button variant="outline" onClick={() => navigate(createPageUrl('PropertyForm') + `?id=${property.id}`)}>
           <Edit className="h-4 w-4 mr-2" />
           <span>Edit</span>
