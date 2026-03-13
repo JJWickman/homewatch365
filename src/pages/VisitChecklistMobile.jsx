@@ -64,16 +64,23 @@ export default function VisitChecklistMobile() {
 
       if (checklistFilter.length > 0 && checklistFilter[0].template_id) {
         const rawTemplateRef = checklistFilter[0].template_id;
-        // template_id may be a code string or a UUID — try code lookup first
-        const byCode = await base44.entities.ChecklistTemplate.filter({ code: rawTemplateRef });
-        if (byCode.length > 0) {
-          resolvedTemplateCode = byCode[0].code;
+
+        // Check if it looks like a UUID (contains hyphens and is long)
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawTemplateRef);
+
+        if (isUUID) {
+          // It's a real UUID — look up the template to get its code
+          const byId = await base44.entities.ChecklistTemplate.filter({ id: rawTemplateRef });
+          if (byId.length > 0) resolvedTemplateCode = byId[0].code;
         } else {
-          // Try treating it as a UUID id
-          try {
-            const byId = await base44.entities.ChecklistTemplate.filter({ id: rawTemplateRef });
-            if (byId.length > 0) resolvedTemplateCode = byId[0].code;
-          } catch (_) {}
+          // It's already a code string — try looking it up by code to confirm it exists
+          const byCode = await base44.entities.ChecklistTemplate.filter({ code: rawTemplateRef });
+          if (byCode.length > 0) {
+            resolvedTemplateCode = byCode[0].code;
+          } else {
+            // Use the value directly as the template code (may be a partial/legacy code)
+            resolvedTemplateCode = rawTemplateRef;
+          }
         }
       }
 
