@@ -1050,6 +1050,16 @@ export default function PropertyDetail() {
                         <SelectItem value="followup">Follow-Ups</SelectItem>
                       </SelectContent>
                     </Select>
+                    {propertyChecklist && (
+                      <Button
+                        size="sm"
+                        className="bg-amber-600 hover:bg-amber-700 text-white"
+                        onClick={() => navigate(createPageUrl('VisitChecklistMobile') + `?property_id=${property.id}&checklist_id=${propertyChecklist.id}&mode=checkin_now`)}
+                      >
+                        <Zap className="h-4 w-4 mr-1" />
+                        Check-In Now
+                      </Button>
+                    )}
                     <Button 
                       size="sm" 
                       onClick={() => navigate(createPageUrl('Visits') + `?action=new&property_id=${property.id}`)}
