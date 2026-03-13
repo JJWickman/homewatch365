@@ -54,16 +54,32 @@ export default function VisitChecklistMobile() {
         return;
       }
 
-      // Resolve template_code from property checklist if checklist_id provided
-      let resolvedTemplateCode = 'condo_villa_home_watch_visit';
-      if (checklistId) {
-        const checklists = await base44.entities.PropertyChecklist.filter({ id: checklistId });
-        if (checklists.length > 0 && checklists[0].template_id) {
-          const templates = await base44.entities.ChecklistTemplate.filter({ id: checklists[0].template_id });
-          if (templates.length > 0 && templates[0].code) {
-            resolvedTemplateCode = templates[0].code;
-          }
+      // Resolve template_code from property checklist
+      let resolvedTemplateCode = null;
+
+      // Try checklist_id first, then fall back to property_id lookup
+      const checklistFilter = checklistId
+        ? await base44.entities.PropertyChecklist.filter({ id: checklistId })
+        : await base44.entities.PropertyChecklist.filter({ property_id: propertyId });
+
+      if (checklistFilter.length > 0 && checklistFilter[0].template_id) {
+        const rawTemplateRef = checklistFilter[0].template_id;
+        // template_id may be a code string or a UUID — try code lookup first
+        const byCode = await base44.entities.ChecklistTemplate.filter({ code: rawTemplateRef });
+        if (byCode.length > 0) {
+          resolvedTemplateCode = byCode[0].code;
+        } else {
+          // Try treating it as a UUID id
+          try {
+            const byId = await base44.entities.ChecklistTemplate.filter({ id: rawTemplateRef });
+            if (byId.length > 0) resolvedTemplateCode = byId[0].code;
+          } catch (_) {}
         }
+      }
+
+      if (!resolvedTemplateCode) {
+        setError('No default checklist is saved for this property. Please configure a checklist in the Property settings first.');
+        return;
       }
 
       // Get visit and property
