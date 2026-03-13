@@ -269,6 +269,10 @@ export default function PropertyDetail() {
         // Load all properties for contractor search dialog
         const allPropsData = await base44.entities.Property.filter({ company_id: prop.company_id });
         setAllProperties(allPropsData);
+
+        // Load property checklist
+        const checklistData = await base44.entities.PropertyChecklist.filter({ property_id: id, company_id: companyId, is_active: true });
+        if (checklistData.length > 0) setPropertyChecklist(checklistData[0]);
       }
     } catch (error) {
       console.error('Error loading property:', error);
