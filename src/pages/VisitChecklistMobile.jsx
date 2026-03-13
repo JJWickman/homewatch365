@@ -137,18 +137,16 @@ export default function VisitChecklistMobile() {
 
   const updateCompletion = useCallback(async (submissionId) => {
     try {
-      const result = await base44.functions.invoke('checklistHelpers', {
-        action: 'calculateCompletion',
-        payload: {
-          submission_id: submissionId,
-          company_id: company.current.id
-        }
-      });
-      setCompletionPercent(result.data.completion_percent || 0);
+      const allItems = Object.values(itemsBySection).flat().filter(i => i.response_type !== 'instruction_only');
+      const existingResponses = await base44.entities.ChecklistSubmissionItem.filter({ submission_id: submissionId });
+      const answered = existingResponses.filter(r => r.response_value !== null || r.numeric_value !== null || (r.photo_urls && r.photo_urls.length > 0));
+      const percent = allItems.length > 0 ? Math.round((answered.length / allItems.length) * 100) : 0;
+      setCompletionPercent(percent);
+      await base44.entities.ChecklistSubmission.update(submissionId, { completion_percent: percent });
     } catch (err) {
       console.error('Completion calc error:', err);
     }
-  }, []);
+  }, [itemsBySection]);
 
   const saveItemResponse = useCallback(async (submissionId, templateItemId, payload) => {
     try {
