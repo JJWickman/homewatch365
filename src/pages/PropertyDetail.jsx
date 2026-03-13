@@ -1502,30 +1502,28 @@ export default function PropertyDetail() {
 
       {/* Change Owner Dialog */}
       <Dialog open={showChangeOwnerDialog} onOpenChange={setShowChangeOwnerDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Change Property Owner</DialogTitle>
+        <DialogContent className="max-w-sm rounded-2xl p-0 bg-white/90 backdrop-blur-xl border border-white/30 shadow-2xl">
+          <DialogHeader className="rounded-t-2xl bg-slate-900 px-6 pt-6 pb-4">
+            <DialogTitle className="text-white text-lg font-semibold">Change Property Owner</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map(c => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.first_name} {c.last_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-4 px-6 pt-4 pb-6">
+            <Select value={selectedClientId} onValueChange={setSelectedClientId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a client" />
+              </SelectTrigger>
+              <SelectContent>
+                {clients.map(c => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.first_name} {c.last_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowChangeOwnerDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleChangeOwner} disabled={changingOwner || !selectedClientId}>
+              <Button onClick={handleChangeOwner} disabled={changingOwner || !selectedClientId} className="bg-slate-900 hover:bg-slate-800">
                 {changingOwner ? 'Changing...' : 'Change Owner'}
               </Button>
             </div>
