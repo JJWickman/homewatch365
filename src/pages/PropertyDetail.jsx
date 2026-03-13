@@ -1365,10 +1365,11 @@ export default function PropertyDetail() {
 
       {/* Add Follow-Up Dialog */}
       <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
-         <DialogContent className="sm:max-w-md">
-           <DialogHeader>
-             <DialogTitle>Add Follow-Up</DialogTitle>
+         <DialogContent className="sm:max-w-md rounded-2xl p-0 bg-white/90 backdrop-blur-xl border border-white/30 shadow-2xl">
+           <DialogHeader className="rounded-t-2xl bg-slate-900 px-6 pt-6 pb-4">
+             <DialogTitle className="text-white text-lg font-semibold">Add Follow-Up</DialogTitle>
           </DialogHeader>
+          <div className="px-6 pt-4">
           <div className="space-y-4">
             <div>
               <Label htmlFor="task-title">Follow-Up Title *</Label>
