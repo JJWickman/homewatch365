@@ -88,7 +88,7 @@ export default function VisitChecklistMobile() {
       const templateResponse = await base44.functions.invoke('checklistHelpers', {
         action: 'getTemplate',
         payload: {
-          template_code: 'condo_villa_home_watch_visit',
+          template_code: resolvedTemplateCode,
           company_id: propertyData.company_id
         }
       });
