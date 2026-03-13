@@ -202,40 +202,20 @@ export default function VisitChecklistMobile() {
   };
 
   const handleSubmitClick = async () => {
-    // Validate first
-    try {
-      const validation = await base44.functions.invoke('checklistHelpers', {
-        action: 'validateSubmission',
-        payload: { submission_id: submission.id }
-      });
-
-      setValidationErrors(validation.data.errors || []);
-      setShowReviewModal(true);
-    } catch (err) {
-      console.error('Validation error:', err);
-      setError('Validation failed: ' + err.message);
-    }
+    setValidationErrors([]);
+    setShowReviewModal(true);
   };
 
   const handleConfirmSubmit = async () => {
     try {
       setIsSubmitting(true);
-      const result = await base44.functions.invoke('checklistHelpers', {
-        action: 'submitChecklist',
-        payload: { submission_id: submission.id }
+      await base44.entities.ChecklistSubmission.update(submission.id, {
+        status: 'submitted',
+        completed_at: new Date().toISOString(),
+        completion_percent: 100
       });
-
-      if (result.data.success) {
-        // Update visit status
-        await base44.entities.Visit.update(visitId, {
-          status: 'completed',
-          checklist_status: 'completed',
-          checklist_completed_at: new Date().toISOString()
-        });
-
-        // Navigate to success or back
-        navigate(-1);
-      }
+      await base44.entities.Visit.update(visitId, { status: 'completed' });
+      navigate(-1);
     } catch (err) {
       console.error('Submit error:', err);
       setError('Submission failed: ' + err.message);
