@@ -1349,53 +1349,55 @@ export default function Visits() {
    </Dialog>
 
   {/* Check-In Now Dialog */}
-  <Dialog open={showCheckInNow} onOpenChange={setShowCheckInNow}>
-    <DialogContent className="max-w-md">
-      <DialogHeader>
-        <DialogTitle>Quick Check-In</DialogTitle>
-        <DialogDescription>Select a property to start a check-in with its saved checklist</DialogDescription>
-      </DialogHeader>
-      <div className="space-y-3 max-h-[60vh] overflow-y-auto">
-        {properties.length === 0 ? (
-          <p className="text-sm text-slate-500 text-center py-6">No properties available</p>
-        ) : (
-          properties.map(property => {
-            const hasChecklist = checklists.some(c => c.property_id === property.id);
-            return (
-              <button
-                key={property.id}
-                onClick={() => handleCheckInNow(property.id)}
-                disabled={!hasChecklist}
-                className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                  hasChecklist
-                    ? 'border-slate-200 bg-white hover:bg-blue-50 hover:border-blue-300'
-                    : 'border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed'
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="h-8 w-8 rounded bg-slate-100 flex items-center justify-center shrink-0">
-                    {property.primary_photo_url ? (
-                      <img src={property.primary_photo_url} alt="" className="h-full w-full object-cover rounded" />
-                    ) : (
-                      <Building2 className="h-4 w-4 text-slate-400" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-slate-900">{property.name || property.address}</p>
-                    <p className="text-sm text-slate-500 truncate">{property.city}, {property.state}</p>
-                    {!hasChecklist && <p className="text-xs text-slate-400 mt-1">No checklist configured</p>}
-                  </div>
-                </div>
-              </button>
-            );
-          })
-        )}
-      </div>
-      <DialogFooter>
-        <Button variant="outline" onClick={() => setShowCheckInNow(false)}>Cancel</Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
+   <Dialog open={showCheckInNow} onOpenChange={setShowCheckInNow}>
+     <DialogContent className="max-w-md rounded-2xl p-0 bg-white/90 backdrop-blur-xl border border-white/30 shadow-2xl">
+       <DialogHeader className="rounded-t-2xl bg-amber-600 px-6 pt-6 pb-4">
+         <DialogTitle className="text-white text-lg font-semibold flex items-center gap-2">
+           <Zap className="h-5 w-5" /> Quick Check-In
+         </DialogTitle>
+         <DialogDescription className="text-amber-100 text-sm">Select a property to start a check-in with its saved checklist</DialogDescription>
+       </DialogHeader>
+       <div className="space-y-3 max-h-[60vh] overflow-y-auto px-6 py-4">
+         {properties.length === 0 ? (
+           <p className="text-sm text-slate-500 text-center py-6">No properties available</p>
+         ) : (
+           properties.map(property => {
+             const hasChecklist = checklists.some(c => c.property_id === property.id);
+             return (
+               <button
+                 key={property.id}
+                 onClick={() => handleCheckInNow(property.id)}
+                 disabled={!hasChecklist}
+                 className={`w-full text-left p-3 rounded-xl border transition-all ${
+                   hasChecklist
+                     ? 'border-white/40 bg-white/60 hover:bg-blue-50/80 hover:border-blue-300 shadow-sm hover:shadow'
+                     : 'border-slate-100 bg-slate-50/50 text-slate-400 cursor-not-allowed'
+                 }`}
+               >
+                 <div className="flex items-start gap-3">
+                   <div className="h-9 w-9 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden">
+                     {property.primary_photo_url ? (
+                       <img src={property.primary_photo_url} alt="" className="h-full w-full object-cover" />
+                     ) : (
+                       <Building2 className="h-4 w-4 text-slate-400" />
+                     )}
+                   </div>
+                   <div className="flex-1 min-w-0">
+                     <p className="font-semibold text-slate-900">{property.name || property.address}</p>
+                     <p className="text-sm text-slate-500 truncate">{property.city}, {property.state}</p>
+                     {!hasChecklist && <p className="text-xs text-amber-600 mt-0.5">No checklist configured</p>}
+                   </div>
+                 </div>
+               </button>
+             );
+           })
+         )}
+       </div>
+       <DialogFooter className="px-6 pb-5">
+         <Button variant="outline" onClick={() => setShowCheckInNow(false)}>Cancel</Button>
+       </DialogFooter>
+     </DialogContent>
+   </Dialog>
     </div>
   );
   }
