@@ -1318,35 +1318,35 @@ export default function Visits() {
   </Dialog>
 
   {/* Replace Scheduled Visit Dialog */}
-  <Dialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
-    <DialogContent className="max-w-md">
-      <DialogHeader>
-        <DialogTitle>Use Drop-In to Fulfill Scheduled Check-In?</DialogTitle>
-        <DialogDescription>
-          There is a scheduled {scheduledVisitToReplace?.checkin_type === 'routine' ? 'Routine' : scheduledVisitToReplace?.checkin_type} check-in for this property on{' '}
-          {scheduledVisitToReplace && format(parseISO(scheduledVisitToReplace.scheduled_date), 'MMM d, yyyy')}.
-          You can mark that scheduled check-in as complete and link this drop-in visit instead.
-        </DialogDescription>
-      </DialogHeader>
+   <Dialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
+     <DialogContent className="max-w-md rounded-2xl p-0 bg-white/90 backdrop-blur-xl border border-white/30 shadow-2xl">
+       <DialogHeader className="rounded-t-2xl bg-slate-900 px-6 pt-6 pb-4">
+         <DialogTitle className="text-white text-lg font-semibold">Use Drop-In to Fulfill Scheduled Check-In?</DialogTitle>
+         <DialogDescription className="text-slate-300 text-sm">
+           There is a scheduled {scheduledVisitToReplace?.checkin_type === 'routine' ? 'Routine' : scheduledVisitToReplace?.checkin_type} check-in for this property on{' '}
+           {scheduledVisitToReplace && format(parseISO(scheduledVisitToReplace.scheduled_date), 'MMM d, yyyy')}.
+           You can mark that scheduled check-in as complete and link this drop-in visit instead.
+         </DialogDescription>
+       </DialogHeader>
 
-      <DialogFooter className="gap-2">
-        <Button 
-          variant="outline" 
-          onClick={() => handleReplaceScheduled(false)}
-          disabled={creating}
-        >
-          Keep Both
-        </Button>
-        <Button 
-          onClick={() => handleReplaceScheduled(true)}
-          disabled={creating}
-          className="bg-slate-900 hover:bg-slate-800"
-        >
-          Use Drop-In & Mark Check-In Complete
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
+       <DialogFooter className="gap-2 px-6 py-5">
+         <Button 
+           variant="outline" 
+           onClick={() => handleReplaceScheduled(false)}
+           disabled={creating}
+         >
+           Keep Both
+         </Button>
+         <Button 
+           onClick={() => handleReplaceScheduled(true)}
+           disabled={creating}
+           className="bg-slate-900 hover:bg-slate-800"
+         >
+           Use Drop-In & Mark Check-In Complete
+         </Button>
+       </DialogFooter>
+     </DialogContent>
+   </Dialog>
 
   {/* Check-In Now Dialog */}
   <Dialog open={showCheckInNow} onOpenChange={setShowCheckInNow}>
