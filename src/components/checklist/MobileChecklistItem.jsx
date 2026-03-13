@@ -101,29 +101,37 @@ export default function MobileChecklistItem({ label, instructions, responseType,
         ))}
       </div>
 
-      {val === 'issue' && (
-        <div className="mt-4 pt-4 border-t border-red-100 space-y-3">
+      {val && (
+        <div className={`mt-4 pt-4 border-t space-y-3 ${val === 'issue' ? 'border-red-100' : 'border-slate-100'}`}>
           <textarea
-            placeholder="Describe the issue..."
+            placeholder={val === 'issue' ? 'Describe the issue...' : 'Add a note (optional)...'}
             value={note}
             onChange={(e) => update({ note: e.target.value })}
-            className="w-full border border-red-200 rounded-xl p-3 text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-red-300 bg-red-50/30"
+            className={`w-full border rounded-xl p-3 text-sm resize-none h-20 focus:outline-none focus:ring-2 ${
+              val === 'issue'
+                ? 'border-red-200 focus:ring-red-300 bg-red-50/30'
+                : 'border-slate-200 focus:ring-blue-300 bg-slate-50/30'
+            }`}
           />
           <div className="flex flex-wrap gap-2 items-center">
             {photos.map((url, idx) => (
               <div key={idx} className="relative">
-                <img src={url} alt="" className="w-20 h-20 object-cover rounded-xl border border-red-200" />
+                <img src={url} alt="" className={`w-20 h-20 object-cover rounded-xl border ${val === 'issue' ? 'border-red-200' : 'border-slate-200'}`} />
                 <button onClick={() => removePhoto(idx)}
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             ))}
-            <label className="w-20 h-20 border-2 border-dashed border-red-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-red-400 bg-red-50/30 transition-colors">
-              {uploading ? <Loader2 className="w-5 h-5 animate-spin text-red-400" /> : (
+            <label className={`w-20 h-20 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors ${
+              val === 'issue'
+                ? 'border-red-200 hover:border-red-400 bg-red-50/30'
+                : 'border-slate-200 hover:border-blue-400 bg-slate-50/30'
+            }`}>
+              {uploading ? <Loader2 className="w-5 h-5 animate-spin text-slate-400" /> : (
                 <>
-                  <Camera className="w-5 h-5 text-red-400" />
-                  <span className="text-xs text-red-400 mt-0.5 font-medium">Photo</span>
+                  <Camera className={`w-5 h-5 ${val === 'issue' ? 'text-red-400' : 'text-slate-400'}`} />
+                  <span className={`text-xs mt-0.5 font-medium ${val === 'issue' ? 'text-red-400' : 'text-slate-400'}`}>Photo</span>
                 </>
               )}
               <input type="file" accept="image/*" capture="environment" onChange={handlePhotoUpload} className="hidden" disabled={uploading} />
