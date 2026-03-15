@@ -168,7 +168,7 @@ export default function ChecklistEditor() {
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap rounded-2xl px-5 py-4" style={{background: 'linear-gradient(to bottom, rgba(30,58,95,1), rgba(20,40,68,1))'}}>
         <div className="flex items-center gap-3">
           <Button 
             variant="ghost" 
