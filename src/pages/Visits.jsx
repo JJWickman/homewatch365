@@ -1361,8 +1361,8 @@ export default function Visits() {
 
   {/* Check-In Now Dialog */}
    <Dialog open={showCheckInNow} onOpenChange={setShowCheckInNow}>
-     <DialogContent className="max-w-md rounded-2xl p-0 bg-white/90 backdrop-blur-xl border border-white/30 shadow-2xl">
-       <DialogHeader className="rounded-t-2xl bg-amber-600 px-6 pt-6 pb-4">
+     <DialogContent className="max-w-md rounded-2xl p-0 bg-blue-900 backdrop-blur-xl border border-white/30 shadow-2xl">
+     <DialogHeader className="rounded-t-2xl bg-amber-600 px-6 pt-6 pb-4">
          <DialogTitle className="text-white text-lg font-semibold flex items-center gap-2">
            <Zap className="h-5 w-5" /> Quick Check-In
          </DialogTitle>
