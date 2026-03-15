@@ -180,6 +180,7 @@ export default function ChecklistEditor() {
                 navigate(createPageUrl('Settings') + '?tab=templates');
               }
             }}
+            className="text-white hover:bg-white/20"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
