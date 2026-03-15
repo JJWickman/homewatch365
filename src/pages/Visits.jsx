@@ -1359,13 +1359,13 @@ export default function Visits() {
 
   {/* Check-In Now Dialog */}
    <Dialog open={showCheckInNow} onOpenChange={setShowCheckInNow}>
-     <DialogContent className="max-w-md rounded-2xl p-0 bg-white/90 backdrop-blur-xl border border-white/30 shadow-2xl">
-     <DialogHeader className="rounded-t-2xl bg-gradient-to-b from-blue-900 to-blue-950 px-6 pt-6 pb-4">
-         <DialogTitle className="text-white text-lg font-semibold flex items-center gap-2">
+     <DialogContent className="max-w-md rounded-2xl p-0 bg-white overflow-hidden">
+       <div style={{background: 'linear-gradient(to bottom, #1e3a8a, #172554)'}} className="px-6 pt-6 pb-4 rounded-t-2xl">
+         <h2 className="text-white text-lg font-semibold flex items-center gap-2">
            <Zap className="h-5 w-5" /> Quick Check-In
-         </DialogTitle>
-         <DialogDescription className="text-amber-100 text-sm">Select a property to start a check-in with its saved checklist</DialogDescription>
-       </DialogHeader>
+         </h2>
+         <p className="text-blue-200 text-sm mt-1">Select a property to start a check-in with its saved checklist</p>
+       </div>
        <div className="space-y-3 max-h-[60vh] overflow-y-auto px-6 py-4">
          {properties.length === 0 ? (
            <p className="text-sm text-slate-500 text-center py-6">No properties available</p>
