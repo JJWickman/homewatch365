@@ -197,7 +197,7 @@ export default function ChecklistEditor() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {savedMsg && <span className="text-sm font-semibold text-green-600">{savedMsg}</span>}
+          {savedMsg && <span className="text-sm font-semibold text-green-300">{savedMsg}</span>}
           {!propertyChecklist && (
             <Button
               variant="outline"
