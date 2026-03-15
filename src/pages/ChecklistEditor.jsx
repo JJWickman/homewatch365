@@ -280,7 +280,7 @@ export default function ChecklistEditor() {
         {sections.map((section, sIdx) => (
           <Card key={sIdx} className="overflow-hidden">
             {/* Section header */}
-            <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-slate-200">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-200" style={{background: 'linear-gradient(to right, rgba(30,58,95,0.08), rgba(30,58,95,0.03))'}}>
               <button
                 onClick={() => toggleSection(sIdx)}
                 className="text-slate-400 hover:text-slate-700 shrink-0"
