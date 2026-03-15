@@ -1360,7 +1360,7 @@ export default function Visits() {
   {/* Check-In Now Dialog */}
    <Dialog open={showCheckInNow} onOpenChange={setShowCheckInNow}>
      <DialogContent className="max-w-md rounded-2xl p-0 bg-white overflow-hidden">
-       <div style={{background: 'linear-gradient(to bottom, #1e3a8a, #172554)'}} className="px-6 pt-6 pb-4 rounded-t-2xl">
+       <div style={{background: 'linear-gradient(to bottom, rgba(30,58,95,1), rgba(20,40,68,1))'}} className="px-6 pt-6 pb-4 rounded-t-2xl">
          <h2 className="text-white text-lg font-semibold flex items-center gap-2">
            <Zap className="h-5 w-5" /> Quick Check-In
          </h2>
