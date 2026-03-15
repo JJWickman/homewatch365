@@ -859,9 +859,9 @@ export default function Visits() {
          }
        }}>
          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto rounded-2xl p-0 bg-white">
-           <DialogHeader className="px-6 pt-6 pb-4 rounded-t-2xl bg-slate-900 -mx-0">
+           <DialogHeader className="px-6 pt-6 pb-4 rounded-t-2xl bg-gradient-to-b from-blue-900 to-blue-950 -mx-0">
              <DialogTitle className="text-white text-lg font-semibold">{editingId ? 'Edit Visit' : 'Schedule a Visit'}</DialogTitle>
-             <DialogDescription className="text-white">
+             <DialogDescription className="text-blue-200">
                {editingId ? 'Update visit details' : 'Create a new check-in or follow-up'}
              </DialogDescription>
            </DialogHeader>
