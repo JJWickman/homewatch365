@@ -859,12 +859,10 @@ export default function Visits() {
          }
        }}>
          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto rounded-2xl p-0 bg-white">
-           <DialogHeader className="px-6 pt-6 pb-4 rounded-t-2xl bg-gradient-to-b from-blue-900 to-blue-950 -mx-0">
-             <DialogTitle className="text-white text-lg font-semibold">{editingId ? 'Edit Visit' : 'Schedule a Visit'}</DialogTitle>
-             <DialogDescription className="text-blue-200">
-               {editingId ? 'Update visit details' : 'Create a new check-in or follow-up'}
-             </DialogDescription>
-           </DialogHeader>
+           <div style={{background: 'linear-gradient(to bottom, #1e3a8a, #172554)'}} className="px-6 pt-6 pb-4 rounded-t-2xl">
+             <h2 className="text-white text-lg font-semibold">{editingId ? 'Edit Visit' : 'Schedule a Visit'}</h2>
+             <p className="text-blue-200 text-sm mt-1">{editingId ? 'Update visit details' : 'Create a new check-in or follow-up'}</p>
+           </div>
            <div className="px-6 pb-6">
 
            {!editingId && (
