@@ -1377,12 +1377,18 @@ export default function Visits() {
              return (
                <button
                  key={property.id}
-                 onClick={() => handleCheckInNow(property.id)}
-                 disabled={!hasChecklist}
+                 onClick={() => {
+                   if (hasChecklist) {
+                     handleCheckInNow(property.id);
+                   } else {
+                     setShowCheckInNow(false);
+                     navigate(createPageUrl('PropertyDetail') + `?id=${property.id}&tab=checklist`);
+                   }
+                 }}
                  className={`w-full text-left p-3 rounded-xl border transition-all ${
                    hasChecklist
                      ? 'border-white/40 bg-white/60 hover:bg-blue-50/80 hover:border-blue-300 shadow-sm hover:shadow'
-                     : 'border-slate-100 bg-slate-50/50 text-slate-400 cursor-not-allowed'
+                     : 'border-amber-200 bg-amber-50/80 hover:bg-amber-100 hover:border-amber-300 shadow-sm hover:shadow'
                  }`}
                >
                  <div className="flex items-start gap-3">
@@ -1396,7 +1402,7 @@ export default function Visits() {
                    <div className="flex-1 min-w-0">
                      <p className="font-semibold text-slate-900">{property.name || property.address}</p>
                      <p className="text-sm text-slate-500 truncate">{property.city}, {property.state}</p>
-                     {!hasChecklist && <p className="text-xs text-amber-600 mt-0.5">No checklist configured</p>}
+                     {!hasChecklist && <p className="text-xs text-amber-700 mt-0.5 font-medium">⚠ Tap to set up checklist</p>}
                    </div>
                  </div>
                </button>
