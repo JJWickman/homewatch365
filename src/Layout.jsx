@@ -467,9 +467,9 @@ export default function Layout({ children, currentPageName }) {
 
         /* Glass dialogs */
         [role="dialog"] > div:first-child {
-          background: rgba(255, 255, 255, 0.9) !important;
-          backdrop-filter: blur(30px) !important;
-          border: 1px solid rgba(255, 255, 255, 0.3) !important;
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(30px);
+          border: 1px solid rgba(255, 255, 255, 0.3);
           box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2) !important;
         }
 
