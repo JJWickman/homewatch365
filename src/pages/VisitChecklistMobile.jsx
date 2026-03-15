@@ -87,9 +87,13 @@ export default function VisitChecklistMobile() {
       const companies = await base44.entities.Company.filter({ id: properties[0].company_id });
       company.current = companies[0];
 
-      // Step 2: Build sections and items directly from customized_sections on the PropertyChecklist
-      // Each section has: { title, items: [{ label, responseType, instructions }] }
-      const rawSections = propertyChecklist.customized_sections || [];
+      // Step 2: Build sections and items from customized_sections, falling back to standard template defaults
+      let rawSections = propertyChecklist.customized_sections || [];
+
+      // If no customized sections saved yet, fall back to the standard template defaults
+      if (rawSections.length === 0 && propertyChecklist.template_id) {
+        rawSections = TEMPLATE_DEFAULTS[propertyChecklist.template_id] || [];
+      }
       const builtSections = rawSections.map((sec, sIdx) => ({
         id: `${propertyChecklist.id}-sec-${sIdx}`,
         title: sec.title,
