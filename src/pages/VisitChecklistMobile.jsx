@@ -8,6 +8,13 @@ import ChecklistFooterBar from '@/components/checklist/ChecklistFooterBar';
 import SubmissionReviewModal from '@/components/checklist/SubmissionReviewModal';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { SFH_SECTIONS, CONDO_SECTIONS, HIGHRISE_SECTIONS } from '@/components/checklist/checklistDefaults';
+
+const TEMPLATE_DEFAULTS = {
+  'sfh-template': SFH_SECTIONS,
+  'condo-template': CONDO_SECTIONS,
+  'highrise-template': HIGHRISE_SECTIONS,
+};
 
 const AUTOSAVE_DEBOUNCE = 1000; // 1 second
 
