@@ -379,15 +379,20 @@ export default function Properties() {
                 onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${property.id}`)}
               >
                 <div className="flex-1">
-                  <h3 className="font-semibold text-slate-900">
-                    {property.name || property.address}
-                  </h3>
-                  <p className="text-sm text-slate-500">
-                    {property.city}, {property.state} • {getClientName(property.client_id)}
-                  </p>
+                 <div className="flex items-center gap-2">
+                   <h3 className="font-semibold text-slate-900">
+                     {property.name || property.address}
+                   </h3>
+                   {!checklists.some(c => c.property_id === property.id) && (
+                     <span className="px-2 py-0.5 rounded-md bg-amber-500 text-white text-xs font-semibold">⚠ No Checklist</span>
+                   )}
+                 </div>
+                 <p className="text-sm text-slate-500">
+                   {property.city}, {property.state} • {getClientName(property.client_id)}
+                 </p>
                 </div>
                 <div className="w-32">
-                  <StatusBadge status={property.status} />
+                 <StatusBadge status={property.status} />
                 </div>
                 <div className="w-16">
                   <Button 
