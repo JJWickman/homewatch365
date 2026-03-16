@@ -40,6 +40,7 @@ export default function Properties() {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [visits, setVisits] = useState([]);
+  const [checklists, setChecklists] = useState([]);
   const [viewMode, setViewMode] = useViewMode('properties', 'large-tiles');
   const [showMap, setShowMap] = useState(false);
 
