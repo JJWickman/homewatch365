@@ -66,15 +66,17 @@ export default function Properties() {
         const cId = members[0].company_id;
         setCompanyId(cId);
         
-        const [propertiesData, clientsData, visitsData] = await Promise.all([
+        const [propertiesData, clientsData, visitsData, checklistsData] = await Promise.all([
           base44.entities.Property.filter({ company_id: cId, is_active: true }, '-created_date'),
           base44.entities.Client.filter({ company_id: cId }),
-          base44.entities.Visit.filter({ company_id: cId })
+          base44.entities.Visit.filter({ company_id: cId }),
+          base44.entities.PropertyChecklist.filter({ company_id: cId, is_active: true })
         ]);
         
         setProperties(propertiesData);
         setClients(clientsData);
         setVisits(visitsData);
+        setChecklists(checklistsData);
       }
     } catch (error) {
       console.error('Error loading properties:', error);
