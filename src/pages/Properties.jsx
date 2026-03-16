@@ -145,6 +145,9 @@ export default function Properties() {
              </div>
            )}
           <div className="absolute top-3 right-3 flex gap-2">
+            {!hasChecklist && (
+              <span className="px-2 py-1 rounded-md bg-amber-500 text-white text-xs font-semibold">⚠ No Checklist</span>
+            )}
             <StatusBadge status={property.status} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
