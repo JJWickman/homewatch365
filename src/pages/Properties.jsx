@@ -126,6 +126,7 @@ export default function Properties() {
 
   const PropertyCard = ({ property, compact = false }) => {
     const statuses = getVisitStatuses(property.id);
+    const hasChecklist = checklists.some(c => c.property_id === property.id);
 
     return (
       <Card 
