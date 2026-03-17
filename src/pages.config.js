@@ -101,8 +101,6 @@ export const PAGES = {
     "ClientDetail": ClientDetail,
     "ClientForm": ClientForm,
     "ClientInspectionView": ClientInspectionView,
-    "ClientLogin": ClientLogin,
-    "ClientPortal": ClientPortal,
     "Clients": Clients,
     "CompanyOnboarding": CompanyOnboarding,
     "CondoVillaChecklistPage": CondoVillaChecklistPage,

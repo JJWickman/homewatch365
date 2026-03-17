@@ -9,6 +9,8 @@ import ChecklistEditor from './pages/ChecklistEditor';
 import AIAssistant from './pages/AIAssistant';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import ClientPortal from './pages/ClientPortal';
+import ClientLogin from './pages/ClientLogin';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
