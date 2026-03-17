@@ -35,9 +35,15 @@ const AuthenticatedApp = () => {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
+      // Don't redirect portal pages — they have their own PIN-based auth
+      const portalPages = ['/ClientPortal', '/ClientLogin'];
+      const isPortalPage = portalPages.some(p => window.location.pathname.startsWith(p));
+      if (isPortalPage) {
+        // Fall through to render routes normally
+      } else {
+        navigateToLogin();
+        return null;
+      }
     }
   }
 
