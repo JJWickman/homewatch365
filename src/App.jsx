@@ -78,6 +78,8 @@ const AuthenticatedApp = () => {
           <ChecklistEditor />
         </LayoutWrapper>
       } />
+      <Route path="/ClientPortal" element={<ClientPortal />} />
+      <Route path="/ClientLogin" element={<ClientLogin />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
