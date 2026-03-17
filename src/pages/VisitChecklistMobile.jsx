@@ -274,6 +274,19 @@ export default function VisitChecklistMobile() {
       />
 
       <div className="flex-1 p-4 space-y-4">
+        {/* Checklist Instructions Banner */}
+        {template?.instructions && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-5 h-5 rounded-full bg-amber-400 flex items-center justify-center shrink-0">
+                <span className="text-white text-xs font-bold">i</span>
+              </div>
+              <span className="font-semibold text-amber-900 text-sm">Instructions</span>
+            </div>
+            <p className="text-sm text-amber-800 leading-relaxed whitespace-pre-wrap">{template.instructions}</p>
+          </div>
+        )}
+
         {sections.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)).map(section => (
           <ChecklistSectionComponent
             key={section.id}
