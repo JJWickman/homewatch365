@@ -17,7 +17,7 @@ const TEMPLATES = [
 ];
 
 const RESPONSE_TYPE_LABELS = {
-  ok_issue_na: 'OK / Issue / N/A',
+  ok_issue_na: 'No Visible Issues / Issue Observed / Not Observed',
   number: 'Number (e.g. temperature)',
   percentage: 'Percentage (e.g. humidity)',
   photo_only: 'Photo Only',

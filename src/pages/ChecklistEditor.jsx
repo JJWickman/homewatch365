@@ -394,14 +394,14 @@ export default function ChecklistEditor() {
                                                   {opt}
                                                 </div>
                                               ))
-                                            ) : ['OK', 'Issue', 'N/A'].map(opt => (
-                                              <div key={opt} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium flex-1 justify-center ${
-                                                opt === 'Issue' ? 'border-red-200 bg-red-50 text-red-600' :
-                                                opt === 'OK' ? 'border-green-200 bg-green-50 text-green-700' :
-                                                'border-slate-200 bg-slate-50 text-slate-500'
-                                              }`}>
-                                                <span className="w-4 h-4 rounded border-2 border-current flex items-center justify-center shrink-0" />
-                                                {opt}
+                                            ) : [
+                                              { label: 'No Visible Issues Observed', cls: 'border-green-200 bg-green-50 text-green-700' },
+                                              { label: 'Issue Observed',              cls: 'border-red-200 bg-red-50 text-red-600' },
+                                              { label: 'Not Observed / Not Accessible', cls: 'border-slate-200 bg-slate-50 text-slate-500' },
+                                            ].map(opt => (
+                                              <div key={opt.label} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium flex-1 ${opt.cls}`}>
+                                                <span className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center shrink-0 flex-shrink-0" />
+                                                {opt.label}
                                               </div>
                                             ))}
                                           </div>
