@@ -265,35 +265,41 @@ export default function ChecklistItemRow({
           {item.required && <Badge className="mt-1 text-xs">Required</Badge>}
         </div>
 
-        <input
-          key={photoInputKey}
-          type="file"
-          multiple
-          accept="image/*"
-          capture="environment"
-          onChange={handlePhotoUpload}
-          className="text-sm"
-        />
-
-        {response?.photo_urls?.length > 0 && (
-          <div className="flex gap-2 flex-wrap">
-            {response.photo_urls.map((url, idx) => (
-              <div key={idx} className="relative">
-                <img
-                  src={url}
-                  alt={`Photo ${idx + 1}`}
-                  className="h-16 w-16 rounded object-cover border border-slate-300"
-                />
-                <button
-                  onClick={() => removePhoto(url)}
-                  className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="flex flex-wrap gap-3 items-center">
+          {(response?.photo_urls || []).map((url, idx) => (
+            <div key={idx} className="relative">
+              <img
+                src={url}
+                alt={`Photo ${idx + 1}`}
+                className="h-20 w-20 rounded-xl object-cover border border-slate-200"
+              />
+              <button
+                onClick={() => removePhoto(url)}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+          <label className="h-20 w-20 border-2 border-dashed border-blue-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 bg-blue-50/50 transition-colors">
+            {uploading
+              ? <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
+              : <>
+                  <Camera className="w-6 h-6 text-blue-400" />
+                  <span className="text-xs text-blue-500 mt-1 font-medium">Take Photo</span>
+                </>
+            }
+            <input
+              key={photoInputKey}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handlePhotoUpload}
+              className="hidden"
+              disabled={uploading}
+            />
+          </label>
+        </div>
 
         {item.required && !response?.photo_urls?.length && (
           <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 p-2 rounded">
