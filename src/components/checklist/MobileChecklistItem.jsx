@@ -35,6 +35,38 @@ export default function MobileChecklistItem({ label, instructions, responseType,
     );
   }
 
+  const waterHeaterType = response.waterHeaterType || '';
+  const waterHeaterNote = response.waterHeaterNote || '';
+
+  if (responseType === 'water_heater') {
+    return (
+      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+        <p className="font-semibold text-slate-800 mb-3">{label}</p>
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          {['Gas', 'Electric', 'Tankless'].map((type) => (
+            <button
+              key={type}
+              onClick={() => update({ waterHeaterType: type })}
+              className={`py-2.5 rounded-xl text-sm font-bold border-2 transition-all active:scale-95 ${
+                waterHeaterType === type
+                  ? 'bg-blue-600 border-blue-600 text-white'
+                  : 'border-slate-200 text-slate-600 bg-slate-50'
+              }`}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+        <textarea
+          placeholder="Notes or specific instructions for this water heater..."
+          value={waterHeaterNote}
+          onChange={(e) => update({ waterHeaterNote: e.target.value })}
+          className="w-full border border-slate-200 rounded-xl p-3 text-sm resize-none h-20 focus:outline-none focus:ring-2 focus:ring-blue-300 bg-slate-50/30"
+        />
+      </div>
+    );
+  }
+
   if (responseType === 'number' || responseType === 'percentage') {
     return (
       <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">

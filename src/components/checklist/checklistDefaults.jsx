@@ -34,6 +34,7 @@ export const SFH_SECTIONS = [
       { label: 'Run water in showers and tubs, checking for visible leaks', responseType: 'ok_issue_na', instructions: '' },
       { label: 'Brush and flush toilets, check for visible leaks and signs of water damage', responseType: 'ok_issue_na', instructions: '' },
       { label: 'Check the water heater for signs of leaks and rust', responseType: 'ok_issue_na', instructions: '' },
+      { label: 'Water heater type and notes', responseType: 'water_heater', instructions: '' },
     ],
   },
   {
@@ -123,6 +124,7 @@ export const CONDO_SECTIONS = [
       { label: 'Always mindful of the valve at the wall as well as any discoloration of the tile grout', responseType: 'instruction_only', instructions: '' },
       { label: 'Brush and flush toilets, check for visible leaks and signs of water damage', responseType: 'ok_issue_na', instructions: '' },
       { label: 'Check water heater for signs of visible leaks and rust', responseType: 'ok_issue_na', instructions: 'Water heater should be OFF at the breaker or set to Vacation Mode. Circulator pump must be OFF.' },
+      { label: 'Water heater type and notes', responseType: 'water_heater', instructions: '' },
     ],
   },
   {
@@ -213,6 +215,7 @@ export const HIGHRISE_SECTIONS = [
       { label: 'Always mindful of the valve at the wall as well as any discoloration of the tile grout', responseType: 'instruction_only', instructions: '' },
       { label: 'Brush and flush toilets, check for visible leaks and signs of water damage', responseType: 'ok_issue_na', instructions: '' },
       { label: 'Check water heater for signs of visible leaks and rust', responseType: 'ok_issue_na', instructions: 'Water heater should be OFF at the breaker or set to Vacation Mode.' },
+      { label: 'Water heater type and notes', responseType: 'water_heater', instructions: '' },
     ],
   },
   {
