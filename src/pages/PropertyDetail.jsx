@@ -390,6 +390,7 @@ export default function PropertyDetail() {
        hoa_website: property.hoa_website,
        hoa_email: property.hoa_email,
        hoa_phone: property.hoa_phone,
+       hoa_notes: property.hoa_notes,
        security_gate: property.security_gate,
        gate_code: property.gate_code,
        emergency_notification_contact_name: property.emergency_notification_contact_name,
