@@ -841,12 +841,75 @@ export default function PropertyDetail() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  {/* Unit Identification - for condo/townhouse/high-rise */}
+                  {['condo', 'townhouse', 'commercial'].includes(property.property_type) && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Key className="h-4 w-4 text-slate-500" />
+                        <h4 className="text-sm font-medium text-slate-500">Unit Identification</h4>
+                      </div>
+                      <div>
+                        <label className="text-xs text-slate-500 block mb-1">Unit Number</label>
+                        <input
+                          type="text"
+                          value={property.unit_number || ''}
+                          onChange={(e) => { setProperty({...property, unit_number: e.target.value}); setHasUnsavedChanges(true); }}
+                          placeholder="e.g., 4B, 12A, PH3"
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black"
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {property.access_instructions && (
                     <div>
                       <h4 className="text-sm font-medium text-slate-500 mb-2">Access Instructions</h4>
                       <p className="text-slate-700 whitespace-pre-wrap">{property.access_instructions}</p>
                     </div>
                   )}
+
+                  {/* High-Rise / Condo specific access fields */}
+                  {['condo', 'townhouse', 'commercial'].includes(property.property_type) && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Building2 className="h-4 w-4 text-slate-500" />
+                        <h4 className="text-sm font-medium text-slate-500">Building Access Procedures</h4>
+                      </div>
+                      <div className="space-y-3">
+                        {[
+                          { label: 'Gate Procedure', field: 'gate_procedure', placeholder: 'e.g., Enter gate code #1234, second gate uses fob...' },
+                          { label: 'Parking Assignment', field: 'parking_assignment', placeholder: 'e.g., Space #42 in Garage B, visitor parking on Level 1...' },
+                          { label: 'Front Desk Sign-In Procedure', field: 'front_desk_signin_procedure', placeholder: 'e.g., Sign in at lobby desk, show ID, call unit from front desk...' },
+                        ].map(({ label, field, placeholder }) => (
+                          <div key={field}>
+                            <label className="text-xs text-slate-500 block mb-1">{label}</label>
+                            <textarea
+                              value={property[field] || ''}
+                              onChange={(e) => { setProperty({...property, [field]: e.target.value}); setHasUnsavedChanges(true); }}
+                              placeholder={placeholder}
+                              rows={2}
+                              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black resize-none"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Key Policy */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Key className="h-4 w-4 text-slate-500" />
+                      <h4 className="text-sm font-medium text-slate-500">Key Policy</h4>
+                    </div>
+                    <textarea
+                      value={property.key_policy || ''}
+                      onChange={(e) => { setProperty({...property, key_policy: e.target.value}); setHasUnsavedChanges(true); }}
+                      placeholder="Document key access procedures, who holds keys, key storage location, key return policies, etc."
+                      rows={3}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black resize-none"
+                    />
+                  </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {property.alarm_code && (
