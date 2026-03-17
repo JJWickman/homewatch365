@@ -82,7 +82,7 @@ export default function VisitChecklistMobile() {
       const propertyChecklist = checklistRecords[0];
       setVisit(visits[0]);
       setProperty(properties[0]);
-      setTemplate({ name: propertyChecklist.name, id: propertyChecklist.id });
+      setTemplate({ name: propertyChecklist.name, id: propertyChecklist.id, instructions: propertyChecklist.checklist_instructions || '' });
 
       const companies = await base44.entities.Company.filter({ id: properties[0].company_id });
       company.current = companies[0];
