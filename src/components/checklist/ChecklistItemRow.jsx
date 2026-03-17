@@ -21,24 +21,27 @@ export default function ChecklistItemRow({
 }) {
   const [showIssueDetails, setShowIssueDetails] = useState(response?.issue_flag || false);
   const [photoInputKey, setPhotoInputKey] = useState(0);
+  const [uploading, setUploading] = useState(false);
 
   const handlePhotoUpload = async (e) => {
     const files = Array.from(e.target.files || []);
-    for (const file of files) {
-      try {
-        const result = await onPhotoUpload(item.id, file);
-        if (result?.file_url) {
-          const photos = response?.photo_urls || [];
-          onItemChange(item.id, {
-            ...response,
-            photo_urls: [...photos, result.file_url]
-          });
-        }
-      } catch (error) {
-        console.error('Upload error:', error);
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      for (const file of files) {
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        const photos = response?.photo_urls || [];
+        onItemChange(item.id, {
+          ...response,
+          photo_urls: [...photos, file_url]
+        });
       }
+    } catch (error) {
+      console.error('Upload error:', error);
+    } finally {
+      setUploading(false);
+      setPhotoInputKey(k => k + 1);
     }
-    setPhotoInputKey(k => k + 1);
   };
 
   const removePhoto = (photoUrl) => {
