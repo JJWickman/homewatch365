@@ -367,7 +367,13 @@ export default function ChecklistEditor() {
                                             className="text-sm h-10 font-medium"
                                           />
                                           <div className="flex gap-2">
-                                            {['OK', 'Issue', 'N/A'].map(opt => (
+                                            {item.responseType === 'water_heater' ? (
+                                              ['Gas', 'Electric', 'Tankless'].map(opt => (
+                                                <div key={opt} className="flex items-center gap-2 px-3 py-2 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 text-sm font-medium flex-1 justify-center">
+                                                  {opt}
+                                                </div>
+                                              ))
+                                            ) : ['OK', 'Issue', 'N/A'].map(opt => (
                                               <div key={opt} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium flex-1 justify-center ${
                                                 opt === 'Issue' ? 'border-red-200 bg-red-50 text-red-600' :
                                                 opt === 'OK' ? 'border-green-200 bg-green-50 text-green-700' :
