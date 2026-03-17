@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
-import { Send, Edit, Loader2, FileText, DollarSign, Mail, Download, Plus, Trash2 } from 'lucide-react';
+import { Send, Edit, Loader2, FileText, DollarSign, Mail, Download, Plus, Trash2, MapPin } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
