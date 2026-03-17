@@ -126,6 +126,16 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
   const toggleSection = (sIdx) =>
     setExpandedSections(prev => ({ ...prev, [sIdx]: !prev[sIdx] }));
 
+  const onDragEnd = (result) => {
+    if (!result.destination || result.source.index === result.destination.index) return;
+    setSections(prev => {
+      const reordered = [...prev];
+      const [moved] = reordered.splice(result.source.index, 1);
+      reordered.splice(result.destination.index, 0, moved);
+      return reordered;
+    });
+  };
+
   const saveChecklist = async () => {
     setSaving(true);
     try {
