@@ -123,6 +123,19 @@ export default function Clients() {
       )
     },
     {
+      header: 'Billing Address',
+      cell: (client) => (
+        <div className="text-sm text-slate-600">
+          {client.address ? (
+            <span>{client.address}{client.city ? `, ${client.city}` : ''}{client.state ? `, ${client.state}` : ''} {client.zip || ''}</span>
+          ) : (
+            <span className="text-slate-400 italic">—</span>
+          )}
+        </div>
+      ),
+      className: 'hidden lg:table-cell'
+    },
+    {
       header: 'Properties',
       cell: (client) => (
         <div className="flex items-center gap-2">

@@ -47,8 +47,10 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AIAssistant from './pages/AIAssistant';
 import Billing from './pages/Billing';
 import BillingTest from './pages/BillingTest';
+import ChecklistEditor from './pages/ChecklistEditor';
 import ChecklistFormsPage from './pages/ChecklistFormsPage';
 import ClientDetail from './pages/ClientDetail';
 import ClientForm from './pages/ClientForm';
@@ -91,8 +93,10 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AIAssistant": AIAssistant,
     "Billing": Billing,
     "BillingTest": BillingTest,
+    "ChecklistEditor": ChecklistEditor,
     "ChecklistFormsPage": ChecklistFormsPage,
     "ClientDetail": ClientDetail,
     "ClientForm": ClientForm,
