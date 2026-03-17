@@ -52,6 +52,14 @@ export const AuthProvider = ({ children }) => {
         if (appError.status === 403 && appError.data?.extra_data?.reason) {
           const reason = appError.data.extra_data.reason;
           if (reason === 'auth_required') {
+            // Allow portal pages to load without auth
+            const portalPages = ['/ClientPortal', '/ClientLogin'];
+            const isPortalPage = portalPages.some(p => window.location.pathname.startsWith(p));
+            if (isPortalPage) {
+              setIsLoadingAuth(false);
+              setIsAuthenticated(false);
+              return;
+            }
             setAuthError({
               type: 'auth_required',
               message: 'Authentication required'
