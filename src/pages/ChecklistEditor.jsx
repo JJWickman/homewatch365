@@ -303,7 +303,7 @@ export default function ChecklistEditor() {
 
       {/* Sections */}
       <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="sections">
+        <Droppable droppableId="sections" type="section">
           {(provided) => (
             <div className="space-y-3" {...provided.droppableProps} ref={provided.innerRef}>
               {sections.map((section, sIdx) => (
