@@ -299,11 +299,14 @@ export default function ClientDetail() {
                 )}
                 {client.address && (
                   <div className="flex items-start gap-3 text-sm text-slate-600">
-                    <MapPin className="h-4 w-4 text-slate-400 mt-0.5" />
-                    <span>
-                      {client.address}<br />
-                      {client.city}, {client.state} {client.zip}
-                    </span>
+                    <MapPin className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-slate-400 font-medium uppercase tracking-wide mb-0.5">Billing Address</p>
+                      <span>
+                        {client.address}<br />
+                        {client.city}{client.state ? `, ${client.state}` : ''} {client.zip || ''}
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
