@@ -273,79 +273,97 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
             </div>
 
             {/* Sections editor */}
-            <div className="space-y-3 max-h-[60vh] overflow-y-auto">
-              {sections.map((section, sIdx) => (
-                <Card key={sIdx} className="overflow-hidden">
-                  <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-slate-200">
-                    <button
-                      onClick={() => toggleSection(sIdx)}
-                      className="text-slate-400 hover:text-slate-700 shrink-0"
-                    >
-                      {expandedSections[sIdx]
-                        ? <ChevronDown className="w-4 h-4" />
-                        : <ChevronRight className="w-4 h-4" />}
-                    </button>
-                    <Input
-                      value={section.title}
-                      onChange={(e) => updateSectionTitle(sIdx, e.target.value)}
-                      className="flex-1 bg-transparent border-0 shadow-none font-semibold text-slate-700 h-8 px-1 focus:bg-white focus:border focus:shadow-sm rounded text-base"
-                    />
-                    <span className="text-xs text-slate-400 shrink-0">{section.items.length} items</span>
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable droppableId="wizard-sections">
+                {(provided) => (
+                  <div className="space-y-3 max-h-[60vh] overflow-y-auto" {...provided.droppableProps} ref={provided.innerRef}>
+                    {sections.map((section, sIdx) => (
+                      <Draggable key={`section-${sIdx}`} draggableId={`section-${sIdx}`} index={sIdx}>
+                        {(dragProvided, dragSnapshot) => (
+                          <Card
+                            ref={dragProvided.innerRef}
+                            {...dragProvided.draggableProps}
+                            className={`overflow-hidden ${dragSnapshot.isDragging ? 'shadow-lg ring-2 ring-blue-300' : ''}`}
+                          >
+                            <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-slate-200">
+                              <div {...dragProvided.dragHandleProps} className="text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing shrink-0">
+                                <GripVertical className="w-4 h-4" />
+                              </div>
+                              <button
+                                onClick={() => toggleSection(sIdx)}
+                                className="text-slate-400 hover:text-slate-700 shrink-0"
+                              >
+                                {expandedSections[sIdx]
+                                  ? <ChevronDown className="w-4 h-4" />
+                                  : <ChevronRight className="w-4 h-4" />}
+                              </button>
+                              <Input
+                                value={section.title}
+                                onChange={(e) => updateSectionTitle(sIdx, e.target.value)}
+                                className="flex-1 bg-transparent border-0 shadow-none font-semibold text-slate-700 h-8 px-1 focus:bg-white focus:border focus:shadow-sm rounded text-base"
+                              />
+                              <span className="text-xs text-slate-400 shrink-0">{section.items.length} items</span>
+                              <Button
+                                size="sm" variant="ghost"
+                                onClick={() => removeSection(sIdx)}
+                                className="text-red-400 hover:text-red-600 h-8 w-8 p-0 shrink-0"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+
+                            {expandedSections[sIdx] && (
+                              <CardContent className="p-4 space-y-2 bg-white">
+                                {section.items.map((item, iIdx) => (
+                                  <div key={iIdx} className="flex items-start gap-3 border border-slate-100 rounded-lg p-3 bg-slate-50/60">
+                                    <div className="flex-1 space-y-2">
+                                      <Input
+                                        value={item.label}
+                                        onChange={(e) => updateItem(sIdx, iIdx, 'label', e.target.value)}
+                                        placeholder="Item label"
+                                        className="text-sm h-9 font-medium"
+                                      />
+                                      <Input
+                                        value={item.instructions || ''}
+                                        onChange={(e) => updateItem(sIdx, iIdx, 'instructions', e.target.value)}
+                                        placeholder="Instructions (optional)"
+                                        className="text-xs h-8 text-slate-500"
+                                      />
+                                    </div>
+                                    <Button
+                                      size="sm" variant="ghost"
+                                      onClick={() => removeItem(sIdx, iIdx)}
+                                      className="text-red-400 hover:text-red-600 h-8 w-8 p-0 shrink-0 mt-0.5"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                ))}
+                                <Button
+                                  size="sm" variant="outline"
+                                  onClick={() => addItem(sIdx)}
+                                  className="w-full h-8 text-xs border-dashed border-slate-300 text-slate-500"
+                                >
+                                  <Plus className="w-3 h-3 mr-1" />Add Item
+                                </Button>
+                              </CardContent>
+                            )}
+                          </Card>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
                     <Button
-                      size="sm" variant="ghost"
-                      onClick={() => removeSection(sIdx)}
-                      className="text-red-400 hover:text-red-600 h-8 w-8 p-0 shrink-0"
+                      variant="outline"
+                      onClick={addSection}
+                      className="w-full border-dashed border-slate-300 text-slate-600 h-9"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Plus className="w-4 h-4 mr-2" />Add Section
                     </Button>
                   </div>
-
-                  {expandedSections[sIdx] && (
-                    <CardContent className="p-4 space-y-2 bg-white">
-                      {section.items.map((item, iIdx) => (
-                        <div key={iIdx} className="flex items-start gap-3 border border-slate-100 rounded-lg p-3 bg-slate-50/60">
-                          <div className="flex-1 space-y-2">
-                            <Input
-                              value={item.label}
-                              onChange={(e) => updateItem(sIdx, iIdx, 'label', e.target.value)}
-                              placeholder="Item label"
-                              className="text-sm h-9 font-medium"
-                            />
-                            <Input
-                              value={item.instructions || ''}
-                              onChange={(e) => updateItem(sIdx, iIdx, 'instructions', e.target.value)}
-                              placeholder="Instructions (optional)"
-                              className="text-xs h-8 text-slate-500"
-                            />
-                          </div>
-                          <Button
-                            size="sm" variant="ghost"
-                            onClick={() => removeItem(sIdx, iIdx)}
-                            className="text-red-400 hover:text-red-600 h-8 w-8 p-0 shrink-0 mt-0.5"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        size="sm" variant="outline"
-                        onClick={() => addItem(sIdx)}
-                        className="w-full h-8 text-xs border-dashed border-slate-300 text-slate-500"
-                      >
-                        <Plus className="w-3 h-3 mr-1" />Add Item
-                      </Button>
-                    </CardContent>
-                  )}
-                </Card>
-              ))}
-              <Button
-                variant="outline"
-                onClick={addSection}
-                className="w-full border-dashed border-slate-300 text-slate-600 h-9"
-              >
-                <Plus className="w-4 h-4 mr-2" />Add Section
-              </Button>
-            </div>
+                )}
+              </Droppable>
+            </DragDropContext>
           </div>
         )}
       </DialogContent>
