@@ -328,31 +328,49 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
 
                             {expandedSections[sIdx] && (
                               <CardContent className="p-4 space-y-2 bg-white">
-                                {section.items.map((item, iIdx) => (
-                                  <div key={iIdx} className="flex items-start gap-3 border border-slate-100 rounded-lg p-3 bg-slate-50/60">
-                                    <div className="flex-1 space-y-2">
-                                      <Input
-                                        value={item.label}
-                                        onChange={(e) => updateItem(sIdx, iIdx, 'label', e.target.value)}
-                                        placeholder="Item label"
-                                        className="text-sm h-9 font-medium"
-                                      />
-                                      <Input
-                                        value={item.instructions || ''}
-                                        onChange={(e) => updateItem(sIdx, iIdx, 'instructions', e.target.value)}
-                                        placeholder="Instructions (optional)"
-                                        className="text-xs h-8 text-slate-500"
-                                      />
+                                <Droppable droppableId={`items-${sIdx}`} type="item">
+                                  {(itemProvided) => (
+                                    <div className="space-y-2" {...itemProvided.droppableProps} ref={itemProvided.innerRef}>
+                                      {section.items.map((item, iIdx) => (
+                                        <Draggable key={`item-${sIdx}-${iIdx}`} draggableId={`item-${sIdx}-${iIdx}`} index={iIdx}>
+                                          {(itemDrag, itemSnap) => (
+                                            <div
+                                              ref={itemDrag.innerRef}
+                                              {...itemDrag.draggableProps}
+                                              className={`flex items-start gap-3 border border-slate-100 rounded-lg p-3 bg-slate-50/60 ${itemSnap.isDragging ? 'shadow-md ring-1 ring-blue-200' : ''}`}
+                                            >
+                                              <div {...itemDrag.dragHandleProps} className="text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing shrink-0 mt-2">
+                                                <GripVertical className="w-4 h-4" />
+                                              </div>
+                                              <div className="flex-1 space-y-2">
+                                                <Input
+                                                  value={item.label}
+                                                  onChange={(e) => updateItem(sIdx, iIdx, 'label', e.target.value)}
+                                                  placeholder="Item label"
+                                                  className="text-sm h-9 font-medium"
+                                                />
+                                                <Input
+                                                  value={item.instructions || ''}
+                                                  onChange={(e) => updateItem(sIdx, iIdx, 'instructions', e.target.value)}
+                                                  placeholder="Instructions (optional)"
+                                                  className="text-xs h-8 text-slate-500"
+                                                />
+                                              </div>
+                                              <Button
+                                                size="sm" variant="ghost"
+                                                onClick={() => removeItem(sIdx, iIdx)}
+                                                className="text-red-400 hover:text-red-600 h-8 w-8 p-0 shrink-0 mt-0.5"
+                                              >
+                                                <Trash2 className="w-4 h-4" />
+                                              </Button>
+                                            </div>
+                                          )}
+                                        </Draggable>
+                                      ))}
+                                      {itemProvided.placeholder}
                                     </div>
-                                    <Button
-                                      size="sm" variant="ghost"
-                                      onClick={() => removeItem(sIdx, iIdx)}
-                                      className="text-red-400 hover:text-red-600 h-8 w-8 p-0 shrink-0 mt-0.5"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                ))}
+                                  )}
+                                </Droppable>
                                 <Button
                                   size="sm" variant="outline"
                                   onClick={() => addItem(sIdx)}
