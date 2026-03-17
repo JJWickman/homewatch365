@@ -31,6 +31,7 @@ export default function ChecklistEditor() {
   const [client, setClient] = useState(null);
   const [sections, setSections] = useState([]);
   const [expandedSections, setExpandedSections] = useState({});
+  const [checklistInstructions, setChecklistInstructions] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState('');
