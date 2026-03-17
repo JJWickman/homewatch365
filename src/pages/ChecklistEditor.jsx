@@ -345,65 +345,83 @@ export default function ChecklistEditor() {
                       {/* Items */}
                       {expandedSections[sIdx] && (
                         <CardContent className="p-4 space-y-2 bg-white">
-                          {section.items.map((item, iIdx) => (
-                            <div key={iIdx} className="flex items-start gap-3 border border-slate-100 rounded-lg p-3 bg-slate-50/60 hover:bg-slate-50">
-                              <div className="flex-1 space-y-3">
-                                <Input
-                                  value={item.label}
-                                  onChange={(e) => updateItem(sIdx, iIdx, 'label', e.target.value)}
-                                  placeholder="Item label"
-                                  className="text-sm h-10 font-medium"
-                                />
-                                <div className="flex gap-2">
-                                  {['OK', 'Issue', 'N/A'].map(opt => (
-                                    <div key={opt} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium flex-1 justify-center ${
-                                      opt === 'Issue' ? 'border-red-200 bg-red-50 text-red-600' :
-                                      opt === 'OK' ? 'border-green-200 bg-green-50 text-green-700' :
-                                      'border-slate-200 bg-slate-50 text-slate-500'
-                                    }`}>
-                                      <span className="w-4 h-4 rounded border-2 border-current flex items-center justify-center shrink-0" />
-                                      {opt}
-                                    </div>
-                                  ))}
-                                </div>
-                                <div className="flex gap-3 flex-wrap">
-                                  <button
-                                    type="button"
-                                    onClick={() => updateItem(sIdx, iIdx, 'require_note', !item.require_note)}
-                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors min-h-[44px] ${
-                                      item.require_note ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-slate-600 border-slate-200'
-                                    }`}
-                                  >
-                                    <MessageSquare className="w-4 h-4" />
-                                    Require Note if Issue
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => updateItem(sIdx, iIdx, 'require_photo', !item.require_photo)}
-                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors min-h-[44px] ${
-                                      item.require_photo ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-slate-600 border-slate-200'
-                                    }`}
-                                  >
-                                    <Camera className="w-4 h-4" />
-                                    Require Photo if Issue
-                                  </button>
-                                </div>
-                                <Input
-                                  value={item.instructions || ''}
-                                  onChange={(e) => updateItem(sIdx, iIdx, 'instructions', e.target.value)}
-                                  placeholder="Instructions / notes for field user (optional)"
-                                  className="text-xs h-9 text-slate-500"
-                                />
+                          <Droppable droppableId={`items-${sIdx}`} type="item">
+                            {(itemProvided) => (
+                              <div className="space-y-2" {...itemProvided.droppableProps} ref={itemProvided.innerRef}>
+                                {section.items.map((item, iIdx) => (
+                                  <Draggable key={`item-${sIdx}-${iIdx}`} draggableId={`item-${sIdx}-${iIdx}`} index={iIdx}>
+                                    {(itemDrag, itemSnap) => (
+                                      <div
+                                        ref={itemDrag.innerRef}
+                                        {...itemDrag.draggableProps}
+                                        className={`flex items-start gap-3 border border-slate-100 rounded-lg p-3 bg-slate-50/60 hover:bg-slate-50 ${itemSnap.isDragging ? 'shadow-md ring-1 ring-blue-200' : ''}`}
+                                      >
+                                        <div {...itemDrag.dragHandleProps} className="text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing shrink-0 mt-2">
+                                          <GripVertical className="w-4 h-4" />
+                                        </div>
+                                        <div className="flex-1 space-y-3">
+                                          <Input
+                                            value={item.label}
+                                            onChange={(e) => updateItem(sIdx, iIdx, 'label', e.target.value)}
+                                            placeholder="Item label"
+                                            className="text-sm h-10 font-medium"
+                                          />
+                                          <div className="flex gap-2">
+                                            {['OK', 'Issue', 'N/A'].map(opt => (
+                                              <div key={opt} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium flex-1 justify-center ${
+                                                opt === 'Issue' ? 'border-red-200 bg-red-50 text-red-600' :
+                                                opt === 'OK' ? 'border-green-200 bg-green-50 text-green-700' :
+                                                'border-slate-200 bg-slate-50 text-slate-500'
+                                              }`}>
+                                                <span className="w-4 h-4 rounded border-2 border-current flex items-center justify-center shrink-0" />
+                                                {opt}
+                                              </div>
+                                            ))}
+                                          </div>
+                                          <div className="flex gap-3 flex-wrap">
+                                            <button
+                                              type="button"
+                                              onClick={() => updateItem(sIdx, iIdx, 'require_note', !item.require_note)}
+                                              className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors min-h-[44px] ${
+                                                item.require_note ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-slate-600 border-slate-200'
+                                              }`}
+                                            >
+                                              <MessageSquare className="w-4 h-4" />
+                                              Require Note if Issue
+                                            </button>
+                                            <button
+                                              type="button"
+                                              onClick={() => updateItem(sIdx, iIdx, 'require_photo', !item.require_photo)}
+                                              className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors min-h-[44px] ${
+                                                item.require_photo ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-slate-600 border-slate-200'
+                                              }`}
+                                            >
+                                              <Camera className="w-4 h-4" />
+                                              Require Photo if Issue
+                                            </button>
+                                          </div>
+                                          <Input
+                                            value={item.instructions || ''}
+                                            onChange={(e) => updateItem(sIdx, iIdx, 'instructions', e.target.value)}
+                                            placeholder="Instructions / notes for field user (optional)"
+                                            className="text-xs h-9 text-slate-500"
+                                          />
+                                        </div>
+                                        <Button
+                                          size="sm" variant="ghost"
+                                          onClick={() => removeItem(sIdx, iIdx)}
+                                          className="text-red-400 hover:text-red-600 h-8 w-8 p-0 shrink-0 mt-0.5"
+                                        >
+                                          <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                ))}
+                                {itemProvided.placeholder}
                               </div>
-                              <Button
-                                size="sm" variant="ghost"
-                                onClick={() => removeItem(sIdx, iIdx)}
-                                className="text-red-400 hover:text-red-600 h-8 w-8 p-0 shrink-0 mt-0.5"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          ))}
+                            )}
+                          </Droppable>
                           <Button
                             size="sm" variant="outline"
                             onClick={() => addItem(sIdx)}
