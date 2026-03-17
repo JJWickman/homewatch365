@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertCircle, X } from 'lucide-react';
+import { AlertCircle, X, Camera, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { base44 } from '@/api/base44Client';
 
 export default function ChecklistItemRow({
   item,
