@@ -127,13 +127,27 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
     setExpandedSections(prev => ({ ...prev, [sIdx]: !prev[sIdx] }));
 
   const onDragEnd = (result) => {
-    if (!result.destination || result.source.index === result.destination.index) return;
-    setSections(prev => {
-      const reordered = [...prev];
-      const [moved] = reordered.splice(result.source.index, 1);
-      reordered.splice(result.destination.index, 0, moved);
-      return reordered;
-    });
+    if (!result.destination) return;
+    const { source, destination, type } = result;
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
+
+    if (type === 'section') {
+      setSections(prev => {
+        const reordered = [...prev];
+        const [moved] = reordered.splice(source.index, 1);
+        reordered.splice(destination.index, 0, moved);
+        return reordered;
+      });
+    } else if (type === 'item') {
+      const sIdx = parseInt(source.droppableId.replace('items-', ''));
+      const dIdx = parseInt(destination.droppableId.replace('items-', ''));
+      setSections(prev => {
+        const next = prev.map(s => ({ ...s, items: [...s.items] }));
+        const [moved] = next[sIdx].items.splice(source.index, 1);
+        next[dIdx].items.splice(destination.index, 0, moved);
+        return next;
+      });
+    }
   };
 
   const saveChecklist = async () => {
