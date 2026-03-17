@@ -958,6 +958,16 @@ export default function PropertyDetail() {
                             />
                           </div>
                         ))}
+                        <div>
+                          <label className="text-xs text-slate-500 block mb-1">Additional Notes</label>
+                          <textarea
+                            value={property.hoa_notes || ''}
+                            onChange={(e) => { setProperty({...property, hoa_notes: e.target.value}); setHasUnsavedChanges(true); }}
+                            placeholder="Any additional HOA information, rules, contacts, etc."
+                            rows={3}
+                            className="w-full px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black resize-none"
+                          />
+                        </div>
                       </div>
                     )}
                   </div>
