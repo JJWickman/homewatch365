@@ -288,7 +288,7 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
 
             {/* Sections editor */}
             <DragDropContext onDragEnd={onDragEnd}>
-              <Droppable droppableId="wizard-sections">
+              <Droppable droppableId="wizard-sections" type="section">
                 {(provided) => (
                   <div className="space-y-3 max-h-[60vh] overflow-y-auto" {...provided.droppableProps} ref={provided.innerRef}>
                     {sections.map((section, sIdx) => (
