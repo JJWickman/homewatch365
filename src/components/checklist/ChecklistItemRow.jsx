@@ -61,43 +61,27 @@ export default function ChecklistItemRow({
           </div>
         </div>
 
-        {/* OK / Issue / N/A buttons */}
-        <div className="flex gap-2">
-          <Button
-            variant={value === 'ok' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => {
-              onItemChange(item.id, { ...response, response_value: 'ok', issue_flag: false });
-              setShowIssueDetails(false);
-            }}
-            className="flex-1"
-          >
-            OK
-          </Button>
-          <Button
-            variant={value === 'issue' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => {
-              onItemChange(item.id, { ...response, response_value: 'issue', issue_flag: true });
-              setShowIssueDetails(true);
-            }}
-            className="flex-1 bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
-          >
-            Issue
-          </Button>
-          {item.allow_na && (
-            <Button
-              variant={value === 'na' ? 'default' : 'outline'}
-              size="sm"
+        {/* Response buttons */}
+        <div className="flex flex-col gap-2">
+          {[
+            { key: 'ok',    label: 'No Visible Issues Observed',    issueFlag: false, cls: value === 'ok' ? 'bg-green-600 text-white border-green-600' : 'border-green-200 text-green-700 bg-green-50 hover:bg-green-100' },
+            { key: 'issue', label: 'Issue Observed',                issueFlag: true,  cls: value === 'issue' ? 'bg-red-600 text-white border-red-600' : 'border-red-200 text-red-700 bg-red-50 hover:bg-red-100' },
+            ...(item.allow_na !== false ? [{ key: 'na', label: 'Not Observed / Not Accessible', issueFlag: false, cls: value === 'na' ? 'bg-slate-600 text-white border-slate-600' : 'border-slate-200 text-slate-600 bg-slate-50 hover:bg-slate-100' }] : []),
+          ].map(btn => (
+            <button
+              key={btn.key}
               onClick={() => {
-                onItemChange(item.id, { ...response, response_value: 'na', issue_flag: false });
-                setShowIssueDetails(false);
+                onItemChange(item.id, { ...response, response_value: btn.key, issue_flag: btn.issueFlag });
+                setShowIssueDetails(btn.issueFlag);
               }}
-              className="flex-1"
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-md border text-sm font-medium text-left transition-colors ${btn.cls}`}
             >
-              N/A
-            </Button>
-          )}
+              <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${value === btn.key ? 'border-white' : 'border-current'}`}>
+                {value === btn.key && <span className="w-2 h-2 rounded-full bg-white block" />}
+              </span>
+              {btn.label}
+            </button>
+          ))}
         </div>
 
         {/* Issue details */}
