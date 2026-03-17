@@ -72,6 +72,7 @@ export default function ChecklistEditor() {
             }
           }
           
+          setChecklistInstructions(pChecklist.checklist_instructions || '');
           raw = pChecklist.customized_sections?.length > 0
             ? JSON.parse(JSON.stringify(pChecklist.customized_sections))
             : JSON.parse(JSON.stringify(template.defaultSections));
