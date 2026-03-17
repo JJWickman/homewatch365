@@ -408,8 +408,10 @@ export default function ChecklistEditor() {
               </CardContent>
             )}
           </Card>
+            )}
+          </Draggable>
         ))}
-
+        {provided.placeholder}
         <Button
           variant="outline"
           onClick={addSection}
@@ -418,6 +420,9 @@ export default function ChecklistEditor() {
           <Plus className="w-4 h-4 mr-2" />Add Section
         </Button>
       </div>
+          )}
+        </Droppable>
+      </DragDropContext>
     </div>
   );
 }
