@@ -45,7 +45,7 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
 
   // Three standard templates
   const STANDARD_TEMPLATES = [
-    { id: 'sfh-template', name: 'Single Family Home', description: 'Standard checklist for single family homes and estates', propertyTypes: ['single_family', 'estate'] },
+    { id: 'sfh-template', name: 'Single Family Home', description: 'Home Watch checklist for single family homes and estates', propertyTypes: ['single_family', 'estate'] },
     { id: 'condo-template', name: 'Condo / Villa', description: 'Checklist for condos, villas, and townhouses', propertyTypes: ['condo', 'townhouse'] },
     { id: 'highrise-template', name: 'Commercial / Multi-Family', description: 'Checklist for commercial properties and high-rise buildings', propertyTypes: ['commercial'] },
   ];
