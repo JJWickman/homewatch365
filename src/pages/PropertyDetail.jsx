@@ -303,7 +303,7 @@ export default function PropertyDetail() {
   const filteredVisits = visits.filter(v => visitTypeFilter === 'all' || v.visit_type === visitTypeFilter);
   
   const visitsByType = {
-    inspection: filteredVisits.filter(v => v.visit_type === 'inspection'),
+    inspection: filteredVisits.filter(v => v.visit_type === 'inspection' || v.visit_type === 'check-in'),
     followup: filteredVisits.filter(v => v.visit_type === 'followup')
   };
 
