@@ -120,14 +120,17 @@ export default function MobileChecklistItem({ label, instructions, responseType,
     <div className={`bg-white rounded-xl border-2 ${borderColor} p-4 shadow-sm transition-colors`}>
       <p className="font-semibold text-slate-800 mb-1 leading-snug text-[15px]">{label}</p>
       {instructions && <p className="text-xs text-slate-500 mb-2 italic leading-relaxed">{instructions}</p>}
-      <div className="grid grid-cols-3 gap-2 mt-3">
+      <div className="flex flex-col gap-2 mt-3">
         {[
-          { key: 'ok',    label: '✓ OK',    active: 'bg-green-500 border-green-500 text-white', inactive: 'border-green-200 text-green-600 bg-green-50' },
-          { key: 'issue', label: '⚠ Issue', active: 'bg-red-500 border-red-500 text-white',     inactive: 'border-red-200 text-red-500 bg-red-50' },
-          { key: 'na',    label: 'N/A',     active: 'bg-slate-500 border-slate-500 text-white', inactive: 'border-slate-200 text-slate-500 bg-slate-50' },
+          { key: 'ok',    label: 'No Visible Issues Observed',      active: 'bg-green-500 border-green-500 text-white', inactive: 'border-green-200 text-green-700 bg-green-50' },
+          { key: 'issue', label: 'Issue Observed',                  active: 'bg-red-500 border-red-500 text-white',     inactive: 'border-red-200 text-red-600 bg-red-50' },
+          { key: 'na',    label: 'Not Observed / Not Accessible',   active: 'bg-slate-500 border-slate-500 text-white', inactive: 'border-slate-200 text-slate-500 bg-slate-50' },
         ].map(btn => (
           <button key={btn.key} onClick={() => update({ value: btn.key })}
-            className={`py-3 rounded-xl text-sm font-bold border-2 transition-all active:scale-95 ${val === btn.key ? btn.active : btn.inactive}`}>
+            className={`py-2.5 px-4 rounded-xl text-sm font-semibold border-2 text-left flex items-center gap-2 transition-all active:scale-[0.98] ${val === btn.key ? btn.active : btn.inactive}`}>
+            <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${val === btn.key ? 'border-white bg-white/30' : 'border-current'}`}>
+              {val === btn.key && <span className="w-2 h-2 rounded-full bg-white block" />}
+            </span>
             {btn.label}
           </button>
         ))}
