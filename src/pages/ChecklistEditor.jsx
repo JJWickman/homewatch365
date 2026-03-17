@@ -305,6 +305,23 @@ export default function ChecklistEditor() {
         </div>
       )}
 
+      {/* Checklist Instructions */}
+      <Card className="mb-4 overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-amber-200 bg-amber-50">
+          <MessageSquare className="w-4 h-4 text-amber-600 shrink-0" />
+          <span className="font-semibold text-amber-800 text-sm">Checklist Instructions</span>
+          <span className="text-xs text-amber-600 ml-1">— shown to the field user at the top of every checklist</span>
+        </div>
+        <CardContent className="p-4 bg-white">
+          <textarea
+            value={checklistInstructions}
+            onChange={(e) => setChecklistInstructions(e.target.value)}
+            placeholder="Enter instructions for field users. These will appear at the top of the checklist before any sections. Use this space to explain procedures, educate homeowners about home care, list safety reminders, or provide any property-specific guidance..."
+            className="w-full border border-slate-200 rounded-lg p-3 text-sm resize-none h-28 focus:outline-none focus:ring-2 focus:ring-amber-300 text-slate-700 placeholder:text-slate-400"
+          />
+        </CardContent>
+      </Card>
+
       {/* Sections */}
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="sections" type="section">
