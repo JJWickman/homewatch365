@@ -4,8 +4,9 @@ import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import {
   Home, Building, Building2, Save, Globe, Plus, Trash2,
-  ChevronDown, ChevronRight, Loader2, ArrowLeft, MessageSquare, Camera
+  ChevronDown, ChevronRight, Loader2, ArrowLeft, MessageSquare, Camera, GripVertical
 } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
