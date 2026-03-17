@@ -221,7 +221,7 @@ export default function ClientDetail() {
     }
   };
 
-  const portalUrl = `${window.location.origin}/ClientPortal?email=${encodeURIComponent(client?.portal_user_email || '')}`;
+  const portalUrl = `https://estatewatch365.app/ClientPortal?email=${encodeURIComponent(client?.portal_user_email || '')}`;
 
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(portalUrl);
