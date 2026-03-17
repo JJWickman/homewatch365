@@ -30,6 +30,7 @@ export const SFH_SECTIONS = [
       { label: 'Ice maker emptied and OFF', responseType: 'ok_issue_na', instructions: '' },
       { label: 'Perishable and frozen foods removed from fridge and freezer', responseType: 'ok_issue_na', instructions: '' },
       { label: 'Check wine cooler or wine room for proper temperature and operation', responseType: 'ok_issue_na', instructions: '' },
+      { label: 'Wine cooler / wine room temperature', responseType: 'number', instructions: '' },
       { label: 'Run water in showers and tubs, checking for visible leaks', responseType: 'ok_issue_na', instructions: '' },
       { label: 'Brush and flush toilets, check for visible leaks and signs of water damage', responseType: 'ok_issue_na', instructions: '' },
       { label: 'Check the water heater for signs of leaks and rust', responseType: 'ok_issue_na', instructions: '' },
