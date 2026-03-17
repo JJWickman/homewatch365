@@ -307,6 +307,8 @@ export default function VisitChecklistMobile() {
         isSubmitting={isSubmitting}
       />
 
+      <CheckInAssistant property={property} visit={visit} />
+
       <SubmissionReviewModal
         open={showReviewModal}
         onOpenChange={setShowReviewModal}
