@@ -158,6 +158,18 @@ export default function ChecklistEditor() {
   const toggleSection = (sIdx) =>
     setExpandedSections(prev => ({ ...prev, [sIdx]: !prev[sIdx] }));
 
+  const onDragEnd = (result) => {
+    if (!result.destination) return;
+    const { source, destination } = result;
+    if (source.index === destination.index) return;
+    setSections(prev => {
+      const reordered = [...prev];
+      const [moved] = reordered.splice(source.index, 1);
+      reordered.splice(destination.index, 0, moved);
+      return reordered;
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
