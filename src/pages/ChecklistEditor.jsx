@@ -160,14 +160,26 @@ export default function ChecklistEditor() {
 
   const onDragEnd = (result) => {
     if (!result.destination) return;
-    const { source, destination } = result;
-    if (source.index === destination.index) return;
-    setSections(prev => {
-      const reordered = [...prev];
-      const [moved] = reordered.splice(source.index, 1);
-      reordered.splice(destination.index, 0, moved);
-      return reordered;
-    });
+    const { source, destination, type } = result;
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
+
+    if (type === 'section') {
+      setSections(prev => {
+        const reordered = [...prev];
+        const [moved] = reordered.splice(source.index, 1);
+        reordered.splice(destination.index, 0, moved);
+        return reordered;
+      });
+    } else if (type === 'item') {
+      const sIdx = parseInt(source.droppableId.replace('items-', ''));
+      const dIdx = parseInt(destination.droppableId.replace('items-', ''));
+      setSections(prev => {
+        const next = prev.map(s => ({ ...s, items: [...s.items] }));
+        const [moved] = next[sIdx].items.splice(source.index, 1);
+        next[dIdx].items.splice(destination.index, 0, moved);
+        return next;
+      });
+    }
   };
 
   if (loading) {
