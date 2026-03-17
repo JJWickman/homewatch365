@@ -101,7 +101,8 @@ export default function ChecklistEditor() {
       if (checklistId && propertyChecklist) {
         // Save to PropertyChecklist
         await base44.entities.PropertyChecklist.update(checklistId, {
-          customized_sections: sections
+          customized_sections: sections,
+          checklist_instructions: checklistInstructions
         });
         setSavedMsg('Saved!');
         setTimeout(() => setSavedMsg(''), 2500);
