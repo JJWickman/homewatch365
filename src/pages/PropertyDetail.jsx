@@ -762,6 +762,12 @@ export default function PropertyDetail() {
                 <span className="text-slate-500">Type</span>
                 <span className="font-medium capitalize">{property.property_type === 'commercial' ? 'High-Rise or Multi-Family Complex' : property.property_type?.replace('_', ' ')}</span>
               </div>
+              {['condo', 'townhouse', 'commercial'].includes(property.property_type) && (
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Unit #</span>
+                  <span className="font-medium">{property.unit_number || <span className="text-slate-400 italic text-sm">Not set</span>}</span>
+                </div>
+              )}
               {property.square_feet && (
                 <div className="flex justify-between">
                   <span className="text-slate-500">Size</span>
