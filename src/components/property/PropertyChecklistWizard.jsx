@@ -171,7 +171,7 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
             </div>
 
             <div>
-              <p className="text-sm font-medium text-slate-700 mb-3">Choose a Standard Template</p>
+              <p className="text-sm font-medium text-slate-700 mb-3">Choose a Template</p>
               <div className="grid grid-cols-1 gap-3">
                 {templates.map((template) => (
                   <Card
