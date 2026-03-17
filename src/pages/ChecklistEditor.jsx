@@ -115,7 +115,7 @@ export default function ChecklistEditor() {
         const checklists = company?.settings?.checklists || {};
         const updatedChecklists = {
           ...checklists,
-          [templateKey]: { sections, published, updatedAt: new Date().toISOString() }
+          [templateKey]: { sections, instructions: checklistInstructions, published, updatedAt: new Date().toISOString() }
         };
         const updatedSettings = { ...(company.settings || {}), checklists: updatedChecklists };
         await base44.entities.Company.update(company.id, { settings: updatedSettings });
