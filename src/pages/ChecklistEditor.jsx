@@ -80,6 +80,7 @@ export default function ChecklistEditor() {
       } else {
         // Editing company template
         const saved = c?.settings?.checklists?.[templateKey];
+        setChecklistInstructions(saved?.instructions || '');
         raw = (saved?.sections?.length > 0)
           ? JSON.parse(JSON.stringify(saved.sections))
           : JSON.parse(JSON.stringify(template.defaultSections));
