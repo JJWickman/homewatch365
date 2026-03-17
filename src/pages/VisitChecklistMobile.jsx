@@ -6,6 +6,7 @@ import ChecklistHeaderComponent from '@/components/checklist/ChecklistHeaderComp
 import ChecklistSectionComponent from '@/components/checklist/ChecklistSectionComponent';
 import ChecklistFooterBar from '@/components/checklist/ChecklistFooterBar';
 import SubmissionReviewModal from '@/components/checklist/SubmissionReviewModal';
+import CheckInAssistant from '@/components/checklist/CheckInAssistant';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { SFH_SECTIONS, CONDO_SECTIONS, HIGHRISE_SECTIONS } from '@/components/checklist/checklistDefaults';
