@@ -133,37 +133,42 @@ export default function ChecklistItemRow({
             {/* Photo upload */}
             {item.allow_photo && (
               <div>
-                <label className="text-xs font-medium text-slate-700 block mb-1">
-                  Photos
-                </label>
-                <input
-                  key={photoInputKey}
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handlePhotoUpload}
-                  className="text-sm"
-                />
-                {response?.photo_urls?.length > 0 && (
-                  <div className="flex gap-2 mt-2 flex-wrap">
-                    {response.photo_urls.map((url, idx) => (
-                      <div key={idx} className="relative">
-                        <img
-                          src={url}
-                          alt={`Photo ${idx + 1}`}
-                          className="h-12 w-12 rounded object-cover border border-slate-300"
-                        />
-                        <button
-                          onClick={() => removePhoto(url)}
-                          className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <label className="text-xs font-medium text-slate-700 block mb-2">Photos</label>
+                <div className="flex flex-wrap gap-2 items-center">
+                  {(response?.photo_urls || []).map((url, idx) => (
+                    <div key={idx} className="relative">
+                      <img
+                        src={url}
+                        alt={`Photo ${idx + 1}`}
+                        className="h-16 w-16 rounded-xl object-cover border border-red-200"
+                      />
+                      <button
+                        onClick={() => removePhoto(url)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center shadow"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  <label className="h-16 w-16 border-2 border-dashed border-red-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-red-500 bg-red-50/50 transition-colors">
+                    {uploading
+                      ? <Loader2 className="w-5 h-5 animate-spin text-red-400" />
+                      : <>
+                          <Camera className="w-5 h-5 text-red-400" />
+                          <span className="text-xs text-red-400 mt-0.5 font-medium">Photo</span>
+                        </>
+                    }
+                    <input
+                      key={photoInputKey}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handlePhotoUpload}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </label>
+                </div>
               </div>
             )}
           </div>
