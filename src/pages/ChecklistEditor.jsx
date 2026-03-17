@@ -290,11 +290,19 @@ export default function ChecklistEditor() {
       )}
 
       {/* Sections */}
-      <div className="space-y-3">
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="sections">
+          {(provided) => (
+        <div className="space-y-3" {...provided.droppableProps} ref={provided.innerRef}>
         {sections.map((section, sIdx) => (
-          <Card key={sIdx} className="overflow-hidden">
+          <Draggable key={`section-${sIdx}`} draggableId={`section-${sIdx}`} index={sIdx}>
+            {(dragProvided, dragSnapshot) => (
+          <Card ref={dragProvided.innerRef} {...dragProvided.draggableProps} className={`overflow-hidden ${dragSnapshot.isDragging ? 'shadow-lg ring-2 ring-blue-300' : ''}`}>
             {/* Section header */}
             <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-200" style={{background: 'linear-gradient(to right, rgba(30,58,95,0.08), rgba(30,58,95,0.03))'}}>
+              <div {...dragProvided.dragHandleProps} className="text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing shrink-0">
+                <GripVertical className="w-4 h-4" />
+              </div>
               <button
                 onClick={() => toggleSection(sIdx)}
                 className="text-slate-400 hover:text-slate-700 shrink-0"
