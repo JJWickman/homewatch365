@@ -117,6 +117,7 @@ export const CONDO_SECTIONS = [
       { label: 'Ice maker emptied and OFF', responseType: 'ok_issue_na', instructions: '' },
       { label: 'Perishable and frozen foods removed from fridge and freezer', responseType: 'ok_issue_na', instructions: '' },
       { label: 'Check wine cooler or wine room for proper temp, signs of water, moisture, or condensation', responseType: 'ok_issue_na', instructions: '' },
+      { label: 'Wine cooler / wine room temperature', responseType: 'number', instructions: '' },
       { label: 'Bathrooms: Always careful and mindful of splashing water on glass enclosures', responseType: 'instruction_only', instructions: '' },
       { label: 'Run water in showers and tubs, checking for visible leaks', responseType: 'ok_issue_na', instructions: '' },
       { label: 'Always mindful of the valve at the wall as well as any discoloration of the tile grout', responseType: 'instruction_only', instructions: '' },
