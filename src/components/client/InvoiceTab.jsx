@@ -395,6 +395,26 @@ export default function InvoiceTab({ clientId, client }) {
       </Dialog>
 
     <div className="space-y-4">
+      {/* Billing Address */}
+      <Card>
+        <CardContent className="pt-4 pb-4">
+          <div className="flex items-start gap-3">
+            <MapPin className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-xs text-slate-500 font-medium uppercase tracking-wide mb-1">Billing Address</p>
+              {client?.address ? (
+                <p className="text-sm text-slate-800">
+                  {client.address}<br />
+                  {client.city}{client.state ? `, ${client.state}` : ''} {client.zip || ''}
+                </p>
+              ) : (
+                <p className="text-sm text-slate-400 italic">No billing address on file</p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Generate & Send Invoice */}
       <Card>
         <CardHeader>
