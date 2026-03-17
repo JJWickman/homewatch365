@@ -300,7 +300,11 @@ export default function PropertyDetail() {
   const completedVisits = visits.filter(v => v.status === 'completed').length;
   const pendingVisits = visits.filter(v => v.status !== 'completed' && v.status !== 'cancelled').length;
   
-  const filteredVisits = visits.filter(v => visitTypeFilter === 'all' || v.visit_type === visitTypeFilter);
+  const filteredVisits = visits.filter(v => {
+    if (visitTypeFilter === 'all') return true;
+    if (visitTypeFilter === 'inspection') return v.visit_type === 'inspection' || v.visit_type === 'check-in';
+    return v.visit_type === visitTypeFilter;
+  });
   
   const visitsByType = {
     inspection: filteredVisits.filter(v => v.visit_type === 'inspection' || v.visit_type === 'check-in'),
