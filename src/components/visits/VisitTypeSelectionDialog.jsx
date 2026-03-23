@@ -79,9 +79,9 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
 
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
-      <DialogContent className="max-w-md rounded-2xl p-0 bg-white overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-900 via-slate-900 to-slate-800 px-6 py-6 flex items-center justify-between">
-          {step === 'type' && !property && (
+      <DialogContent className="max-w-md rounded-2xl p-0 overflow-hidden" style={{backgroundColor: 'transparent'}}>
+        <div className="bg-gradient-to-r from-blue-900 via-slate-900 to-slate-800 px-6 py-6 flex items-center justify-between rounded-t-2xl">
+         {step === 'type' && !property && (
             <button
               onClick={() => {
                 setStep('property');
@@ -102,7 +102,7 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
             </p>
           </div>
         </div>
-        <div className="p-4 max-h-[70vh] overflow-y-auto">
+        <div className="p-4 max-h-[70vh] overflow-y-auto bg-white rounded-b-2xl">
           {step === 'property' ? (
             <div className="space-y-2">
               {properties.length === 0 ? (
