@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ClientPortal from './pages/ClientPortal';
 import ClientLogin from './pages/ClientLogin';
+import ApproveFounder from './pages/ApproveFounder';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -80,6 +81,7 @@ const AuthenticatedApp = () => {
       } />
       <Route path="/ClientPortal" element={<ClientPortal />} />
       <Route path="/ClientLogin" element={<ClientLogin />} />
+      <Route path="/approvefounder" element={<ApproveFounder />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
