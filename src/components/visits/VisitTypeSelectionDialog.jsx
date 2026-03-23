@@ -79,7 +79,7 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
 
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
-      <DialogContent className="max-w-md rounded-2xl p-0 overflow-hidden" style={{backgroundColor: 'transparent'}}>
+      <DialogContent className="max-w-md rounded-2xl p-0 overflow-hidden border-0 shadow-lg" style={{padding: 0}}>
         <div className="bg-white border-b-4 border-green-500 px-6 py-6 flex items-center justify-between rounded-t-2xl">
          {step === 'type' && !property && (
             <button
@@ -102,7 +102,7 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
             </p>
           </div>
         </div>
-        <div className="p-4 max-h-[70vh] overflow-y-auto bg-white rounded-b-2xl">
+        <div className="p-4 max-h-[70vh] overflow-y-auto bg-slate-50">
           {step === 'property' ? (
             <div className="space-y-2">
               {properties.length === 0 ? (
