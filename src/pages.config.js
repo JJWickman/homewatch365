@@ -88,7 +88,7 @@ import VisitChecklistMobile from './pages/VisitChecklistMobile';
 import VisitChecklistPage from './pages/VisitChecklistPage';
 import VisitDetail from './pages/VisitDetail';
 import VisitFlow from './pages/VisitFlow';
-import Visits from './pages/Visits';
+import Visits from './pages/Visits.jsx';
 import __Layout from './Layout.jsx';
 
 
