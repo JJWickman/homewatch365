@@ -105,8 +105,6 @@ export default function Settings() {
   const [showNewTypeDialog, setShowNewTypeDialog] = useState(false);
   const [editingTypeId, setEditingTypeId] = useState(null);
   const [typeFormData, setTypeFormData] = useState({ name: '', slug: '', description: '', is_active: true });
-  const [billingCycle, setBillingCycle] = useState('monthly');
-  const [stripePrices, setStripePrices] = useState({});
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
@@ -119,7 +117,6 @@ export default function Settings() {
 
   useEffect(() => {
     loadData();
-    loadStripePrices();
   }, []);
 
   const loadData = async () => {
@@ -558,56 +555,7 @@ ${company.name}
 
   const canManageStaff = isDispatcherOrAdmin;
 
-  const PRICING_TIERS = [
-    {
-      id: 'solopreneur',
-      name: 'Solopreneur',
-      icon: Users,
-      monthlyPrice: 99,
-      annualPrice: 79,
-      features: ['Unlimited Clients', 'Unlimited Properties', 'Inspections & Scheduling', 'Follow-ups & Tasks'],
-      limits: { users: 1, admins: 1 }
-    },
-    {
-      id: 'growth',
-      name: 'Growth',
-      icon: TrendingUp,
-      monthlyPrice: 199,
-      annualPrice: 159,
-      popular: true,
-      features: ['Everything in Solopreneur', 'Up to 5 Field Inspectors', '1 Admin User', 'Team Collaboration', 'Route Optimization'],
-      limits: { users: 5, admins: 1 }
-    },
-    {
-      id: 'professional',
-      name: 'Professional',
-      icon: Briefcase,
-      monthlyPrice: 249,
-      annualPrice: 199,
-      features: ['Everything in Growth', 'Up to 10 Team Members', '2 Admin Users', 'Priority Support', 'Route Optimization'],
-      limits: { users: 10, admins: 2 }
-    },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      icon: Shield,
-      monthlyPrice: 499,
-      annualPrice: 399,
-      features: ['Everything in Professional', 'Up to 50 Team Members', '5 Admin Users', 'Contractor Management', 'Marketing Tools'],
-      limits: { users: 50, admins: 5 }
-    }
-  ];
 
-  const loadStripePrices = async () => {
-    try {
-      const response = await base44.functions.invoke('getStripePrices');
-      if (response.data.success) {
-        setStripePrices(response.data.prices);
-      }
-    } catch (error) {
-      console.error('Error loading Stripe prices:', error);
-    }
-  };
   
   const DEFAULT_CONTRACTOR_TYPES = [
     'electrician', 'hvac', 'roofer', 'plumber', 'pool_service', 'landscaping', 

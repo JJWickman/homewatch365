@@ -19,58 +19,6 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, CreditCard } from 'lucide-react';
 
-const PRICING_TIERS = [
-  {
-    id: 'solopreneur',
-    name: 'Solopreneur',
-    monthlyPrice: 99,
-    annualPrice: 79,
-  },
-  {
-    id: 'solopreneur_crm',
-    name: 'Solopreneur + CRM',
-    monthlyPrice: 149,
-    annualPrice: 119,
-  },
-  {
-    id: 'growth',
-    name: 'Growth',
-    monthlyPrice: 199,
-    annualPrice: 159,
-  },
-  {
-    id: 'growth_crm',
-    name: 'Growth + CRM',
-    monthlyPrice: 248,
-    annualPrice: 198,
-  },
-  {
-    id: 'professional',
-    name: 'Professional',
-    monthlyPrice: 249,
-    annualPrice: 199,
-  },
-  {
-    id: 'professional_crm',
-    name: 'Professional + CRM',
-    monthlyPrice: 299,
-    annualPrice: 239,
-  },
-  {
-    id: 'enterprise',
-    name: 'Enterprise',
-    monthlyPrice: 499,
-    annualPrice: 399,
-  }
-];
-
-const PLAN_FEATURES = {
-  solopreneur: { users: 1, admins: 1 },
-  growth: { users: 5, admins: 1 },
-  professional: { users: 10, admins: 2 },
-  enterprise: { users: 50, admins: 5 }
-};
-
 export default function PlanChangeDialog({
   open,
   onOpenChange,
@@ -78,7 +26,6 @@ export default function PlanChangeDialog({
   newPlan,
   billingCycle,
   company,
-  stripePrices,
   paymentMethod,
   onPaymentMethodChange,
   onPlanChangeComplete
@@ -86,40 +33,46 @@ export default function PlanChangeDialog({
   const [selectedPlan, setSelectedPlan] = useState(newPlan || null);
   const [loading, setLoading] = useState(false);
   const [useNewPaymentMethod, setUseNewPaymentMethod] = useState(false);
+  const [stripePlans, setStripePlans] = useState([]);
 
   useEffect(() => {
     if (open) {
       setSelectedPlan(newPlan || null);
+      loadPlans();
     }
   }, [open, newPlan]);
 
-  const currentTier = PRICING_TIERS.find(t => t.id === currentPlan);
-  const selectedTier = selectedPlan ? PRICING_TIERS.find(t => t.id === selectedPlan) : null;
+  const loadPlans = async () => {
+    try {
+      const response = await base44.functions.invoke('getStripePrices', {});
+      if (response.data?.success) setStripePlans(response.data.plans);
+    } catch (e) {
+      console.error('Error loading plans:', e);
+    }
+  };
 
-  const currentPrice = currentTier
-    ? (billingCycle === 'monthly' ? currentTier.monthlyPrice : currentTier.annualPrice)
-    : 0;
+  const getPlanPrice = (planId, cycle) => {
+    const plan = stripePlans.find(p => p.id === planId);
+    return cycle === 'monthly' ? plan?.prices?.monthly?.amount : plan?.prices?.yearly?.amount;
+  };
 
-  const newPrice = selectedTier
-    ? (billingCycle === 'monthly' ? selectedTier.monthlyPrice : selectedTier.annualPrice)
-    : 0;
+  const getPriceId = (planId, cycle) => {
+    const plan = stripePlans.find(p => p.id === planId);
+    return cycle === 'monthly' ? plan?.prices?.monthly?.priceId : plan?.prices?.yearly?.priceId;
+  };
 
+  const currentPrice = getPlanPrice(currentPlan, billingCycle) || 0;
+  const newPrice = getPlanPrice(selectedPlan, billingCycle) || 0;
   const priceDifference = newPrice - currentPrice;
   const isUpgrade = priceDifference > 0;
   const isDowngrade = priceDifference < 0;
-
-  const currentFeatures = PLAN_FEATURES[currentPlan] || {};
-  const newFeatures = PLAN_FEATURES[selectedPlan] || {};
-  
-  const losingUsers = newFeatures.users < currentFeatures.users;
-  const losingAdmins = newFeatures.admins < currentFeatures.admins;
 
   const handleChangePlan = async () => {
     if (!selectedPlan || selectedPlan === currentPlan) return;
 
     setLoading(true);
     try {
-      const priceId = stripePrices[selectedPlan]?.[billingCycle];
+      const priceId = getPriceId(selectedPlan, billingCycle);
 
       if (!priceId) {
         alert('Stripe products not configured. Please contact support.');
@@ -127,19 +80,16 @@ export default function PlanChangeDialog({
         return;
       }
 
-      // If changing payment method, open billing portal first
       if (useNewPaymentMethod) {
         const portalResponse = await base44.functions.invoke('createBillingPortalSession', {
           company_id: company.id,
           return_url: `${window.location.origin}/Settings?tab=billing`
         });
-
         if (portalResponse.data?.url) {
           window.open(portalResponse.data.url, '_blank');
         }
       }
 
-      // Now update subscription
       const response = await base44.functions.invoke('updateSubscription', {
         subscription_id: company.stripe_subscription_id,
         price_id: priceId,
@@ -182,9 +132,9 @@ export default function PlanChangeDialog({
                 <SelectValue placeholder="Choose a plan" />
               </SelectTrigger>
               <SelectContent>
-                {PRICING_TIERS.map((tier) => (
-                  <SelectItem key={tier.id} value={tier.id} disabled={tier.id === currentPlan}>
-                    {tier.name} {tier.id === currentPlan && '(Current)'}
+                {stripePlans.map((plan) => (
+                  <SelectItem key={plan.id} value={plan.id} disabled={plan.id === currentPlan}>
+                    {plan.name} {plan.id === currentPlan && '(Current)'}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -192,24 +142,21 @@ export default function PlanChangeDialog({
           </div>
 
           {/* Billing Information */}
-          {selectedTier && selectedPlan !== currentPlan && (
+          {selectedPlan && selectedPlan !== currentPlan && (
             <div className="space-y-3 bg-slate-50 p-4 rounded-lg">
               <div className="text-sm">
                 <p className="text-slate-600">Current Plan</p>
                 <p className="font-semibold text-slate-900">
-                  ${currentPrice}/month
+                  {currentPrice ? `$${currentPrice}/month` : '—'}
                 </p>
               </div>
-
               <div className="border-t border-slate-200 pt-3">
                 <p className="text-sm text-slate-600">New Plan</p>
                 <p className="font-semibold text-slate-900">
-                  ${newPrice}/month
+                  {newPrice ? `$${newPrice}/month` : '—'}
                 </p>
               </div>
-
-              {/* Billing Impact */}
-              {priceDifference !== 0 && (
+              {priceDifference !== 0 && currentPrice > 0 && newPrice > 0 && (
                 <div className="border-t border-slate-200 pt-3">
                   <p className="text-sm text-slate-600">
                     {isUpgrade ? 'Additional charge today' : 'Credit applied next billing cycle'}
@@ -222,17 +169,16 @@ export default function PlanChangeDialog({
             </div>
           )}
 
-          {/* Billing Impact Alert */}
-          {selectedTier && isUpgrade && (
+          {selectedPlan && selectedPlan !== currentPlan && isUpgrade && (
             <Alert className="bg-blue-50 border-blue-200">
               <AlertCircle className="h-4 w-4 text-blue-600" />
               <AlertDescription className="text-blue-900 text-sm">
-                You'll be charged ${Math.abs(priceDifference)}/month today for this upgrade. Your monthly billing continues on the same schedule.
+                You'll be charged ${Math.abs(priceDifference)}/month today for this upgrade.
               </AlertDescription>
             </Alert>
           )}
 
-          {selectedTier && isDowngrade && (
+          {selectedPlan && selectedPlan !== currentPlan && isDowngrade && (
             <Alert className="bg-blue-50 border-blue-200">
               <AlertCircle className="h-4 w-4 text-blue-600" />
               <AlertDescription className="text-blue-900 text-sm">
@@ -241,28 +187,13 @@ export default function PlanChangeDialog({
             </Alert>
           )}
 
-          {/* Downgrade Warning */}
-          {selectedTier && isDowngrade && (losingUsers || losingAdmins) && (
-            <Alert className="bg-orange-50 border-orange-200">
-              <AlertCircle className="h-4 w-4 text-orange-600" />
-              <AlertDescription className="text-orange-900 text-sm">
-                <strong>Note:</strong> This plan supports fewer users.
-                {losingUsers && <div>• Max users: {currentFeatures.users} → {newFeatures.users}</div>}
-                {losingAdmins && <div>• Admin users: {currentFeatures.admins} → {newFeatures.admins}</div>}
-              </AlertDescription>
-            </Alert>
-          )}
-
           {/* Payment Method */}
-          {selectedTier && (
+          {selectedPlan && selectedPlan !== currentPlan && (
             <div className="border rounded-lg p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-slate-600" />
-                  <span className="text-sm font-medium">Payment Method</span>
-                </div>
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-slate-600" />
+                <span className="text-sm font-medium">Payment Method</span>
               </div>
-
               {paymentMethod ? (
                 <div className="bg-slate-50 p-3 rounded text-sm">
                   <p className="text-slate-900">
@@ -275,7 +206,6 @@ export default function PlanChangeDialog({
               ) : (
                 <p className="text-sm text-slate-500">No payment method on file</p>
               )}
-
               <Button
                 variant="outline"
                 size="sm"
@@ -289,11 +219,7 @@ export default function PlanChangeDialog({
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={loading}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             Cancel
           </Button>
           <Button
