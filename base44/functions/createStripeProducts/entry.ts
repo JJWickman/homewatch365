@@ -69,11 +69,24 @@ Deno.serve(async (req) => {
         metadata: { plan_id: plan.id, billing_cycle: 'monthly' }
       });
 
+      // Annual price = monthly * 12 * 0.8 (20% discount), billed once per year
+      const annualAmount = Math.round(plan.monthlyPrice * 12 * 0.8);
+      const yearlyPrice = await stripe.prices.create({
+        product: product.id,
+        unit_amount: annualAmount * 100,
+        currency: 'usd',
+        recurring: { interval: 'year' },
+        metadata: { plan_id: plan.id, billing_cycle: 'yearly' }
+      });
+
       results.push({
         plan: plan.id,
         product_id: product.id,
         monthly_price_id: monthlyPrice.id,
         monthly_amount: plan.monthlyPrice,
+        yearly_price_id: yearlyPrice.id,
+        yearly_amount: annualAmount,
+        yearly_per_month: Math.round(annualAmount / 12),
         max_users: plan.maxUsers,
         max_properties: plan.maxProperties
       });
