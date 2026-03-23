@@ -126,9 +126,9 @@ export default function UserManagementSection({ staff = [], company }) {
                     <p className="text-sm text-slate-500 truncate">{user.user_email}</p>
                   </div>
                   <Badge variant="outline" className="capitalize">
-                    {user.role === 'field_inspector' ? 'Field Inspector' : 
-                     user.role === 'dispatcher' ? 'Dispatcher' : 
-                     'Administrator'}
+                     {user.role === 'field_inspector' ? 'Reporter' : 
+                      user.role === 'dispatcher' ? 'Dispatcher' : 
+                      'Administrator'}
                   </Badge>
                 </div>
 
