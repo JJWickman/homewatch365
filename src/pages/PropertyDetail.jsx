@@ -34,6 +34,7 @@ import PropertyReportTab from '@/components/property/PropertyReportTab';
 import PropertyPricingTab from '@/components/property/PropertyPricingTab';
 import PropertyChecklistConfigTab from '@/components/property/PropertyChecklistConfigTab';
 import ContractorSearchDialog from '@/components/contractors/ContractorSearchDialog.jsx';
+import VisitTypeSelectionDialog from '@/components/visits/VisitTypeSelectionDialog.jsx';
 import { toast } from 'sonner';
 
 const CONTRACTOR_TYPES = [
@@ -86,6 +87,7 @@ export default function PropertyDetail() {
   const [propertyTags, setPropertyTags] = useState([]);
   const [newTag, setNewTag] = useState('');
   const [savingTags, setSavingTags] = useState(false);
+  const [showVisitTypeDialog, setShowVisitTypeDialog] = useState(false);
 
   useEffect(() => {
     loadProperty();
@@ -442,20 +444,6 @@ export default function PropertyDetail() {
     }
   };
 
-  const startVisit = async () => {
-    const visit = await base44.entities.Visit.create({
-      company_id: property.company_id,
-      property_id: property.id,
-      client_id: property.client_id || null,
-      visit_type: 'check-in',
-      checkin_type: 'routine',
-      scheduled_date: new Date().toISOString().split('T')[0],
-      status: 'in_progress',
-      template_id: propertyChecklist?.template_id || null
-    });
-    navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${property.id}&checklist_id=${propertyChecklist?.id}`);
-  };
-
   return (
     <div className="max-w-5xl mx-auto">
       <PageHeader
@@ -469,7 +457,7 @@ export default function PropertyDetail() {
           </Button>
         )}
         {propertyChecklist && (
-          <Button className="bg-amber-600 hover:bg-amber-700 text-white" onClick={startVisit}>
+          <Button className="bg-amber-600 hover:bg-amber-700 text-white" onClick={() => setShowVisitTypeDialog(true)}>
             <Zap className="h-4 w-4 mr-2" />
             Record Visit
           </Button>
@@ -940,7 +928,7 @@ export default function PropertyDetail() {
                       </SelectContent>
                     </Select>
                     {propertyChecklist && (
-                      <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white" onClick={startVisit}>
+                      <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white" onClick={() => setShowVisitTypeDialog(true)}>
                         <Zap className="h-4 w-4 mr-1" />
                         Record Visit
                       </Button>
@@ -1406,6 +1394,14 @@ export default function PropertyDetail() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Visit Type Selection Dialog */}
+      <VisitTypeSelectionDialog
+        open={showVisitTypeDialog}
+        onOpenChange={setShowVisitTypeDialog}
+        property={property}
+        propertyChecklist={propertyChecklist}
+      />
     </div>
   );
 }
