@@ -44,7 +44,7 @@ export default function ApproveFounder() {
     setMessage(null);
     try {
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are an expert email composer. Write a professional email based on this request:\n\n${aiPrompt}\n\nRespond with a JSON object containing:\n{\n  "subject": "email subject line",\n  "body": "email body text"\n}`,
+        prompt: `You are an expert email composer. Write a professional email based on this request:\n\n${aiPrompt}\n\nRespond ONLY with valid JSON (no markdown, no code blocks):\n{\n  "subject": "email subject line",\n  "body": "email body text"\n}`,
         response_json_schema: {
           type: "object",
           properties: {
@@ -55,12 +55,17 @@ export default function ApproveFounder() {
         }
       });
 
-      if (response.data?.subject && response.data?.body) {
-        setSubject(response.data.subject);
-        setBody(response.data.body);
+      console.log('Raw response:', response);
+      console.log('Response data:', response.data);
+      
+      const data = response.data;
+      if (data && typeof data === 'object' && data.subject && data.body) {
+        setSubject(data.subject);
+        setBody(data.body);
         setMessage({ type: 'success', text: 'Email generated successfully' });
       } else {
-        setMessage({ type: 'error', text: 'Failed to generate email' });
+        console.error('Invalid structure:', data);
+        setMessage({ type: 'error', text: `Failed: Invalid response format. Got: ${JSON.stringify(data)}` });
       }
     } catch (error) {
       console.error('AI error:', error);
