@@ -5,9 +5,9 @@ import { createPageUrl } from '@/utils';
 import { format } from 'date-fns';
 import { 
   Building2, MapPin, User, Key, Wifi, Phone, 
-  Edit, ClipboardCheck, Calendar, Clock, 
+  Calendar, Clock, 
   AlertTriangle, CheckCircle2, FileText, Upload, Image, 
-  AlertCircle, Circle, Plus, ZoomIn, ZoomOut,
+  Circle, Plus, ZoomIn, ZoomOut,
   Search, Loader2, Globe, Zap, Tag
 } from 'lucide-react';
 import {
@@ -30,7 +30,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
-import EmptyState from '@/components/shared/EmptyState';
 import PropertyReportTab from '@/components/property/PropertyReportTab';
 import PropertyPricingTab from '@/components/property/PropertyPricingTab';
 import PropertyChecklistConfigTab from '@/components/property/PropertyChecklistConfigTab';
@@ -79,10 +78,7 @@ export default function PropertyDetail() {
   const [mapZoom, setMapZoom] = useState(17);
   const [searchingHoa, setSearchingHoa] = useState(false);
   const [emergencyContactSaved, setEmergencyContactSaved] = useState(false);
-  const [showAddContractorDialog, setShowAddContractorDialog] = useState(false);
   const [selectedContractorType, setSelectedContractorType] = useState('');
-  const [contractorSearchResults, setContractorSearchResults] = useState([]);
-  const [searchingContractors, setSearchingContractors] = useState(false);
   const [showContractorSearchModal, setShowContractorSearchModal] = useState(false);
   const [allProperties, setAllProperties] = useState([]);
   const [propertyChecklist, setPropertyChecklist] = useState(null);
@@ -103,35 +99,14 @@ export default function PropertyDetail() {
 
   const loadMapUrl = async (userLocation = null, zoom = mapZoom) => {
     if (!property?.latitude || !property?.longitude) return;
-    
     setLoadingMap(true);
     try {
-      const stops = [{
-        latitude: property.latitude,
-        longitude: property.longitude,
-        order: 1,
-        color: 'red',
-        label: 'P'
-      }];
-
+      const stops = [{ latitude: property.latitude, longitude: property.longitude, order: 1, color: 'red', label: 'P' }];
       if (userLocation) {
-        stops.push({
-          latitude: userLocation.latitude,
-          longitude: userLocation.longitude,
-          order: 2,
-          color: 'blue',
-          label: 'Y'
-        });
+        stops.push({ latitude: userLocation.latitude, longitude: userLocation.longitude, order: 2, color: 'blue', label: 'Y' });
       }
-
-      const response = await base44.functions.invoke('generateStaticMapUrl', {
-        stops,
-        zoom
-      });
-      
-      if (response.data?.mapUrl) {
-        setMapUrl(response.data.mapUrl);
-      }
+      const response = await base44.functions.invoke('generateStaticMapUrl', { stops, zoom });
+      if (response.data?.mapUrl) setMapUrl(response.data.mapUrl);
     } catch (error) {
       console.error('Error loading map:', error);
     } finally {
@@ -143,7 +118,7 @@ export default function PropertyDetail() {
     if (mapZoom < 20) {
       const newZoom = mapZoom + 1;
       setMapZoom(newZoom);
-      loadMapUrl(showingUserLocation ? { latitude: property.latitude, longitude: property.longitude } : null, newZoom);
+      loadMapUrl(null, newZoom);
     }
   };
 
@@ -151,23 +126,19 @@ export default function PropertyDetail() {
     if (mapZoom > 10) {
       const newZoom = mapZoom - 1;
       setMapZoom(newZoom);
-      loadMapUrl(showingUserLocation ? { latitude: property.latitude, longitude: property.longitude } : null, newZoom);
+      loadMapUrl(null, newZoom);
     }
   };
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371e3; // Earth's radius in meters
+    const R = 6371e3;
     const φ1 = lat1 * Math.PI / 180;
     const φ2 = lat2 * Math.PI / 180;
     const Δφ = (lat2 - lat1) * Math.PI / 180;
     const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    return R * c; // Distance in meters
+    return R * c;
   };
 
   const handleShowMyLocation = async () => {
@@ -176,32 +147,13 @@ export default function PropertyDetail() {
       const position = await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject);
       });
-
-      const userLocation = {
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude
-      };
-
-      // Calculate distance in meters
-      const distanceInMeters = calculateDistance(
-        property.latitude,
-        property.longitude,
-        userLocation.latitude,
-        userLocation.longitude
-      );
-
-      // 100 feet = ~30.48 meters
+      const userLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude };
+      const distanceInMeters = calculateDistance(property.latitude, property.longitude, userLocation.latitude, userLocation.longitude);
       const isWithin100Feet = distanceInMeters <= 30.48;
       setIsNearProperty(isWithin100Feet);
-
       setShowingUserLocation(true);
       await loadMapUrl(userLocation);
-      
-      if (isWithin100Feet) {
-        toast.success('You are within 100 feet of the property!');
-      } else {
-        toast.success('Your location added to map');
-      }
+      toast.success(isWithin100Feet ? 'You are within 100 feet of the property!' : 'Your location added to map');
     } catch (error) {
       console.error('Error getting location:', error);
       toast.error('Unable to get your location. Please enable location services.');
@@ -214,13 +166,9 @@ export default function PropertyDetail() {
     if (!property?.id) return;
     const unsubscribe = base44.entities.Visit.subscribe((event) => {
       if (event.property_id === property.id) {
-        if (event.type === 'create') {
-          setVisits(prev => [event.data, ...prev]);
-        } else if (event.type === 'update') {
-          setVisits(prev => prev.map(v => v.id === event.id ? event.data : v));
-        } else if (event.type === 'delete') {
-          setVisits(prev => prev.filter(v => v.id !== event.id));
-        }
+        if (event.type === 'create') setVisits(prev => [event.data, ...prev]);
+        else if (event.type === 'update') setVisits(prev => prev.map(v => v.id === event.id ? event.data : v));
+        else if (event.type === 'delete') setVisits(prev => prev.filter(v => v.id !== event.id));
       }
     });
     return unsubscribe;
@@ -229,11 +177,7 @@ export default function PropertyDetail() {
   const loadProperty = async () => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
-    
-    if (!id) {
-      navigate(createPageUrl('Properties'));
-      return;
-    }
+    if (!id) { navigate(createPageUrl('Properties')); return; }
 
     try {
       const user = await base44.auth.me();
@@ -249,38 +193,28 @@ export default function PropertyDetail() {
         const prop = propertyData[0];
         setProperty(prop);
         setVisits(visitsData);
-        
-        // Load client and all clients
+
         if (prop.client_id) {
           const [clientData, allClientsData] = await Promise.all([
             base44.entities.Client.filter({ id: prop.client_id }),
             base44.entities.Client.filter({ company_id: prop.company_id, is_active: true })
           ]);
-          if (clientData.length > 0) {
-            setClient(clientData[0]);
-          }
+          if (clientData.length > 0) setClient(clientData[0]);
           setClients(allClientsData);
         }
-        
-        // Load contractors
+
         if (prop.contractors && prop.contractors.length > 0) {
-          const contractorsData = await base44.entities.Contractor.filter({ 
-            id: { $in: prop.contractors } 
-          });
+          const contractorsData = await base44.entities.Contractor.filter({ id: { $in: prop.contractors } });
           setContractors(contractorsData);
         }
 
-        // Load all properties for contractor search dialog
         const allPropsData = await base44.entities.Property.filter({ company_id: prop.company_id });
         setAllProperties(allPropsData);
 
-        // Load property checklist
         const checklistData = await base44.entities.PropertyChecklist.filter({ property_id: id, company_id: companyId, is_active: true });
         if (checklistData.length > 0) setPropertyChecklist(checklistData[0]);
 
-        // Load all tags from all properties in company
-        const allPropertiesData = await base44.entities.Property.filter({ company_id: companyId });
-        const uniqueTags = Array.from(new Set(allPropertiesData.flatMap(p => p.tags || [])));
+        const uniqueTags = Array.from(new Set(allPropsData.flatMap(p => p.tags || [])));
         setAllTags(uniqueTags);
         setPropertyTags(prop.tags || []);
       }
@@ -309,48 +243,21 @@ export default function PropertyDetail() {
 
   const completedVisits = visits.filter(v => v.status === 'completed').length;
   const pendingVisits = visits.filter(v => v.status !== 'completed' && v.status !== 'cancelled').length;
-  
+
   const filteredVisits = visits.filter(v => {
     if (visitTypeFilter === 'all') return true;
     if (visitTypeFilter === 'inspection') return v.visit_type === 'inspection' || v.visit_type === 'check-in';
     return v.visit_type === visitTypeFilter;
   });
-  
+
   const visitsByType = {
     inspection: filteredVisits.filter(v => v.visit_type === 'inspection' || v.visit_type === 'check-in'),
     followup: filteredVisits.filter(v => v.visit_type === 'followup')
   };
 
-  const getTaskStatusIcon = (status) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle2 className="h-5 w-5 text-emerald-600" />;
-      case 'in_progress':
-        return <Clock className="h-5 w-5 text-blue-600" />;
-      case 'pending':
-        return <Circle className="h-5 w-5 text-slate-400" />;
-      default:
-        return <FileText className="h-5 w-5 text-slate-400" />;
-    }
-  };
-
-  const getTaskStatusColor = (status) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-emerald-50 border-emerald-200';
-      case 'in_progress':
-        return 'bg-blue-50 border-blue-200';
-      case 'pending':
-        return 'bg-slate-50 border-slate-200';
-      default:
-        return 'bg-slate-50 border-slate-200';
-    }
-  };
-
   const handlePhotoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setUploadingPhoto(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
@@ -366,20 +273,10 @@ export default function PropertyDetail() {
   };
 
   const handleFetchAerialView = async () => {
-    if (!property.address || !property.city || !property.state) {
-      toast.error('Property address is incomplete');
-      return;
-    }
-
+    if (!property.address || !property.city || !property.state) { toast.error('Property address is incomplete'); return; }
     setFetchingAerial(true);
     try {
-      const response = await base44.functions.invoke('testGoogleMapsAPI', {
-        address: property.address,
-        city: property.city,
-        state: property.state,
-        zip: property.zip
-      });
-
+      const response = await base44.functions.invoke('testGoogleMapsAPI', { address: property.address, city: property.city, state: property.state, zip: property.zip });
       if (response.data?.aerialViewUrl) {
         setProperty({ ...property, primary_photo_url: response.data.aerialViewUrl });
         setHasUnsavedChanges(true);
@@ -398,29 +295,29 @@ export default function PropertyDetail() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await base44.entities.Property.update(property.id, { 
-       primary_photo_url: property.primary_photo_url,
-       hoa_name: property.hoa_name,
-       hoa_website: property.hoa_website,
-       hoa_email: property.hoa_email,
-       hoa_phone: property.hoa_phone,
-       hoa_notes: property.hoa_notes,
-       unit_number: property.unit_number,
-       gate_procedure: property.gate_procedure,
-       parking_assignment: property.parking_assignment,
-       front_desk_signin_procedure: property.front_desk_signin_procedure,
-       key_policy: property.key_policy,
-       security_gate: property.security_gate,
-       gate_code: property.gate_code,
-       emergency_notification_contact_name: property.emergency_notification_contact_name,
-       emergency_notification_contact_phone: property.emergency_notification_contact_phone,
-       emergency_notification_contact_email: property.emergency_notification_contact_email,
-       storm_protection_description: property.storm_protection_description,
-       storm_panels_notes: property.storm_panels_notes,
-       equipment_water_valve_location: property.equipment_water_valve_location,
-       equipment_breaker_box_location: property.equipment_breaker_box_location,
-       equipment_water_heater_location: property.equipment_water_heater_location,
-       equipment_air_handler_location: property.equipment_air_handler_location,
+      await base44.entities.Property.update(property.id, {
+        primary_photo_url: property.primary_photo_url,
+        hoa_name: property.hoa_name,
+        hoa_website: property.hoa_website,
+        hoa_email: property.hoa_email,
+        hoa_phone: property.hoa_phone,
+        hoa_notes: property.hoa_notes,
+        unit_number: property.unit_number,
+        gate_procedure: property.gate_procedure,
+        parking_assignment: property.parking_assignment,
+        front_desk_signin_procedure: property.front_desk_signin_procedure,
+        key_policy: property.key_policy,
+        security_gate: property.security_gate,
+        gate_code: property.gate_code,
+        emergency_notification_contact_name: property.emergency_notification_contact_name,
+        emergency_notification_contact_phone: property.emergency_notification_contact_phone,
+        emergency_notification_contact_email: property.emergency_notification_contact_email,
+        storm_protection_description: property.storm_protection_description,
+        storm_panels_notes: property.storm_panels_notes,
+        equipment_water_valve_location: property.equipment_water_valve_location,
+        equipment_breaker_box_location: property.equipment_breaker_box_location,
+        equipment_water_heater_location: property.equipment_water_heater_location,
+        equipment_air_handler_location: property.equipment_air_handler_location,
       });
       setHasUnsavedChanges(false);
       setEmergencyContactSaved(true);
@@ -436,7 +333,6 @@ export default function PropertyDetail() {
 
   const handleChangeOwner = async () => {
     if (!selectedClientId) return;
-    
     setChangingOwner(true);
     try {
       await base44.entities.Property.update(property.id, { client_id: selectedClientId });
@@ -462,22 +358,10 @@ export default function PropertyDetail() {
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `Find official contact information for the Homeowners Association named "${property.hoa_name}". Return their official website URL, contact email, and phone number if available.`,
         add_context_from_internet: true,
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            website: { type: 'string' },
-            email: { type: 'string' },
-            phone: { type: 'string' }
-          }
-        }
+        response_json_schema: { type: 'object', properties: { website: { type: 'string' }, email: { type: 'string' }, phone: { type: 'string' } } }
       });
       if (result) {
-        setProperty(prev => ({
-          ...prev,
-          hoa_website: result.website || prev.hoa_website || '',
-          hoa_email: result.email || prev.hoa_email || '',
-          hoa_phone: result.phone || prev.hoa_phone || '',
-        }));
+        setProperty(prev => ({ ...prev, hoa_website: result.website || prev.hoa_website || '', hoa_email: result.email || prev.hoa_email || '', hoa_phone: result.phone || prev.hoa_phone || '' }));
         setHasUnsavedChanges(true);
         toast.success('HOA information found!');
       }
@@ -490,23 +374,13 @@ export default function PropertyDetail() {
   };
 
   const handleAddTask = async () => {
-    if (!newTask.title) {
-      toast.error('Please enter a task title');
-      return;
-    }
-
+    if (!newTask.title) { toast.error('Please enter a task title'); return; }
     setSavingTask(true);
     try {
       await base44.entities.FollowUp.create({
-        company_id: property.company_id,
-        property_id: property.id,
-        client_id: property.client_id,
-        title: newTask.title,
-        description: newTask.description,
-        priority: newTask.priority,
-        due_date: newTask.due_date,
-        type: 'other',
-        status: 'open'
+        company_id: property.company_id, property_id: property.id, client_id: property.client_id,
+        title: newTask.title, description: newTask.description, priority: newTask.priority,
+        due_date: newTask.due_date, type: 'other', status: 'open'
       });
       setVisits(await base44.entities.Visit.filter({ property_id: property.id, company_id: property.company_id }, '-scheduled_date', 20));
       setNewTask({ title: '', description: '', priority: 'medium', due_date: '' });
@@ -521,11 +395,7 @@ export default function PropertyDetail() {
   };
 
   const handleAddContact = async () => {
-    if (!newContact.name) {
-      toast.error('Please enter a contact name');
-      return;
-    }
-
+    if (!newContact.name) { toast.error('Please enter a contact name'); return; }
     setSavingContact(true);
     try {
       const updatedContacts = [...(property.emergency_contacts || []), newContact];
@@ -542,40 +412,13 @@ export default function PropertyDetail() {
     }
   };
 
-  const handleSearchContractors = async (query) => {
-    if (!query || query.length < 2) {
-      setContractorSearchResults([]);
-      return;
-    }
-
-    setSearchingContractors(true);
-    try {
-      const response = await base44.functions.invoke('searchContractors', {
-        query,
-        contractor_type: selectedContractorType
-      });
-      setContractorSearchResults(response.data?.contractors || []);
-    } catch (error) {
-      console.error('Error searching contractors:', error);
-      toast.error('Failed to search contractors');
-      setContractorSearchResults([]);
-    } finally {
-      setSearchingContractors(false);
-    }
-  };
-
-
-
   const handleAssignContractor = async (contractorId) => {
     try {
       const updatedContractors = [...(property.contractors || []), contractorId];
       await base44.entities.Property.update(property.id, { contractors: updatedContractors });
       setProperty({ ...property, contractors: updatedContractors });
-      const contractorsData = await base44.entities.Contractor.filter({ 
-        id: { $in: updatedContractors } 
-      });
+      const contractorsData = await base44.entities.Contractor.filter({ id: { $in: updatedContractors } });
       setContractors(contractorsData);
-      setShowAddContractorDialog(false);
       toast.success('Contractor assigned successfully');
     } catch (error) {
       console.error('Error assigning contractor:', error);
@@ -585,14 +428,10 @@ export default function PropertyDetail() {
 
   const handleContractorSearchSelect = async (contractorData) => {
     try {
-      // Override the contractor_type with the selected type if set
       const typeToUse = selectedContractorType || contractorData.contractor_type;
       const newContractor = await base44.entities.Contractor.create({
-        ...contractorData,
-        contractor_type: typeToUse,
-        company_id: property.company_id,
-        hourly_rate: contractorData.hourly_rate ? parseFloat(contractorData.hourly_rate) : null,
-        is_active: true
+        ...contractorData, contractor_type: typeToUse, company_id: property.company_id,
+        hourly_rate: contractorData.hourly_rate ? parseFloat(contractorData.hourly_rate) : null, is_active: true
       });
       await handleAssignContractor(newContractor.id);
       setShowContractorSearchModal(false);
@@ -601,6 +440,20 @@ export default function PropertyDetail() {
       console.error('Error adding contractor from search:', error);
       toast.error('Failed to add contractor');
     }
+  };
+
+  const startVisit = async () => {
+    const visit = await base44.entities.Visit.create({
+      company_id: property.company_id,
+      property_id: property.id,
+      client_id: property.client_id || null,
+      visit_type: 'check-in',
+      checkin_type: 'routine',
+      scheduled_date: new Date().toISOString().split('T')[0],
+      status: 'in_progress',
+      template_id: propertyChecklist?.template_id || null
+    });
+    navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${property.id}&checklist_id=${propertyChecklist?.id}`);
   };
 
   return (
@@ -616,22 +469,7 @@ export default function PropertyDetail() {
           </Button>
         )}
         {propertyChecklist && (
-          <Button
-            className="bg-amber-600 hover:bg-amber-700 text-white"
-            onClick={async () => {
-              const visit = await base44.entities.Visit.create({
-                company_id: property.company_id,
-                property_id: property.id,
-                client_id: property.client_id || null,
-                visit_type: 'check-in',
-                checkin_type: 'routine',
-                scheduled_date: new Date().toISOString().split('T')[0],
-                status: 'in_progress',
-                template_id: propertyChecklist.template_id || null
-              });
-              navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${property.id}&checklist_id=${propertyChecklist.id}`);
-            }}
-          >
+          <Button className="bg-amber-600 hover:bg-amber-700 text-white" onClick={startVisit}>
             <Zap className="h-4 w-4 mr-2" />
             Record Visit
           </Button>
@@ -662,22 +500,12 @@ export default function PropertyDetail() {
             <Card>
               <CardHeader className="pb-2 flex flex-row items-center justify-between">
                 <CardTitle className="text-sm font-medium text-slate-500">Owner</CardTitle>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setSelectedClientId(property.client_id);
-                    setShowChangeOwnerDialog(true);
-                  }}
-                >
+                <Button size="sm" variant="ghost" onClick={() => { setSelectedClientId(property.client_id); setShowChangeOwnerDialog(true); }}>
                   Change
                 </Button>
               </CardHeader>
               <CardContent>
-                <Link
-                  to={createPageUrl('ClientDetail') + `?id=${client.id}`}
-                  className="flex items-center gap-3 hover:bg-slate-50 -mx-2 px-2 py-2 rounded-lg transition-colors"
-                >
+                <Link to={createPageUrl('ClientDetail') + `?id=${client.id}`} className="flex items-center gap-3 hover:bg-slate-50 -mx-2 px-2 py-2 rounded-lg transition-colors">
                   <div className="h-10 w-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-medium">
                     {client.first_name?.[0]}{client.last_name?.[0]}
                   </div>
@@ -761,16 +589,17 @@ export default function PropertyDetail() {
           <Tabs defaultValue="access">
             <TabsList className="w-full justify-start mb-4 flex-wrap">
               <TabsTrigger value="access">Access Info</TabsTrigger>
-                 <TabsTrigger value="visits">Visits</TabsTrigger>
-                 <TabsTrigger value="checklist">Checklist</TabsTrigger>
-                 <TabsTrigger value="report">Report</TabsTrigger>
-                 <TabsTrigger value="pricing">Pricing</TabsTrigger>
-                 <TabsTrigger value="contractors">Contractors</TabsTrigger>
-                 <TabsTrigger value="tags">Tags</TabsTrigger>
-                 <TabsTrigger value="storm">Storm Protection</TabsTrigger>
-                 <TabsTrigger value="contacts">Contacts</TabsTrigger>
+              <TabsTrigger value="visits">Visits</TabsTrigger>
+              <TabsTrigger value="checklist">Checklist</TabsTrigger>
+              <TabsTrigger value="report">Report</TabsTrigger>
+              <TabsTrigger value="pricing">Pricing</TabsTrigger>
+              <TabsTrigger value="contractors">Contractors</TabsTrigger>
+              <TabsTrigger value="tags">Tags</TabsTrigger>
+              <TabsTrigger value="storm">Storm Protection</TabsTrigger>
+              <TabsTrigger value="contacts">Contacts</TabsTrigger>
             </TabsList>
 
+            {/* ACCESS TAB */}
             <TabsContent value="access">
               <Card>
                 <CardHeader>
@@ -780,7 +609,54 @@ export default function PropertyDetail() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Unit Identification - for condo/townhouse/high-rise */}
+                  {/* Photo section */}
+                  <div className="relative">
+                    <div className="aspect-video bg-slate-100 rounded-lg overflow-hidden">
+                      {property.primary_photo_url ? (
+                        <img src={property.primary_photo_url} alt={property.name || property.address} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Building2 className="h-12 w-12 text-slate-300" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      <input type="file" id="photo-upload" accept="image/*" className="hidden" onChange={handlePhotoUpload} disabled={uploadingPhoto} />
+                      <Button size="sm" variant="outline" onClick={() => document.getElementById('photo-upload').click()} disabled={uploadingPhoto}>
+                        <Upload className="h-4 w-4 mr-2" />
+                        {uploadingPhoto ? 'Uploading...' : 'Upload Photo'}
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={handleFetchAerialView} disabled={fetchingAerial}>
+                        <Image className="h-4 w-4 mr-2" />
+                        {fetchingAerial ? 'Fetching...' : 'Fetch Aerial View'}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Status badge */}
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-slate-600">Property Status:</span>
+                    <div className="relative group">
+                      <button
+                        className="cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => {
+                          const statuses = ['occupied', 'vacant', 'seasonal', 'for_sale'];
+                          const next = statuses[(statuses.indexOf(property.status) + 1) % statuses.length];
+                          setProperty({ ...property, status: next });
+                          base44.entities.Property.update(property.id, { status: next });
+                          toast.success(`Status updated to ${next.replace('_', ' ')}`);
+                        }}
+                        title="Click to change status"
+                      >
+                        <StatusBadge status={property.status} />
+                      </button>
+                      <div className="absolute left-0 top-full mt-1 bg-black/70 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                        Click to change
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Unit Identification */}
                   {['condo', 'townhouse', 'commercial'].includes(property.property_type) && (
                     <div>
                       <div className="flex items-center gap-2 mb-3">
@@ -807,7 +683,7 @@ export default function PropertyDetail() {
                     </div>
                   )}
 
-                  {/* High-Rise / Condo specific access fields */}
+                  {/* High-Rise / Condo specific */}
                   {['condo', 'townhouse', 'commercial'].includes(property.property_type) && (
                     <div>
                       <div className="flex items-center gap-2 mb-3">
@@ -816,9 +692,9 @@ export default function PropertyDetail() {
                       </div>
                       <div className="space-y-3">
                         {[
-                          { label: 'Gate Procedure', field: 'gate_procedure', placeholder: 'e.g., Enter gate code #1234, second gate uses fob...' },
-                          { label: 'Parking Assignment', field: 'parking_assignment', placeholder: 'e.g., Space #42 in Garage B, visitor parking on Level 1...' },
-                          { label: 'Front Desk Sign-In Procedure', field: 'front_desk_signin_procedure', placeholder: 'e.g., Sign in at lobby desk, show ID, call unit from front desk...' },
+                          { label: 'Gate Procedure', field: 'gate_procedure', placeholder: 'e.g., Enter gate code #1234...' },
+                          { label: 'Parking Assignment', field: 'parking_assignment', placeholder: 'e.g., Space #42 in Garage B...' },
+                          { label: 'Front Desk Sign-In Procedure', field: 'front_desk_signin_procedure', placeholder: 'e.g., Sign in at lobby desk...' },
                         ].map(({ label, field, placeholder }) => (
                           <div key={field}>
                             <label className="text-xs text-slate-500 block mb-1">{label}</label>
@@ -844,12 +720,13 @@ export default function PropertyDetail() {
                     <textarea
                       value={property.key_policy || ''}
                       onChange={(e) => { setProperty({...property, key_policy: e.target.value}); setHasUnsavedChanges(true); }}
-                      placeholder="Document key access procedures, who holds keys, key storage location, key return policies, etc."
+                      placeholder="Document key access procedures, who holds keys, key storage location, etc."
                       rows={3}
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black resize-none"
                     />
                   </div>
-                  
+
+                  {/* Alarm / Lockbox */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {property.alarm_code && (
                       <div className="p-4 bg-slate-50 rounded-lg">
@@ -863,7 +740,6 @@ export default function PropertyDetail() {
                         <p className="font-mono font-semibold text-lg">{property.lockbox_code}</p>
                       </div>
                     )}
-
                   </div>
 
                   {/* Equipment Locations */}
@@ -902,14 +778,8 @@ export default function PropertyDetail() {
                     <div className="flex items-center gap-3 mb-3">
                       <span className="text-sm text-slate-600">Has Security Gate?</span>
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => { setProperty({...property, security_gate: true}); setHasUnsavedChanges(true); }}
-                          className={`px-3 py-1 rounded text-sm font-medium transition-colors ${property.security_gate === true ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                        >Yes</button>
-                        <button
-                          onClick={() => { setProperty({...property, security_gate: false}); setHasUnsavedChanges(true); }}
-                          className={`px-3 py-1 rounded text-sm font-medium transition-colors ${property.security_gate === false ? 'bg-slate-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                        >No</button>
+                        <button onClick={() => { setProperty({...property, security_gate: true}); setHasUnsavedChanges(true); }} className={`px-3 py-1 rounded text-sm font-medium transition-colors ${property.security_gate === true ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Yes</button>
+                        <button onClick={() => { setProperty({...property, security_gate: false}); setHasUnsavedChanges(true); }} className={`px-3 py-1 rounded text-sm font-medium transition-colors ${property.security_gate === false ? 'bg-slate-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>No</button>
                       </div>
                     </div>
                     {property.security_gate && (
@@ -940,11 +810,7 @@ export default function PropertyDetail() {
                         placeholder="HOA name (e.g., Sunset Bay HOA)"
                         className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black"
                       />
-                      <button
-                        onClick={handleHoaSearch}
-                        disabled={searchingHoa || !property.hoa_name}
-                        className="px-3 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50 flex items-center gap-1.5 text-sm"
-                      >
+                      <button onClick={handleHoaSearch} disabled={searchingHoa || !property.hoa_name} className="px-3 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50 flex items-center gap-1.5 text-sm">
                         {searchingHoa ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
                         Search
                       </button>
@@ -963,7 +829,7 @@ export default function PropertyDetail() {
                               value={property[field] || ''}
                               onChange={(e) => { setProperty({...property, [field]: e.target.value}); setHasUnsavedChanges(true); }}
                               placeholder={placeholder}
-                               className="flex-1 px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black"
+                              className="flex-1 px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black"
                             />
                           </div>
                         ))}
@@ -981,6 +847,7 @@ export default function PropertyDetail() {
                     )}
                   </div>
 
+                  {/* WiFi */}
                   {(property.wifi_network || property.wifi_password) && (
                     <div>
                       <div className="flex items-center gap-2 mb-3">
@@ -1004,8 +871,6 @@ export default function PropertyDetail() {
                     </div>
                   )}
 
-
-
                   {/* Static Map */}
                   {property.latitude && property.longitude && (
                     <div>
@@ -1020,40 +885,22 @@ export default function PropertyDetail() {
                           </div>
                         ) : mapUrl ? (
                           <>
-                            <img
-                              src={mapUrl}
-                              alt="Property Location"
-                              className="w-full h-64 object-cover"
-                            />
+                            <img src={mapUrl} alt="Property Location" className="w-full h-64 object-cover" />
                             <div className="absolute top-3 right-3 flex flex-col gap-1 bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={handleZoomIn}
-                                disabled={mapZoom >= 20 || loadingMap}
-                                className="h-8 w-8 rounded-none hover:bg-slate-100"
-                              >
+                              <Button size="icon" variant="ghost" onClick={handleZoomIn} disabled={mapZoom >= 20 || loadingMap} className="h-8 w-8 rounded-none hover:bg-slate-100">
                                 <ZoomIn className="h-4 w-4" />
                               </Button>
                               <div className="h-px bg-slate-200" />
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={handleZoomOut}
-                                disabled={mapZoom <= 10 || loadingMap}
-                                className="h-8 w-8 rounded-none hover:bg-slate-100"
-                              >
+                              <Button size="icon" variant="ghost" onClick={handleZoomOut} disabled={mapZoom <= 10 || loadingMap} className="h-8 w-8 rounded-none hover:bg-slate-100">
                                 <ZoomOut className="h-4 w-4" />
                               </Button>
                             </div>
                           </>
                         ) : (
-                          <div className="w-full h-64 flex items-center justify-center text-slate-400">
-                            Map unavailable
-                          </div>
+                          <div className="w-full h-64 flex items-center justify-center text-slate-400">Map unavailable</div>
                         )}
                       </div>
-                      
+
                       {isNearProperty && showingUserLocation && (
                         <Alert className="mt-3 bg-green-50 border-green-200">
                           <CheckCircle2 className="h-4 w-4 text-green-600" />
@@ -1064,25 +911,19 @@ export default function PropertyDetail() {
                       )}
 
                       <div className="flex items-center justify-between mt-3">
-                        <p className="text-xs text-slate-500">
-                          Use this map to verify you're at the correct location
-                        </p>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={handleShowMyLocation}
-                          disabled={gettingLocation || showingUserLocation}
-                        >
+                        <p className="text-xs text-slate-500">Use this map to verify you're at the correct location</p>
+                        <Button size="sm" variant="outline" onClick={handleShowMyLocation} disabled={gettingLocation || showingUserLocation}>
                           <MapPin className="h-4 w-4 mr-2" />
                           {gettingLocation ? 'Getting location...' : showingUserLocation ? 'Location shown' : 'Show My Location'}
                         </Button>
                       </div>
                     </div>
                   )}
-                  </CardContent>
-                  </Card>
-                  </TabsContent>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
+            {/* VISITS TAB */}
             <TabsContent value="visits">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
@@ -1099,28 +940,34 @@ export default function PropertyDetail() {
                       </SelectContent>
                     </Select>
                     {propertyChecklist && (
-                      <Button
-                        size="sm"
-                        className="bg-amber-600 hover:bg-amber-700 text-white"
-                        onClick={async () => {
-                          const visit = await base44.entities.Visit.create({
-                            company_id: property.company_id,
-                            property_id: property.id,
-                            client_id: property.client_id || null,
-                            visit_type: 'check-in',
-                            checkin_type: 'routine',
-                            scheduled_date: new Date().toISOString().split('T')[0],
-                            status: 'in_progress',
-                            template_id: propertyChecklist.template_id || null
-                          });
-                          navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${property.id}&checklist_id=${propertyChecklist.id}`);
-                        }}
-                      >
+                      <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white" onClick={startVisit}>
                         <Zap className="h-4 w-4 mr-1" />
                         Record Visit
                       </Button>
                     )}
-                                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {filteredVisits.length === 0 ? (
+                    <p className="text-slate-400 italic text-center py-8">No visits found</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {visitsByType.inspection.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold text-slate-900 mb-3">Visits ({visitsByType.inspection.length})</h4>
+                          <div className="space-y-2">
+                            {visitsByType.inspection.map((visit) => (
+                              <Link key={visit.id} to={createPageUrl('VisitDetail') + `?id=${visit.id}`} className="flex items-start justify-between p-3 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-colors">
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-slate-900">{visit.custom_checkin_name || 'Check-In'}</p>
+                                  <div className="flex flex-wrap items-center gap-2 mt-1 text-xs">
+                                    {visit.checkin_type && <span className="px-2 py-0.5 rounded-full bg-white/50 capitalize">{visit.checkin_type.replace('_', ' ')}</span>}
+                                    {visit.scheduled_date && (
+                                      <span className="flex items-center gap-1 text-slate-600">
+                                        <Calendar className="h-3 w-3" />
+                                        {format(new Date(visit.scheduled_date), 'MMM d, yyyy')}
+                                      </span>
+                                    )}
                                   </div>
                                 </div>
                                 <StatusBadge status={visit.status} />
@@ -1142,23 +989,17 @@ export default function PropertyDetail() {
                                 <div className="flex items-start justify-between">
                                   <div className="flex-1">
                                     <p className="font-medium text-slate-900">{visit.title}</p>
-                                    {visit.description && (
-                                      <p className="text-sm text-slate-600 mt-1">{visit.description}</p>
-                                    )}
+                                    {visit.description && <p className="text-sm text-slate-600 mt-1">{visit.description}</p>}
                                     <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
                                       <StatusBadge status={visit.status} />
-                                      {visit.priority && (
-                                        <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-700 capitalize">{visit.priority}</span>
-                                      )}
+                                      {visit.priority && <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-700 capitalize">{visit.priority}</span>}
                                       {visit.scheduled_date && (
                                         <span className="flex items-center gap-1 text-slate-600">
                                           <Calendar className="h-3 w-3" />
                                           {format(new Date(visit.scheduled_date), 'MMM d')}
                                         </span>
                                       )}
-                                      {visit.assigned_to_name && (
-                                        <span className="text-slate-600">Assigned: {visit.assigned_to_name}</span>
-                                      )}
+                                      {visit.assigned_to_name && <span className="text-slate-600">Assigned: {visit.assigned_to_name}</span>}
                                     </div>
                                   </div>
                                 </div>
@@ -1173,21 +1014,108 @@ export default function PropertyDetail() {
               </Card>
             </TabsContent>
 
+            {/* CHECKLIST TAB */}
             <TabsContent value="checklist">
               <PropertyChecklistConfigTab propertyId={property.id} companyId={property.company_id} property={property} />
             </TabsContent>
 
+            {/* REPORT TAB */}
             <TabsContent value="report">
               <PropertyReportTab visits={visits} />
             </TabsContent>
 
+            {/* PRICING TAB */}
             <TabsContent value="pricing">
               <PropertyPricingTab propertyId={property.id} companyId={property.company_id} />
             </TabsContent>
 
-            <TabsContent value="tags">
+            {/* CONTRACTORS TAB */}
+            <TabsContent value="contractors">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Contractors
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {CONTRACTOR_TYPES.map(({ value, label }) => {
+                      const typeContractors = contractors.filter(c => c.contractor_type === value);
+                      const availableContractors = contractors.filter(c => c.contractor_type === value && !property.contractors?.includes(c.id));
+                      return (
+                        <div key={value} className="border border-slate-200 rounded-lg overflow-hidden">
+                          <div className="px-4 py-3">
+                            <label className="text-sm font-medium text-slate-700 block mb-2">{label}</label>
+                            <Select onValueChange={async (contractorId) => {
+                              if (contractorId === 'add-new') {
+                                setSelectedContractorType(value);
+                                setShowContractorSearchModal(true);
+                              } else {
+                                await handleAssignContractor(contractorId);
+                              }
+                            }}>
+                              <SelectTrigger className="flex-1">
+                                <SelectValue placeholder={`Select a ${label.toLowerCase()}`} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {availableContractors.map(contractor => (
+                                  <SelectItem key={contractor.id} value={contractor.id}>{contractor.business_name}</SelectItem>
+                                ))}
+                                {availableContractors.length > 0 && <div className="mx-2 my-1 border-t border-slate-200" />}
+                                <SelectItem value="add-new">
+                                  <Plus className="h-4 w-4 inline mr-2" />
+                                  Add New {label}
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          {typeContractors.length > 0 && (
+                            <div className="divide-y divide-slate-100 border-t border-slate-200">
+                              {typeContractors.map((contractor) => (
+                                <div key={contractor.id} className="px-4 py-3 flex items-start justify-between">
+                                  <div>
+                                    <p className="font-medium text-slate-900">{contractor.business_name}</p>
+                                    {contractor.contact_name && <p className="text-sm text-slate-500">Contact: {contractor.contact_name}</p>}
+                                    <div className="mt-2 space-y-1 text-sm">
+                                      {contractor.phone && (
+                                        <a href={`tel:${contractor.phone}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+                                          <Phone className="h-3.5 w-3.5" />
+                                          {contractor.phone}
+                                        </a>
+                                      )}
+                                      {contractor.email && (
+                                        <a href={`mailto:${contractor.email}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+                                          {contractor.email}
+                                        </a>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <Button size="sm" variant="ghost" onClick={async () => {
+                                    const updatedContractors = property.contractors?.filter(id => id !== contractor.id) || [];
+                                    await base44.entities.Property.update(property.id, { contractors: updatedContractors });
+                                    setProperty({ ...property, contractors: updatedContractors });
+                                    const contractorsData = await base44.entities.Contractor.filter({ id: { $in: updatedContractors } });
+                                    setContractors(contractorsData);
+                                  }} className="text-red-600 hover:text-red-700">
+                                    Remove
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* TAGS TAB */}
+            <TabsContent value="tags">
+              <Card>
+                <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Tag className="h-5 w-5" />
                     Tags
@@ -1200,34 +1128,23 @@ export default function PropertyDetail() {
                         {propertyTags.map(tag => (
                           <div key={tag} className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-lg text-sm">
                             {tag}
-                            <button
-                              onClick={() => setPropertyTags(prev => prev.filter(t => t !== tag))}
-                              className="text-blue-700 hover:text-blue-900 font-bold"
-                            >
-                              ×
-                            </button>
+                            <button onClick={() => setPropertyTags(prev => prev.filter(t => t !== tag))} className="text-blue-700 hover:text-blue-900 font-bold">×</button>
                           </div>
                         ))}
                       </div>
                     )}
-
                     {allTags.length > 0 && (
                       <div className="p-3 bg-slate-50 rounded-lg">
                         <p className="text-xs text-slate-600 mb-2 font-medium">Quick add from existing tags:</p>
                         <div className="flex flex-wrap gap-2">
                           {allTags.filter(t => !propertyTags.includes(t)).map(tag => (
-                            <button
-                              key={tag}
-                              onClick={() => setPropertyTags(prev => [...prev, tag])}
-                              className="px-2 py-1 rounded-md bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs transition-colors"
-                            >
+                            <button key={tag} onClick={() => setPropertyTags(prev => [...prev, tag])} className="px-2 py-1 rounded-md bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs transition-colors">
                               + {tag}
                             </button>
                           ))}
                         </div>
                       </div>
                     )}
-
                     <div>
                       <p className="text-xs text-slate-600 mb-2 font-medium">Create new tag:</p>
                       <div className="flex gap-2">
@@ -1247,31 +1164,18 @@ export default function PropertyDetail() {
                           placeholder="Type a new tag..."
                           className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black"
                         />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (newTag.trim() && !propertyTags.includes(newTag.trim())) {
-                              setPropertyTags(prev => [...prev, newTag.trim()]);
-                              setNewTag('');
-                            }
-                          }}
-                        >
+                        <Button variant="outline" size="sm" onClick={() => {
+                          if (newTag.trim() && !propertyTags.includes(newTag.trim())) {
+                            setPropertyTags(prev => [...prev, newTag.trim()]);
+                            setNewTag('');
+                          }
+                        }}>
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
-
                     <div className="flex justify-end gap-3 pt-4">
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setPropertyTags(property.tags || []);
-                          setNewTag('');
-                        }}
-                      >
-                        Cancel
-                      </Button>
+                      <Button variant="outline" onClick={() => { setPropertyTags(property.tags || []); setNewTag(''); }}>Cancel</Button>
                       <Button
                         onClick={async () => {
                           setSavingTags(true);
@@ -1298,103 +1202,7 @@ export default function PropertyDetail() {
               </Card>
             </TabsContent>
 
-             <TabsContent value="contractors">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Contractors
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {CONTRACTOR_TYPES.map(({ value, label }) => {
-                      const typeContractors = contractors.filter(c => c.contractor_type === value);
-                      const availableContractors = contractors.filter(c => c.contractor_type === value && !property.contractors?.includes(c.id));
-                      return (
-                        <div key={value} className="border border-slate-200 rounded-lg overflow-hidden">
-                          <div className="px-4 py-3">
-                            <label className="text-sm font-medium text-slate-700 block mb-2">{label}</label>
-                            <div className="flex gap-2">
-                              <Select
-                                onValueChange={async (contractorId) => {
-                                  if (contractorId === 'add-new') {
-                                    setSelectedContractorType(value);
-                                    setShowContractorSearchModal(true);
-                                  } else {
-                                    await handleAssignContractor(contractorId);
-                                  }
-                                }}
-                              >
-                                <SelectTrigger className="flex-1">
-                                  <SelectValue placeholder={`Select a ${label.toLowerCase()}`} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {availableContractors.map(contractor => (
-                                    <SelectItem key={contractor.id} value={contractor.id}>
-                                      {contractor.business_name}
-                                    </SelectItem>
-                                  ))}
-                                  {availableContractors.length > 0 && <div className="mx-2 my-1 border-t border-slate-200" />}
-                                  <SelectItem value="add-new">
-                                    <Plus className="h-4 w-4 inline mr-2" />
-                                    Add New {label}
-                                  </SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                          {typeContractors.length > 0 && (
-                            <div className="divide-y divide-slate-100 border-t border-slate-200">
-                              {typeContractors.map((contractor) => (
-                                <div key={contractor.id} className="px-4 py-3 flex items-start justify-between">
-                                  <div>
-                                    <p className="font-medium text-slate-900">{contractor.business_name}</p>
-                                    {contractor.contact_name && (
-                                      <p className="text-sm text-slate-500">Contact: {contractor.contact_name}</p>
-                                    )}
-                                    <div className="mt-2 space-y-1 text-sm">
-                                      {contractor.phone && (
-                                        <a href={`tel:${contractor.phone}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
-                                          <Phone className="h-3.5 w-3.5" />
-                                          {contractor.phone}
-                                        </a>
-                                      )}
-                                      {contractor.email && (
-                                        <a href={`mailto:${contractor.email}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
-                                          {contractor.email}
-                                        </a>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={async () => {
-                                      const updatedContractors = property.contractors?.filter(id => id !== contractor.id) || [];
-                                      await base44.entities.Property.update(property.id, { contractors: updatedContractors });
-                                      setProperty({ ...property, contractors: updatedContractors });
-                                      const contractorsData = await base44.entities.Contractor.filter({ 
-                                        id: { $in: updatedContractors } 
-                                      });
-                                      setContractors(contractorsData);
-                                    }}
-                                    className="text-red-600 hover:text-red-700"
-                                  >
-                                    Remove
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
+            {/* STORM TAB */}
             <TabsContent value="storm">
               <Card>
                 <CardHeader>
@@ -1405,27 +1213,19 @@ export default function PropertyDetail() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Storm Protection Description
-                    </label>
-                    <p className="text-xs text-slate-500 mb-2">
-                      Completely describe the storm protection, type of shutters, etc. that you have for your home.
-                    </p>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Storm Protection Description</label>
+                    <p className="text-xs text-slate-500 mb-2">Completely describe the storm protection, type of shutters, etc. that you have for your home.</p>
                     <textarea
                       value={property.storm_protection_description || ''}
                       onChange={(e) => { setProperty({...property, storm_protection_description: e.target.value}); setHasUnsavedChanges(true); }}
-                      placeholder="e.g., Impact-resistant windows on all floors, accordion shutters on east-facing windows, roll-down shutters on garage..."
+                      placeholder="e.g., Impact-resistant windows on all floors, accordion shutters on east-facing windows..."
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black"
                       rows={5}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Storm Panels / Installation Contractor
-                    </label>
-                    <p className="text-xs text-slate-500 mb-2">
-                      If you have storm panels, screens, or other storm protection that needs to be installed, please note the contractor that you have engaged.
-                    </p>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Storm Panels / Installation Contractor</label>
+                    <p className="text-xs text-slate-500 mb-2">If you have storm panels that need to be installed, please note the contractor you have engaged.</p>
                     <textarea
                       value={property.storm_panels_notes || ''}
                       onChange={(e) => { setProperty({...property, storm_panels_notes: e.target.value}); setHasUnsavedChanges(true); }}
@@ -1445,6 +1245,7 @@ export default function PropertyDetail() {
               </Card>
             </TabsContent>
 
+            {/* CONTACTS TAB */}
             <TabsContent value="contacts">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
@@ -1452,11 +1253,7 @@ export default function PropertyDetail() {
                     <Phone className="h-5 w-5" />
                     Emergency Contacts
                   </CardTitle>
-                  <Button 
-                    size="sm" 
-                    onClick={() => setShowAddContact(true)}
-                    className="bg-slate-900 hover:bg-slate-800 text-white"
-                  >
+                  <Button size="sm" onClick={() => setShowAddContact(true)} className="bg-slate-900 hover:bg-slate-800 text-white">
                     <Plus className="h-4 w-4 mr-1" />
                     Add Contact
                   </Button>
@@ -1500,67 +1297,42 @@ export default function PropertyDetail() {
 
       {/* Add Follow-Up Dialog */}
       <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
-         <DialogContent className="sm:max-w-md rounded-2xl p-0 bg-white/90 backdrop-blur-xl border border-white/30 shadow-2xl">
-           <DialogHeader className="rounded-t-2xl bg-slate-900 px-6 pt-6 pb-4">
-             <DialogTitle className="text-white text-lg font-semibold">Add Follow-Up</DialogTitle>
+        <DialogContent className="sm:max-w-md rounded-2xl p-0 bg-white/90 backdrop-blur-xl border border-white/30 shadow-2xl">
+          <DialogHeader className="rounded-t-2xl bg-slate-900 px-6 pt-6 pb-4">
+            <DialogTitle className="text-white text-lg font-semibold">Add Follow-Up</DialogTitle>
           </DialogHeader>
           <div className="px-6 pt-4">
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="task-title">Follow-Up Title *</Label>
-              <input
-                id="task-title"
-                type="text"
-                value={newTask.title}
-                onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                placeholder="e.g., Fix roof leak"
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
-              />
-            </div>
-            <div>
-              <Label htmlFor="task-description">Details</Label>
-              <textarea
-                id="task-description"
-                value={newTask.description}
-                onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-                placeholder="Task details..."
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
-                rows={3}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div>
-                <Label htmlFor="task-priority">Priority</Label>
-                <select
-                  id="task-priority"
-                  value={newTask.priority}
-                  onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
-                  >
-                   <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
-                </select>
+                <Label htmlFor="task-title">Follow-Up Title *</Label>
+                <input id="task-title" type="text" value={newTask.title} onChange={(e) => setNewTask({ ...newTask, title: e.target.value })} placeholder="e.g., Fix roof leak" className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur" />
               </div>
               <div>
-                <Label htmlFor="task-due-date">Due Date</Label>
-                <input
-                  id="task-due-date"
-                  type="date"
-                  value={newTask.due_date}
-                  onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
-                />
+                <Label htmlFor="task-description">Details</Label>
+                <textarea id="task-description" value={newTask.description} onChange={(e) => setNewTask({ ...newTask, description: e.target.value })} placeholder="Task details..." className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur" rows={3} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="task-priority">Priority</Label>
+                  <select id="task-priority" value={newTask.priority} onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="task-due-date">Due Date</Label>
+                  <input id="task-due-date" type="date" value={newTask.due_date} onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur" />
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex justify-end gap-3 pt-2 pb-6">
-            <Button variant="outline" onClick={() => setShowAddTask(false)}>Cancel</Button>
-            <Button onClick={handleAddTask} disabled={savingTask} className="bg-slate-900 hover:bg-slate-800">
-              {savingTask ? 'Creating...' : 'Create Follow-Up'}
-            </Button>
-          </div>
+            <div className="flex justify-end gap-3 pt-2 pb-6">
+              <Button variant="outline" onClick={() => setShowAddTask(false)}>Cancel</Button>
+              <Button onClick={handleAddTask} disabled={savingTask} className="bg-slate-900 hover:bg-slate-800">
+                {savingTask ? 'Creating...' : 'Create Follow-Up'}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -1574,47 +1346,19 @@ export default function PropertyDetail() {
           <div className="space-y-4 px-6 pt-4">
             <div>
               <Label htmlFor="contact-name">Name *</Label>
-              <input
-                id="contact-name"
-                type="text"
-                value={newContact.name}
-                onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
-                placeholder="Contact name"
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
-              />
+              <input id="contact-name" type="text" value={newContact.name} onChange={(e) => setNewContact({ ...newContact, name: e.target.value })} placeholder="Contact name" className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur" />
             </div>
             <div>
               <Label htmlFor="contact-relationship">Relationship</Label>
-              <input
-                id="contact-relationship"
-                type="text"
-                value={newContact.relationship}
-                onChange={(e) => setNewContact({ ...newContact, relationship: e.target.value })}
-                placeholder="e.g., Owner, Manager"
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
-              />
+              <input id="contact-relationship" type="text" value={newContact.relationship} onChange={(e) => setNewContact({ ...newContact, relationship: e.target.value })} placeholder="e.g., Owner, Manager" className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur" />
             </div>
             <div>
               <Label htmlFor="contact-phone">Phone</Label>
-              <input
-                id="contact-phone"
-                type="tel"
-                value={newContact.phone}
-                onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
-                placeholder="Phone number"
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
-              />
+              <input id="contact-phone" type="tel" value={newContact.phone} onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })} placeholder="Phone number" className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur" />
             </div>
             <div>
               <Label htmlFor="contact-email">Email</Label>
-              <input
-                id="contact-email"
-                type="email"
-                value={newContact.email}
-                onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
-                placeholder="Email address"
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur"
-              />
+              <input id="contact-email" type="email" value={newContact.email} onChange={(e) => setNewContact({ ...newContact, email: e.target.value })} placeholder="Email address" className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 text-black bg-white/60 backdrop-blur" />
             </div>
             <div className="flex justify-end gap-3 pt-2 pb-6">
               <Button variant="outline" onClick={() => setShowAddContact(false)}>Cancel</Button>
@@ -1626,7 +1370,7 @@ export default function PropertyDetail() {
         </DialogContent>
       </Dialog>
 
-      {/* Add Contractor via Google Search Modal */}
+      {/* Contractor Search Modal */}
       <ContractorSearchDialog
         open={showContractorSearchModal}
         onOpenChange={setShowContractorSearchModal}
@@ -1649,16 +1393,12 @@ export default function PropertyDetail() {
               </SelectTrigger>
               <SelectContent>
                 {clients.map(c => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.first_name} {c.last_name}
-                  </SelectItem>
+                  <SelectItem key={c.id} value={c.id}>{c.first_name} {c.last_name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setShowChangeOwnerDialog(false)}>
-                Cancel
-              </Button>
+              <Button variant="outline" onClick={() => setShowChangeOwnerDialog(false)}>Cancel</Button>
               <Button onClick={handleChangeOwner} disabled={changingOwner || !selectedClientId} className="bg-slate-900 hover:bg-slate-800">
                 {changingOwner ? 'Changing...' : 'Change Owner'}
               </Button>
