@@ -55,15 +55,12 @@ export default function ApproveFounder() {
         }
       });
 
-      const emailData = response.data?.data || response.data;
-      console.log('Email response:', emailData);
-      if (emailData?.subject && emailData?.body) {
-        setSubject(emailData.subject);
-        setBody(emailData.body);
+      if (response.data?.subject && response.data?.body) {
+        setSubject(response.data.subject);
+        setBody(response.data.body);
         setMessage({ type: 'success', text: 'Email generated successfully' });
       } else {
-        console.error('Unexpected response structure:', response.data);
-        setMessage({ type: 'error', text: `Failed to generate email: ${typeof emailData}` });
+        setMessage({ type: 'error', text: 'Failed to generate email' });
       }
     } catch (error) {
       console.error('AI error:', error);
