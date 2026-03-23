@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Building2, Mail, Lock, ArrowRight, RotateCcw } from 'lucide-react';
+import { Building2, Mail, Lock, ArrowRight, RotateCcw, Eye, EyeOff } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,8 @@ export default function ClientLogin() {
   const [newPin, setNewPin] = useState('');
   const [loading, setLoading] = useState(false);
   const [clientData, setClientData] = useState(null);
+  const [showPin, setShowPin] = useState(false);
+  const [showNewPin, setShowNewPin] = useState(false);
 
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
@@ -183,17 +185,26 @@ export default function ClientLogin() {
             <form onSubmit={handlePinSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="pin">PIN Code</Label>
-                <Input
-                  id="pin"
-                  type="password"
-                  value={pin}
-                  onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="000000"
-                  maxLength={6}
-                  required
-                  autoFocus
-                  className="text-center text-2xl tracking-widest"
-                />
+                <div className="relative">
+                  <Input
+                    id="pin"
+                    type={showPin ? 'text' : 'password'}
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="000000"
+                    maxLength={6}
+                    required
+                    autoFocus
+                    className="text-center text-2xl tracking-widest pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPin(!showPin)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPin ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
               <Button type="submit" className="w-full" disabled={loading || pin.length !== 6}>
                 {loading ? 'Verifying...' : 'Login'}
@@ -242,16 +253,25 @@ export default function ClientLogin() {
               </div>
               <div>
                 <Label htmlFor="new-pin">New PIN</Label>
-                <Input
-                  id="new-pin"
-                  type="password"
-                  value={newPin}
-                  onChange={(e) => setNewPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="000000"
-                  maxLength={6}
-                  required
-                  className="text-center text-2xl tracking-widest"
-                />
+                <div className="relative">
+                  <Input
+                    id="new-pin"
+                    type={showNewPin ? 'text' : 'password'}
+                    value={newPin}
+                    onChange={(e) => setNewPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="000000"
+                    maxLength={6}
+                    required
+                    className="text-center text-2xl tracking-widest pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPin(!showNewPin)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showNewPin ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
               <Button type="submit" className="w-full" disabled={loading || newPin.length !== 6}>
                 {loading ? 'Resetting...' : 'Reset PIN'}
