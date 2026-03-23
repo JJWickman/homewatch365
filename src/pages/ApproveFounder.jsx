@@ -84,17 +84,20 @@ export default function ApproveFounder() {
     setSendingEmail(true);
     setMessage(null);
     try {
-      await base44.integrations.Core.SendEmail({
+      const response = await base44.functions.invoke('sendFounderInviteEmail', {
         to: recipient,
         subject,
-        body,
-        from_name: 'Estate Watch 365'
+        body
       });
-      setMessage({ type: 'success', text: 'Email sent successfully' });
-      setRecipient('');
-      setSubject('');
-      setBody('');
-      setAiPrompt('');
+      if (response.data?.success) {
+        setMessage({ type: 'success', text: 'Email sent successfully' });
+        setRecipient('');
+        setSubject('');
+        setBody('');
+        setAiPrompt('');
+      } else {
+        setMessage({ type: 'error', text: response.data?.error || 'Error sending email' });
+      }
     } catch (error) {
       console.error('Send error:', error);
       setMessage({ type: 'error', text: error.message || 'Error sending email' });
