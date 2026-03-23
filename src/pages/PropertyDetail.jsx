@@ -634,39 +634,8 @@ export default function PropertyDetail() {
           >
             <Zap className="h-4 w-4 mr-2" />
             Record Visit
-        )}
-        <Button variant="outline" onClick={() => navigate(createPageUrl('PropertyForm') + `?id=${property.id}`)}>
-          <Edit className="h-4 w-4 mr-2" />
-          <span>Edit</span>
-        </Button>
-      </PageHeader>
-
-      {/* Floating Save Button */}
-      {hasUnsavedChanges && (
-        <div className="fixed bottom-6 right-6 z-40">
-          <Button 
-            onClick={handleSave} 
-            disabled={saving}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg"
-            size="lg"
-          >
-            {saving ? 'Saving...' : 'Save Changes'}
           </Button>
-        </div>
-      )}
-
-      {/* Hero Image */}
-      <Card className="mb-6 overflow-hidden">
-        <div className="aspect-[3/1] bg-slate-100 relative flex items-center justify-center">
-          {property.primary_photo_url ? (
-            <img 
-              src={property.primary_photo_url}
-              alt={property.name || property.address}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="text-slate-400">No photo uploaded</div>
-          )}
+        )}
           <div className="absolute top-4 right-4 flex gap-2">
             <div className="relative group">
               <button
