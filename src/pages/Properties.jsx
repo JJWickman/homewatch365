@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +38,7 @@ export default function Properties() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [tagFilter, setTagFilter] = useState('');
   const [companyId, setCompanyId] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -115,9 +117,12 @@ export default function Properties() {
       property.city?.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || property.status === statusFilter;
+    const matchesTag = !tagFilter || (property.tags && property.tags.includes(tagFilter));
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesTag;
   });
+
+  const allTags = Array.from(new Set(properties.flatMap(p => p.tags || [])));
 
   const getVisitStatuses = (propertyId) => {
     const propertyVisits = visits.filter(v => v.property_id === propertyId);
@@ -207,6 +212,15 @@ export default function Properties() {
              )}
            </div>
 
+           {/* Tags */}
+           {!compact && property.tags && property.tags.length > 0 && (
+             <div className="flex gap-2 flex-wrap pt-2 pb-2">
+               {property.tags.map(tag => (
+                 <span key={tag} className="px-2 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-medium">{tag}</span>
+               ))}
+             </div>
+           )}
+
            {/* Visit Status Badges */}
            {!compact && (
              <div className="flex gap-2 flex-wrap pt-3 border-t border-slate-100">
@@ -283,6 +297,19 @@ export default function Properties() {
               <SelectItem value="for_sale">For Sale</SelectItem>
             </SelectContent>
           </Select>
+          {allTags.length > 0 && (
+            <Select value={tagFilter} onValueChange={setTagFilter}>
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue placeholder="Filter by tag" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={null}>All Tags</SelectItem>
+                {allTags.map(tag => (
+                  <SelectItem key={tag} value={tag}>{tag}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <div className="flex items-center gap-2">
             <Button
               variant={showMap ? "default" : "outline"}
@@ -403,13 +430,20 @@ export default function Properties() {
                      <span className="px-2 py-0.5 rounded-md bg-amber-500 text-white text-xs font-semibold">⚠ No Checklist</span>
                    )}
                  </div>
-                 <p className="text-sm text-slate-500">
+                 <div className="text-sm text-slate-500 mb-2">
                    {property.city}, {property.state} • {getClientName(property.client_id)}
-                 </p>
-                </div>
-                <div className="w-32">
+                 </div>
+                 {property.tags && property.tags.length > 0 && (
+                   <div className="flex gap-1 flex-wrap">
+                     {property.tags.map(tag => (
+                       <Badge key={tag} className="bg-blue-100 text-blue-800 border-blue-200 text-xs">{tag}</Badge>
+                     ))}
+                   </div>
+                 )}
+                 </div>
+                 <div className="w-32">
                  <StatusBadge status={property.status} />
-                </div>
+                 </div>
                 <div className="w-16">
                   <Button 
                     variant="ghost" 
