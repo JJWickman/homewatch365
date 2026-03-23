@@ -8,6 +8,7 @@ import PageNotFound from './lib/PageNotFound';
 import ChecklistEditor from './pages/ChecklistEditor';
 import AIAssistant from './pages/AIAssistant';
 import AdminSubscriptions from './pages/AdminSubscriptions';
+import ApproveFounder from './pages/ApproveFounder';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ClientPortal from './pages/ClientPortal';
@@ -82,6 +83,11 @@ const AuthenticatedApp = () => {
       <Route path="/AdminSubscriptions" element={
         <LayoutWrapper currentPageName="AdminSubscriptions">
           <AdminSubscriptions />
+        </LayoutWrapper>
+      } />
+      <Route path="/ApproveFounder" element={
+        <LayoutWrapper currentPageName="ApproveFounder">
+          <ApproveFounder />
         </LayoutWrapper>
       } />
       <Route path="/ClientPortal" element={<ClientPortal />} />
