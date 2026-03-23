@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import {
+import { ChevronLeft,
   Home, Users, Wrench, AlertTriangle, Building2, Car, Wind, Package, CalendarCheck
 } from 'lucide-react';
 import { createPageUrl } from '@/utils';
@@ -29,19 +29,28 @@ const VISIT_TYPES = [
   { value: 'followup', label: 'Follow-Up', icon: CalendarCheck, color: 'bg-teal-50 border-teal-200 hover:bg-teal-100' },
 ];
 
-export default function VisitTypeSelectionDialog({ open, onOpenChange, property, propertyChecklist }) {
+export default function VisitTypeSelectionDialog({ open, onOpenChange, property, propertyChecklist, properties = [], checklists = [] }) {
   const navigate = useNavigate();
   const [creating, setCreating] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [step, setStep] = useState(property ? 'type' : 'property');
+
+  const handleSelectProperty = (prop) => {
+    setSelectedProperty(prop);
+    setStep('type');
+  };
 
   const handleSelectVisitType = async (visitType) => {
-    if (!property) return;
+    const targetProperty = property || selectedProperty;
+    if (!targetProperty) return;
     setCreating(true);
 
     try {
+      const propertyChecklist = checklists.find(c => c.property_id === targetProperty.id);
       const visit = await base44.entities.Visit.create({
-        company_id: property.company_id,
-        property_id: property.id,
-        client_id: property.client_id || null,
+        company_id: targetProperty.company_id,
+        property_id: targetProperty.id,
+        client_id: targetProperty.client_id || null,
         visit_type: visitType,
         checkin_type: visitType === 'check-in' ? 'routine' : null,
         scheduled_date: format(new Date(), 'yyyy-MM-dd'),
@@ -49,8 +58,10 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         template_id: (visitType === 'check-in' && propertyChecklist) ? propertyChecklist.template_id : null,
       });
 
-      navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${property.id}&checklist_id=${propertyChecklist?.id}`);
+      navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${targetProperty.id}&checklist_id=${propertyChecklist?.id}`);
       onOpenChange(false);
+      setStep(property ? 'type' : 'property');
+      setSelectedProperty(null);
     } catch (error) {
       console.error('Error creating visit:', error);
       toast.error('Failed to start visit');
@@ -58,25 +69,73 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
     }
   };
 
+  const handleDialogChange = (newOpen) => {
+    onOpenChange(newOpen);
+    if (!newOpen) {
+      setStep(property ? 'type' : 'property');
+      setSelectedProperty(null);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="max-w-md rounded-2xl p-0 bg-white overflow-hidden">
-        <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-6">
-          <DialogTitle className="text-white text-lg font-semibold">Select Visit Type</DialogTitle>
-          <p className="text-slate-300 text-xs mt-1">Choose what you're recording</p>
-        </div>
-        <div className="p-4 grid grid-cols-2 gap-3 max-h-[70vh] overflow-y-auto">
-          {VISIT_TYPES.map(({ value, label, icon: Icon, color }) => (
+        <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-6 flex items-center justify-between">
+          {step === 'type' && !property && (
             <button
-              key={value}
+              onClick={() => {
+                setStep('property');
+                setSelectedProperty(null);
+              }}
               disabled={creating}
-              onClick={() => handleSelectVisitType(value)}
-              className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-colors font-medium text-sm ${color} ${creating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-95'}`}
+              className="mr-2 p-1 hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
             >
-              <Icon className="h-6 w-6 mb-2" />
-              <span className="text-center leading-tight">{label}</span>
+              <ChevronLeft className="h-5 w-5 text-white" />
             </button>
-          ))}
+          )}
+          <div className="flex-1">
+            <DialogTitle className="text-white text-lg font-semibold">
+              {step === 'property' ? 'Select Property' : 'Select Visit Type'}
+            </DialogTitle>
+            <p className="text-slate-300 text-xs mt-1">
+              {step === 'property' ? 'Choose a property to record a visit for' : 'Choose what you\'re recording'}
+            </p>
+          </div>
+        </div>
+        <div className="p-4 max-h-[70vh] overflow-y-auto">
+          {step === 'property' ? (
+            <div className="space-y-2">
+              {properties.length === 0 ? (
+                <p className="text-center text-slate-500 text-sm py-8">No properties available</p>
+              ) : (
+                properties.map(prop => (
+                  <button
+                    key={prop.id}
+                    onClick={() => handleSelectProperty(prop)}
+                    disabled={creating}
+                    className="w-full text-left p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors disabled:opacity-50"
+                  >
+                    <p className="font-medium text-slate-900">{prop.name || prop.address}</p>
+                    <p className="text-sm text-slate-500">{prop.city}, {prop.state}</p>
+                  </button>
+                ))
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              {VISIT_TYPES.map(({ value, label, icon: Icon, color }) => (
+                <button
+                  key={value}
+                  disabled={creating}
+                  onClick={() => handleSelectVisitType(value)}
+                  className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-colors font-medium text-sm ${color} ${creating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-95'}`}
+                >
+                  <Icon className="h-6 w-6 mb-2" />
+                  <span className="text-center leading-tight">{label}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
