@@ -131,6 +131,36 @@ export default function SubscriptionManagement({ company, companyMember }) {
 
   return (
     <div className="space-y-8">
+      {/* Current Plan Section */}
+      <div className="bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">Current Plan</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <p className="text-sm text-slate-600 mb-1">Plan</p>
+            <p className="text-2xl font-bold text-slate-900 capitalize">{company?.subscription_plan?.replace('_', ' ') || 'None'}</p>
+            {PLAN_FEATURES[company?.subscription_plan]?.tagline && (
+              <p className="text-sm text-slate-500 mt-1">{PLAN_FEATURES[company?.subscription_plan].tagline}</p>
+            )}
+          </div>
+          <div>
+            <p className="text-sm text-slate-600 mb-1">Status</p>
+            <Badge className={`${
+              company?.subscription_status === 'active' ? 'bg-green-100 text-green-800 border-green-200' :
+              company?.subscription_status === 'trial' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+              company?.subscription_status === 'past_due' ? 'bg-amber-100 text-amber-800 border-amber-200' :
+              'bg-slate-100 text-slate-800 border-slate-200'
+            }`}>
+              {company?.subscription_status?.charAt(0).toUpperCase() + company?.subscription_status?.slice(1) || 'Unknown'}
+            </Badge>
+          </div>
+        </div>
+        {company?.subscription_status === 'trial' && company?.trial_ends_at && (
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-900">Trial ends on <strong>{new Date(company.trial_ends_at).toLocaleDateString()}</strong></p>
+          </div>
+        )}
+      </div>
+
       <div>
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-slate-900">Choose Your Plan</h2>
