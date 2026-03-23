@@ -50,12 +50,8 @@ Deno.serve(async (req) => {
     // Define the exact desired order
     const planOrder = [
       'solopreneur',
-      'growth', 
-      'professional',
-      'solopreneur_crm',
-      'growth_crm',
-      'professional_crm',
-      'enterprise'
+      'growth',
+      'professional'
     ];
     
     // Convert to array and sort by predefined order

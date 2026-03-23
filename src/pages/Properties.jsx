@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { getLimits } from '@/lib/planLimits';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
@@ -43,6 +44,7 @@ export default function Properties() {
   const [checklists, setChecklists] = useState([]);
   const [viewMode, setViewMode] = useViewMode('properties', 'large-tiles');
   const [showMap, setShowMap] = useState(false);
+  const [company, setCompany] = useState(null);
 
   useEffect(() => {
     loadProperties();
@@ -67,17 +69,19 @@ export default function Properties() {
         const cId = members[0].company_id;
         setCompanyId(cId);
         
-        const [propertiesData, clientsData, visitsData, checklistsData] = await Promise.all([
+        const [propertiesData, clientsData, visitsData, checklistsData, companiesData] = await Promise.all([
           base44.entities.Property.filter({ company_id: cId, is_active: true }, '-created_date'),
           base44.entities.Client.filter({ company_id: cId }),
           base44.entities.Visit.filter({ company_id: cId }),
-          base44.entities.PropertyChecklist.filter({ company_id: cId, is_active: true })
+          base44.entities.PropertyChecklist.filter({ company_id: cId, is_active: true }),
+          base44.entities.Company.filter({ id: cId })
         ]);
         
         setProperties(propertiesData);
         setClients(clientsData);
         setVisits(visitsData);
         setChecklists(checklistsData);
+        if (companiesData.length > 0) setCompany(companiesData[0]);
       }
     } catch (error) {
       console.error('Error loading properties:', error);
@@ -234,14 +238,26 @@ export default function Properties() {
     );
   };
 
+  const limits = getLimits(company?.subscription_plan);
+  const atPropertyLimit = properties.length >= limits.maxProperties;
+
   return (
     <div>
       <PageHeader
         title="Properties"
-        subtitle={`${properties.length} total properties`}
-        action={() => navigate(createPageUrl('PropertyForm'))}
+        subtitle={`${properties.length} / ${limits.maxProperties} properties`}
+        action={atPropertyLimit ? undefined : () => navigate(createPageUrl('PropertyForm'))}
         actionLabel="Add Property"
       />
+      {atPropertyLimit && (
+        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-3">
+          <AlertCircle className="h-5 w-5 text-amber-600 shrink-0" />
+          <div>
+            <p className="font-semibold text-amber-900">Property limit reached ({limits.maxProperties} max on your plan)</p>
+            <p className="text-sm text-amber-700">Upgrade your plan in Settings → Subscription to add more properties.</p>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <Card className="mb-6 p-4">

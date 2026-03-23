@@ -1,187 +1,92 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
 import Stripe from 'npm:stripe@17.5.0';
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
+
+const NEW_PLANS = [
+  {
+    id: 'solopreneur',
+    name: 'Solopreneur',
+    description: 'Perfect for solo operators — up to 50 properties',
+    monthlyPrice: 49,
+    maxUsers: 1,
+    maxProperties: 50
+  },
+  {
+    id: 'growth',
+    name: 'Growth',
+    description: 'For growing teams — up to 100 properties',
+    monthlyPrice: 89,
+    maxUsers: 2,
+    maxProperties: 100
+  },
+  {
+    id: 'professional',
+    name: 'Professional',
+    description: 'For larger teams — up to 500 properties',
+    monthlyPrice: 149,
+    maxUsers: 5,
+    maxProperties: 500
+  }
+];
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+
+    // Step 1: Archive all existing active products in Stripe
+    const existingProducts = await stripe.products.list({ active: true, limit: 100 });
+    const archived = [];
+    for (const product of existingProducts.data) {
+      await stripe.products.update(product.id, { active: false });
+      archived.push(product.id);
+      console.log(`Archived old product: ${product.id} (${product.name})`);
     }
 
-    // Create products and prices for each tier
-    const tiers = [
-      {
-        id: 'solopreneur',
-        name: 'Solopreneur',
-        monthlyPrice: 99,
-        annualPrice: 79
-      },
-      {
-        id: 'growth',
-        name: 'Growth',
-        monthlyPrice: 199,
-        annualPrice: 159
-      },
-      {
-        id: 'professional',
-        name: 'Professional',
-        monthlyPrice: 249,
-        annualPrice: 199
-      },
-      {
-        id: 'enterprise',
-        name: 'Enterprise',
-        monthlyPrice: 499,
-        annualPrice: 399
-      }
-    ];
-
+    // Step 2: Create the 3 new plans
     const results = [];
 
-    for (const tier of tiers) {
-      console.log(`Creating product for tier: ${tier.id}`);
-      // Create product
+    for (const plan of NEW_PLANS) {
       const product = await stripe.products.create({
-        name: tier.name,
-        description: `${tier.name} Plan`,
+        name: plan.name,
+        description: plan.description,
         metadata: {
-          plan_id: tier.id
+          plan_id: plan.id,
+          max_users: String(plan.maxUsers),
+          max_properties: String(plan.maxProperties)
         }
       });
-      console.log(`✓ Created product ${product.id} for ${tier.id}`);
+      console.log(`Created product ${product.id} for plan: ${plan.id}`);
 
-      // Create monthly price
       const monthlyPrice = await stripe.prices.create({
         product: product.id,
-        unit_amount: tier.monthlyPrice * 100,
+        unit_amount: plan.monthlyPrice * 100,
         currency: 'usd',
-        recurring: {
-          interval: 'month'
-        },
-        metadata: {
-          plan_id: tier.id,
-          billing_cycle: 'monthly'
-        }
-      });
-
-      // Create annual price
-      const annualPrice = await stripe.prices.create({
-        product: product.id,
-        unit_amount: tier.annualPrice * 100 * 12,
-        currency: 'usd',
-        recurring: {
-          interval: 'year'
-        },
-        metadata: {
-          plan_id: tier.id,
-          billing_cycle: 'annual'
-        }
+        recurring: { interval: 'month' },
+        metadata: { plan_id: plan.id, billing_cycle: 'monthly' }
       });
 
       results.push({
-        tier: tier.id,
+        plan: plan.id,
         product_id: product.id,
         monthly_price_id: monthlyPrice.id,
-        annual_price_id: annualPrice.id
+        monthly_amount: plan.monthlyPrice,
+        max_users: plan.maxUsers,
+        max_properties: plan.maxProperties
       });
     }
 
-    // Create bundled CRM & Marketing plans
-    const bundledTiers = [
-      {
-        id: 'solopreneur_crm',
-        name: 'Solopreneur + CRM & Marketing',
-        monthlyPrice: 149,
-        annualPrice: 119 // 20% discount
-      },
-      {
-        id: 'growth_crm',
-        name: 'Growth + CRM & Marketing',
-        monthlyPrice: 248,
-        annualPrice: 198.40 // 20% discount
-      },
-      {
-        id: 'professional_crm',
-        name: 'Professional + CRM & Marketing',
-        monthlyPrice: 299,
-        annualPrice: 239.20 // 20% discount
-      }
-    ];
-
-    for (const tier of bundledTiers) {
-      console.log(`Creating bundled product for: ${tier.id}`);
-      
-      const product = await stripe.products.create({
-        name: tier.name,
-        description: `${tier.name} Plan`,
-        metadata: {
-          plan_id: tier.id,
-          includes_crm: 'true'
-        }
-      });
-      console.log(`✓ Created product ${product.id} for ${tier.id}`);
-
-      // Create monthly price
-      const monthlyPrice = await stripe.prices.create({
-        product: product.id,
-        unit_amount: tier.monthlyPrice * 100,
-        currency: 'usd',
-        recurring: {
-          interval: 'month'
-        },
-        metadata: {
-          plan_id: tier.id,
-          billing_cycle: 'monthly'
-        }
-      });
-
-      // Create annual price
-      const annualPrice = await stripe.prices.create({
-        product: product.id,
-        unit_amount: tier.annualPrice * 100 * 12,
-        currency: 'usd',
-        recurring: {
-          interval: 'year'
-        },
-        metadata: {
-          plan_id: tier.id,
-          billing_cycle: 'annual'
-        }
-      });
-
-      results.push({
-        tier: tier.id,
-        product_id: product.id,
-        monthly_price_id: monthlyPrice.id,
-        annual_price_id: annualPrice.id
-      });
-    }
-
-    // Store prices in a Settings entity for easy reference
-    try {
-      const settings = await base44.asServiceRole.entities.Settings.list();
-      if (settings.length > 0) {
-        await base44.asServiceRole.entities.Settings.update(settings[0].id, {
-          stripe_prices: results
-        });
-      }
-    } catch (e) {
-      console.log('Settings entity not available, skipping storage');
-    }
-
-    return Response.json({ 
+    return Response.json({
       success: true,
-      products: results,
-      message: 'Stripe products, prices, and add-ons created successfully'
+      archived_count: archived.length,
+      created: results,
+      message: 'Old products archived. New 3-tier plans created successfully.'
     });
   } catch (error) {
     console.error('Error creating Stripe products:', error);
-    return Response.json({ 
-      error: error.message 
-    }, { status: 500 });
+    return Response.json({ error: error.message }, { status: 500 });
   }
 });
