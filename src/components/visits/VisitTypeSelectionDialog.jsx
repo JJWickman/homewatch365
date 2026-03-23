@@ -80,7 +80,7 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="max-w-md rounded-2xl p-0 bg-white overflow-hidden">
-        <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-6 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-blue-900 via-slate-900 to-slate-800 px-6 py-6 flex items-center justify-between">
           {step === 'type' && !property && (
             <button
               onClick={() => {
@@ -94,10 +94,10 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
             </button>
           )}
           <div className="flex-1">
-            <DialogTitle className="text-white text-lg font-semibold">
+            <DialogTitle className="text-white text-lg font-bold">
               {step === 'property' ? 'Select Property' : 'Select Visit Type'}
             </DialogTitle>
-            <p className="text-slate-300 text-xs mt-1">
+            <p className="text-white text-sm mt-1 opacity-90">
               {step === 'property' ? 'Choose a property to record a visit for' : 'Choose what you\'re recording'}
             </p>
           </div>
