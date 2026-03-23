@@ -102,5 +102,42 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
             </p>
           </div>
         </div>
-  );
-}
+        <div className="p-4 max-h-[70vh] overflow-y-auto">
+          {step === 'property' ? (
+            <div className="space-y-2">
+              {properties.length === 0 ? (
+                <p className="text-center text-slate-500 text-sm py-8">No properties available</p>
+              ) : (
+                properties.map(prop => (
+                  <button
+                    key={prop.id}
+                    onClick={() => handleSelectProperty(prop)}
+                    disabled={creating}
+                    className="w-full text-left p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors disabled:opacity-50"
+                  >
+                    <p className="font-medium text-slate-900">{prop.name || prop.address}</p>
+                    <p className="text-sm text-slate-500">{prop.city}, {prop.state}</p>
+                  </button>
+                ))
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              {VISIT_TYPES.map(({ value, label, icon: Icon, color }) => (
+                <button
+                  key={value}
+                  disabled={creating}
+                  onClick={() => handleSelectVisitType(value)}
+                  className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-colors font-medium text-sm ${color} ${creating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-95'}`}
+                >
+                  <Icon className="h-6 w-6 mb-2" />
+                  <span className="text-center leading-tight">{label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        </DialogContent>
+        </Dialog>
+        );
+        }
