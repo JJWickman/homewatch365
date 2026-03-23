@@ -55,17 +55,17 @@ export default function ApproveFounder() {
         }
       });
 
-      console.log('Raw response:', response);
-      console.log('Response data:', response.data);
+      console.log('Full response:', JSON.stringify(response));
       
-      const data = response.data;
-      if (data && typeof data === 'object' && data.subject && data.body) {
+      const data = response.data || response;
+      console.log('Extracted data:', data);
+      
+      if (data?.subject && data?.body) {
         setSubject(data.subject);
         setBody(data.body);
         setMessage({ type: 'success', text: 'Email generated successfully' });
       } else {
-        console.error('Invalid structure:', data);
-        setMessage({ type: 'error', text: `Failed: Invalid response format. Got: ${JSON.stringify(data)}` });
+        setMessage({ type: 'error', text: `Invalid response: ${JSON.stringify(data)}` });
       }
     } catch (error) {
       console.error('AI error:', error);
