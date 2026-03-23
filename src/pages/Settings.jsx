@@ -514,7 +514,7 @@ ${company.name}
       }
 
       const appUrl = window.location.origin;
-      const roleLabel = member.role === 'field_inspector' ? 'Field Inspector' : 
+      const roleLabel = member.role === 'field_inspector' ? 'Reporter' : 
                        member.role === 'dispatcher' ? 'Dispatcher/Manager' : 'Administrator';
 
       const invitationUrl = `${appUrl}${createPageUrl('InvitationAccept')}?token=${invitation.token}`;
@@ -911,7 +911,7 @@ ${company.name}
                      <div>
                        <Label className="text-sm text-slate-500">Role</Label>
                        <p className="font-medium capitalize">
-                         {companyMember.role === 'field_inspector' ? 'Field Inspector' : 
+                         {companyMember.role === 'field_inspector' ? 'Reporter' : 
                           companyMember.role === 'dispatcher' ? 'Dispatcher/Manager' : 
                           'Administrator'}
                          {companyMember.is_owner && <span className="ml-2 text-amber-600">(Owner)</span>}
@@ -1293,9 +1293,9 @@ ${company.name}
                          <Shield className="h-5 w-5 text-blue-600" title="Admin Access" />
                        )}
                        <Badge variant="outline" className="capitalize">
-                         {member.role === 'field_inspector' ? 'Field Inspector' : 
-                          member.role === 'dispatcher' ? 'Dispatcher/Manager' : 
-                          'Administrator'}
+                         {member.role === 'field_inspector' ? 'Reporter' : 
+                           member.role === 'dispatcher' ? 'Dispatcher/Manager' : 
+                           'Administrator'}
                        </Badge>
                        {member.access_level === 'admin' && (
                          <Badge className="bg-blue-100 text-blue-800 border-blue-200">Admin Access</Badge>
@@ -1611,7 +1611,7 @@ ${company.name}
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="field_inspector">Field Inspector</SelectItem>
+                  <SelectItem value="field_inspector">Reporter</SelectItem>
                   <SelectItem value="dispatcher">Dispatcher/Manager</SelectItem>
                   <SelectItem value="administrator">Administrator</SelectItem>
                 </SelectContent>
@@ -1732,7 +1732,7 @@ ${company.name}
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="field_inspector">Field Inspector</SelectItem>
+                    <SelectItem value="field_inspector">Reporter</SelectItem>
                     <SelectItem value="dispatcher">Dispatcher/Manager</SelectItem>
                     <SelectItem value="administrator">Administrator</SelectItem>
                   </SelectContent>
