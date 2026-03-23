@@ -85,11 +85,7 @@ const AuthenticatedApp = () => {
           <AdminSubscriptions />
         </LayoutWrapper>
       } />
-      <Route path="/ApproveFounder" element={
-        <LayoutWrapper currentPageName="ApproveFounder">
-          <ApproveFounder />
-        </LayoutWrapper>
-      } />
+      <Route path="/ApproveFounder" element={<ApproveFounder />} />
       <Route path="/ClientPortal" element={<ClientPortal />} />
       <Route path="/ClientLogin" element={<ClientLogin />} />
       <Route path="*" element={<PageNotFound />} />
