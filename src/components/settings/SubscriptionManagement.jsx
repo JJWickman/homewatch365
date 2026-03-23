@@ -120,9 +120,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
               }`}
             >
               Annual
-              {billingCycle === 'yearly' && (
-                <Badge className="bg-green-500 text-white text-xs">Save 20%</Badge>
-              )}
+              <Badge className="bg-green-500 text-white text-xs">Save 20%</Badge>
             </button>
           </div>
         </div>
@@ -132,8 +130,10 @@ export default function SubscriptionManagement({ company, companyMember }) {
           {plans.map((plan) => {
             const isCurrent = company.subscription_plan === plan.id;
             const monthlyPrice = plan.prices?.monthly?.amount;
-            const yearlyPrice = plan.prices?.yearly?.amount;
-            const displayPrice = billingCycle === 'monthly' ? monthlyPrice : yearlyPrice;
+            const yearlyTotal = plan.prices?.yearly?.amount;
+            // Show per-month equivalent for annual (total / 12)
+            const yearlyPerMonth = yearlyTotal ? Math.round(yearlyTotal / 12) : null;
+            const displayPrice = billingCycle === 'monthly' ? monthlyPrice : yearlyPerMonth;
             
             return (
               <div
@@ -155,9 +155,14 @@ export default function SubscriptionManagement({ company, companyMember }) {
                 <div className="mb-8">
                   <h3 className="text-2xl font-bold text-slate-900 mb-3">{plan.name}</h3>
                   {displayPrice ? (
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold text-slate-900">${displayPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
-                      <span className="text-slate-600">/mo</span>
+                    <div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-bold text-slate-900">${displayPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                        <span className="text-slate-600">/mo</span>
+                      </div>
+                      {billingCycle === 'yearly' && yearlyTotal && (
+                        <p className="text-sm text-slate-500 mt-1">${yearlyTotal}/yr billed annually</p>
+                      )}
                     </div>
                   ) : (
                     <p className="text-xl font-bold text-slate-900">Custom Pricing</p>
