@@ -67,6 +67,8 @@ export default function PropertyForm() {
   const [newClientData, setNewClientData] = useState({ first_name: '', last_name: '', email: '' });
   const [creatingClient, setCreatingClient] = useState(false);
   const [showContractorSearch, setShowContractorSearch] = useState(false);
+  const [allTags, setAllTags] = useState([]);
+  const [newTag, setNewTag] = useState('');
   
   const validateTimeoutRef = React.useRef(null);
   const autocompleteServiceRef = React.useRef(null);
@@ -81,6 +83,7 @@ export default function PropertyForm() {
     zip: '',
     property_type: 'single_family',
     status: 'seasonal',
+    tags: [],
     square_feet: '',
     bedrooms: '',
     bathrooms: '',
@@ -209,6 +212,11 @@ export default function PropertyForm() {
         setClients(clientsData);
         setStaff(staffData);
         setContractors(contractorsData);
+        
+        // Collect all tags from properties
+        const propertiesData = await base44.entities.Property.filter({ company_id: cId });
+        const tags = Array.from(new Set(propertiesData.flatMap(p => p.tags || [])));
+        setAllTags(tags);
       }
 
       const params = new URLSearchParams(window.location.search);
@@ -262,7 +270,7 @@ export default function PropertyForm() {
             primary_photo_url: p.primary_photo_url || '',
             notes: p.notes || '',
             emergency_contacts: p.emergency_contacts || [],
-            utilities: p.utilities || {}
+             utilities: p.utilities || {}
           });
           
           // Set the street view URL if property has a photo
@@ -1003,11 +1011,98 @@ export default function PropertyForm() {
                      />
                    </div>
                  </div>
-             </div>
-           </CardContent>
-         </Card>
+                 </div>
+                 </CardContent>
+                 </Card>
 
-         {/* Property Photo */}
+                 {/* Tags */}
+                 <Card>
+                 <CardHeader>
+                 <CardTitle className="text-lg">Tags</CardTitle>
+                 </CardHeader>
+                 <CardContent className="space-y-4">
+                 <div className="space-y-3">
+                 {formData.tags.length > 0 && (
+                   <div className="flex flex-wrap gap-2">
+                     {formData.tags.map(tag => (
+                       <div key={tag} className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-lg text-sm">
+                         {tag}
+                         <button
+                           type="button"
+                           onClick={() => setFormData(prev => ({ ...prev, tags: prev.tags.filter(t => t !== tag) }))}
+                           className="text-blue-700 hover:text-blue-900 font-semibold"
+                         >
+                           ×
+                         </button>
+                       </div>
+                     ))}
+                   </div>
+                 )}
+                 </div>
+
+                 <div className="space-y-3 border-t pt-4">
+                 {allTags.length > 0 && (
+                   <div>
+                     <Label className="text-sm">Select from existing tags:</Label>
+                     <div className="flex flex-wrap gap-2 mt-2">
+                       {allTags.filter(t => !formData.tags.includes(t)).map(tag => (
+                         <button
+                           key={tag}
+                           type="button"
+                           onClick={() => setFormData(prev => ({ ...prev, tags: [...prev.tags, tag] }))}
+                           className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm transition-colors"
+                         >
+                           + {tag}
+                         </button>
+                       ))}
+                     </div>
+                   </div>
+                 )}
+
+                 <div>
+                   <Label className="text-sm">Or create a new tag:</Label>
+                   <div className="flex gap-2 mt-2">
+                     <Input
+                       value={newTag}
+                       onChange={(e) => setNewTag(e.target.value)}
+                       placeholder="Tag name..."
+                       className="flex-1"
+                       onKeyPress={(e) => {
+                         if (e.key === 'Enter') {
+                           e.preventDefault();
+                           if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
+                             setFormData(prev => ({ ...prev, tags: [...prev.tags, newTag.trim()] }));
+                             if (!allTags.includes(newTag.trim())) {
+                               setAllTags(prev => [...prev, newTag.trim()]);
+                             }
+                             setNewTag('');
+                           }
+                         }
+                       }}
+                     />
+                     <Button
+                       type="button"
+                       onClick={() => {
+                         if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
+                           setFormData(prev => ({ ...prev, tags: [...prev.tags, newTag.trim()] }));
+                           if (!allTags.includes(newTag.trim())) {
+                             setAllTags(prev => [...prev, newTag.trim()]);
+                           }
+                           setNewTag('');
+                         }
+                       }}
+                       variant="outline"
+                       size="sm"
+                     >
+                       <Plus className="h-4 w-4" />
+                     </Button>
+                   </div>
+                 </div>
+                 </div>
+                 </CardContent>
+                 </Card>
+
+                 {/* Property Photo */}
         {streetViewUrl && (
           <Card>
             <CardHeader>
