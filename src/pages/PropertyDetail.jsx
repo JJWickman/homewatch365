@@ -8,7 +8,7 @@ import {
   Edit, ClipboardCheck, Calendar, Clock, 
   AlertTriangle, CheckCircle2, FileText, Upload, Image, 
   AlertCircle, Circle, Plus, ZoomIn, ZoomOut,
-  Search, Loader2, Globe, Zap
+  Search, Loader2, Globe, Zap, Tag
 } from 'lucide-react';
 import {
   Select,
@@ -86,6 +86,10 @@ export default function PropertyDetail() {
   const [showContractorSearchModal, setShowContractorSearchModal] = useState(false);
   const [allProperties, setAllProperties] = useState([]);
   const [propertyChecklist, setPropertyChecklist] = useState(null);
+  const [allTags, setAllTags] = useState([]);
+  const [propertyTags, setPropertyTags] = useState([]);
+  const [newTag, setNewTag] = useState('');
+  const [savingTags, setSavingTags] = useState(false);
 
   useEffect(() => {
     loadProperty();
@@ -273,6 +277,12 @@ export default function PropertyDetail() {
         // Load property checklist
         const checklistData = await base44.entities.PropertyChecklist.filter({ property_id: id, company_id: companyId, is_active: true });
         if (checklistData.length > 0) setPropertyChecklist(checklistData[0]);
+
+        // Load all tags from all properties in company
+        const allPropertiesData = await base44.entities.Property.filter({ company_id: companyId });
+        const uniqueTags = Array.from(new Set(allPropertiesData.flatMap(p => p.tags || [])));
+        setAllTags(uniqueTags);
+        setPropertyTags(prop.tags || []);
       }
     } catch (error) {
       console.error('Error loading property:', error);
@@ -832,13 +842,14 @@ export default function PropertyDetail() {
           <Tabs defaultValue="access">
             <TabsList className="w-full justify-start mb-4 flex-wrap">
               <TabsTrigger value="access">Access Info</TabsTrigger>
-              <TabsTrigger value="visits">Visits</TabsTrigger>
-              <TabsTrigger value="checklist">Checklist</TabsTrigger>
-              <TabsTrigger value="report">Report</TabsTrigger>
-              <TabsTrigger value="pricing">Pricing</TabsTrigger>
-              <TabsTrigger value="contractors">Contractors</TabsTrigger>
-              <TabsTrigger value="storm">Storm Protection</TabsTrigger>
-              <TabsTrigger value="contacts">Contacts</TabsTrigger>
+                 <TabsTrigger value="visits">Visits</TabsTrigger>
+                 <TabsTrigger value="checklist">Checklist</TabsTrigger>
+                 <TabsTrigger value="report">Report</TabsTrigger>
+                 <TabsTrigger value="pricing">Pricing</TabsTrigger>
+                 <TabsTrigger value="contractors">Contractors</TabsTrigger>
+                 <TabsTrigger value="tags">Tags</TabsTrigger>
+                 <TabsTrigger value="storm">Storm Protection</TabsTrigger>
+                 <TabsTrigger value="contacts">Contacts</TabsTrigger>
             </TabsList>
 
             <TabsContent value="access">
@@ -1303,7 +1314,120 @@ export default function PropertyDetail() {
               <PropertyPricingTab propertyId={property.id} companyId={property.company_id} />
             </TabsContent>
 
-            <TabsContent value="contractors">
+            <TabsContent value="tags">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Tag className="h-5 w-5" />
+                    Tags
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {propertyTags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {propertyTags.map(tag => (
+                          <div key={tag} className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-lg text-sm">
+                            {tag}
+                            <button
+                              onClick={() => setPropertyTags(prev => prev.filter(t => t !== tag))}
+                              className="text-blue-700 hover:text-blue-900 font-bold"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {allTags.length > 0 && (
+                      <div className="p-3 bg-slate-50 rounded-lg">
+                        <p className="text-xs text-slate-600 mb-2 font-medium">Quick add from existing tags:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {allTags.filter(t => !propertyTags.includes(t)).map(tag => (
+                            <button
+                              key={tag}
+                              onClick={() => setPropertyTags(prev => [...prev, tag])}
+                              className="px-2 py-1 rounded-md bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs transition-colors"
+                            >
+                              + {tag}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div>
+                      <p className="text-xs text-slate-600 mb-2 font-medium">Create new tag:</p>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newTag}
+                          onChange={(e) => setNewTag(e.target.value)}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              if (newTag.trim() && !propertyTags.includes(newTag.trim())) {
+                                setPropertyTags(prev => [...prev, newTag.trim()]);
+                                setNewTag('');
+                              }
+                            }
+                          }}
+                          placeholder="Type a new tag..."
+                          className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (newTag.trim() && !propertyTags.includes(newTag.trim())) {
+                              setPropertyTags(prev => [...prev, newTag.trim()]);
+                              setNewTag('');
+                            }
+                          }}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setPropertyTags(property.tags || []);
+                          setNewTag('');
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={async () => {
+                          setSavingTags(true);
+                          try {
+                            await base44.entities.Property.update(property.id, { tags: propertyTags });
+                            setProperty({...property, tags: propertyTags});
+                            setNewTag('');
+                            toast.success('Tags updated successfully');
+                          } catch (error) {
+                            console.error('Error updating tags:', error);
+                            toast.error('Failed to update tags');
+                          } finally {
+                            setSavingTags(false);
+                          }
+                        }}
+                        disabled={savingTags}
+                        className="bg-slate-900 hover:bg-slate-800"
+                      >
+                        {savingTags ? 'Saving...' : 'Save Tags'}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+             <TabsContent value="contractors">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg flex items-center gap-2">
