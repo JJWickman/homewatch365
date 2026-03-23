@@ -55,12 +55,14 @@ export default function ApproveFounder() {
         }
       });
 
-      if (response.data?.subject && response.data?.body) {
-        setSubject(response.data.subject);
-        setBody(response.data.body);
+      const emailData = response.data;
+      if (emailData?.subject && emailData?.body) {
+        setSubject(emailData.subject);
+        setBody(emailData.body);
         setMessage({ type: 'success', text: 'Email generated successfully' });
       } else {
-        setMessage({ type: 'error', text: 'Failed to generate email' });
+        console.error('Invalid response:', emailData);
+        setMessage({ type: 'error', text: 'Failed to generate email — check console' });
       }
     } catch (error) {
       console.error('AI error:', error);
