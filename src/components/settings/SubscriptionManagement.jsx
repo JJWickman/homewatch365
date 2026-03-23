@@ -3,7 +3,46 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Check, Loader2 } from 'lucide-react';
+import { AlertCircle, Check, Loader2, Star } from 'lucide-react';
+
+const PLAN_FEATURES = {
+  solopreneur: {
+    highlight: false,
+    tagline: 'Perfect for solo operators',
+    features: [
+      '1 user account',
+      'Up to 50 properties',
+      'Visit scheduling & checklists',
+      'Client portal access',
+      'Photo reports & PDF exports',
+      'Email notifications',
+    ]
+  },
+  growth: {
+    highlight: true,
+    tagline: 'Most popular for growing teams',
+    features: [
+      'Up to 2 user accounts',
+      'Up to 100 properties',
+      'Everything in Solopreneur',
+      'Route optimizer',
+      'Dispatcher dashboard',
+      'Team scheduling',
+    ]
+  },
+  professional: {
+    highlight: false,
+    tagline: 'For established businesses',
+    features: [
+      'Up to 5 user accounts',
+      'Up to 500 properties',
+      'Everything in Growth',
+      'Advanced reporting',
+      'Priority support',
+      'Custom branding',
+    ]
+  }
+};
 
 export default function SubscriptionManagement({ company, companyMember }) {
   const [changingPlan, setChangingPlan] = useState(false);
@@ -135,25 +174,40 @@ export default function SubscriptionManagement({ company, companyMember }) {
             const yearlyPerMonth = yearlyTotal ? Math.round(yearlyTotal / 12) : null;
             const displayPrice = billingCycle === 'monthly' ? monthlyPrice : yearlyPerMonth;
             
+            const planMeta = PLAN_FEATURES[plan.id] || {};
+            const isHighlighted = planMeta.highlight;
+
             return (
               <div
                 key={plan.id}
-                className={`relative rounded-2xl border-2 p-8 transition-all ${
-                  isCurrent 
-                    ? 'border-green-500 bg-white shadow-lg' 
+                className={`relative rounded-2xl border-2 p-8 transition-all flex flex-col ${
+                  isCurrent
+                    ? 'border-green-500 bg-white shadow-lg'
+                    : isHighlighted
+                    ? 'border-blue-500 bg-white shadow-lg'
                     : 'border-slate-200 hover:border-slate-300 bg-white'
                 }`}
               >
-                {/* Current Plan Badge */}
+                {/* Badges */}
                 {isCurrent && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                     <Badge className="bg-green-500 text-white px-4 py-1">Current Plan</Badge>
                   </div>
                 )}
+                {!isCurrent && isHighlighted && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-blue-500 text-white px-4 py-1 flex items-center gap-1">
+                      <Star className="h-3 w-3 fill-white" /> Most Popular
+                    </Badge>
+                  </div>
+                )}
 
                 {/* Plan Name & Price */}
-                <div className="mb-8">
-                  <h3 className="text-2xl font-bold text-slate-900 mb-3">{plan.name}</h3>
+                <div className="mb-2">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-1">{plan.name}</h3>
+                  {planMeta.tagline && (
+                    <p className="text-sm text-slate-500 mb-4">{planMeta.tagline}</p>
+                  )}
                   {displayPrice ? (
                     <div>
                       <div className="flex items-baseline gap-2">
@@ -169,9 +223,19 @@ export default function SubscriptionManagement({ company, companyMember }) {
                   )}
                 </div>
 
-                {/* Description */}
-                {plan.description && (
-                  <p className="text-sm text-slate-600 mb-8 line-clamp-2">{plan.description}</p>
+                {/* Divider */}
+                <hr className="my-6 border-slate-100" />
+
+                {/* Features */}
+                {planMeta.features && (
+                  <ul className="space-y-3 mb-8 flex-1">
+                    {planMeta.features.map((feature, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                        <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
                 )}
 
                 {/* CTA Button */}
@@ -181,13 +245,14 @@ export default function SubscriptionManagement({ company, companyMember }) {
                   className={`w-full font-semibold py-2.5 transition-all ${
                     isCurrent
                       ? 'bg-slate-100 text-slate-600 cursor-not-allowed'
+                      : isHighlighted
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
                       : 'bg-slate-900 hover:bg-slate-800 text-white'
                   }`}
                 >
                   {changingPlan ? 'Loading...' : isCurrent ? 'Current Plan' : 'Subscribe'}
                 </Button>
 
-                {/* Trial Notice - only show if they haven't completed a trial yet */}
                 {!company?.trial_ends_at && !isCurrent && (
                   <p className="text-xs text-slate-500 text-center mt-4">14-day free trial included</p>
                 )}
