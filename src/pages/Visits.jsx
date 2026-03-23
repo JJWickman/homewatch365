@@ -731,7 +731,7 @@ export default function Visits() {
            className="bg-amber-600 hover:bg-amber-700 text-white"
          >
            <Zap className="w-4 h-4 mr-2" />
-           Check-In Now
+           Record Visit
          </Button>
        </div>
 
