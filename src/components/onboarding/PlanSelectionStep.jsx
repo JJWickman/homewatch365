@@ -1,73 +1,39 @@
 import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Check, ArrowRight, AlertCircle } from 'lucide-react';
+import { Check, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-const PLANS = [
-  {
-    id: 'trial',
-    name: '14-Day Free Trial',
-    description: 'No credit card required',
-    features: ['Full access to all features', 'Unlimited clients & properties', 'No commitment']
-  },
-  {
-    id: 'solopreneur',
-    name: 'Solopreneur - $99/mo',
-    description: 'Perfect for solo operators',
-    features: ['Unlimited clients & properties', 'Inspections & scheduling', 'Follow-ups & tasks']
-  },
-  {
-    id: 'solopreneur_crm',
-    name: 'Solopreneur + CRM - $149/mo',
-    description: 'Solopreneur with marketing tools',
-    features: ['Everything in Solopreneur', 'CRM & Marketing', 'Email campaigns', 'SMS marketing'],
-    badge: 'Bundle'
-  },
-  {
-    id: 'growth',
-    name: 'Growth - $199/mo',
-    description: 'Most popular for growing teams',
-    features: ['Everything in Solopreneur', 'Up to 5 team members', 'Route optimization'],
-    popular: true
-  },
-  {
-    id: 'growth_crm',
-    name: 'Growth + CRM - $248/mo',
-    description: 'Growth with marketing tools',
-    features: ['Everything in Growth', 'CRM & Marketing', 'Email campaigns', 'SMS marketing'],
-    badge: 'Bundle'
-  },
-  {
-    id: 'professional',
-    name: 'Professional - $249/mo',
-    description: 'For larger teams',
-    features: ['Up to 10 team members', '2 admin users', 'Priority support']
-  },
-  {
-    id: 'professional_crm',
-    name: 'Professional + CRM - $299/mo',
-    description: 'Professional with marketing',
-    features: ['Everything in Professional', 'CRM & Marketing', 'Email campaigns', 'SMS marketing'],
-    badge: 'Bundle'
-  },
-  {
-    id: 'enterprise',
-    name: 'Enterprise - $499/mo',
-    description: 'Complete solution',
-    features: ['Up to 50 team members', 'CRM included', 'Contractor management', 'Priority support']
-  }
-];
 
 export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
   const [selectedPlan, setSelectedPlan] = useState('trial');
+  const [plans, setPlans] = useState([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
   const [promoCode, setPromoCode] = useState('');
   const [promoError, setPromoError] = useState('');
   const [promoSuccess, setPromoSuccess] = useState('');
   const [validatingPromo, setValidatingPromo] = useState(false);
+
+  useEffect(() => {
+    loadStripePlans();
+  }, []);
+
+  const loadStripePlans = async () => {
+    try {
+      const response = await base44.functions.invoke('getStripePrices', {});
+      if (response.data?.success && response.data.plans) {
+        // Prepend the free trial option
+        setPlans([{ id: 'trial', name: '14-Day Free Trial', description: 'No credit card required', features: ['Full access to all features', 'Unlimited clients & properties', 'No commitment'] }, ...response.data.plans]);
+      }
+    } catch (e) {
+      console.error('Error loading plans:', e);
+    } finally {
+      setLoadingPlans(false);
+    }
+  };
 
   // Re-validate promo when plan changes
   useEffect(() => {
@@ -116,8 +82,13 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
       </div>
 
       {/* Plan Selection */}
+      {loadingPlans ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {PLANS.map((plan) => (
+        {plans.map((plan) => (
           <button
             key={plan.id}
             onClick={() => setSelectedPlan(plan.id)}
@@ -127,30 +98,25 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
           >
             <Card className={`h-full cursor-pointer ${
               selectedPlan === plan.id ? 'border-blue-500 border-2' : ''
-            } ${plan.badge ? 'border-purple-300' : ''}`}>
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-blue-600 text-white">Most Popular</Badge>
-                </div>
-              )}
-              {plan.badge && !plan.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-purple-600 text-white">{plan.badge}</Badge>
-                </div>
-              )}
+            }`}>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg">{plan.name}</CardTitle>
-                <CardDescription>{plan.description}</CardDescription>
+                {plan.description && <CardDescription>{plan.description}</CardDescription>}
+                {plan.prices?.monthly?.amount && (
+                  <p className="text-2xl font-bold text-slate-900 mt-1">${plan.prices.monthly.amount}<span className="text-sm font-normal text-slate-500">/mo</span></p>
+                )}
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm">
-                      <Check className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                      <span className="text-slate-600">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+                {plan.features && (
+                  <ul className="space-y-2">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm">
+                        <Check className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                        <span className="text-slate-600">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {selectedPlan === plan.id && (
                   <div className="mt-4 p-2 bg-blue-50 rounded border border-blue-200">
                     <p className="text-xs font-semibold text-blue-600">✓ Selected</p>
@@ -161,6 +127,7 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
           </button>
         ))}
       </div>
+      )}
 
       {/* Promo Code Section */}
       <Card className="bg-slate-800 border-slate-700">
