@@ -958,6 +958,13 @@ export default function Visits() {
                     <SelectItem value="followup">Follow-Up</SelectItem>
                     <SelectItem value="pre_storm">Pre-Storm</SelectItem>
                     <SelectItem value="post_storm">Post-Storm</SelectItem>
+                    <SelectItem value="arrival_departure">Arrival/Departure</SelectItem>
+                    <SelectItem value="access_visit">Access Visit</SelectItem>
+                    <SelectItem value="emergency_visit">Emergency Visit</SelectItem>
+                    <SelectItem value="damage_recovery">Damage Recovery</SelectItem>
+                    <SelectItem value="auto_care">Auto Care</SelectItem>
+                    <SelectItem value="client_service">Client Service</SelectItem>
+                    <SelectItem value="concierge">Concierge Service</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
