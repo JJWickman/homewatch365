@@ -1198,55 +1198,8 @@ export default function PropertyDetail() {
                       >
                         <Zap className="h-4 w-4 mr-1" />
                         Record Visit
+                      </Button>
                     )}
-                    <Button 
-                      size="sm" 
-                      onClick={() => navigate(createPageUrl('Visits') + `?action=new&property_id=${property.id}`)}
-                      className="bg-black hover:bg-gray-900 text-white"
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Schedule
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {filteredVisits.length === 0 ? (
-                    <EmptyState
-                      icon={ClipboardCheck}
-                      title="No visits"
-                      description="Schedule your first visit for this property"
-                    />
-                  ) : (
-                    <div className="space-y-6">
-                      {visitsByType.inspection.length > 0 && (
-                        <div>
-                          <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                            <ClipboardCheck className="h-4 w-4 text-blue-600" />
-                            Visits ({visitsByType.inspection.length})
-                          </h4>
-                          <div className="space-y-2">
-                            {visitsByType.inspection.map((visit) => (
-                              <Link
-                                key={visit.id}
-                                to={createPageUrl('InspectionDetail') + `?id=${visit.id}`}
-                                className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors border"
-                              >
-                                <div className="flex items-center gap-3 flex-1">
-                                  <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center">
-                                    <ClipboardCheck className="h-5 w-5 text-slate-500" />
-                                  </div>
-                                  <div className="min-w-0">
-                                    <p className="font-medium text-slate-900">
-                                      {format(new Date(visit.scheduled_date), 'MMM d, yyyy')}
-                                    </p>
-                                    <div className="flex items-center gap-2 text-sm text-slate-500">
-                                      <span className="capitalize">{visit.inspection_type || 'routine'}</span>
-                                      {visit.assigned_to_name && (
-                                        <>
-                                          <span>•</span>
-                                          <span>{visit.assigned_to_name}</span>
-                                        </>
-                                      )}
                                     </div>
                                   </div>
                                 </div>
