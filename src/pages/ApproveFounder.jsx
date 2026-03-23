@@ -44,7 +44,7 @@ export default function ApproveFounder() {
     setMessage(null);
     try {
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are an expert email composer. Write a professional email based on this request:\n\n${aiPrompt}\n\nRespond ONLY with valid JSON (no markdown, no code blocks):\n{\n  "subject": "email subject line",\n  "body": "email body text"\n}`,
+        prompt: `You are an expert email composer. Write a professional email based on this request:\n\nRecipient: ${recipient || 'Not specified'}\n\nRequest: ${aiPrompt}\n\nRespond ONLY with valid JSON (no markdown, no code blocks):\n{\n  "subject": "email subject line",\n  "body": "email body text"\n}`,
         response_json_schema: {
           type: "object",
           properties: {
