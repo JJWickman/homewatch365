@@ -39,10 +39,7 @@ if (memberRole === 'field_inspector' || memberRole === 'technician') {
     { name: 'My Schedule', icon: Calendar, page: 'Schedule' }
   ];
   
-  // Add Route Optimizer for field inspectors if company has growth+ subscription
-  if (['growth', 'growth_crm', 'professional', 'professional_crm', 'enterprise'].includes(subscriptionPlan)) {
-    items.push({ name: 'Route Optimizer', icon: Route, page: 'RouteOptimizer' });
-  }
+
   
   return items;
 }
@@ -55,7 +52,6 @@ const baseItems = [
   { name: 'Visits', icon: ClipboardCheck, page: 'Visits' },
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
   { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
-  { name: 'Route Optimizer', icon: Route, page: 'RouteOptimizer' },
   { name: 'Help & Tutorials', icon: BookOpen, page: 'HelpTutorials' },
   { name: 'AI Assistant', icon: Bot, page: 'AIAssistant' },
 ];
