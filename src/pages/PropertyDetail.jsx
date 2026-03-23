@@ -633,8 +633,7 @@ export default function PropertyDetail() {
             }}
           >
             <Zap className="h-4 w-4 mr-2" />
-            Check-In Now
-          </Button>
+            Record Visit
         )}
         <Button variant="outline" onClick={() => navigate(createPageUrl('PropertyForm') + `?id=${property.id}`)}>
           <Edit className="h-4 w-4 mr-2" />
@@ -1198,8 +1197,7 @@ export default function PropertyDetail() {
                         }}
                       >
                         <Zap className="h-4 w-4 mr-1" />
-                        Check-In Now
-                      </Button>
+                        Record Visit
                     )}
                     <Button 
                       size="sm" 
