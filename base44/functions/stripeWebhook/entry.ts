@@ -61,32 +61,17 @@ Deno.serve(async (req) => {
         if (subscription.status === 'unpaid') status = 'past_due';
         if (subscription.status === 'trialing') status = 'trial';
         
-        // Get the current plan from the subscription items
-        const currentItem = subscription.items.data[0];
-        const priceId = currentItem?.price?.id;
-        
-        // Map price_id to subscription plan (live prices)
-        let subscriptionPlan = 'solopreneur';
-        const prices = {
-          'solopreneur': ['price_1StZzpGwUVhIPcgxL7HiPZEJ', 'price_1StZzpGwUVhIPcgxkMp5kbKe'],
-          'growth': ['price_1StZzpGwUVhIPcgxRSLH94NJ', 'price_1StZzpGwUVhIPcgxZzv8KbYN'],
-          'professional': ['price_1StZzqGwUVhIPcgx5UJRLUfb', 'price_1StZzqGwUVhIPcgxaIaDPAO6'],
-          'enterprise': ['price_1StZzqGwUVhIPcgxOWFkoHih', 'price_1StZzqGwUVhIPcgxpFrillOn']
-        };
-        
-        for (const [plan, priceIds] of Object.entries(prices)) {
-          if (priceIds.includes(priceId)) {
-            subscriptionPlan = plan;
-            break;
-          }
-        }
+        // Use plan from subscription metadata (set at checkout time) — no hardcoded price IDs
+        let subscriptionPlan = subscription.metadata?.subscription_plan || 'solopreneur';
         
         if (companyId) {
+          const hasCrm = subscriptionPlan.includes('_crm') || subscriptionPlan === 'enterprise';
           await base44.asServiceRole.entities.Company.update(companyId, {
             subscription_plan: subscriptionPlan,
             subscription_status: status,
             stripe_subscription_id: subscription.id,
-            trial_ends_at: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null
+            trial_ends_at: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
+            marketing_addon_active: hasCrm
           });
         }
         break;

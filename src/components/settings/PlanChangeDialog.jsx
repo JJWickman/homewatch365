@@ -27,16 +27,34 @@ const PRICING_TIERS = [
     annualPrice: 79,
   },
   {
+    id: 'solopreneur_crm',
+    name: 'Solopreneur + CRM',
+    monthlyPrice: 149,
+    annualPrice: 119,
+  },
+  {
     id: 'growth',
     name: 'Growth',
     monthlyPrice: 199,
     annualPrice: 159,
   },
   {
+    id: 'growth_crm',
+    name: 'Growth + CRM',
+    monthlyPrice: 248,
+    annualPrice: 198,
+  },
+  {
     id: 'professional',
     name: 'Professional',
     monthlyPrice: 249,
     annualPrice: 199,
+  },
+  {
+    id: 'professional_crm',
+    name: 'Professional + CRM',
+    monthlyPrice: 299,
+    annualPrice: 239,
   },
   {
     id: 'enterprise',

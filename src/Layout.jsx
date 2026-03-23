@@ -39,7 +39,7 @@ if (memberRole === 'field_inspector' || memberRole === 'technician') {
   ];
   
   // Add Route Optimizer for field inspectors if company has growth+ subscription
-  if (['growth', 'professional', 'enterprise'].includes(subscriptionPlan)) {
+  if (['growth', 'growth_crm', 'professional', 'professional_crm', 'enterprise'].includes(subscriptionPlan)) {
     items.push({ name: 'Route Optimizer', icon: Route, page: 'RouteOptimizer' });
   }
   
@@ -205,7 +205,7 @@ export default function Layout({ children, currentPageName }) {
 
   const hasMarketingAccess = company?.subscription_plan === 'enterprise' || 
                              company?.marketing_addon_active === true ||
-                             company?.subscription_plan?.endsWith('_crm');
+                             ['solopreneur_crm', 'growth_crm', 'professional_crm'].includes(company?.subscription_plan);
   const isAdminOrOwner = companyMember?.role === 'administrator' || companyMember?.is_owner === true;
 
   let navigationItems = getNavigationItems(company?.subscription_plan, companyMember?.role);
