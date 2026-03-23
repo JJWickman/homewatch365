@@ -32,6 +32,7 @@ const getPageRestrictions = () => {
 const getNavigationItems = (subscriptionPlan, memberRole) => {
 // Field Inspector - limited access (includes backward compatibility for 'technician')
 if (memberRole === 'field_inspector' || memberRole === 'technician') {
+  // Reporter role (formerly field_inspector)
   const items = [
     { name: 'Dashboard', icon: Home, page: 'Dashboard' },
     { name: 'My Visits', icon: ClipboardCheck, page: 'Visits' },
