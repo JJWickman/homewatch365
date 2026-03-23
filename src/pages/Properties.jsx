@@ -5,8 +5,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
   Building2, Search, Plus, MapPin, User, 
-  MoreVertical, Edit, Trash2, Eye, Calendar, CheckCircle2, Clock, AlertCircle
+  MoreVertical, Edit, Trash2, Eye, Calendar, CheckCircle2, Clock, AlertCircle, Tag
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -47,6 +48,9 @@ export default function Properties() {
   const [viewMode, setViewMode] = useViewMode('properties', 'large-tiles');
   const [showMap, setShowMap] = useState(false);
   const [company, setCompany] = useState(null);
+  const [tagEditProperty, setTagEditProperty] = useState(null);
+  const [tagEditTags, setTagEditTags] = useState([]);
+  const [newTag, setNewTag] = useState('');
 
   useEffect(() => {
     loadProperties();
@@ -124,6 +128,21 @@ export default function Properties() {
 
   const allTags = Array.from(new Set(properties.flatMap(p => p.tags || [])));
 
+  const handleSaveTags = async () => {
+    if (!tagEditProperty) return;
+    try {
+      await base44.entities.Property.update(tagEditProperty.id, { tags: tagEditTags });
+      setProperties(prev => prev.map(p => p.id === tagEditProperty.id ? { ...p, tags: tagEditTags } : p));
+      setTagEditProperty(null);
+      setTagEditTags([]);
+      setNewTag('');
+      toast.success('Tags updated');
+    } catch (error) {
+      console.error('Error updating tags:', error);
+      toast.error('Error updating tags');
+    }
+  };
+
   const getVisitStatuses = (propertyId) => {
     const propertyVisits = visits.filter(v => v.property_id === propertyId);
     return {
@@ -169,6 +188,16 @@ export default function Properties() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem 
+                  onClick={() => {
+                    setTagEditProperty(property);
+                    setTagEditTags(property.tags || []);
+                    setNewTag('');
+                  }}
+                >
+                  <Tag className="h-4 w-4 mr-2" />
+                  Tags
+                </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => navigate(createPageUrl('PropertyForm') + `?id=${property.id}`)}
                 >
@@ -473,6 +502,97 @@ export default function Properties() {
       ) : null}
 
       {/* Deactivate Confirmation Dialog */}
+      {/* Tag Management Dialog */}
+      {tagEditProperty && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-sm mx-4">
+            <div className="p-6">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Manage Tags</h2>
+              
+              {tagEditTags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {tagEditTags.map(tag => (
+                    <div key={tag} className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-lg text-sm">
+                      {tag}
+                      <button
+                        onClick={() => setTagEditTags(prev => prev.filter(t => t !== tag))}
+                        className="text-blue-700 hover:text-blue-900 font-semibold"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {allTags.length > 0 && (
+                <div className="mb-4 p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-600 mb-2 font-medium">Available tags:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {allTags.filter(t => !tagEditTags.includes(t)).map(tag => (
+                      <button
+                        key={tag}
+                        onClick={() => setTagEditTags(prev => [...prev, tag])}
+                        className="px-2 py-1 rounded-md bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs transition-colors"
+                      >
+                        + {tag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div className="mb-4">
+                <div className="flex gap-2">
+                  <Input
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="New tag..."
+                    className="flex-1"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (newTag.trim() && !tagEditTags.includes(newTag.trim())) {
+                          setTagEditTags(prev => [...prev, newTag.trim()]);
+                          setNewTag('');
+                        }
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (newTag.trim() && !tagEditTags.includes(newTag.trim())) {
+                        setTagEditTags(prev => [...prev, newTag.trim()]);
+                        setNewTag('');
+                      }
+                    }}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setTagEditProperty(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSaveTags}
+                  className="bg-slate-900 hover:bg-slate-800"
+                >
+                  Save Tags
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <Card className="w-full max-w-sm mx-4">
