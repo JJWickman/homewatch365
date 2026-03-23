@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import ChecklistEditor from './pages/ChecklistEditor';
 import AIAssistant from './pages/AIAssistant';
+import AdminSubscriptions from './pages/AdminSubscriptions';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ClientPortal from './pages/ClientPortal';
@@ -76,6 +77,11 @@ const AuthenticatedApp = () => {
       <Route path="/ChecklistEditor" element={
         <LayoutWrapper currentPageName="ChecklistEditor">
           <ChecklistEditor />
+        </LayoutWrapper>
+      } />
+      <Route path="/AdminSubscriptions" element={
+        <LayoutWrapper currentPageName="AdminSubscriptions">
+          <AdminSubscriptions />
         </LayoutWrapper>
       } />
       <Route path="/ClientPortal" element={<ClientPortal />} />
