@@ -38,20 +38,19 @@ export default function CompanyOnboarding() {
   });
 
   const [propertyData, setPropertyData] = useState({
-        name: '',
-        address: '',
-        city: '',
-        state: '',
-        zip: '',
-        propertyType: 'single_family'
-      });
+    name: '',
+    address: '',
+    city: '',
+    state: '',
+    zip: '',
+    propertyType: 'single_family'
+  });
 
-      const [skipFutureOnboarding, setSkipFutureOnboarding] = useState(false);
+  const [skipFutureOnboarding, setSkipFutureOnboarding] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('trial');
   const [promoCode, setPromoCode] = useState('');
 
   useEffect(() => {
-    // Check if force_restart parameter is present
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('force_restart') === 'true') {
       setCheckingUser(false);
@@ -62,33 +61,29 @@ export default function CompanyOnboarding() {
   }, []);
 
   const checkExistingCompany = async () => {
-        try {
-          const currentUser = await base44.auth.me();
-          setUser(currentUser);
+    try {
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
 
-          // Check if user already has a company
-          const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-          if (members.length > 0) {
-            // User has a company - check if they want to skip onboarding
-            if (currentUser.onboarding_completed === true) {
-              navigate(createPageUrl('Dashboard'));
-              return;
-            }
-            // User has a company but hasn't opted out of onboarding - show success step
-            const companies = await base44.entities.Company.filter({ id: members[0].company_id });
-            if (companies.length > 0) {
-              setCompany(companies[0]);
-            }
-            setStep('complete');
-          }
-        } catch (error) {
-          // User not logged in - redirect to login
-          base44.auth.redirectToLogin(createPageUrl('CompanyOnboarding'));
+      const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
+      if (members.length > 0) {
+        if (currentUser.onboarding_completed === true) {
+          navigate(createPageUrl('Dashboard'));
           return;
-        } finally {
-          setCheckingUser(false);
         }
-      };
+        const companies = await base44.entities.Company.filter({ id: members[0].company_id });
+        if (companies.length > 0) {
+          setCompany(companies[0]);
+        }
+        setStep('complete');
+      }
+    } catch (error) {
+      base44.auth.redirectToLogin(createPageUrl('CompanyOnboarding'));
+      return;
+    } finally {
+      setCheckingUser(false);
+    }
+  };
 
   const handleCreateCompany = async () => {
     if (!user || !companyData.companyName || !companyData.email) {
@@ -97,6 +92,52 @@ export default function CompanyOnboarding() {
     }
     
     console.log('Creating company with plan:', selectedPlan);
+    setLoading(true);
+    try {
+      const newCompany = await base44.entities.Company.create({
+        name: companyData.companyName,
+        slug: companyData.companyName.toLowerCase().replace(/\s+/g, '-'),
+        email: companyData.email,
+        phone: companyData.phone,
+        address: companyData.address,
+        city: companyData.city,
+        state: companyData.state,
+        zip: companyData.zip,
+        subscription_plan: selectedPlan,
+        subscription_status: selectedPlan === 'trial' ? 'trial' : 'active',
+        trial_ends_at: selectedPlan === 'trial' ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() : null
+      });
+
+      await base44.entities.CompanyMember.create({
+        company_id: newCompany.id,
+        user_email: user.email,
+        user_name: user.full_name,
+        role: 'administrator',
+        access_level: 'admin',
+        is_owner: true,
+        is_active: true
+      });
+
+      await base44.auth.updateMe({ company_id: newCompany.id });
+
+      await base44.functions.invoke('seedCompanyTemplates', { data: newCompany });
+
+      setCompany(newCompany);
+      setStep('client');
+    } catch (error) {
+      console.error('Error creating company:', error);
+      toast.error('Failed to create company. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateClient = async () => {
+    if (!company || !clientData.firstName || !clientData.lastName || !clientData.email) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
     setLoading(true);
     try {
       await base44.entities.Client.create({
@@ -111,6 +152,7 @@ export default function CompanyOnboarding() {
       setStep('property');
     } catch (error) {
       console.error('Error creating client:', error);
+      toast.error('Failed to create client. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -121,7 +163,6 @@ export default function CompanyOnboarding() {
     
     setLoading(true);
     try {
-      // Get the client we just created
       const clients = await base44.entities.Client.filter({
         company_id: company.id,
         first_name: clientData.firstName,
@@ -164,7 +205,6 @@ export default function CompanyOnboarding() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-slate-700 mb-4 border-2 border-dashed border-slate-500">
             <ImageIcon className="h-8 w-8 text-slate-400" />
@@ -174,29 +214,26 @@ export default function CompanyOnboarding() {
         </div>
 
         <Card>
-                  {/* Welcome Step - Plan Selection First */}
-                  {step === 'welcome' && (
-                    <div className="px-6 py-8">
-                      <PlanSelectionStep
-                        onContinue={(plan, promo) => {
-                          console.log('Plan selected:', plan);
-                          setSelectedPlan(plan);
-                          setPromoCode(promo);
-                          setStep('company');
-                        }}
-                        onSkip={() => {
-                          console.log('Skipping plan selection');
-                          // Skip to company creation with trial plan
-                          setSelectedPlan('trial');
-                          setStep('company');
-                        }}
-                        isLoading={loading}
-                      />
-                    </div>
-                  )}
+          {step === 'welcome' && (
+            <div className="px-6 py-8">
+              <PlanSelectionStep
+                onContinue={(plan, promo) => {
+                  console.log('Plan selected:', plan);
+                  setSelectedPlan(plan);
+                  setPromoCode(promo);
+                  setStep('company');
+                }}
+                onSkip={() => {
+                  console.log('Skipping plan selection');
+                  setSelectedPlan('trial');
+                  setStep('company');
+                }}
+                isLoading={loading}
+              />
+            </div>
+          )}
 
-                  {/* Company Step */}
-                  {step === 'company' && (
+          {step === 'company' && (
             <>
               <CardHeader>
                 <CardTitle>Step 1: Create Your Company</CardTitle>
@@ -291,7 +328,6 @@ export default function CompanyOnboarding() {
             </>
           )}
 
-          {/* Client Step */}
           {step === 'client' && (
             <>
               <CardHeader>
@@ -343,43 +379,39 @@ export default function CompanyOnboarding() {
                 </div>
 
                 <div className="flex gap-3">
-                   <Button 
-                     onClick={() => setStep('company')}
-                     variant="outline"
-                     className="w-full"
-                     disabled={loading}
-                   >
-                     Back
-                   </Button>
-                   <Button 
-                     onClick={() => {
-                       // Allow skip to dashboard after company creation
-                       setStep('complete');
-                     }}
-                     variant="ghost"
-                     className="text-slate-600 hover:text-slate-700"
-                     disabled={loading}
-                   >
-                     Skip
-                   </Button>
-                   <Button 
-                     onClick={handleCreateClient}
-                     disabled={loading || !clientData.firstName || !clientData.lastName || !clientData.email}
-                     className="w-full bg-slate-900 hover:bg-slate-800"
-                   >
-                     {loading ? (
-                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                     ) : (
-                       <ArrowRight className="h-4 w-4 mr-2" />
-                     )}
-                     {loading ? 'Creating...' : 'Continue'}
-                   </Button>
-                 </div>
+                  <Button 
+                    onClick={() => setStep('company')}
+                    variant="outline"
+                    className="w-full"
+                    disabled={loading}
+                  >
+                    Back
+                  </Button>
+                  <Button 
+                    onClick={() => setStep('complete')}
+                    variant="ghost"
+                    className="text-slate-600 hover:text-slate-700"
+                    disabled={loading}
+                  >
+                    Skip
+                  </Button>
+                  <Button 
+                    onClick={handleCreateClient}
+                    disabled={loading || !clientData.firstName || !clientData.lastName || !clientData.email}
+                    className="w-full bg-slate-900 hover:bg-slate-800"
+                  >
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <ArrowRight className="h-4 w-4 mr-2" />
+                    )}
+                    {loading ? 'Creating...' : 'Continue'}
+                  </Button>
+                </div>
               </CardContent>
             </>
           )}
 
-          {/* Success Step */}
           {step === 'complete' && (
             <>
               <CardHeader>
@@ -390,12 +422,12 @@ export default function CompanyOnboarding() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex justify-center">
-                                        <img 
-                                          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/1552114f9_CongratulationsLeomeme.jpg" 
-                                          alt="Congratulations" 
-                                          className="w-full rounded-lg"
-                                        />
-                                      </div>
+                  <img 
+                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/1552114f9_CongratulationsLeomeme.jpg" 
+                    alt="Congratulations" 
+                    className="w-full rounded-lg"
+                  />
+                </div>
                 <div className="text-center space-y-2">
                   <p className="text-lg font-semibold text-slate-900">You're ready to go!</p>
                   <p className="text-slate-600">Your company, first client, and property have been created. Let's get started managing properties.</p>
@@ -413,24 +445,21 @@ export default function CompanyOnboarding() {
                   </label>
                 </div>
                 <Button 
-                    onClick={async () => {
-                      // Save onboarding preference
-                      if (skipFutureOnboarding && user) {
-                        await base44.auth.updateMe({ onboarding_completed: true });
-                      }
-                      // Force page reload to ensure fresh data
-                      window.location.href = createPageUrl('Dashboard');
-                    }}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white"
-                    size="lg"
-                  >
-                    Take me to the Dashboard
-                  </Button>
+                  onClick={async () => {
+                    if (skipFutureOnboarding && user) {
+                      await base44.auth.updateMe({ onboarding_completed: true });
+                    }
+                    window.location.href = createPageUrl('Dashboard');
+                  }}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  size="lg"
+                >
+                  Take me to the Dashboard
+                </Button>
               </CardContent>
             </>
           )}
 
-          {/* Property Step */}
           {step === 'property' && (
             <>
               <CardHeader>
@@ -504,44 +533,40 @@ export default function CompanyOnboarding() {
                 </div>
 
                 <div className="flex gap-3">
-                   <Button 
-                     onClick={() => setStep('client')}
-                     variant="outline"
-                     className="w-full"
-                     disabled={loading}
-                   >
-                     Back
-                   </Button>
-                   <Button 
-                     onClick={() => {
-                       // Allow skip to dashboard after client creation
-                       setStep('complete');
-                     }}
-                     variant="ghost"
-                     className="text-slate-600 hover:text-slate-700"
-                     disabled={loading}
-                   >
-                     Skip
-                   </Button>
-                   <Button 
-                     onClick={handleCreateProperty}
-                     disabled={loading || !propertyData.address || !propertyData.city || !propertyData.state}
-                     className="w-full bg-slate-900 hover:bg-slate-800"
-                   >
-                     {loading ? (
-                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                     ) : (
-                       <Check className="h-4 w-4 mr-2" />
-                     )}
-                     {loading ? 'Creating...' : 'Complete Onboarding'}
-                   </Button>
-                 </div>
+                  <Button 
+                    onClick={() => setStep('client')}
+                    variant="outline"
+                    className="w-full"
+                    disabled={loading}
+                  >
+                    Back
+                  </Button>
+                  <Button 
+                    onClick={() => setStep('complete')}
+                    variant="ghost"
+                    className="text-slate-600 hover:text-slate-700"
+                    disabled={loading}
+                  >
+                    Skip
+                  </Button>
+                  <Button 
+                    onClick={handleCreateProperty}
+                    disabled={loading || !propertyData.address || !propertyData.city || !propertyData.state}
+                    className="w-full bg-slate-900 hover:bg-slate-800"
+                  >
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Check className="h-4 w-4 mr-2" />
+                    )}
+                    {loading ? 'Creating...' : 'Complete Onboarding'}
+                  </Button>
+                </div>
               </CardContent>
             </>
           )}
         </Card>
 
-        {/* Features */}
         <div className="mt-8 grid grid-cols-2 gap-4 text-center">
           {[
             'Unlimited Properties',
