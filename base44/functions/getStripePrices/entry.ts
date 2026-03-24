@@ -26,7 +26,8 @@ Deno.serve(async (req) => {
         id: planId,
         name: product.name,
         description: product.description,
-        prices: {}
+        prices: {},
+        features: product.metadata?.features ? product.metadata.features.split('|') : []
       };
       
       // Organize prices by interval

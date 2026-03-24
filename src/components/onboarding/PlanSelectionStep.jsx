@@ -25,52 +25,19 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
     try {
       const response = await base44.functions.invoke('getStripePrices', {});
       if (response.data?.success && response.data.plans) {
-        // Prepend the free trial option
-        setPlans([{ id: 'trial', name: '14-Day Free Trial', description: 'No credit card required', features: ['Full access to all features', 'Unlimited clients & properties', 'No commitment'] }, ...response.data.plans]);
+        // Add default features if missing, prepend the free trial option
+        const plansWithFeatures = response.data.plans.map(plan => ({
+          ...plan,
+          features: plan.features || ['Full access', 'Manage clients & properties', 'Mobile inspections']
+        }));
+        setPlans([{ id: 'trial', name: '14-Day Free Trial', description: 'No credit card required', features: ['Full access to all features', 'Unlimited clients & properties', 'No commitment'] }, ...plansWithFeatures]);
+      } else {
+        console.error('Failed to load plans:', response.data);
       }
     } catch (e) {
       console.error('Error loading plans:', e);
     } finally {
       setLoadingPlans(false);
-    }
-  };
-
-  // Re-validate promo when plan changes
-  useEffect(() => {
-    if (promoCode.trim() && promoSuccess) {
-      validatePromoCode();
-    }
-  }, [selectedPlan]);
-
-  const validatePromoCode = async () => {
-    if (!promoCode.trim()) {
-      setPromoError('');
-      setPromoSuccess('');
-      return;
-    }
-
-    setValidatingPromo(true);
-    setPromoError('');
-    setPromoSuccess('');
-
-    try {
-      const response = await fetch(`/functions/validatePromoCode?code=${encodeURIComponent(promoCode)}`);
-      const data = await response.json();
-
-      if (data.valid) {
-        // Check if promo excludes Enterprise and selected plan is Enterprise
-        if (data.excludes_enterprise && selectedPlan === 'enterprise') {
-          setPromoError('This promo code is not valid for Enterprise plan');
-        } else {
-          setPromoSuccess(`✓ ${data.benefit_description || 'Promo code applied!'}`);
-        }
-      } else {
-        setPromoError(data.message || 'Invalid promo code');
-      }
-    } catch (error) {
-      setPromoError('Unable to validate code. Please try again.');
-    } finally {
-      setValidatingPromo(false);
     }
   };
 

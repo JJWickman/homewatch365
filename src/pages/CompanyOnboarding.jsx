@@ -91,112 +91,12 @@ export default function CompanyOnboarding() {
       };
 
   const handleCreateCompany = async () => {
-    if (!user || !companyData.companyName || !companyData.email) return;
-    
-    toast.loading('Setting up your account...\n\nWe\'ll walk you through a 3-step process to create your company, first client, and first property. This should take about 3 minutes.', {
-      duration: 5000
-    });
-    
-    setLoading(true);
-    try {
-      const slug = companyData.companyName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '');
-      
-      const newCompany = await base44.entities.Company.create({
-        name: companyData.companyName,
-        slug: slug + '-' + Date.now().toString(36),
-        email: companyData.email,
-        phone: companyData.phone,
-        address: companyData.address,
-        city: companyData.city,
-        state: companyData.state,
-        zip: companyData.zip,
-        logo_url: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/7e2dc0976_EstateIQFavIcon.png',
-        subscription_plan: selectedPlan === 'trial' ? 'solopreneur' : selectedPlan,
-        subscription_status: 'trial',
-        trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-        is_active: true
-      });
-
-      await base44.entities.CompanyMember.create({
-        company_id: newCompany.id,
-        user_email: user.email,
-        user_name: user.full_name,
-        role: 'administrator',
-        is_owner: true,
-        is_active: true
-      });
-
-      await base44.entities.InspectionTemplate.create({
-        company_id: newCompany.id,
-        name: 'Standard Weekly Inspection',
-        description: 'Default template for routine property inspections',
-        type: 'routine',
-        is_default: true,
-        is_active: true,
-        sections: [
-          {
-            name: 'Exterior',
-            order: 1,
-            items: [
-              { name: 'Front entrance & doors', check_type: 'pass_fail', requires_photo: true, order: 1 },
-              { name: 'Windows & screens', check_type: 'pass_fail', requires_photo: false, order: 2 },
-              { name: 'Landscaping condition', check_type: 'pass_fail', requires_photo: true, order: 3 },
-              { name: 'Pool/spa (if applicable)', check_type: 'pass_fail', requires_photo: true, order: 4 },
-              { name: 'Gutters & drainage', check_type: 'pass_fail', requires_photo: false, order: 5 }
-            ]
-          },
-          {
-            name: 'Interior - Main Areas',
-            order: 2,
-            items: [
-              { name: 'Foyer/entry', check_type: 'pass_fail', requires_photo: true, order: 1 },
-              { name: 'Living areas', check_type: 'pass_fail', requires_photo: true, order: 2 },
-              { name: 'Kitchen appliances', check_type: 'yes_no', requires_photo: false, order: 3 },
-              { name: 'Refrigerator/freezer', check_type: 'pass_fail', requires_photo: false, order: 4 },
-              { name: 'Pest inspection', check_type: 'yes_no', requires_photo: false, order: 5 }
-            ]
-          },
-          {
-            name: 'Systems & Utilities',
-            order: 3,
-            items: [
-              { name: 'HVAC operation', check_type: 'pass_fail', requires_photo: false, order: 1 },
-              { name: 'Thermostat setting', check_type: 'text', requires_photo: false, order: 2 },
-              { name: 'Water heater', check_type: 'pass_fail', requires_photo: false, order: 3 },
-              { name: 'Plumbing - no leaks', check_type: 'yes_no', requires_photo: false, order: 4 },
-              { name: 'Smoke/CO detectors', check_type: 'pass_fail', requires_photo: false, order: 5 }
-            ]
-          }
-        ]
-      });
-
-      // Send welcome email
-      try {
-        await base44.functions.invoke('sendWelcomeEmail', {
-          company_name: newCompany.name,
-          user_email: user.email,
-          user_name: user.full_name
-        });
-      } catch (error) {
-        console.error('Failed to send welcome email:', error);
-        // Don't block onboarding if email fails
-      }
-
-      setCompany(newCompany);
-      setStep('client');
-    } catch (error) {
-      console.error('Error creating company:', error);
-    } finally {
-      setLoading(false);
+    if (!user || !companyData.companyName || !companyData.email) {
+      toast.error('Please fill in required fields');
+      return;
     }
-  };
-
-  const handleCreateClient = async () => {
-    if (!company || !clientData.firstName || !clientData.lastName || !clientData.email) return;
     
+    console.log('Creating company with plan:', selectedPlan);
     setLoading(true);
     try {
       await base44.entities.Client.create({
@@ -279,11 +179,13 @@ export default function CompanyOnboarding() {
                     <div className="px-6 py-8">
                       <PlanSelectionStep
                         onContinue={(plan, promo) => {
+                          console.log('Plan selected:', plan);
                           setSelectedPlan(plan);
                           setPromoCode(promo);
                           setStep('company');
                         }}
                         onSkip={() => {
+                          console.log('Skipping plan selection');
                           // Skip to company creation with trial plan
                           setSelectedPlan('trial');
                           setStep('company');
@@ -291,61 +193,6 @@ export default function CompanyOnboarding() {
                         isLoading={loading}
                       />
                     </div>
-                  )}
-
-                  {/* Old Welcome Step - Removed */}
-                  {step === 'old_welcome' && (
-                    <>
-                      <CardHeader>
-                        <CardTitle className="text-center text-2xl">Welcome to EstateWatch365! 🎉</CardTitle>
-                        <CardDescription className="text-center">
-                          Let's set up your account in 3 simple steps
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-6">
-                        <div className="text-center space-y-4">
-                          <p className="text-slate-600">
-                            We'll guide you through creating your company, adding your first client, and setting up your first property.
-                          </p>
-                          <p className="text-slate-600">
-                            This should take about 3 minutes.
-                          </p>
-                        </div>
-
-                        <div className="space-y-3 bg-slate-50 p-4 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">1</div>
-                            <div>
-                              <p className="font-medium">Create Your Company</p>
-                              <p className="text-sm text-slate-500">Set up your business information</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-semibold">2</div>
-                            <div>
-                              <p className="font-medium">Add Your First Client</p>
-                              <p className="text-sm text-slate-500">Create a client profile</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-semibold">3</div>
-                            <div>
-                              <p className="font-medium">Set Up First Property</p>
-                              <p className="text-sm text-slate-500">Add a property to manage</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <Button 
-                           onClick={() => setStep('plan')}
-                           className="w-full bg-blue-600 hover:bg-blue-700"
-                           size="lg"
-                         >
-                           Get Started
-                           <ArrowRight className="h-4 w-4 ml-2" />
-                         </Button>
-                      </CardContent>
-                    </>
                   )}
 
                   {/* Company Step */}
