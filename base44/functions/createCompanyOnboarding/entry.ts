@@ -58,10 +58,27 @@ Deno.serve(async (req) => {
     // Link user to company
     await base44.auth.updateMe({ company_id: newCompany.id });
 
+    // Fetch price_id for the selected plan if it's paid
+    let price_id = null;
+    if (subscriptionPlan && subscriptionPlan !== 'trial') {
+      try {
+        const stripePricesResponse = await base44.functions.invoke('getStripePrices', {});
+        const plans = stripePricesResponse.data?.plans || [];
+        const selectedPlanData = plans.find(p => p.id === subscriptionPlan);
+        if (selectedPlanData && selectedPlanData.prices?.monthly?.id) {
+          price_id = selectedPlanData.prices.monthly.id;
+        }
+      } catch (e) {
+        console.log('Could not fetch stripe price:', e.message);
+      }
+    }
+
     return Response.json({
       success: true,
       company_id: newCompany.id,
-      company: newCompany
+      company: newCompany,
+      price_id: price_id,
+      subscription_plan: subscriptionPlan
     });
   } catch (error) {
     console.error('Error creating company:', error);

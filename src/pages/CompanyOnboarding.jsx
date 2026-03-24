@@ -28,6 +28,7 @@ export default function CompanyOnboarding() {
   });
 
   const [selectedPlan, setSelectedPlan] = useState('trial');
+  const [promoCode, setPromoCode] = useState('');
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -78,6 +79,23 @@ export default function CompanyOnboarding() {
 
       if (response.data.success) {
         await base44.auth.updateMe({ onboarding_completed: true });
+
+        // If paid plan, redirect to Stripe checkout
+        if (selectedPlan !== 'trial') {
+          const checkoutResponse = await base44.functions.invoke('createCheckoutSession', {
+            price_id: response.data.price_id,
+            company_id: response.data.company_id,
+            subscription_plan: selectedPlan,
+            promo_code: promoCode || undefined
+          });
+
+          if (checkoutResponse.data?.url) {
+            window.location.href = checkoutResponse.data.url;
+            return;
+          }
+        }
+
+        // Trial plan - redirect to dashboard
         toast.success('Company created! Redirecting to dashboard...');
         setTimeout(() => {
           window.location.href = createPageUrl('Dashboard');
@@ -116,8 +134,9 @@ export default function CompanyOnboarding() {
           {step === 'welcome' && (
             <div className="px-6 py-8">
               <PlanSelectionStep
-                onContinue={(plan) => {
+                onContinue={(plan, promo) => {
                   setSelectedPlan(plan);
+                  setPromoCode(promo);
                   setStep('company');
                 }}
                 onSkip={() => {
