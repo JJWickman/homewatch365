@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Info } from 'lucide-react';
+import { MapPin, Info, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function GeofencingSettings({ company, onUpdate }) {
@@ -10,6 +10,19 @@ export default function GeofencingSettings({ company, onUpdate }) {
   const [radius, setRadius] = useState(company?.geofencing_radius_meters || 150);
 
   const handleToggle = async (enabled) => {
+    // Before enabling, check for properties missing coordinates
+    if (enabled) {
+      const properties = await base44.entities.Property.filter({ company_id: company.id, is_active: true });
+      const missing = properties.filter(p => !p.latitude || !p.longitude);
+      if (missing.length > 0) {
+        toast.error(
+          `${missing.length} propert${missing.length === 1 ? 'y is' : 'ies are'} missing GPS coordinates. Use "Geocode All" below before enabling geofencing.`,
+          { duration: 6000 }
+        );
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       await base44.entities.Company.update(company.id, { geofencing_enabled: enabled });
