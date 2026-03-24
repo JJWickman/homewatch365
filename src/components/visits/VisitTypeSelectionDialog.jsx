@@ -46,6 +46,33 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
     setCreating(true);
 
     try {
+      // Check geofencing if enabled for the company
+      const companies = await base44.entities.Company.filter({ id: targetProperty.company_id });
+      const company = companies[0];
+      if (company?.geofencing_enabled && targetProperty.latitude && targetProperty.longitude) {
+        const position = await new Promise((resolve, reject) =>
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 })
+        ).catch(() => null);
+
+        if (!position) {
+          toast.error('Location access is required to record a visit at this property. Please enable GPS and try again.');
+          setCreating(false);
+          return;
+        }
+
+        const result = await base44.functions.invoke('validateVisitLocation', {
+          propertyId: targetProperty.id,
+          userLat: position.coords.latitude,
+          userLon: position.coords.longitude,
+        });
+
+        if (!result.data?.valid) {
+          toast.error(result.data?.message || 'You must be at the property to record a visit.');
+          setCreating(false);
+          return;
+        }
+      }
+
       const propertyChecklist = checklists.find(c => c.property_id === targetProperty.id);
       const visit = await base44.entities.Visit.create({
         company_id: targetProperty.company_id,

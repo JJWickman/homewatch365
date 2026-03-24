@@ -50,6 +50,7 @@ import StripeConnectCard from '@/components/settings/StripeConnectCard';
 import SubscriptionManagement from '@/components/settings/SubscriptionManagement';
 import BillingEmailSection from '@/components/settings/BillingEmailSection';
 import ReviewsTab from '@/components/settings/ReviewsTab';
+import GeofencingSettings from '@/components/settings/GeofencingSettings';
 import { getLimits } from '@/lib/planLimits';
 
 export default function Settings() {
@@ -1358,6 +1359,14 @@ ${company.name}
               </div>
             </CardContent>
           </Card>
+
+          {/* Geofencing */}
+          {company && (
+            <GeofencingSettings
+              company={company}
+              onUpdate={(updated) => setCompany(updated)}
+            />
+          )}
 
           {/* Geocoding Tool */}
           <Card>
