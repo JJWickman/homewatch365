@@ -243,14 +243,16 @@ export default function Layout({ children, currentPageName }) {
           <div className="flex items-center justify-between h-16 px-4 border-b border-blue-800">
           <div className="flex items-center gap-3">
             {company?.logo_url ? (
-              <img src={company.logo_url} alt={company.name} className="h-8 w-8 rounded" />
+              <img src={company.logo_url} alt={company.name} className="h-8 w-8 rounded object-contain bg-white/10" />
             ) : (
-              <div className="h-8 w-8 rounded bg-green-500 flex items-center justify-center">
-                <Building className="h-5 w-5 text-white" />
+              <div className="h-8 w-8 rounded bg-green-500 flex items-center justify-center shrink-0">
+                <span className="text-white font-bold text-sm">
+                  {company?.name ? company.name.charAt(0).toUpperCase() : <Building className="h-5 w-5 text-white" />}
+                </span>
               </div>
             )}
               <span className="font-semibold text-white truncate">
-                {company?.name || 'Estate Watch'}
+                {company?.name || 'My Company'}
               </span>
             </div>
             <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-400">
