@@ -782,6 +782,11 @@ export default function PropertyForm() {
     e.preventDefault();
     if (!companyId || !formData.client_id) return;
 
+    if (!formData.latitude || !formData.longitude) {
+      toast.error('GPS coordinates are required. Please select the address from the autocomplete dropdown or click the validate button to geocode the address.');
+      return;
+    }
+
     setSaving(true);
     try {
       const data = {
