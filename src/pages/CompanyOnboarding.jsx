@@ -91,68 +91,29 @@ export default function CompanyOnboarding() {
       return;
     }
     
-    console.log('Creating company with plan:', selectedPlan);
     setLoading(true);
     try {
-      const newCompany = await base44.entities.Company.create({
-        name: companyData.companyName,
-        slug: companyData.companyName.toLowerCase().replace(/\s+/g, '-'),
+      const response = await base44.functions.invoke('createCompanyOnboarding', {
+        companyName: companyData.companyName,
         email: companyData.email,
         phone: companyData.phone,
         address: companyData.address,
         city: companyData.city,
         state: companyData.state,
         zip: companyData.zip,
-        subscription_plan: selectedPlan,
-        subscription_status: selectedPlan === 'trial' ? 'trial' : 'active',
-        trial_ends_at: selectedPlan === 'trial' ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() : null
+        subscriptionPlan: selectedPlan
       });
 
-      await base44.entities.CompanyMember.create({
-        company_id: newCompany.id,
-        user_email: user.email,
-        user_name: user.full_name,
-        role: 'administrator',
-        access_level: 'admin',
-        is_owner: true,
-        is_active: true
-      });
-
-      await base44.auth.updateMe({ company_id: newCompany.id });
-
-      await base44.functions.invoke('seedCompanyTemplates', { data: newCompany });
-
-      setCompany(newCompany);
-      setStep('client');
+      if (response.data.success) {
+        setCompany(response.data.company);
+        toast.success('Company created! Add your first client.');
+        setStep('client');
+      } else {
+        toast.error(response.data.error || 'Failed to create company');
+      }
     } catch (error) {
       console.error('Error creating company:', error);
       toast.error('Failed to create company. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateClient = async () => {
-    if (!company || !clientData.firstName || !clientData.lastName || !clientData.email) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await base44.entities.Client.create({
-        company_id: company.id,
-        first_name: clientData.firstName,
-        last_name: clientData.lastName,
-        email: clientData.email,
-        phone: clientData.phone,
-        is_active: true
-      });
-
-      setStep('property');
-    } catch (error) {
-      console.error('Error creating client:', error);
-      toast.error('Failed to create client. Please try again.');
     } finally {
       setLoading(false);
     }
