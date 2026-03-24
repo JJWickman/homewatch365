@@ -9,6 +9,19 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // If user already has a company, return it (prevent duplicates)
+    if (user.company_id) {
+      const existingCompany = await base44.asServiceRole.entities.Company.filter({ id: user.company_id });
+      if (existingCompany.length > 0) {
+        return Response.json({
+          success: true,
+          company_id: existingCompany[0].id,
+          company: existingCompany[0],
+          message: 'Company already exists'
+        });
+      }
+    }
+
     const { companyName, email, phone, address, city, state, zip, subscriptionPlan } = await req.json();
 
     if (!companyName || !email) {
