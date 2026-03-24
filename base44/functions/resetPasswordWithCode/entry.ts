@@ -40,25 +40,8 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // Update password via auth
-    const updateResult = await fetch(`${Deno.env.get('BASE44_API_URL')}/auth/reset-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Deno.env.get('BASE44_SERVICE_TOKEN')}`
-      },
-      body: JSON.stringify({
-        email,
-        new_password: newPassword
-      })
-    });
-
-    if (!updateResult.ok) {
-      // Fallback: try using updateMe
-      await base44.auth.updateMe({
-        password: newPassword
-      });
-    }
+    // Update password via auth using SDK
+    await base44.asServiceRole.auth.resetUserPassword(email, newPassword);
 
     // Clear reset code
     await base44.auth.updateMe({

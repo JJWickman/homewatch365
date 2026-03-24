@@ -1,40 +1,35 @@
-/**
- * Backend function: Validates property address using Google Address Validation API
- * This runs securely on the server side with API key protection
- */
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
 
-export async function validatePropertyAddress(req) {
-  const { address, city, state, zip } = req.body;
-  const apiKey = process.env.GOOGLE_ADDRESS_VALIDATION_API_KEY;
-
-  if (!apiKey) {
-    return {
-      valid: false,
-      error: "Address validation service not configured"
-    };
-  }
-
+Deno.serve(async (req) => {
   try {
-    // Google Address Validation API endpoint
-    const url = "https://addressvalidation.googleapis.com/v1:validateAddress";
-    
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { address, city, state, zip } = await req.json();
+    const apiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
+
+    if (!apiKey) {
+      return Response.json({ valid: false, error: 'Address validation service not configured' }, { status: 500 });
+    }
+
+    const url = `https://addressvalidation.googleapis.com/v1:validateAddress?key=${apiKey}`;
+
     const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         address: {
           addressLines: [address],
           administrativeArea: state,
           locality: city,
           postalCode: zip,
-          regionCode: "US"
+          regionCode: 'US'
         }
-      }),
-      searchParams: {
-        key: apiKey
-      }
+      })
     });
 
     if (!response.ok) {
@@ -44,14 +39,12 @@ export async function validatePropertyAddress(req) {
     const data = await response.json();
     const result = data.result;
 
-    // Check if address was validated
-    if (result?.verdict?.validationGranularity === "PREMISE" || 
-        result?.verdict?.validationGranularity === "STREET_ADDRESS") {
-      
+    if (result?.verdict?.validationGranularity === 'PREMISE' ||
+        result?.verdict?.validationGranularity === 'STREET_ADDRESS') {
       const geocode = result.geocode;
       const formattedAddress = result.address?.formattedAddress;
 
-      return {
+      return Response.json({
         valid: true,
         formattedAddress: formattedAddress || `${address}, ${city}, ${state} ${zip}`,
         latitude: geocode?.location?.latitude,
@@ -61,18 +54,15 @@ export async function validatePropertyAddress(req) {
           administrativeArea: result.address?.administrativeArea,
           locality: result.address?.locality
         }
-      };
+      });
     } else {
-      return {
+      return Response.json({
         valid: false,
-        error: "Address could not be fully validated. Please check the address and try again.",
+        error: 'Address could not be fully validated. Please check the address and try again.',
         validationGranularity: result?.verdict?.validationGranularity
-      };
+      });
     }
   } catch (error) {
-    return {
-      valid: false,
-      error: `Address validation error: ${error.message}`
-    };
+    return Response.json({ valid: false, error: `Address validation error: ${error.message}` }, { status: 500 });
   }
-}
+});

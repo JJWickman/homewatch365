@@ -5,9 +5,7 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (user?.email !== 'jasonwi@live.com') {
-      return Response.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+    if (user?.role !== 'admin') {
 
     const { to, subject, body } = await req.json();
 
