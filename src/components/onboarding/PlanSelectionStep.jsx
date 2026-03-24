@@ -41,6 +41,28 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
     }
   };
 
+  const validatePromoCode = async () => {
+    if (!promoCode.trim()) return;
+    
+    setValidatingPromo(true);
+    setPromoError('');
+    setPromoSuccess('');
+    
+    try {
+      const response = await base44.functions.invoke('validatePromoCode', { code: promoCode });
+      if (response.data?.valid) {
+        setPromoSuccess(response.data.description || 'Promo code applied successfully!');
+      } else {
+        setPromoError(response.data?.message || 'Invalid promo code');
+      }
+    } catch (e) {
+      console.error('Error validating promo code:', e);
+      setPromoError('Failed to validate promo code');
+    } finally {
+      setValidatingPromo(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2 mb-8">
