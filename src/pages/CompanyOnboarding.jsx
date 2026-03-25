@@ -97,7 +97,11 @@ export default function CompanyOnboarding() {
       });
 
       if (response.data.success) {
-        await base44.auth.updateMe({ onboarding_completed: true });
+        // Update user with company_id and mark onboarding complete
+        await base44.auth.updateMe({ 
+          company_id: response.data.company_id,
+          onboarding_completed: true 
+        });
 
         // If paid plan, redirect to Stripe checkout
         if (selectedPlan !== 'trial') {
