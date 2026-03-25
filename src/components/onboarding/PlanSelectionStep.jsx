@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -65,7 +64,7 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
     <div className="space-y-6">
       <div className="text-center space-y-2 mb-8">
         <h2 className="text-2xl font-bold text-white">Choose Your Plan</h2>
-        <p className="text-slate-400">Start free or upgrade to a paid plan immediately</p>
+        <p className="text-slate-300">Start free or upgrade to a paid plan immediately</p>
       </div>
 
       {loadingPlans ? (
@@ -79,49 +78,47 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
               key={plan.id}
               onClick={() => setSelectedPlan(plan.id)}
               className={`relative text-left transition-all ${
-                selectedPlan === plan.id ? 'ring-2 ring-blue-500' : ''
+                selectedPlan === plan.id ? 'ring-2 ring-white/80' : ''
               }`}
             >
-              <Card className={`h-full cursor-pointer ${
-                selectedPlan === plan.id ? 'border-blue-500 border-2' : ''
+              <div className={`h-full cursor-pointer rounded-xl p-6 backdrop-blur-xl border transition-all ${
+                selectedPlan === plan.id 
+                  ? 'bg-white/95 border-white/80 shadow-2xl' 
+                  : 'bg-white/70 border-white/40 hover:bg-white/80 hover:border-white/60'
               }`}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">{plan.name}</CardTitle>
-                  {plan.description && <CardDescription>{plan.description}</CardDescription>}
-                  {plan.prices?.monthly?.amount && (
-                    <p className="text-2xl font-bold text-slate-900 mt-1">${plan.prices.monthly.amount}<span className="text-sm font-normal text-slate-500">/mo</span></p>
-                  )}
-                </CardHeader>
-                <CardContent>
+                <h3 className="text-lg font-semibold text-slate-900">{plan.name}</h3>
+                {plan.description && <p className="text-sm text-slate-600 mt-1">{plan.description}</p>}
+                {plan.prices?.monthly?.amount && (
+                  <p className="text-2xl font-bold text-slate-900 mt-2">${plan.prices.monthly.amount}<span className="text-sm font-normal text-slate-600 ml-1">/mo</span></p>
+                )}
+                <div className="mt-4">
                   {plan.features && (
-                    <ul className="space-y-2">
+                    <ul className="space-y-2.5">
                       {plan.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm">
-                          <Check className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                          <span className="text-slate-600">{feature}</span>
+                        <li key={idx} className="flex items-start gap-2.5 text-sm">
+                          <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                          <span className="text-slate-700">{feature}</span>
                         </li>
                       ))}
                     </ul>
                   )}
                   {selectedPlan === plan.id && (
-                    <div className="mt-4 p-2 bg-blue-50 rounded border border-blue-200">
-                      <p className="text-xs font-semibold text-blue-600">✓ Selected</p>
+                    <div className="mt-4 p-2.5 bg-emerald-50/60 rounded-lg border border-emerald-200/50 backdrop-blur-sm">
+                      <p className="text-xs font-semibold text-emerald-700">✓ Selected</p>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </button>
           ))}
         </div>
       )}
 
-      <Card className="bg-slate-800 border-slate-700">
-        <CardHeader>
-          <CardTitle className="text-white text-base">Have a Promo Code?</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
+      <div className="rounded-xl p-6 backdrop-blur-xl bg-white/70 border border-white/40">
+        <h3 className="text-base font-semibold text-slate-900 mb-4">Have a Promo Code?</h3>
+        <div className="space-y-3">
           <div className="space-y-2">
-            <Label htmlFor="promo" className="text-slate-300">Promo Code (Optional)</Label>
+            <Label htmlFor="promo" className="text-slate-700">Promo Code (Optional)</Label>
             <div className="flex gap-2">
               <Input
                 id="promo"
@@ -132,13 +129,12 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
                   setPromoSuccess('');
                 }}
                 placeholder="Enter code"
-                className="bg-slate-700 border-slate-600 text-white"
+                className="backdrop-blur-sm bg-white/70 border-white/40 text-slate-900 placeholder:text-slate-500"
               />
               <Button
                 onClick={handleValidatePromoCode}
-                variant="outline"
                 disabled={!promoCode.trim() || validatingPromo}
-                className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                className="bg-white/80 hover:bg-white/90 text-slate-900 border-0 backdrop-blur-sm"
               >
                 {validatingPromo ? 'Checking...' : 'Apply'}
               </Button>
@@ -156,21 +152,20 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
               <AlertDescription className="text-green-800">{promoSuccess}</AlertDescription>
             </Alert>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <div className="flex gap-3 pt-4">
         <Button
           onClick={onSkip}
-          variant="outline"
-          className="w-full border-slate-600 text-slate-300 hover:bg-slate-800"
+          className="w-full backdrop-blur-sm bg-white/50 hover:bg-white/70 text-slate-900 border-white/40 border"
           disabled={isLoading}
         >
           Skip
         </Button>
         <Button
           onClick={() => onContinue(selectedPlan, promoCode)}
-          className="w-full bg-blue-600 hover:bg-blue-700"
+          className="w-full backdrop-blur-sm bg-white/90 hover:bg-white text-slate-900 shadow-lg"
           disabled={isLoading}
         >
           {isLoading ? 'Loading...' : 'Continue'}
