@@ -30,8 +30,11 @@ const getPageRestrictions = () => {
 };
 
 const getNavigationItems = (subscriptionPlan, memberRole) => {
+// Use a safe default if companyMember doesn't exist
+const role = memberRole || 'administrator';
+
 // Field Inspector - limited access (includes backward compatibility for 'technician')
-if (memberRole === 'field_inspector' || memberRole === 'technician') {
+if (role === 'field_inspector' || role === 'technician') {
   // Reporter role (formerly field_inspector)
   const items = [
     { name: 'Dashboard', icon: Home, page: 'Dashboard' },
@@ -58,7 +61,7 @@ const baseItems = [
 ];
 
 // Only show Billing and Import Data for Administrators
-if (memberRole === 'administrator' || memberRole === 'owner') {
+if (role === 'administrator' || role === 'owner') {
   baseItems.splice(7, 0, { name: 'Billing', icon: DollarSign, page: 'Billing' });
   baseItems.splice(8, 0, { name: 'Import Data', icon: Download, page: 'ImportData' });
 }
@@ -87,15 +90,15 @@ export default function Layout({ children, currentPageName }) {
 
   useEffect(() => {
     // Subscribe to company updates
-    if (companyMember?.company_id) {
+    if (company?.id) {
       const unsubscribe = base44.entities.Company.subscribe((event) => {
-        if (event.type === 'update' && event.id === companyMember.company_id) {
+        if (event.type === 'update' && event.id === company.id) {
           setCompany(event.data);
         }
       });
       return unsubscribe;
     }
-  }, [companyMember?.company_id]);
+  }, [company?.id]);
 
   useEffect(() => {
     // Redirect to subscription if trial has expired
@@ -146,7 +149,8 @@ export default function Layout({ children, currentPageName }) {
         return;
       }
       
-      // Load user's CompanyMember record (role/permissions)
+      // Load user's CompanyMember record (role/permissions) - OPTIONAL
+      // Users can access their tenant via company_id alone; CompanyMember is for team roles
       const members = await base44.entities.CompanyMember.filter({ 
         company_id: currentUser.company_id,
         user_email: currentUser.email 
@@ -154,6 +158,7 @@ export default function Layout({ children, currentPageName }) {
       if (members.length > 0) {
         setCompanyMember(members[0]);
       }
+      // If no CompanyMember record exists, user still has access to their tenant
 
       // Load company details
       const companies = await base44.entities.Company.filter({ id: currentUser.company_id });
