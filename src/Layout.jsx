@@ -305,7 +305,7 @@ export default function Layout({ children, currentPageName }) {
             </Link>
           </div>
 
-          {/* Estate Watch 365 Footer */}
+          {/* Home Watch 365 Footer */}
           <div className="p-4 border-t border-slate-200 bg-white">
             <div className="flex items-center justify-center mb-3">
               <a 
@@ -316,7 +316,7 @@ export default function Layout({ children, currentPageName }) {
               >
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/c534cf318_NewEstateWatchLogo.png" 
-                  alt="Estate Watch 365" 
+                  alt="Home Watch 365" 
                   className="h-20 w-auto object-contain" 
                 />
               </a>
