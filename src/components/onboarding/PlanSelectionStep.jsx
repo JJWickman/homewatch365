@@ -135,9 +135,7 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
               <button
                 key={plan.id}
                 onClick={() => setSelectedPlan(plan.id)}
-                className={`relative text-left transition-all duration-300 group w-full ${
-                  isPopular && selectedPlan !== plan.id ? 'lg:scale-105' : ''
-                }`}
+                className={`relative text-left transition-all duration-300 group w-full h-full flex flex-col`}
               >
                 {isPopular && selectedPlan !== plan.id && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shadow-lg">
