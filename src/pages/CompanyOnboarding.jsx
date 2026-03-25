@@ -142,13 +142,7 @@ export default function CompanyOnboarding() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-          {company?.logo_url ? (
-            <img src={company.logo_url} alt={company.name} className="h-16 w-16 rounded-2xl object-contain mx-auto mb-4 bg-white" />
-          ) : (
-            <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-slate-700 mb-4 border-2 border-dashed border-slate-500">
-              <ImageIcon className="h-8 w-8 text-slate-400" />
-            </div>
-          )}
+          <img src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/26b3196de_image.png" alt="Base44" className="h-16 w-16 rounded-2xl object-contain mx-auto mb-4 bg-white" />
           <h1 className="text-2xl font-bold text-white">{company?.name || 'Estate Watch 365'}</h1>
           <p className="text-slate-400 mt-1">Property Management Platform</p>
         </div>
