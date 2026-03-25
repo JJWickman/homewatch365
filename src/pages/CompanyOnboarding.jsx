@@ -143,27 +143,11 @@ export default function CompanyOnboarding() {
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
           <img src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/26b3196de_image.png" alt="Base44" className="h-16 w-16 rounded-2xl object-contain mx-auto mb-4 bg-white" />
-          <h1 className="text-2xl font-bold text-white">{company?.name || 'Estate Watch 365'}</h1>
+          <h1 className="text-2xl font-bold text-white">Estate Watch 365</h1>
           <p className="text-slate-400 mt-1">Property Management Platform</p>
         </div>
 
-        <Card>
-          {step === 'welcome' && (
-            <div className="px-6 py-8">
-              <PlanSelectionStep
-                onContinue={(plan, promo) => {
-                  setSelectedPlan(plan);
-                  setPromoCode(promo);
-                  setStep('company');
-                }}
-                onSkip={() => {
-                  setSelectedPlan('trial');
-                  setStep('company');
-                }}
-                isLoading={loading}
-              />
-            </div>
-          )}
+        <Card className="backdrop-blur-xl bg-white/90 border-white/30 shadow-2xl">
 
           {step === 'company' && (
             <>
