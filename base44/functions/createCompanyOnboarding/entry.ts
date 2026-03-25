@@ -28,20 +28,29 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Company name and email are required' }, { status: 400 });
     }
 
-    // Check if user already has a company via CompanyMember record
-    const existingMembers = await base44.asServiceRole.entities.CompanyMember.filter({ user_email: user.email });
-    if (existingMembers.length > 0) {
-      const existingCompany = await base44.asServiceRole.entities.Company.filter({ id: existingMembers[0].company_id });
-      if (existingCompany.length > 0) {
-        // User already has a company - return it
-        return Response.json({
-          success: true,
-          company_id: existingCompany[0].id,
-          company: existingCompany[0],
-          price_id: null,
-          subscription_plan: existingCompany[0].subscription_plan,
-          message: 'User already has an existing company'
-        });
+    // Ensure user has a CompanyMember record for their company
+    if (user.company_id) {
+      const existingMembers = await base44.asServiceRole.entities.CompanyMember.filter({ user_email: user.email });
+      if (existingMembers.length === 0) {
+        // User has company_id but no CompanyMember - create it
+        const company = await base44.asServiceRole.entities.Company.filter({ id: user.company_id });
+        if (company.length > 0) {
+          await base44.asServiceRole.entities.CompanyMember.create({
+            company_id: user.company_id,
+            user_email: user.email,
+            user_name: user.full_name,
+            role: 'administrator',
+            access_level: 'admin',
+            is_owner: true,
+            is_active: true
+          });
+          return Response.json({
+            success: true,
+            company_id: company[0].id,
+            company: company[0],
+            message: 'CompanyMember record created for existing company'
+          });
+        }
       }
     }
 
