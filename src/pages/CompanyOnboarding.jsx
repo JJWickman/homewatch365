@@ -12,7 +12,7 @@ import PlanSelectionStep from '@/components/onboarding/PlanSelectionStep';
 
 export default function CompanyOnboarding() {
   const navigate = useNavigate();
-  const [step, setStep] = useState('welcome');
+  const [step, setStep] = useState('plan');
   const [loading, setLoading] = useState(false);
   const [checkingUser, setCheckingUser] = useState(true);
   const [user, setUser] = useState(null);
