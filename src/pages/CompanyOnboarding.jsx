@@ -148,11 +148,25 @@ export default function CompanyOnboarding() {
         </div>
 
         <Card className="backdrop-blur-xl bg-white/90 border-white/30 shadow-2xl">
+          {step === 'plan' && (
+            <PlanSelectionStep 
+              onContinue={(plan, promo) => {
+                setSelectedPlan(plan);
+                setPromoCode(promo);
+                setStep('company');
+              }}
+              onSkip={() => {
+                setSelectedPlan('trial');
+                setStep('company');
+              }}
+              isLoading={loading}
+            />
+          )}
 
           {step === 'company' && (
             <>
               <CardHeader>
-                <CardTitle>Create Your Company</CardTitle>
+                <CardTitle className="text-xl">Create Your Company</CardTitle>
                 <CardDescription>
                   Set up your estate management business
                 </CardDescription>
