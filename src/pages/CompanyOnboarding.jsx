@@ -166,11 +166,10 @@ export default function CompanyOnboarding() {
           )}
 
           {step === 'company' && (
-            <div className="p-6">
-            <>
-              <h2 className="text-2xl font-bold text-white mb-2">Create Your Company</h2>
-              <p className="text-blue-200 text-sm mb-6">Set up your estate management business</p>
-              <div className="space-y-4">
+           <div className="p-6">
+             <h2 className="text-2xl font-bold text-white mb-2">Create Your Company</h2>
+             <p className="text-blue-200 text-sm mb-6">Set up your estate management business</p>
+             <div className="space-y-4">
                 <div>
                   <Label htmlFor="companyName" className="text-white">Company Name <span className="text-red-400">*</span></Label>
                   <Input
