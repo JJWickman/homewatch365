@@ -62,9 +62,9 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
 
   return (
     <div className="space-y-8">
-      <div className="text-center space-y-3 mb-10">
-        <h2 className="text-4xl font-black text-white bg-clip-text">Choose Your Plan</h2>
-        <p className="text-slate-300 text-lg">Start free or upgrade to a paid plan immediately</p>
+      <div className="text-center space-y-2 sm:space-y-3 mb-6 sm:mb-10">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white bg-clip-text">Choose Your Plan</h2>
+        <p className="text-slate-300 text-sm sm:text-base lg:text-lg">Start free or upgrade to a paid plan immediately</p>
       </div>
 
       {loadingPlans ? (
@@ -106,7 +106,7 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
               <button
                 key={plan.id}
                 onClick={() => setSelectedPlan(plan.id)}
-                className={`relative text-left transition-all duration-300 group h-full w-full ${
+                className={`relative text-left transition-all duration-300 group h-full w-full flex flex-col ${
                   isPopular && selectedPlan !== plan.id ? 'lg:scale-105' : ''
                 }`}
               >
@@ -116,7 +116,7 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
                   </div>
                 )}
                 <div
-                  className={`h-full cursor-pointer rounded-2xl p-8 backdrop-blur-xl border-2 transition-all duration-300 relative overflow-hidden group-hover:shadow-2xl ${
+                  className={`h-full cursor-pointer rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 backdrop-blur-xl border-2 transition-all duration-300 relative overflow-hidden group-hover:shadow-2xl ${
                     selectedPlan === plan.id
                       ? `bg-gradient-to-br ${bgGradient[plan.id]} to-white/10 ${borderColors[plan.id]} shadow-2xl`
                       : `bg-gradient-to-br ${bgGradient[plan.id]} to-white/5 ${borderColors[plan.id]} hover:to-white/10 hover:shadow-xl`
@@ -128,9 +128,9 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
                   {/* Content */}
                   <div className="relative z-10 flex flex-col h-full">
                     {/* Header */}
-                    <div className="flex items-start justify-between mb-6">
-                      <div className={`p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 group-hover:bg-white/20 transition-all`}>
-                        <Icon className={`h-6 w-6 ${accentColors[plan.id]}`} />
+                    <div className="flex items-start justify-between mb-4 sm:mb-6">
+                      <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 group-hover:bg-white/20 transition-all`}>
+                        <Icon className={`h-5 sm:h-6 w-5 sm:w-6 ${accentColors[plan.id]}`} />
                       </div>
                       {selectedPlan === plan.id && (
                         <div className="bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full p-1.5 shadow-lg">
@@ -140,34 +140,34 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
                     </div>
 
                     {/* Plan name and description */}
-                    <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white mb-1 sm:mb-2 leading-tight">{plan.name}</h3>
                     {plan.description && (
-                      <p className="text-sm text-slate-300 mb-6 opacity-90">{plan.description}</p>
+                      <p className="text-xs sm:text-sm text-slate-300 mb-4 sm:mb-6 opacity-90 leading-relaxed">{plan.description}</p>
                     )}
 
                     {/* Pricing */}
-                    <div className="mb-8">
+                    <div className="mb-6 sm:mb-8">
                       <div className="flex items-baseline gap-1">
                         {plan.prices?.monthly?.amount ? (
                           <>
-                            <span className="text-5xl font-bold text-white">${plan.prices.monthly.amount}</span>
-                            <span className="text-slate-400 font-medium">/month</span>
+                            <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">${plan.prices.monthly.amount}</span>
+                            <span className="text-xs sm:text-sm text-slate-400 font-medium">/month</span>
                           </>
                         ) : (
-                          <span className="text-5xl font-bold text-white">Free</span>
+                          <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">Free</span>
                         )}
                       </div>
                     </div>
 
                     {/* Features */}
                     {plan.features && (
-                      <ul className="space-y-3 flex-1 mb-6">
+                      <ul className="space-y-2 sm:space-y-3 flex-1 mb-4 sm:mb-6">
                         {plan.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-start gap-3 group/item">
-                            <div className="mt-1">
-                              <Check className="h-4 w-4 text-emerald-400 group-hover/item:scale-110 transition-transform" />
+                          <li key={idx} className="flex items-start gap-2 sm:gap-3 group/item">
+                            <div className="mt-0.5 flex-shrink-0">
+                              <Check className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-emerald-400 group-hover/item:scale-110 transition-transform" />
                             </div>
-                            <span className="text-slate-200 font-medium text-sm leading-relaxed">{feature}</span>
+                            <span className="text-slate-200 font-medium text-xs sm:text-sm leading-snug">{feature}</span>
                           </li>
                         ))}
                       </ul>
@@ -176,7 +176,7 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
                     {/* CTA Button */}
                     <div className="mt-auto">
                       {selectedPlan === plan.id && (
-                        <div className="bg-gradient-to-r from-emerald-500/20 to-emerald-400/10 border border-emerald-400/50 rounded-lg p-3 backdrop-blur-sm">
+                        <div className="bg-gradient-to-r from-emerald-500/20 to-emerald-400/10 border border-emerald-400/50 rounded-lg p-2 sm:p-3 backdrop-blur-sm">
                           <p className="text-xs font-bold text-emerald-300">✓ Selected</p>
                         </div>
                       )}
