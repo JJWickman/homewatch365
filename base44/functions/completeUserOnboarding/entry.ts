@@ -5,8 +5,8 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const { email, company_id } = await req.json();
 
-    if (!email) {
-      return Response.json({ error: 'Email is required' }, { status: 400 });
+    if (!email || !company_id) {
+      return Response.json({ error: 'Email and company_id are required' }, { status: 400 });
     }
 
     // Find the user by email
@@ -15,8 +15,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Update user with onboarding_completed and company_id via auth API
-    await base44.auth.updateMe({ onboarding_completed: true, company_id });
+    const user = users[0];
+
+    // Update user via service role to set both fields
+    await base44.asServiceRole.entities.User.update(user.id, { 
+      onboarding_completed: true, 
+      company_id: company_id
+    });
 
     return Response.json({ 
       success: true, 
