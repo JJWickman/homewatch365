@@ -140,7 +140,7 @@ export default function CompanyOnboarding() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-6xl">
         <div className="text-center mb-8">
           <img src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/26b3196de_image.png" alt="Base44" className="h-16 w-16 rounded-2xl object-contain mx-auto mb-4 bg-white" />
           <h1 className="text-3xl font-bold text-white">Home Watch 365</h1>
@@ -149,7 +149,7 @@ export default function CompanyOnboarding() {
 
         <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl overflow-hidden">
           {step === 'plan' && (
-            <div className="p-6">
+            <div className="p-6 lg:p-8">
             <PlanSelectionStep 
               onContinue={(plan, promo) => {
                 setSelectedPlan(plan);
@@ -166,7 +166,7 @@ export default function CompanyOnboarding() {
           )}
 
           {step === 'company' && (
-           <div className="p-6">
+           <div className="p-6 lg:p-8 max-w-2xl mx-auto">
              <h2 className="text-2xl font-bold text-white mb-2">Create Your Company</h2>
              <p className="text-blue-200 text-sm mb-6">Set up your estate management business</p>
              <div className="space-y-4">
