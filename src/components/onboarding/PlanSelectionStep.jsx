@@ -72,7 +72,7 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
           <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 auto-rows-fr">
           {plans.map((plan) => {
             const isPopular = plan.id === 'growth';
             const iconMap = { trial: Gift, solopreneur: Zap, growth: Rocket, professional: Crown };
@@ -106,7 +106,7 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
               <button
                 key={plan.id}
                 onClick={() => setSelectedPlan(plan.id)}
-                className={`relative text-left transition-all duration-300 group h-full w-full flex flex-col ${
+                className={`relative text-left transition-all duration-300 group w-full ${
                   isPopular && selectedPlan !== plan.id ? 'lg:scale-105' : ''
                 }`}
               >
@@ -116,14 +116,14 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
                   </div>
                 )}
                 <div
-                  className={`h-full cursor-pointer rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 backdrop-blur-xl border-2 transition-all duration-300 relative overflow-hidden group-hover:shadow-2xl ${
+                  className={`cursor-pointer rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 backdrop-blur-xl border-2 transition-all duration-300 relative overflow-visible group-hover:shadow-2xl flex flex-col h-full ${
                     selectedPlan === plan.id
                       ? `bg-gradient-to-br ${bgGradient[plan.id]} to-white/10 ${borderColors[plan.id]} shadow-2xl`
                       : `bg-gradient-to-br ${bgGradient[plan.id]} to-white/5 ${borderColors[plan.id]} hover:to-white/10 hover:shadow-xl`
                   }`}
                 >
                   {/* Gradient background */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${gradients[plan.id]} pointer-events-none opacity-60`} />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${gradients[plan.id]} pointer-events-none opacity-60 rounded-xl sm:rounded-2xl`} />
                   
                   {/* Content */}
                   <div className="relative z-10 flex flex-col h-full">
@@ -140,9 +140,9 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
                     </div>
 
                     {/* Plan name and description */}
-                    <h3 className="text-xl sm:text-2xl font-bold text-white mb-1 sm:mb-2 leading-tight">{plan.name}</h3>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white mb-1 sm:mb-2 leading-tight whitespace-normal break-words">{plan.name}</h3>
                     {plan.description && (
-                      <p className="text-xs sm:text-sm text-slate-300 mb-4 sm:mb-6 opacity-90 leading-relaxed">{plan.description}</p>
+                      <p className="text-xs sm:text-sm text-slate-300 mb-4 sm:mb-6 opacity-90 leading-relaxed whitespace-normal">{plan.description}</p>
                     )}
 
                     {/* Pricing */}
@@ -161,13 +161,13 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
 
                     {/* Features */}
                     {plan.features && (
-                      <ul className="space-y-2 sm:space-y-3 flex-1 mb-4 sm:mb-6">
+                      <ul className="space-y-2 sm:space-y-3 flex-1 mb-4 sm:mb-6 min-h-0">
                         {plan.features.map((feature, idx) => (
                           <li key={idx} className="flex items-start gap-2 sm:gap-3 group/item">
-                            <div className="mt-0.5 flex-shrink-0">
+                            <div className="mt-0.5 flex-shrink-0 pt-0.5">
                               <Check className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-emerald-400 group-hover/item:scale-110 transition-transform" />
                             </div>
-                            <span className="text-slate-200 font-medium text-xs sm:text-sm leading-snug">{feature}</span>
+                            <span className="text-slate-200 font-medium text-xs sm:text-sm leading-snug whitespace-normal break-words">{feature}</span>
                           </li>
                         ))}
                       </ul>
