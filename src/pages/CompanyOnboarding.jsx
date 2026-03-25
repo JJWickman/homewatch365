@@ -139,16 +139,17 @@ export default function CompanyOnboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
           <img src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/26b3196de_image.png" alt="Base44" className="h-16 w-16 rounded-2xl object-contain mx-auto mb-4 bg-white" />
-          <h1 className="text-2xl font-bold text-white">Home Watch 365</h1>
-          <p className="text-slate-400 mt-1">Partners in Your Successful Home Watch Business</p>
+          <h1 className="text-3xl font-bold text-white">Home Watch 365</h1>
+          <p className="text-blue-200 mt-1">Partners in Your Successful Home Watch Business</p>
         </div>
 
-        <Card className="backdrop-blur-xl bg-white/90 border-white/30 shadow-2xl">
+        <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl overflow-hidden">
           {step === 'plan' && (
+            <div className="p-6">
             <PlanSelectionStep 
               onContinue={(plan, promo) => {
                 setSelectedPlan(plan);
@@ -161,99 +162,104 @@ export default function CompanyOnboarding() {
               }}
               isLoading={loading}
             />
+            </div>
           )}
 
           {step === 'company' && (
+            <div className="p-6">
             <>
-              <CardHeader>
-                <CardTitle className="text-xl">Create Your Company</CardTitle>
-                <CardDescription>
-                  Set up your estate management business
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+              <h2 className="text-2xl font-bold text-white mb-2">Create Your Company</h2>
+              <p className="text-blue-200 text-sm mb-6">Set up your estate management business</p>
+              <div className="space-y-4">
                 <div>
-                  <Label htmlFor="companyName">Company Name <span className="text-red-500">*</span></Label>
+                  <Label htmlFor="companyName" className="text-white">Company Name <span className="text-red-400">*</span></Label>
                   <Input
                     id="companyName"
                     value={companyData.companyName}
                     onChange={(e) => setCompanyData(prev => ({ ...prev, companyName: e.target.value }))}
                     placeholder="Your Company Name"
+                    className="backdrop-blur-sm bg-white/10 border-white/20 text-white placeholder:text-white/40"
                     required
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="email">Company Email <span className="text-red-500">*</span></Label>
+                  <Label htmlFor="email" className="text-white">Company Email <span className="text-red-400">*</span></Label>
                   <Input
                     id="email"
                     type="email"
                     value={companyData.email}
                     onChange={(e) => setCompanyData(prev => ({ ...prev, email: e.target.value }))}
                     placeholder="info@company.com"
+                    className="backdrop-blur-sm bg-white/10 border-white/20 text-white placeholder:text-white/40"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="phone">Business Phone</Label>
+                  <Label htmlFor="phone" className="text-white">Business Phone</Label>
                   <Input
                     id="phone"
                     value={companyData.phone}
                     onChange={(e) => setCompanyData(prev => ({ ...prev, phone: e.target.value }))}
                     placeholder="(555) 123-4567"
+                    className="backdrop-blur-sm bg-white/10 border-white/20 text-white placeholder:text-white/40"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="address">Address</Label>
+                  <Label htmlFor="address" className="text-white">Address</Label>
                   <Input
                     id="address"
                     value={companyData.address}
                     onChange={(e) => setCompanyData(prev => ({ ...prev, address: e.target.value }))}
                     placeholder="123 Main St"
+                    className="backdrop-blur-sm bg-white/10 border-white/20 text-white placeholder:text-white/40"
                   />
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <Label htmlFor="city">City</Label>
+                    <Label htmlFor="city" className="text-white">City</Label>
                     <Input
                       id="city"
                       value={companyData.city}
                       onChange={(e) => setCompanyData(prev => ({ ...prev, city: e.target.value }))}
+                      className="backdrop-blur-sm bg-white/10 border-white/20 text-white placeholder:text-white/40"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="state">State</Label>
+                    <Label htmlFor="state" className="text-white">State</Label>
                     <Input
                       id="state"
                       value={companyData.state}
                       onChange={(e) => setCompanyData(prev => ({ ...prev, state: e.target.value }))}
+                      className="backdrop-blur-sm bg-white/10 border-white/20 text-white placeholder:text-white/40"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="zip">ZIP</Label>
+                    <Label htmlFor="zip" className="text-white">ZIP</Label>
                     <Input
                       id="zip"
                       value={companyData.zip}
                       onChange={(e) => setCompanyData(prev => ({ ...prev, zip: e.target.value }))}
+                      className="backdrop-blur-sm bg-white/10 border-white/20 text-white placeholder:text-white/40"
                     />
                   </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex gap-3 pt-2">
                   <Button 
-                    onClick={() => setStep('welcome')}
-                    variant="outline"
+                    onClick={() => setStep('plan')}
                     disabled={loading}
-                    className="w-full"
+                    className="w-full backdrop-blur-sm bg-white/20 hover:bg-white/30 text-white border border-white/30"
+                    variant="outline"
                   >
                     Back
                   </Button>
                   <Button 
                     onClick={handleCreateCompany}
                     disabled={loading || !companyData.companyName || !companyData.email}
-                    className="w-full bg-slate-900 hover:bg-slate-800"
+                    className="w-full backdrop-blur-sm bg-green-500 hover:bg-green-600 text-white shadow-lg"
                   >
                     {loading ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -263,10 +269,10 @@ export default function CompanyOnboarding() {
                     {loading ? 'Creating...' : 'Create Company'}
                   </Button>
                 </div>
-              </CardContent>
-            </>
+              </div>
+            </div>
           )}
-        </Card>
+        </div>
       </div>
     </div>
   );
