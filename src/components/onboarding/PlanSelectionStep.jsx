@@ -146,14 +146,18 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
                     )}
 
                     {/* Pricing */}
-                    {plan.prices?.monthly?.amount && (
-                      <div className="mb-8">
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-5xl font-bold text-white">${plan.prices.monthly.amount}</span>
-                          <span className="text-slate-400 font-medium">/month</span>
-                        </div>
+                    <div className="mb-8">
+                      <div className="flex items-baseline gap-1">
+                        {plan.prices?.monthly?.amount ? (
+                          <>
+                            <span className="text-5xl font-bold text-white">${plan.prices.monthly.amount}</span>
+                            <span className="text-slate-400 font-medium">/month</span>
+                          </>
+                        ) : (
+                          <span className="text-5xl font-bold text-white">Free</span>
+                        )}
                       </div>
-                    )}
+                    </div>
 
                     {/* Features */}
                     {plan.features && (
