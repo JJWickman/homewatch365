@@ -16,7 +16,9 @@ export default function CompanyOnboarding() {
   const [loading, setLoading] = useState(false);
   const [checkingUser, setCheckingUser] = useState(true);
   const [user, setUser] = useState(null);
-  
+  const [company, setCompany] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState('trial');
+  const [promoCode, setPromoCode] = useState('');
   const [companyData, setCompanyData] = useState({
     companyName: '',
     email: '',
@@ -26,9 +28,6 @@ export default function CompanyOnboarding() {
     state: '',
     zip: ''
   });
-
-  const [selectedPlan, setSelectedPlan] = useState('trial');
-  const [promoCode, setPromoCode] = useState('');
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -45,6 +44,12 @@ export default function CompanyOnboarding() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
+      // Load company data from app settings
+      const companies = await base44.entities.Company.list('-updated_date', 1);
+      if (companies.length > 0) {
+        setCompany(companies[0]);
+      }
+
       const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
       if (members.length > 0 && currentUser.onboarding_completed === true) {
         navigate(createPageUrl('Dashboard'));
@@ -53,12 +58,15 @@ export default function CompanyOnboarding() {
 
       // If user has a company with a paid plan, skip plan selection and go to company form
       if (members.length > 0 && currentUser.company_id) {
-        const companies = await base44.entities.Company.filter({ id: currentUser.company_id });
-        if (companies.length > 0 && companies[0].subscription_plan && companies[0].subscription_plan !== 'trial') {
-          setSelectedPlan(companies[0].subscription_plan);
-          setStep('company');
-          setCheckingUser(false);
-          return;
+        const userCompanies = await base44.entities.Company.filter({ id: currentUser.company_id });
+        if (userCompanies.length > 0) {
+          setCompany(userCompanies[0]);
+          if (userCompanies[0].subscription_plan && userCompanies[0].subscription_plan !== 'trial') {
+            setSelectedPlan(userCompanies[0].subscription_plan);
+            setStep('company');
+            setCheckingUser(false);
+            return;
+          }
         }
       }
     } catch (error) {
@@ -134,10 +142,14 @@ export default function CompanyOnboarding() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-slate-700 mb-4 border-2 border-dashed border-slate-500">
-            <ImageIcon className="h-8 w-8 text-slate-400" />
-          </div>
-          <h1 className="text-2xl font-bold text-white">Estate Watch 365</h1>
+          {company?.logo_url ? (
+            <img src={company.logo_url} alt={company.name} className="h-16 w-16 rounded-2xl object-contain mx-auto mb-4 bg-white" />
+          ) : (
+            <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-slate-700 mb-4 border-2 border-dashed border-slate-500">
+              <ImageIcon className="h-8 w-8 text-slate-400" />
+            </div>
+          )}
+          <h1 className="text-2xl font-bold text-white">{company?.name || 'Estate Watch 365'}</h1>
           <p className="text-slate-400 mt-1">Property Management Platform</p>
         </div>
 
