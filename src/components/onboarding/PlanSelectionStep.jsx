@@ -72,7 +72,7 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
           <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max">
           {plans.map((plan) => {
             const isPopular = plan.id === 'growth';
             const iconMap = { trial: Gift, solopreneur: Zap, growth: Rocket, professional: Crown };
