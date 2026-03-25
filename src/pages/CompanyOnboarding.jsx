@@ -50,6 +50,17 @@ export default function CompanyOnboarding() {
         navigate(createPageUrl('Dashboard'));
         return;
       }
+
+      // If user has a company with a paid plan, skip plan selection and go to company form
+      if (members.length > 0 && currentUser.company_id) {
+        const companies = await base44.entities.Company.filter({ id: currentUser.company_id });
+        if (companies.length > 0 && companies[0].subscription_plan && companies[0].subscription_plan !== 'trial') {
+          setSelectedPlan(companies[0].subscription_plan);
+          setStep('company');
+          setCheckingUser(false);
+          return;
+        }
+      }
     } catch (error) {
       base44.auth.redirectToLogin(createPageUrl('CompanyOnboarding'));
       return;
