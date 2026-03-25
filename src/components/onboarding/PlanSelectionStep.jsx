@@ -23,11 +23,40 @@ export default function PlanSelectionStep({ onContinue, onSkip, isLoading }) {
     try {
       const response = await base44.functions.invoke('getStripePrices', {});
       if (response.data?.success && response.data.plans) {
+        const planFeatures = {
+          solopreneur: [
+            'Up to 50 properties',
+            'Unlimited clients',
+            'Mobile inspections',
+            'Visit reports & scheduling',
+            'Team collaboration basics'
+          ],
+          growth: [
+            'Up to 100 properties',
+            'Unlimited clients',
+            'Advanced mobile inspections',
+            'Detailed visit reports',
+            'Full team management',
+            'Route optimization',
+            'Marketing tools'
+          ],
+          professional: [
+            'Unlimited properties',
+            'Unlimited clients',
+            'Enterprise mobile app',
+            'White-label reports',
+            'Advanced team features',
+            'API access',
+            'Priority support',
+            'Custom workflows'
+          ]
+        };
+
         const plansWithFeatures = response.data.plans.map(plan => ({
           ...plan,
-          features: plan.features || ['Full access', 'Manage clients & properties', 'Mobile inspections']
+          features: planFeatures[plan.id] || plan.features || ['Full feature access', 'Client management', 'Mobile inspections']
         }));
-        setPlans([{ id: 'trial', name: '14-Day Free Trial', description: 'No credit card required', features: ['Full access to all features', 'Unlimited clients & properties', 'No commitment'] }, ...plansWithFeatures]);
+        setPlans([{ id: 'trial', name: '14-Day Free Trial', description: 'No credit card required', features: ['Full access to all features', 'Unlimited clients & properties', 'Mobile inspections included', 'Visit reports & templates', 'Team collaboration', 'Route optimization', 'No credit card needed'] }, ...plansWithFeatures]);
       } else {
         console.error('Failed to load plans:', response.data);
       }
