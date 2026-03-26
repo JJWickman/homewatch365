@@ -1,0 +1,75 @@
+{
+  "name": "CommunicationLog",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Reference to Tenant (isolation)"
+    },
+    "campaign_id": {
+      "type": "string",
+      "description": "Reference to Campaign (optional for standalone emails)"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "Reference to Client (optional for non-client emails like invitations)"
+    },
+    "client_email": {
+      "type": "string"
+    },
+    "client_phone": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms"
+      ]
+    },
+    "subject": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "sent",
+        "failed",
+        "bounced"
+      ],
+      "default": "pending"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "type"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "read": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "delete": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "write": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    }
+  }
+}
