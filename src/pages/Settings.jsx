@@ -28,7 +28,7 @@ export default function Settings() {
           </TabsTrigger>
           <TabsTrigger value="billing" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
-            <span className="hidden sm:inline">Billing</span>
+            <span className="hidden sm:inline">Subscription</span>
           </TabsTrigger>
           <TabsTrigger value="admin" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
