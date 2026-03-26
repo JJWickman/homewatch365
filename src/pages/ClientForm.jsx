@@ -126,7 +126,7 @@ export default function ClientForm() {
 
     try {
       const transaction = await base44.entities.ClientTransaction.create({
-        company_id: companyId,
+        tenant_id: companyId,
         client_id: clientId,
         description: newTransaction.description,
         amount: parseFloat(newTransaction.amount),
