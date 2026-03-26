@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create checkout session - only add trial for new customers (not upgrading from trial)
+    // Create checkout session
     const subscriptionData = {
       metadata: {
         tenant_id: tenant.id,
@@ -86,8 +86,8 @@ Deno.serve(async (req) => {
       }
     };
     
-    // Only include trial if they don't have an existing subscription
-    if (!tenant.stripe_subscription_id) {
+    // Only include trial for trial plans, never for paid plans
+    if (subscriptionPlan === 'trial') {
       subscriptionData.trial_period_days = 14;
     }
 

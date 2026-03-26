@@ -121,14 +121,10 @@ export default function CompanyOnboarding() {
             return;
           }
         } else {
-          // For trial plans, finalize onboarding immediately
-          try {
-            await base44.functions.invoke('finalizeOnboarding', {
-              tenant_id: response.data.company_id
-            });
-          } catch (e) {
-            console.error('Error finalizing onboarding:', e);
-          }
+          // For trial plans, set primary_tenant_id directly
+          await base44.auth.updateMe({
+            primary_tenant_id: response.data.company_id
+          });
         }
         toast.success('Welcome to Home Watch 365!');
         // Wait 1s for user record to update in backend before Layout checks for company_id
