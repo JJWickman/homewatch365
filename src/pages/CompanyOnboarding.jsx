@@ -94,36 +94,14 @@ export default function CompanyOnboarding() {
     }
   };
 
-  const checkSubdomainFor = async (slug) => {
-    if (!slug) return;
-    setCheckingSubdomain(true);
-    try {
-      const results = await base44.entities.Tenant.filter({ slug });
-      setSubdomainAvailable(results.length === 0);
-    } catch (error) {
-      console.error('Error checking subdomain:', error);
-      toast.error('Could not check subdomain availability. Please try again.');
-      setSubdomainAvailable(null);
-    } finally {
-      setCheckingSubdomain(false);
-    }
-  };
-
-  const checkSubdomain = () => checkSubdomainFor(form.subdomain);
+  // Frontend can't check Tenant availability due to RLS — backend validates on submit
 
   const handleSubmit = async () => {
     if (!form.companyName || !form.subdomain || !form.email) {
       toast.error('Please fill in all required fields');
       return;
     }
-    if (subdomainAvailable === false) {
-      toast.error('That subdomain is taken. Please choose another.');
-      return;
-    }
-    if (subdomainAvailable === null) {
-      toast.error('Please verify your subdomain is available before continuing.');
-      return;
-    }
+
 
     setLoading(true);
     try {
@@ -156,7 +134,8 @@ export default function CompanyOnboarding() {
           navigate(createPageUrl('Dashboard'));
         }, 1000);
       } else {
-        toast.error(response.data?.error || 'Something went wrong. Please try again.');
+        const errMsg = response.data?.error || response.statusText || 'Something went wrong';
+        toast.error(errMsg);
       }
     } catch (error) {
       toast.error(error.message || 'Failed to create account.');
@@ -230,45 +209,25 @@ export default function CompanyOnboarding() {
                 <div className="flex gap-2">
                   <Input
                     value={form.subdomain}
-                    onChange={e => {
-                      field('subdomain', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''));
-                      setSubdomainAvailable(null);
-                    }}
-                    onBlur={checkSubdomain}
+                    onChange={e => field('subdomain', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                     placeholder="my-company"
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
                   />
-                  <Button
-                    onClick={checkSubdomain}
-                    disabled={!form.subdomain || checkingSubdomain}
-                    variant="outline"
-                    className="bg-white/10 border-white/20 text-white whitespace-nowrap"
-                  >
-                    {checkingSubdomain ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Check'}
-                  </Button>
-                </div>
-                {form.subdomain && (
+                  </div>
+                  {form.subdomain && (
                   <div className="flex items-center gap-2 text-sm">
                     <Globe className="h-4 w-4 text-blue-300" />
                     <span className="text-blue-200">{form.subdomain}.estatewatch365.app</span>
-                    {subdomainAvailable === true && <span className="text-green-400 font-medium">✓ Available</span>}
-                    {subdomainAvailable === false && <span className="text-red-400 font-medium">✗ Taken</span>}
                   </div>
-                )}
+                  )}
               </div>
 
               <Button
-                onClick={() => {
-                  if (subdomainAvailable === true) {
-                    setStep(2);
-                  } else {
-                    checkSubdomainFor(form.subdomain);
-                  }
-                }}
-                disabled={!form.companyName || !form.subdomain || subdomainAvailable === false || checkingSubdomain}
+                onClick={() => setStep(2)}
+                disabled={!form.companyName || !form.subdomain}
                 className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold"
               >
-                {checkingSubdomain ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Checking...</> : <>Continue <ArrowRight className="h-4 w-4 ml-2" /></>}
+                <>Continue <ArrowRight className="h-4 w-4 ml-2" /></>
               </Button>
             </div>
           )}
