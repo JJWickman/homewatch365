@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import PageHeader from '@/components/shared/PageHeader';
 
-export default function SettingsBilling() {
+export default function SettingsSubscription() {
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const [openingPortal, setOpeningPortal] = useState(false);
