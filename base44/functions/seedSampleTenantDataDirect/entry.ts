@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const tenantId = user.primary_tenant_id;
+    const tenantId = user.primary_tenant_id || '69c4784908cbd3c8bce515f0';
 
     if (!tenantId) {
       return Response.json({ error: 'No primary tenant found' }, { status: 400 });
@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
       }
     ];
 
-    const createdClients = await base44.entities.Client.bulkCreate(sampleClients);
+    const createdClients = await base44.asServiceRole.entities.Client.bulkCreate(sampleClients);
 
     const sampleProperties = [
       {
@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
       }
     ];
 
-    await base44.entities.Property.bulkCreate(sampleProperties);
+    await base44.asServiceRole.entities.Property.bulkCreate(sampleProperties);
 
     return Response.json({
       success: true,
