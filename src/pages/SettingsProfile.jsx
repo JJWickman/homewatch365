@@ -35,10 +35,7 @@ export default function SettingsProfile() {
   const [baseHqAddress, setBaseHqAddress] = useState({ address: '', city: '', state: '', zip: '' });
   const [homeAddress, setHomeAddress] = useState({ address: '', city: '', state: '', zip: '' });
   const [calendarUrlCopied, setCalendarUrlCopied] = useState(false);
-
-  useEffect(() => {
-    loadData();
-  }, []);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const loadData = async () => {
     try {
@@ -124,10 +121,9 @@ export default function SettingsProfile() {
         home_address: homeAddress
       });
       
+      setSaveSuccess(true);
       toast.success('Profile saved successfully');
-    } catch (error) {
-      console.error('Error saving profile:', error);
-      toast.error('Failed to save: ' + (error.message || 'Unknown error'));
+      setTimeout(() => setSaveSuccess(false), 3000);
     } finally {
       setSaving(false);
     }
@@ -321,99 +317,15 @@ export default function SettingsProfile() {
           </div>
 
           <div className="border-t pt-4 flex items-center justify-end gap-3">
-            <Button onClick={handleSaveProfile} disabled={saving} className="bg-slate-900 hover:bg-slate-800">
-              <Save className="h-4 w-4 mr-2" />
-              {saving ? 'Saving...' : 'Save Changes'}
+            <Button onClick={handleSaveProfile} disabled={saving} className={saveSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-900 hover:bg-slate-800'}>
+              {saveSuccess ? (<><Check className="h-4 w-4 mr-2" /> Saved</>) : (<><Save className="h-4 w-4 mr-2" /> {saving ? 'Saving...' : 'Save Changes'}</>) }
             </Button>
           </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+          </Card>
 
-      {/* Route Optimization Addresses */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Route Optimization Addresses
-          </CardTitle>
-          <CardDescription>Set your starting locations for route planning</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Base HQ Address */}
-          <div>
-            <Label className="text-sm font-medium">Base HQ Address</Label>
-            <p className="text-xs text-slate-500 mb-3">Your main office location for route optimization</p>
-            <div className="space-y-3">
-              <Input
-                placeholder="Street address"
-                value={baseHqAddress.address}
-                onChange={(e) => setBaseHqAddress({ ...baseHqAddress, address: e.target.value })}
-              />
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <Input
-                  placeholder="City"
-                  value={baseHqAddress.city}
-                  onChange={(e) => setBaseHqAddress({ ...baseHqAddress, city: e.target.value })}
-                  className="sm:col-span-2"
-                />
-                <Input
-                  placeholder="State"
-                  value={baseHqAddress.state}
-                  onChange={(e) => setBaseHqAddress({ ...baseHqAddress, state: e.target.value })}
-                  maxLength="2"
-                />
-              </div>
-              <Input
-                placeholder="ZIP code"
-                value={baseHqAddress.zip}
-                onChange={(e) => setBaseHqAddress({ ...baseHqAddress, zip: e.target.value })}
-              />
-            </div>
-          </div>
-
-          {/* Home Address */}
-          <div>
-            <Label className="text-sm font-medium">Home Address</Label>
-            <p className="text-xs text-slate-500 mb-3">Your home address for starting routes from home</p>
-            <div className="space-y-3">
-              <Input
-                placeholder="Street address"
-                value={homeAddress.address}
-                onChange={(e) => setHomeAddress({ ...homeAddress, address: e.target.value })}
-              />
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <Input
-                  placeholder="City"
-                  value={homeAddress.city}
-                  onChange={(e) => setHomeAddress({ ...homeAddress, city: e.target.value })}
-                  className="sm:col-span-2"
-                />
-                <Input
-                  placeholder="State"
-                  value={homeAddress.state}
-                  onChange={(e) => setHomeAddress({ ...homeAddress, state: e.target.value })}
-                  maxLength="2"
-                />
-              </div>
-              <Input
-                placeholder="ZIP code"
-                value={homeAddress.zip}
-                onChange={(e) => setHomeAddress({ ...homeAddress, zip: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="border-t pt-4 flex justify-end">
-            <Button onClick={handleSaveProfile} disabled={saving} className="bg-slate-900 hover:bg-slate-800">
-              <Save className="h-4 w-4 mr-2" />
-              {saving ? 'Saving...' : 'Save Addresses'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Calendar Sync */}
-      <Card className="mt-6">
+          {/* Route Optimization Addresses */}
+          <Card className="mt-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
