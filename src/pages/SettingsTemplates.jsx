@@ -53,7 +53,7 @@ export default function SettingsTemplates() {
         }
       }
 
-      // Get stored company templates (from settings.checklists)
+      // Get stored company templates (from settings.checklists) - custom 8
       const storedTemplates = [];
       if (companyData?.settings?.checklists) {
         Object.entries(companyData.settings.checklists).forEach(([key, template]) => {
@@ -69,14 +69,16 @@ export default function SettingsTemplates() {
         });
       }
 
-      // Fetch all ChecklistTemplate records
+      // Fetch all ChecklistTemplate records - system 11 templates (3 home watch + 8 service visit)
       const allTemplates = await base44.entities.ChecklistTemplate.filter({});
       const dbTemplates = allTemplates.filter(t => t.active !== false).map(t => ({
         ...t,
         type: 'db'
       }));
 
-      setTemplates([...storedTemplates, ...dbTemplates]);
+      // Combine both: stored custom templates + database system templates = 11+ total
+      const combined = [...storedTemplates, ...dbTemplates];
+      setTemplates(combined);
     } catch (error) {
       console.error('Error loading templates:', error);
     } finally {
