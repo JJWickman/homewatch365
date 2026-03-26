@@ -12,6 +12,7 @@ import ApproveFounder from './pages/ApproveFounder';
 import SettingsProfile from './pages/SettingsProfile';
 import SettingsCompany from './pages/SettingsCompany';
 import SettingsAdmin from './pages/SettingsAdmin';
+import SettingsTemplates from './pages/SettingsTemplates';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ClientPortal from './pages/ClientPortal';
@@ -104,6 +105,11 @@ const AuthenticatedApp = () => {
       <Route path="/SettingsAdmin" element={
         <LayoutWrapper currentPageName="SettingsAdmin">
           <SettingsAdmin />
+        </LayoutWrapper>
+      } />
+      <Route path="/SettingsTemplates" element={
+        <LayoutWrapper currentPageName="SettingsTemplates">
+          <SettingsTemplates />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />
