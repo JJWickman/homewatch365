@@ -100,19 +100,6 @@ export default function Layout({ children, currentPageName }) {
   }, [company?.id]);
 
   useEffect(() => {
-    // Redirect to subscription if trial has expired
-    if (company && !clientPortalPages.includes(currentPageName) && !publicPages.includes(currentPageName) && currentPageName !== 'Settings') {
-      const isTrialExpired = company.subscription_status === 'trial' && 
-                            company.trial_ends_at && 
-                            new Date(company.trial_ends_at) < new Date();
-      
-      if (isTrialExpired) {
-        navigate(createPageUrl('Settings') + '?tab=billing');
-      }
-    }
-  }, [company, currentPageName, navigate]);
-
-  useEffect(() => {
     // Verify user still exists every 30 seconds
     if (!user) return;
 
