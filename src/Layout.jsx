@@ -29,7 +29,11 @@ const getPageRestrictions = () => {
   };
 };
 
-const getNavigationItems = (subscriptionPlan, roleInTenant) => {
+const getNavigationItems = (subscriptionPlan, roleInTenant, globalRole) => {
+  // Superadmins bypass tenant role check
+  if (globalRole === 'superadmin' || globalRole === 'admin') {
+    roleInTenant = 'admin';
+  }
   const role = roleInTenant || 'field_inspector';
 
   // Field Inspector - limited access
@@ -175,7 +179,7 @@ export default function Layout({ children, currentPageName }) {
   ['solopreneur_crm', 'growth_crm', 'professional_crm'].includes(company?.subscription_plan);
   const isAdminOrOwner = tenantUser?.role_in_tenant === 'admin' || tenantUser?.is_owner === true;
 
-  let navigationItems = getNavigationItems(company?.subscription_plan, tenantUser?.role_in_tenant);
+  let navigationItems = getNavigationItems(company?.subscription_plan, tenantUser?.role_in_tenant, user?.role);
 
   // Add CRM & Marketing if company has access AND user is admin/owner
   if (hasMarketingAccess && isAdminOrOwner) {
