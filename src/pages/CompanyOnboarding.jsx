@@ -50,6 +50,7 @@ export default function CompanyOnboarding() {
     fullName: '',
     email: '',
     plan: 'trial',
+    promoCode: '',
   });
 
   useEffect(() => {
@@ -126,6 +127,7 @@ export default function CompanyOnboarding() {
         email: form.email,
         subdomain: form.subdomain,
         subscriptionPlan: form.plan,
+        promoCode: form.promoCode || null,
       });
 
       if (response.data?.success) {
@@ -297,10 +299,21 @@ export default function CompanyOnboarding() {
                 </div>
               </div>
 
+              {/* Promo Code */}
+              <div className="space-y-2">
+               <Label className="text-white">Promo Code <span className="text-white/50">(optional)</span></Label>
+               <Input
+                 value={form.promoCode}
+                 onChange={e => field('promoCode', e.target.value)}
+                 placeholder="Enter promo code if you have one"
+                 className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+               />
+              </div>
+
               {/* Plan selection */}
               <div className="space-y-2">
-                <Label className="text-white">Choose Your Plan</Label>
-                <div className="grid grid-cols-2 gap-3">
+               <Label className="text-white">Choose Your Plan</Label>
+               <div className="grid grid-cols-2 gap-3">
                   {PLANS.map(plan => (
                     <button
                       key={plan.id}
