@@ -141,8 +141,7 @@ export default function CompanyOnboarding() {
           }
         }
         toast.success('Welcome to Home Watch 365!');
-        // Wait 1.5s to ensure user record is updated on backend, then hard reload
-        setTimeout(() => { window.location.href = window.location.origin; }, 1500);
+        setTimeout(() => navigate(createPageUrl('Dashboard')), 300);
       } else {
         toast.error(response.data?.error || 'Something went wrong. Please try again.');
       }
