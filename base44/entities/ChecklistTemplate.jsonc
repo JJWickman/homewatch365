@@ -1,0 +1,116 @@
+{
+  "name": "ChecklistTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Template name"
+    },
+    "code": {
+      "type": "string",
+      "description": "Unique code identifier"
+    },
+    "property_type": {
+      "type": "string",
+      "enum": [
+        "single_family",
+        "condo_villa",
+        "commercial",
+        "service_visit",
+        "high_rise"
+      ],
+      "description": "Property type this template applies to"
+    },
+    "category": {
+      "type": "string",
+      "description": "Category (e.g., home_watch_visit)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Template description"
+    },
+    "version": {
+      "type": "number",
+      "default": 1,
+      "description": "Template version"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether template is active"
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "Reference to Tenant (null for system templates)"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Legacy company reference"
+    }
+  },
+  "required": [
+    "name",
+    "code"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "data.company_id": "{{user.data.company_id}}"
+        },
+        {
+          "data.tenant_id": null
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "data.company_id": "{{user.data.company_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "data.company_id": "{{user.data.company_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "data.company_id": "{{user.data.company_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
