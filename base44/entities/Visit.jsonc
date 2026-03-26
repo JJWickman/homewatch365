@@ -1,0 +1,415 @@
+{
+  "name": "Visit",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Reference to Tenant (isolation)"
+    },
+    "property_id": {
+      "type": "string",
+      "description": "Reference to Property"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "Reference to Client"
+    },
+    "visit_type": {
+      "type": "string",
+      "enum": [
+        "check-in",
+        "followup",
+        "pre_storm",
+        "post_storm",
+        "arrival_departure",
+        "access_visit",
+        "emergency_visit",
+        "damage_recovery",
+        "auto_care",
+        "client_service",
+        "concierge"
+      ],
+      "description": "Master visit type"
+    },
+    "purpose": {
+      "type": "string",
+      "description": "Sub-purpose for visit type"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Staff member email"
+    },
+    "assigned_to_name": {
+      "type": "string"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "scheduled_time": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "in_progress",
+        "completed",
+        "cancelled",
+        "missed",
+        "open"
+      ],
+      "default": "scheduled"
+    },
+    "checkin_type": {
+      "type": "string",
+      "enum": [
+        "routine",
+        "customer_called_in",
+        "drop_in",
+        "other"
+      ],
+      "description": "Type of check-in (visit_type=check-in only)"
+    },
+    "template_id": {
+      "type": "string",
+      "description": "Reference to VisitTemplate"
+    },
+    "checklist_data": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Check-in checklist data"
+    },
+    "overall_status": {
+      "type": "string",
+      "enum": [
+        "all_clear",
+        "issues_found",
+        "urgent",
+        "no_visible_issue",
+        "issue_observed",
+        "not_observed"
+      ],
+      "description": "Overall visit result"
+    },
+    "issues_found": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Issues found during visit"
+    },
+    "summary_notes": {
+      "type": "string",
+      "description": "Summary notes"
+    },
+    "title": {
+      "type": "string",
+      "description": "Visit title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Visit description"
+    },
+    "followup_type": {
+      "type": "string",
+      "enum": [
+        "issue",
+        "contractor_appointment",
+        "maintenance",
+        "repair",
+        "arrival_prep",
+        "departure",
+        "storm_prep",
+        "client_request",
+        "other"
+      ],
+      "description": "Type of follow-up (visit_type=followup only)"
+    },
+    "followup_category": {
+      "type": "string",
+      "enum": [
+        "urgent_issue",
+        "contractor_needed",
+        "general"
+      ],
+      "default": "general"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ],
+      "default": "medium"
+    },
+    "contractor_id": {
+      "type": "string",
+      "description": "Reference to Contractor"
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "default": false
+    },
+    "recurrence_pattern": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "bi_weekly",
+        "monthly"
+      ]
+    },
+    "photo_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "photo_count": {
+      "type": "number",
+      "default": 0
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_by": {
+      "type": "string"
+    },
+    "start_location": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        }
+      }
+    },
+    "end_location": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        }
+      }
+    },
+    "report_url": {
+      "type": "string",
+      "description": "URL to generated PDF report"
+    },
+    "client_notified": {
+      "type": "boolean",
+      "default": false
+    },
+    "client_notified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "estimated_duration_minutes": {
+      "type": "number"
+    },
+    "billable": {
+      "type": "boolean",
+      "default": false
+    },
+    "billable_amount": {
+      "type": "number"
+    },
+    "vendor_name": {
+      "type": "string",
+      "description": "For access visits - vendor/company name"
+    },
+    "vendor_purpose": {
+      "type": "string",
+      "description": "For access visits - purpose of vendor visit"
+    },
+    "reporter_present": {
+      "type": "boolean",
+      "description": "For access visits - was reporter present"
+    },
+    "time_in": {
+      "type": "string",
+      "format": "date-time",
+      "description": "For access/auto care visits"
+    },
+    "time_out": {
+      "type": "string",
+      "format": "date-time",
+      "description": "For access/auto care visits"
+    },
+    "trigger": {
+      "type": "string",
+      "description": "For emergency visits - what triggered"
+    },
+    "time_received": {
+      "type": "string",
+      "format": "date-time",
+      "description": "For emergency visits - when received"
+    },
+    "time_on_site": {
+      "type": "string",
+      "format": "date-time",
+      "description": "For emergency visits - arrival time"
+    },
+    "actions_taken": {
+      "type": "string",
+      "description": "Actions taken during visit"
+    },
+    "contacts_made": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Who was contacted"
+    },
+    "followup_required": {
+      "type": "boolean",
+      "default": false
+    },
+    "vehicle_info": {
+      "type": "object",
+      "properties": {
+        "vehicle_name": {
+          "type": "string"
+        },
+        "start_mileage": {
+          "type": "number"
+        },
+        "end_mileage": {
+          "type": "number"
+        }
+      },
+      "description": "For auto care visits"
+    },
+    "duration_hours": {
+      "type": "number",
+      "description": "For auto care visits - duration in hours"
+    },
+    "dashboard_alerts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dashboard alerts (if any)"
+    },
+    "observations_before": {
+      "type": "string",
+      "description": "Observations before service"
+    },
+    "observations_after": {
+      "type": "string",
+      "description": "Observations after service"
+    },
+    "services_performed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Services performed"
+    },
+    "outcome": {
+      "type": "string",
+      "description": "Outcome of visit/service"
+    },
+    "weather_conditions": {
+      "type": "string",
+      "description": "Weather conditions at time of visit"
+    },
+    "exterior_observations": {
+      "type": "string",
+      "description": "Exterior observations"
+    },
+    "interior_observations": {
+      "type": "string",
+      "description": "Interior observations"
+    },
+    "visible_changes": {
+      "type": "string",
+      "description": "Visible changes since last visit"
+    },
+    "issue_type": {
+      "type": "string",
+      "description": "For damage recovery - type of issue"
+    },
+    "issue_description": {
+      "type": "string",
+      "description": "For damage recovery - description of condition"
+    },
+    "timeline_notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Timeline of ongoing entries for damage recovery"
+    },
+    "vendors_involved": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Vendors involved in recovery"
+    },
+    "recovery_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "monitoring",
+        "resolved"
+      ],
+      "description": "Status of damage recovery"
+    },
+    "service_type": {
+      "type": "string",
+      "enum": [
+        "package_handling",
+        "delivery_coordination",
+        "guest_access",
+        "other"
+      ],
+      "description": "For concierge service - type of service"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "property_id",
+    "client_id",
+    "visit_type",
+    "scheduled_date"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "read": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "delete": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "write": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    }
+  }
+}
