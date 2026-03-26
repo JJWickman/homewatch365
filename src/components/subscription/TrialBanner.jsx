@@ -51,16 +51,12 @@ export default function TrialBanner({ company, tenantUser }) {
     );
   }
 
-  if (!isExpiringSoon) {
-    return null; // Don't show banner if more than 3 days remaining
-  }
-
   return (
     <Alert className="mb-6 bg-amber-50 border-amber-200">
       <Clock className="h-4 w-4 text-amber-600" />
       <AlertDescription className="text-amber-900 flex items-center justify-between">
         <span>
-          <strong>Trial Ending Soon:</strong> {daysRemaining} day{daysRemaining !== 1 ? 's' : ''} remaining in your free trial.
+          <strong>Free Trial:</strong> {daysRemaining} day{daysRemaining !== 1 ? 's' : ''} remaining.
         </span>
         {tenantUser?.is_owner && (
           <Button 
