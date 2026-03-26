@@ -24,6 +24,48 @@ export default function ProductServiceWizard() {
     base_price: ''
   });
 
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    
+    if (!form.name || !form.base_price) {
+      toast.error('Please fill in required fields');
+      return;
+    }
+
+    setAdding(true);
+    try {
+      const user = await base44.auth.me();
+      const newProduct = await base44.entities.ProductService.create({
+        tenant_id: user.primary_tenant_id,
+        name: form.name,
+        description: form.description,
+        visit_type: form.visit_type,
+        base_price: parseFloat(form.base_price),
+        type: 'addon',
+        is_active: true
+      });
+      
+      setProducts([newProduct, ...products]);
+      setForm({
+        name: '',
+        description: '',
+        visit_type: 'check-in',
+        base_price: ''
+      });
+      setShowForm(false);
+      toast.success('Service added');
+    } catch (error) {
+      console.error('Error adding service:', error);
+      toast.error('Failed to add service');
+    } finally {
+      setAdding(false);
+    }
+  };
+
   const loadData = async () => {
     try {
       const user = await base44.auth.me();
@@ -68,6 +110,10 @@ export default function ProductServiceWizard() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this service?')) return;
