@@ -44,16 +44,39 @@ export default function SettingsTemplates() {
       const user = await base44.auth.me();
       const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
       
+      let companyData = null;
       if (members.length > 0) {
-        const companyData = await base44.entities.Company.filter({ id: members[0].company_id });
-        if (companyData.length > 0) {
-          setCompany(companyData[0]);
+        const companies = await base44.entities.Company.filter({ id: members[0].company_id });
+        if (companies.length > 0) {
+          companyData = companies[0];
+          setCompany(companyData);
         }
       }
 
-      // Fetch all ChecklistTemplate records for this company
+      // Get stored company templates (from settings.checklists)
+      const storedTemplates = [];
+      if (companyData?.settings?.checklists) {
+        Object.entries(companyData.settings.checklists).forEach(([key, template]) => {
+          if (template.sections) {
+            storedTemplates.push({
+              id: key,
+              name: template.name || key.charAt(0).toUpperCase() + key.slice(1),
+              description: template.description || '',
+              type: 'stored',
+              published: template.published
+            });
+          }
+        });
+      }
+
+      // Fetch all ChecklistTemplate records
       const allTemplates = await base44.entities.ChecklistTemplate.filter({});
-      setTemplates(allTemplates.filter(t => t.active !== false));
+      const dbTemplates = allTemplates.filter(t => t.active !== false).map(t => ({
+        ...t,
+        type: 'db'
+      }));
+
+      setTemplates([...storedTemplates, ...dbTemplates]);
     } catch (error) {
       console.error('Error loading templates:', error);
     } finally {
@@ -69,25 +92,29 @@ export default function SettingsTemplates() {
 
     setCreating(true);
     try {
-      const newTemplate = await base44.entities.ChecklistTemplate.create({
-        name: newTemplateName.trim(),
-        code: newTemplateName.trim().toLowerCase().replace(/\s+/g, '_') + '_' + Date.now(),
-        property_type: 'single_family',
-        category: 'custom',
-        description: '',
-        version: 1,
-        active: true,
-        company_id: company.id
-      });
-
+      const key = newTemplateName.trim().toLowerCase().replace(/\s+/g, '_') + '_' + Date.now();
+      const checklists = company?.settings?.checklists || {};
+      const updatedChecklists = {
+        ...checklists,
+        [key]: { 
+          name: newTemplateName.trim(),
+          description: '',
+          sections: [],
+          instructions: '',
+          published: false
+        }
+      };
+      const updatedSettings = { ...(company.settings || {}), checklists: updatedChecklists };
+      await base44.entities.Company.update(company.id, { settings: updatedSettings });
+      
+      const newTemplate = { id: key, name: newTemplateName.trim(), description: '', type: 'stored', published: false };
       setTemplates(prev => [...prev, newTemplate]);
       setShowCreateDialog(false);
       setNewTemplateName('');
       toast.success('Template created! Redirecting to editor...');
       
-      // Navigate to the editor for this template
       setTimeout(() => {
-        window.location.href = createPageUrl('ChecklistEditor') + `?templateId=${newTemplate.id}`;
+        window.location.href = createPageUrl('ChecklistEditor') + `?templateId=${key}`;
       }, 500);
     } catch (error) {
       console.error('Error creating template:', error);
@@ -101,7 +128,15 @@ export default function SettingsTemplates() {
     if (!deletingTemplate) return;
     
     try {
-      await base44.entities.ChecklistTemplate.delete(deletingTemplate.id);
+      if (deletingTemplate.type === 'stored') {
+        const checklists = company?.settings?.checklists || {};
+        const updatedChecklists = { ...checklists };
+        delete updatedChecklists[deletingTemplate.id];
+        const updatedSettings = { ...(company.settings || {}), checklists: updatedChecklists };
+        await base44.entities.Company.update(company.id, { settings: updatedSettings });
+      } else {
+        await base44.entities.ChecklistTemplate.delete(deletingTemplate.id);
+      }
       setTemplates(prev => prev.filter(t => t.id !== deletingTemplate.id));
       setShowDeleteDialog(false);
       setDeletingTemplate(null);
@@ -156,11 +191,16 @@ export default function SettingsTemplates() {
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="capitalize">
-                      {template.property_type?.replace('_', ' ')}
-                    </Badge>
+                    {template.type === 'db' && (
+                      <Badge variant="outline" className="capitalize">
+                        {template.property_type?.replace('_', ' ')}
+                      </Badge>
+                    )}
+                    {template.published && (
+                      <Badge variant="default" className="bg-green-600">Published</Badge>
+                    )}
                     {template.active && (
-                      <Badge variant="default" className="bg-green-600">Active</Badge>
+                      <Badge variant="default" className="bg-blue-600">Active</Badge>
                     )}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
