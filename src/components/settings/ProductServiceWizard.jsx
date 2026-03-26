@@ -27,67 +27,44 @@ export default function ProductServiceWizard() {
   const loadData = async () => {
     try {
       const user = await base44.auth.me();
-      if (user?.primary_tenant_id) {
-        const tenants = await base44.entities.Tenant.filter({ id: user.primary_tenant_id });
-        if (tenants.length > 0) setTenant(tenants[0]);
-
-        let prods = await base44.entities.ProductService.filter({ tenant_id: user.primary_tenant_id });
-        
-        // Auto-seed defaults if tenant has no products
-        if (prods.length === 0) {
-          try {
-            const res = await base44.functions.invoke('seedDefaultProducts', {});
-            if (res.data?.success) {
-              // Re-fetch after seeding
-              prods = await base44.entities.ProductService.filter({ tenant_id: user.primary_tenant_id });
-            }
-          } catch (error) {
-            console.error('Seed error:', error);
-          }
-        }
-        
-        setProducts(prods.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)));
+      if (!user?.primary_tenant_id) {
+        toast.error('No tenant found');
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error('Error loading data:', error);
-      toast.error('Failed to load services');
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+      const tenants = await base44.entities.Tenant.filter({ id: user.primary_tenant_id });
+      if (tenants.length > 0) setTenant(tenants[0]);
 
-  const handleAdd = async (e) => {
-    e.preventDefault();
-    if (!form.name || !form.visit_type || !form.base_price) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
-    setAdding(true);
-    try {
-      const newProduct = await base44.entities.ProductService.create({
-        tenant_id: tenant.id,
-        name: form.name,
-        description: form.description,
-        visit_type: form.visit_type,
-        type: 'addon',
-        base_price: parseFloat(form.base_price),
+      // Just load products directly
+      const prods = await base44.entities.ProductService.filter({ 
+        tenant_id: user.primary_tenant_id,
         is_active: true
       });
 
-      setProducts([newProduct, ...products]);
-      setForm({ name: '', description: '', visit_type: 'check-in', base_price: '' });
-      setShowForm(false);
-      toast.success('Service added successfully');
+      if (prods.length === 0) {
+        // Try to seed defaults
+        try {
+          await base44.functions.invoke('seedDefaultProducts', {});
+          // Re-fetch after seeding
+          const refetch = await base44.entities.ProductService.filter({ 
+            tenant_id: user.primary_tenant_id,
+            is_active: true
+          });
+          setProducts(refetch.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)));
+        } catch (seedError) {
+          console.warn('Auto-seed failed (non-critical):', seedError);
+          setProducts([]);
+        }
+      } else {
+        setProducts(prods.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)));
+      }
     } catch (error) {
-      console.error('Error adding service:', error);
-      toast.error('Failed to add service');
+      console.error('Error loading products:', error);
+      toast.error('Failed to load services');
+      setProducts([]);
     } finally {
-      setAdding(false);
+      setLoading(false);
     }
   };
 

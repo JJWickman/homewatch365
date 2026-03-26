@@ -2,35 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { 
-  User, Mail, Phone, MapPin, CreditCard, Save, X, Package, Plus, Trash2, DollarSign, FileText
-} from 'lucide-react';
-import MonthlyStatementDialog from '../components/billing/MonthlyStatementDialog';
+import PageHeader from '@/components/shared/PageHeader';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import PageHeader from '@/components/shared/PageHeader';
-import { useAutoSave } from '@/components/shared/useAutoSave';
-import { Clock } from 'lucide-react';
+import { Switch } from "@/components/ui/switch";
+import { User, Mail, Phone, MapPin, CreditCard, Package, DollarSign, Plus, Save, X, Clock, FileText, Trash2 } from 'lucide-react';
+import MonthlyStatementDialog from '@/components/billing/MonthlyStatementDialog';
+import { toast } from 'sonner';
 
 export default function ClientForm() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [companyId, setCompanyId] = useState(null);
   const [clientId, setClientId] = useState(null);
-  
+  const [companyId, setCompanyId] = useState(null);
+  const [availableProducts, setAvailableProducts] = useState([]);
+  const [monthlyTransactions, setMonthlyTransactions] = useState([]);
+  const [showStatementDialog, setShowStatementDialog] = useState(false);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
+  const currentBillingMonth = new Date().toISOString().slice(0, 7);
+
+  const [newTransaction, setNewTransaction] = useState({
+    description: '',
+    amount: '',
+    billing_month: currentBillingMonth
+  });
+
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -50,37 +53,6 @@ export default function ClientForm() {
     notes: '',
     is_active: true
   });
-  
-  const [availableServices, setAvailableServices] = useState([]);
-  const [availableProducts, setAvailableProducts] = useState([]);
-  const [monthlyTransactions, setMonthlyTransactions] = useState([]);
-  const [newTransaction, setNewTransaction] = useState({
-    description: '',
-    amount: '',
-    billing_month: new Date().toISOString().slice(0, 7)
-  });
-  const [showStatementDialog, setShowStatementDialog] = useState(false);
-  const [currentBillingMonth, setCurrentBillingMonth] = useState(new Date().toISOString().slice(0, 7));
-  
-  const autoSaveFunction = async (data) => {
-    if (!companyId || !clientId) return;
-    const saveData = {
-      ...data,
-      company_id: companyId,
-      monthly_rate: data.monthly_rate ? parseFloat(data.monthly_rate) : null,
-      portal_user_email: data.portal_access ? data.email : null
-    };
-    await base44.entities.Client.update(clientId, saveData);
-  };
-  
-  const { isSaving: isAutoSaving, lastSaved } = useAutoSave(formData, autoSaveFunction, {
-    enabled: !!clientId,
-    delay: 2000
-  });
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -98,7 +70,36 @@ export default function ClientForm() {
           is_active: true
         });
         setAvailableProducts(allItems);
-        });
+      }
+      
+      // Check if editing existing client
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      
+      if (id) {
+        setClientId(id);
+        const clients = await base44.entities.Client.filter({ id });
+        if (clients.length > 0) {
+          const client = clients[0];
+          setFormData({
+            first_name: client.first_name || '',
+            last_name: client.last_name || '',
+            email: client.email || '',
+            phone: client.phone || '',
+            secondary_phone: client.secondary_phone || '',
+            address: client.address || '',
+            city: client.city || '',
+            state: client.state || '',
+            zip: client.zip || '',
+            service_subscription_id: client.service_subscription_id || '',
+            additional_products: client.additional_products || [],
+            monthly_rate: client.monthly_rate || '',
+            billing_frequency: client.billing_frequency || 'monthly',
+            portal_access: client.portal_access !== false,
+            portal_pin: client.portal_pin || '',
+            notes: client.notes || '',
+            is_active: client.is_active !== false
+          });
           
           // Load monthly transactions
           const transactions = await base44.entities.ClientTransaction.filter({ 
@@ -109,10 +110,15 @@ export default function ClientForm() {
       }
     } catch (error) {
       console.error('Error loading data:', error);
+      toast.error('Failed to load client data');
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -122,6 +128,7 @@ export default function ClientForm() {
     try {
       const data = {
         ...formData,
+        tenant_id: companyId,
         company_id: companyId,
         monthly_rate: formData.monthly_rate ? parseFloat(formData.monthly_rate) : null,
         portal_user_email: formData.portal_access ? formData.email : null
@@ -133,9 +140,11 @@ export default function ClientForm() {
         await base44.entities.Client.create(data);
       }
 
+      toast.success('Client saved successfully');
       navigate(createPageUrl('Clients'));
     } catch (error) {
       console.error('Error saving client:', error);
+      toast.error('Failed to save client');
     } finally {
       setSaving(false);
     }
@@ -147,7 +156,7 @@ export default function ClientForm() {
 
   const handleAddTransaction = async () => {
     if (!clientId || !companyId || !newTransaction.description || !newTransaction.amount) {
-      alert('Please fill in all transaction fields');
+      toast.error('Please fill in all transaction fields');
       return;
     }
 
@@ -167,11 +176,12 @@ export default function ClientForm() {
       setNewTransaction({
         description: '',
         amount: '',
-        billing_month: new Date().toISOString().slice(0, 7)
+        billing_month: currentBillingMonth
       });
+      toast.success('Transaction added');
     } catch (error) {
       console.error('Error adding transaction:', error);
-      alert('Failed to add transaction');
+      toast.error('Failed to add transaction');
     }
   };
 
@@ -179,9 +189,10 @@ export default function ClientForm() {
     try {
       await base44.entities.ClientTransaction.delete(transactionId);
       setMonthlyTransactions(prev => prev.filter(t => t.id !== transactionId));
+      toast.success('Transaction deleted');
     } catch (error) {
       console.error('Error deleting transaction:', error);
-      alert('Failed to delete transaction');
+      toast.error('Failed to delete transaction');
     }
   };
 
@@ -201,24 +212,10 @@ export default function ClientForm() {
         backLink="Clients"
         backLabel="Back to Clients"
       >
-        <div className="flex items-center gap-3">
-          {clientId && (
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Clock className="h-4 w-4" />
-              {isAutoSaving ? (
-                <span className="text-amber-600">Saving...</span>
-              ) : lastSaved ? (
-                <span>Saved {new Date(lastSaved).toLocaleTimeString()}</span>
-              ) : (
-                <span>Auto-save enabled</span>
-              )}
-            </div>
-          )}
-          <Button type="submit" form="client-form" disabled={saving} className="bg-slate-900 hover:bg-slate-800">
-            <Save className="h-4 w-4 mr-2" />
-            {saving ? 'Saving...' : 'Save'}
-          </Button>
-        </div>
+        <Button type="submit" form="client-form" disabled={saving} className="bg-slate-900 hover:bg-slate-800">
+          <Save className="h-4 w-4 mr-2" />
+          {saving ? 'Saving...' : 'Save'}
+        </Button>
       </PageHeader>
 
       <form id="client-form" onSubmit={handleSubmit} className="space-y-6">
@@ -387,49 +384,222 @@ export default function ClientForm() {
             </div>
 
             <div>
-             <Label htmlFor="billing_frequency">Billing Frequency</Label>
-             <Select
-               value={formData.billing_frequency}
-               onValueChange={(value) => handleChange('billing_frequency', value)}
-             >
-               <SelectTrigger className="w-full sm:w-48">
-                 <SelectValue />
-               </SelectTrigger>
-               <SelectContent>
-                 <SelectItem value="monthly">Monthly</SelectItem>
-                 <SelectItem value="quarterly">Quarterly</SelectItem>
-                 <SelectItem value="annually">Annually</SelectItem>
-               </SelectContent>
-             </Select>
+              <Label htmlFor="billing_frequency">Billing Frequency</Label>
+              <Select
+                value={formData.billing_frequency}
+                onValueChange={(value) => handleChange('billing_frequency', value)}
+              >
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                  <SelectItem value="annually">Annually</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex items-center justify-between py-2">
-             <div>
-               <Label>Portal Access</Label>
-               <p className="text-sm text-slate-500">Allow client to view inspections and reports online</p>
-             </div>
-             <Switch
-               checked={formData.portal_access}
-               onCheckedChange={(checked) => handleChange('portal_access', checked)}
-             />
+              <div>
+                <Label>Portal Access</Label>
+                <p className="text-sm text-slate-500">Allow client to view inspections and reports online</p>
+              </div>
+              <Switch
+                checked={formData.portal_access}
+                onCheckedChange={(checked) => handleChange('portal_access', checked)}
+              />
             </div>
 
             {formData.portal_access && (
-             <div>
-               <Label htmlFor="portal_pin">Portal PIN (6 digits) *</Label>
-               <Input
-                 id="portal_pin"
-                 type="password"
-                 maxLength={6}
-                 value={formData.portal_pin || ''}
-                 onChange={(e) => handleChange('portal_pin', e.target.value.replace(/\D/g, '').slice(0, 6))}
-                 placeholder="000000"
-                 className="text-center text-lg tracking-widest"
-               />
-               <p className="text-xs text-slate-500 mt-1">Client will use this PIN to access the portal</p>
-             </div>
+              <div>
+                <Label htmlFor="portal_pin">Portal PIN (6 digits) *</Label>
+                <Input
+                  id="portal_pin"
+                  type="password"
+                  maxLength={6}
+                  value={formData.portal_pin || ''}
+                  onChange={(e) => handleChange('portal_pin', e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  className="text-center text-lg tracking-widest"
+                />
+                <p className="text-xs text-slate-500 mt-1">Client will use this PIN to access the portal</p>
+              </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Monthly Billing Transactions */}
+        {clientId && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Monthly Billing Transactions
+              </CardTitle>
+              <CardDescription>Add custom items to include in monthly invoices</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Add New Transaction */}
+              <div className="border rounded-lg p-4 bg-slate-50">
+                <Label className="text-sm font-medium mb-3 block">Add New Item</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <Input
+                    placeholder="Description"
+                    value={newTransaction.description}
+                    onChange={(e) => setNewTransaction(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="Amount"
+                    value={newTransaction.amount}
+                    onChange={(e) => setNewTransaction(prev => ({ ...prev, amount: e.target.value }))}
+                  />
+                  <Input
+                    type="month"
+                    value={newTransaction.billing_month}
+                    onChange={(e) => setNewTransaction(prev => ({ ...prev, billing_month: e.target.value }))}
+                  />
                 </div>
+                <Button 
+                  type="button"
+                  onClick={handleAddTransaction} 
+                  className="mt-3"
+                  size="sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Item
+                </Button>
+              </div>
+
+              {/* Current Month Summary */}
+              <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="text-sm font-medium">Current Month Bill Preview</Label>
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowStatementDialog(true)}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    View Full Statement
+                  </Button>
+                </div>
+                
+                <div className="space-y-2 text-sm">
+                   {/* Available Visit Services */}
+                   {formData.additional_products?.map(productId => {
+                     const product = availableProducts.find(p => p.id === productId);
+                     return product ? (
+                       <div key={productId} className="flex justify-between">
+                         <span className="text-slate-700">{product.name} (per visit)</span>
+                         <span className="font-medium">${product.base_price?.toFixed(2)}</span>
+                       </div>
+                     ) : null;
+                   })}
+                   
+                   {/* Custom Transactions for current month */}
+                   {monthlyTransactions
+                     .filter(t => t.billing_month === currentBillingMonth)
+                     .map(transaction => (
+                       <div key={transaction.id} className="flex justify-between">
+                         <span className="text-slate-700">{transaction.description}</span>
+                         <span className="font-medium">${transaction.amount.toFixed(2)}</span>
+                       </div>
+                     ))
+                   }
+                   
+                   {/* Total */}
+                   <div className="flex justify-between pt-2 border-t border-blue-300 font-bold text-base">
+                     <span>Monthly Total:</span>
+                     <span className="text-blue-700">
+                       ${(() => {
+                         let total = 0;
+                         
+                         // Add available visit services
+                         formData.additional_products?.forEach(productId => {
+                           const product = availableProducts.find(p => p.id === productId);
+                           if (product) total += product.base_price;
+                         });
+                         
+                         // Add transactions
+                         monthlyTransactions
+                           .filter(t => t.billing_month === currentBillingMonth)
+                           .forEach(t => total += t.amount);
+                         
+                         return total.toFixed(2);
+                       })()}
+                     </span>
+                   </div>
+                </div>
+              </div>
+
+              {/* Transactions List */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">All Custom Billing Items</Label>
+                {monthlyTransactions.length === 0 ? (
+                  <p className="text-sm text-slate-500 text-center py-4">No custom billing items yet</p>
+                ) : (
+                  monthlyTransactions.map((transaction) => (
+                    <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg bg-white">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{transaction.description}</p>
+                        <p className="text-xs text-slate-500">
+                          {new Date(transaction.billing_month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="font-semibold">${transaction.amount.toFixed(2)}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteTransaction(transaction.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Notes */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Notes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              value={formData.notes}
+              onChange={(e) => handleChange('notes', e.target.value)}
+              placeholder="Add any additional notes about this client..."
+              rows={4}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Actions */}
+        <div className="flex items-center justify-end gap-3 pb-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate(createPageUrl('Clients'))}
+          >
+            <X className="h-4 w-4 mr-2" />
+            Cancel
+          </Button>
+          <Button type="submit" disabled={saving} className="bg-slate-900 hover:bg-slate-800">
+            <Save className="h-4 w-4 mr-2" />
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
+        </div>
       </form>
 
       {/* Monthly Statement Dialog */}
@@ -439,7 +609,6 @@ export default function ClientForm() {
         clientId={clientId}
         billingMonth={currentBillingMonth}
         onStatementUpdated={() => {
-          // Reload transactions if needed
           if (clientId) {
             base44.entities.ClientTransaction.filter({ client_id: clientId }).then(setMonthlyTransactions);
           }
