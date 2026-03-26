@@ -37,14 +37,15 @@ export default function SettingsProducts() {
   const loadProducts = async () => {
     try {
       const user = await base44.auth.me();
+      const tenantId = user?.data?.primary_tenant_id || user?.primary_tenant_id;
       
-      if (!user?.primary_tenant_id) {
+      if (!tenantId) {
         setLoading(false);
         return;
       }
 
       const prods = await base44.entities.ProductService.filter({
-        tenant_id: user.primary_tenant_id
+        tenant_id: tenantId
       });
       setProducts(prods?.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)) || []);
     } catch (error) {
@@ -66,8 +67,9 @@ export default function SettingsProducts() {
     setAdding(true);
     try {
       const user = await base44.auth.me();
+      const tenantId = user?.data?.primary_tenant_id || user?.primary_tenant_id;
       await base44.entities.ProductService.create({
-        tenant_id: user.primary_tenant_id,
+        tenant_id: tenantId,
         name: form.name,
         visit_type: form.visit_type,
         base_price: parseFloat(form.base_price),
