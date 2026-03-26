@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
     };
 
     // Title Page
-    addTitle('Testing Instructions for Estate Watch 365');
+    addTitle('Testing Instructions for HomeWatch365');
     yPosition += 5;
     addText('Step-by-step guide to create your account and explore the home watch management platform');
     yPosition += 10;
@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
 
     // Introduction
     addHeading('Overview');
-    addText('This guide walks you through creating your account and exploring the key features of Estate Watch 365. You will:');
+    addText('This guide walks you through creating your account and exploring the key features of HomeWatch365. You will:');
     addText('- Set up your company account and profile', 5);
     addText('- Create sample clients and properties', 5);
     addText('- Configure products and pricing', 5);
@@ -175,7 +175,7 @@ Deno.serve(async (req) => {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': 'attachment; filename=Estate-Watch-365-Testing-Instructions.pdf'
+        'Content-Disposition': 'attachment; filename=HomeWatch365-Testing-Instructions.pdf'
       }
     });
   } catch (error) {
