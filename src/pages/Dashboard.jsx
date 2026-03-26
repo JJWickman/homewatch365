@@ -18,7 +18,7 @@ import StatusBadge from '@/components/shared/StatusBadge';
 export default function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [companyMember, setCompanyMember] = useState(null);
+  const [tenantUser, setTenantUser] = useState(null);
   const [company, setCompany] = useState(null);
   const [stats, setStats] = useState({
     totalClients: 0,
@@ -65,8 +65,11 @@ export default function Dashboard() {
      const currentUser = await base44.auth.me();
      setUser(currentUser);
 
-     const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-     setCompanyMember(members[0]);
+     const tenantUsers = await base44.entities.TenantUser.filter({
+       user_id: currentUser.id,
+       tenant_id: currentUser.primary_tenant_id
+     });
+     if (tenantUsers.length > 0) setTenantUser(tenantUsers[0]);
 
      const [tenants, clients, properties, visits] = await Promise.all([
        base44.entities.Tenant.filter({ id: currentUser.primary_tenant_id }),
@@ -82,7 +85,6 @@ export default function Dashboard() {
       const weekEnd = format(endOfWeek(new Date()), 'yyyy-MM-dd');
 
       // Filter visits based on user role
-      const isFieldInspector = members[0]?.role === 'field_inspector' || members[0]?.role === 'technician';
       const weekVisits = visits.filter(v => {
         const date = v.scheduled_date;
         const matchesDate = date >= weekStart && date <= weekEnd;
@@ -109,6 +111,7 @@ export default function Dashboard() {
         monthlyRevenue: recurringRevenue
       });
 
+      const isFieldInspector = tenantUser?.role_in_tenant === 'field_inspector';
       const todayScheduled = visits.filter(v => {
         const matchesDate = v.scheduled_date === today && v.status !== 'cancelled';
         const matchesAssignment = !isFieldInspector || v.assigned_to === currentUser.email;
@@ -194,7 +197,7 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, {companyMember?.user_name?.split(' ')[0] || 'there'}
+            Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, {user?.full_name?.split(' ')[0] || 'there'}
           </h1>
           <p className="text-slate-500 mt-1">Here's what's happening with your properties today.</p>
         </div>
