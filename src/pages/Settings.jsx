@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import PageHeader from '@/components/shared/PageHeader';
 
-export default function SettingsHub() {
+export default function Settings() {
   const navigate = useNavigate();
 
   const sections = [
