@@ -57,7 +57,6 @@ const baseItems = [
   { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
   { name: 'Help & Tutorials', icon: BookOpen, page: 'HelpTutorials' },
   { name: 'AI Assistant', icon: Bot, page: 'AIAssistant' },
-  { name: 'Checklist Templates', icon: ClipboardCheck, page: 'ChecklistEditor' },
 ];
 
 // Only show Billing and Import Data for Administrators
@@ -246,7 +245,7 @@ export default function Layout({ children, currentPageName }) {
               return (
                 <Link
                   key={item.name}
-                  to={createPageUrl(item.page)}
+                  to={item.page === 'Settings' ? createPageUrl('Settings') + '?tab=templates' : createPageUrl(item.page)}
                   onClick={() => setSidebarOpen(false)}
                   className={`
                     flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
