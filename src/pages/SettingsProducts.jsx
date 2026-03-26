@@ -47,6 +47,8 @@ export default function SettingsProducts() {
       const prods = await base44.entities.ProductService.filter({
         tenant_id: tenantId
       });
+      console.log('Tenant ID:', tenantId);
+      console.log('Products loaded:', prods);
       setProducts(prods?.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)) || []);
     } catch (error) {
       console.error('Error loading products:', error);
