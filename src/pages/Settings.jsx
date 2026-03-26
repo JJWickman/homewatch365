@@ -1,11 +1,12 @@
 import React from 'react';
-import { User, Building, Shield, Palette } from 'lucide-react';
+import { User, Building, Shield, Palette, CreditCard } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PageHeader from '@/components/shared/PageHeader';
 import SettingsProfile from './SettingsProfile';
 import SettingsCompany from './SettingsCompany';
 import SettingsAdmin from './SettingsAdmin';
 import SettingsTemplates from './SettingsTemplates';
+import SettingsBilling from './SettingsBilling';
 
 export default function Settings() {
   return (
@@ -16,7 +17,7 @@ export default function Settings() {
       />
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-6">
+        <TabsList className="grid w-full grid-cols-5 mb-6">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">Profile</span>
@@ -24,6 +25,10 @@ export default function Settings() {
           <TabsTrigger value="company" className="flex items-center gap-2">
             <Building className="h-4 w-4" />
             <span className="hidden sm:inline">Company</span>
+          </TabsTrigger>
+          <TabsTrigger value="billing" className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4" />
+            <span className="hidden sm:inline">Billing</span>
           </TabsTrigger>
           <TabsTrigger value="admin" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
@@ -41,6 +46,10 @@ export default function Settings() {
 
         <TabsContent value="company">
           <SettingsCompany />
+        </TabsContent>
+
+        <TabsContent value="billing">
+          <SettingsBilling />
         </TabsContent>
 
         <TabsContent value="admin">
