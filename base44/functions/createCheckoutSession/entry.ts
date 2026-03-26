@@ -86,8 +86,9 @@ Deno.serve(async (req) => {
       }
     };
     
-    // Only include trial for trial plans, never for paid plans
-    if (subscription_plan === 'trial') {
+    // Include trial period for paid plans (free trial incentive)
+    // Don't include trial for 'trial' plan itself (already free)
+    if (subscription_plan !== 'trial') {
       subscriptionData.trial_period_days = 14;
     }
 
@@ -103,7 +104,7 @@ Deno.serve(async (req) => {
         },
       ],
       subscription_data: subscriptionData,
-      success_url: `${new URL(req.url).origin}/?checkout=success&tenant_id=${tenant.id}`,
+      success_url: `${new URL(req.url).origin}/Dashboard?checkout=success&tenant_id=${tenant.id}`,
       cancel_url: `${new URL(req.url).origin}/?tab=billing`,
       metadata: {
         tenant_id: tenant.id,
