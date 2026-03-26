@@ -79,10 +79,16 @@ export default function ProductServiceWizard() {
       const tenants = await base44.entities.Tenant.filter({ id: user.primary_tenant_id });
       if (tenants.length > 0) setTenant(tenants[0]);
 
-      // Load products
+      // Deduplicate products on first load
+      try {
+        await base44.functions.invoke('deduplicateProducts', {});
+      } catch (e) {
+        console.warn('Deduplication failed (non-critical):', e);
+      }
+
+      // Load ALL products (not just active)
       const prods = await base44.entities.ProductService.filter({ 
-        tenant_id: user.primary_tenant_id,
-        is_active: true
+        tenant_id: user.primary_tenant_id
       });
 
       if (prods.length === 0) {
@@ -91,8 +97,7 @@ export default function ProductServiceWizard() {
           await base44.functions.invoke('seedDefaultProducts', {});
           // Re-fetch after seeding
           const refetch = await base44.entities.ProductService.filter({ 
-            tenant_id: user.primary_tenant_id,
-            is_active: true
+            tenant_id: user.primary_tenant_id
           });
           setProducts(refetch.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)));
         } catch (seedError) {
