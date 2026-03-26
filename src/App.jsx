@@ -13,6 +13,7 @@ import SettingsProfile from './pages/SettingsProfile';
 import SettingsCompany from './pages/SettingsCompany';
 import SettingsAdmin from './pages/SettingsAdmin';
 import SettingsTemplates from './pages/SettingsTemplates';
+import SettingsProducts from './pages/SettingsProducts';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ClientPortal from './pages/ClientPortal';
@@ -111,6 +112,11 @@ const AuthenticatedApp = () => {
       <Route path="/SettingsTemplates" element={
         <LayoutWrapper currentPageName="SettingsTemplates">
           <SettingsTemplates />
+        </LayoutWrapper>
+      } />
+      <Route path="/SettingsProducts" element={
+        <LayoutWrapper currentPageName="SettingsProducts">
+          <SettingsProducts />
         </LayoutWrapper>
       } />
       <Route path="/TestingDashboard" element={
