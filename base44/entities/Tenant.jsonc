@@ -133,14 +133,7 @@
     "read": {
       "$or": [
         {
-          "id": {
-            "$in": {
-              "collection": "TenantUser",
-              "query": {
-                "user_id": "{{user.id}}"
-              }
-            }
-          }
+          "id": "{{user.primary_tenant_id}}"
         },
         {
           "user_condition": {
@@ -152,15 +145,7 @@
     "update": {
       "$or": [
         {
-          "id": {
-            "$in": {
-              "collection": "TenantUser",
-              "query": {
-                "user_id": "{{user.id}}",
-                "role_in_tenant": "admin"
-              }
-            }
-          }
+          "id": "{{user.primary_tenant_id}}"
         },
         {
           "user_condition": {
