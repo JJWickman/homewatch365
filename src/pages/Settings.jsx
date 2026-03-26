@@ -321,9 +321,31 @@ export default function Settings() {
     }
   };
 
+  const handleSaveEdit = async () => {
+    if (!editingMember) return;
+    try {
+      await base44.entities.CompanyMember.update(editingMember.id, {
+        user_name: editingMember.user_name,
+        role: editingMember.role,
+        access_level: editingMember.access_level,
+        crm_marketing_access: editingMember.crm_marketing_access
+      });
+      setShowEditDialog(false);
+      setEditingMember(null);
+      await loadData();
+    } catch (error) {
+      console.error('Error updating member:', error);
+      alert('Failed to update team member: ' + error.message);
+    }
+  };
+
+  const handleEditMember = (member) => {
+    setEditingMember({ ...member });
+    setShowEditDialog(true);
+  };
+
   const handleDeleteMember = async () => {
     if (!deletingMember) return;
-    
     try {
       await base44.entities.CompanyMember.delete(deletingMember.id);
       setShowDeleteDialog(false);
@@ -334,16 +356,7 @@ export default function Settings() {
     }
   };
 
-  const handleSuspendMember = async (member) => {
-    try {
-      await base44.entities.CompanyMember.update(member.id, { 
-        is_active: member.is_active === false ? true : false 
-      });
-      loadData();
-    } catch (error) {
-      console.error('Error suspending member:', error);
-    }
-  };
+  const handleSuspendMember
 
   const handleForcePasswordReset = async (member) => {
     try {
