@@ -86,11 +86,8 @@ Deno.serve(async (req) => {
       }
     };
     
-    // Include trial period for paid plans (free trial incentive)
-    // Don't include trial for 'trial' plan itself (already free)
-    if (subscription_plan !== 'trial') {
-      subscriptionData.trial_period_days = 14;
-    }
+    // Never set trial_period_days here — trial is managed at tenant level in the database
+    // All plans charge immediately (or are free if already on trial at tenant level)
 
     const sessionParams = {
       customer: customerId,
