@@ -52,6 +52,7 @@ import SubscriptionManagement from '@/components/settings/SubscriptionManagement
 import BillingEmailSection from '@/components/settings/BillingEmailSection';
 import ReviewsTab from '@/components/settings/ReviewsTab';
 import GeofencingSettings from '@/components/settings/GeofencingSettings';
+import CompanyLogo from '@/components/settings/CompanyLogo';
 
 import { getLimits } from '@/lib/planLimits';
 
@@ -1012,7 +1013,16 @@ ${company.name}
         </TabsContent>
 
         <TabsContent value="company">
-          <Card>
+          <CompanyLogo
+            company={company}
+            companyForm={companyForm}
+            setCompanyForm={setCompanyForm}
+            saving={saving}
+            saveSuccess={saveSuccess}
+            onSave={saveCompanySettings}
+          />
+
+          <Card className="mt-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building className="h-5 w-5" />
@@ -1241,11 +1251,9 @@ ${company.name}
                   {saving ? 'Saving...' : 'Save Integrations'}
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-
-  
-        </TabsContent>
+              </CardContent>
+              </Card>
+              </TabsContent>
 
         <TabsContent value="subscription">
           <SubscriptionManagement company={company} companyMember={companyMember} />
