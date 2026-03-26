@@ -605,10 +605,10 @@ ${company.name}
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
       </div>
-    );
-  }
+      );
+      }
 
-  return (
+      return (
     <div className="max-w-4xl mx-auto">
       <PageHeader
         title="Settings"
