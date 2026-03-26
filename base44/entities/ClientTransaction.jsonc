@@ -66,18 +66,18 @@
   ],
   "rls": {
     "create": {
-      "data.company_id": "{{user.data.primary_tenant_id}}"
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "read": {
-      "data.company_id": "{{user.data.primary_tenant_id}}"
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "update": {
-      "data.company_id": "{{user.data.primary_tenant_id}}"
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "delete": {
       "$or": [
         {
-          "data.company_id": "{{user.data.primary_tenant_id}}"
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
         {
           "user_condition": {
