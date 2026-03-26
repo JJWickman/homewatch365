@@ -60,7 +60,7 @@
           "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
         {
-          "data.company_id": "{{user.data.company_id}}"
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
         {
           "data.tenant_id": null
@@ -73,7 +73,7 @@
           "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
         {
-          "data.company_id": "{{user.data.company_id}}"
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
         {
           "user_condition": {
@@ -88,7 +88,7 @@
           "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
         {
-          "data.company_id": "{{user.data.company_id}}"
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
         {
           "user_condition": {
@@ -103,7 +103,7 @@
           "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
         {
-          "data.company_id": "{{user.data.company_id}}"
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
         {
           "user_condition": {
