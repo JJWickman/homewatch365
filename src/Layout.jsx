@@ -117,13 +117,13 @@ export default function Layout({ children, currentPageName }) {
         return;
       }
       
-      // Load TenantUser (role/permissions via new Tenant model)
-      const tenantUsers = await base44.entities.TenantUser.filter({ 
+      // Load UserTenant (role/permissions)
+      const userTenants = await base44.entities.UserTenant.filter({ 
         user_id: currentUser.id,
         tenant_id: currentUser.primary_tenant_id 
       });
-      if (tenantUsers.length > 0) {
-        setTenantUser(tenantUsers[0]);
+      if (userTenants.length > 0) {
+        setTenantUser(userTenants[0]);
       }
 
       // Load tenant
