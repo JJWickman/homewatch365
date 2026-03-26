@@ -1,0 +1,189 @@
+{
+  "name": "Client",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Reference to Tenant (isolation)"
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "secondary_phone": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string",
+      "description": "Primary/billing address"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "portal_access": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether client has portal access"
+    },
+    "portal_user_email": {
+      "type": "string",
+      "description": "Email used for portal login"
+    },
+    "portal_pin": {
+      "type": "string",
+      "description": "6-digit PIN for portal access"
+    },
+    "service_subscription_id": {
+      "type": "string",
+      "description": "ProductService ID for the main service subscription"
+    },
+    "additional_products": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "ProductService IDs for additional products"
+    },
+    "monthly_rate": {
+      "type": "number",
+      "description": "Monthly service fee"
+    },
+    "billing_frequency": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "quarterly",
+        "annually"
+      ],
+      "default": "monthly"
+    },
+    "stripe_customer_id": {
+      "type": "string"
+    },
+    "billing_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "past_due",
+        "paused",
+        "cancelled"
+      ],
+      "default": "active"
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number"
+          },
+          "uploaded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Client files and documents"
+    },
+    "visit_reports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "visit_id": {
+            "type": "string",
+            "description": "Reference to Visit record"
+          },
+          "property_id": {
+            "type": "string"
+          },
+          "property_name": {
+            "type": "string"
+          },
+          "report_url": {
+            "type": "string",
+            "description": "URL to PDF report"
+          },
+          "visit_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Visit reports available in portal"
+    },
+    "receive_report_emails": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether client wants to receive visit report emails"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "custom_fields": {
+      "type": "object",
+      "description": "Custom fields imported or added by user"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "first_name",
+    "last_name",
+    "email"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "read": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "delete": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "write": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    }
+  }
+}
