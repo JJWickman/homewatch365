@@ -6,8 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Loader2, Plus } from 'lucide-react';
+import { Trash2, Loader2, Plus, Edit2 } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
 export default function SettingsProducts() {
   const [products, setProducts] = useState([]);
@@ -15,10 +22,12 @@ export default function SettingsProducts() {
   const [deleting, setDeleting] = useState(null);
   const [adding, setAdding] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
     name: '',
     visit_type: 'check-in',
-    base_price: ''
+    base_price: '',
+    description: ''
   });
 
   useEffect(() => {
@@ -85,6 +94,48 @@ export default function SettingsProducts() {
     }
   };
 
+  const handleEdit = (product) => {
+    setForm({
+      name: product.name,
+      visit_type: product.visit_type,
+      base_price: String(product.base_price),
+      description: product.description || ''
+    });
+    setEditingId(product.id);
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (!form.name || !form.base_price) {
+      toast.error('Please fill in required fields');
+      return;
+    }
+
+    setAdding(true);
+    try {
+      await base44.entities.ProductService.update(editingId, {
+        name: form.name,
+        visit_type: form.visit_type,
+        base_price: parseFloat(form.base_price),
+        description: form.description
+      });
+      setEditingId(null);
+      setForm({
+        name: '',
+        visit_type: 'check-in',
+        base_price: '',
+        description: ''
+      });
+      toast.success('Product updated');
+      loadProducts();
+    } catch (error) {
+      console.error('Error updating product:', error);
+      toast.error('Failed to update product');
+    } finally {
+      setAdding(false);
+    }
+  };
+
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this product?')) return;
     setDeleting(id);
@@ -129,24 +180,35 @@ export default function SettingsProducts() {
                 <div key={product.id} className="flex items-start justify-between p-4 border rounded-lg bg-slate-50">
                   <div className="flex-1">
                     <h3 className="font-semibold text-slate-900">{product.name}</h3>
+                    {product.description && <p className="text-sm text-slate-600 mt-1">{product.description}</p>}
                     <div className="flex gap-4 mt-2 text-sm text-slate-600">
                       <span>Type: <strong>{product.visit_type?.replace(/_/g, ' ')}</strong></span>
                       <span>Price: <strong>${product.base_price}</strong></span>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(product.id)}
-                    disabled={deleting === product.id}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    {deleting === product.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="h-4 w-4" />
-                    )}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEdit(product)}
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(product.id)}
+                      disabled={deleting === product.id}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      {deleting === product.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -176,6 +238,17 @@ export default function SettingsProducts() {
                   value={form.name}
                   onChange={(e) => setForm({...form, name: e.target.value})}
                   placeholder="Product name"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Input
+                  id="description"
+                  value={form.description}
+                  onChange={(e) => setForm({...form, description: e.target.value})}
+                  placeholder="Optional description"
                   className="mt-1"
                 />
               </div>
@@ -241,6 +314,84 @@ export default function SettingsProducts() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!editingId} onOpenChange={(open) => !open && setEditingId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Product</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSave} className="space-y-4">
+            <div>
+              <Label htmlFor="edit-name">Name *</Label>
+              <Input
+                id="edit-name"
+                value={form.name}
+                onChange={(e) => setForm({...form, name: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="edit-description">Description</Label>
+              <Input
+                id="edit-description"
+                value={form.description}
+                onChange={(e) => setForm({...form, description: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-visit-type">Visit Type *</Label>
+                <Select value={form.visit_type} onValueChange={(val) => setForm({...form, visit_type: val})}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="check-in">Check-In</SelectItem>
+                    <SelectItem value="followup">Follow-up</SelectItem>
+                    <SelectItem value="pre_storm">Pre-Storm</SelectItem>
+                    <SelectItem value="post_storm">Post-Storm</SelectItem>
+                    <SelectItem value="arrival_departure">Arrival/Departure</SelectItem>
+                    <SelectItem value="access_visit">Access Visit</SelectItem>
+                    <SelectItem value="emergency_visit">Emergency</SelectItem>
+                    <SelectItem value="damage_recovery">Damage Recovery</SelectItem>
+                    <SelectItem value="auto_care">Auto Care</SelectItem>
+                    <SelectItem value="client_service">Client Service</SelectItem>
+                    <SelectItem value="concierge">Concierge</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="edit-price">Price *</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                  <Input
+                    id="edit-price"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={form.base_price}
+                    onChange={(e) => setForm({...form, base_price: e.target.value})}
+                    className="pl-7"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setEditingId(null)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={adding} className="bg-slate-900 hover:bg-slate-800">
+                {adding ? 'Saving...' : 'Save'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
