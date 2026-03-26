@@ -1,0 +1,178 @@
+{
+  "name": "Tenant",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Tenant company name"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-friendly identifier (subdomain)"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "Tenant logo"
+    },
+    "primary_color": {
+      "type": "string",
+      "default": "#1e3a5f"
+    },
+    "accent_color": {
+      "type": "string",
+      "default": "#c9a962"
+    },
+    "address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "billing_email": {
+      "type": "string"
+    },
+    "billing_email_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "sendgrid_sender_id": {
+      "type": "string"
+    },
+    "sendgrid_domain": {
+      "type": "string"
+    },
+    "sendgrid_reply_to": {
+      "type": "string"
+    },
+    "twilio_phone_number": {
+      "type": "string"
+    },
+    "google_business_url": {
+      "type": "string"
+    },
+    "facebook_business_url": {
+      "type": "string"
+    },
+    "subscription_plan": {
+      "type": "string",
+      "enum": [
+        "trial",
+        "solopreneur",
+        "growth",
+        "professional"
+      ],
+      "default": "trial"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "trial",
+        "active",
+        "past_due",
+        "cancelled"
+      ],
+      "default": "trial"
+    },
+    "trial_ends_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "stripe_customer_id": {
+      "type": "string"
+    },
+    "stripe_subscription_id": {
+      "type": "string"
+    },
+    "stripe_connect_account_id": {
+      "type": "string"
+    },
+    "geofencing_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "geofencing_radius_meters": {
+      "type": "number",
+      "default": 150
+    },
+    "settings": {
+      "type": "object"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "created_by_email": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "slug"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "id": {
+            "$in": {
+              "collection": "TenantUser",
+              "query": {
+                "user_id": "{{user.id}}"
+              }
+            }
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "id": {
+            "$in": {
+              "collection": "TenantUser",
+              "query": {
+                "user_id": "{{user.id}}",
+                "role_in_tenant": "admin"
+              }
+            }
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
