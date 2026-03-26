@@ -1262,13 +1262,9 @@ ${company.name}
                               Edit Role & Access
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleResendInvite(member)}>
-                              <Mail className="h-4 w-4 mr-2" />
-                              Resend Invite
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleForcePasswordReset(member)}>
-                              <Lock className="h-4 w-4 mr-2" />
-                              Force Password Reset
-                            </DropdownMenuItem>
+                               <Mail className="h-4 w-4 mr-2" />
+                               Resend Invite
+                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               onClick={() => handleSuspendMember(member)}
                               className={member.is_active === false ? "text-green-600" : "text-amber-600"}
