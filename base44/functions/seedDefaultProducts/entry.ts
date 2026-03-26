@@ -127,7 +127,7 @@ Deno.serve(async (req) => {
     }
 
     // Check if products already exist
-    const existing = await base44.entities.ProductService.filter({ tenant_id: tenantId });
+    const existing = await base44.asServiceRole.entities.ProductService.filter({ tenant_id: tenantId });
     if (existing.length > 0) {
       return Response.json({
         success: false,
@@ -139,7 +139,7 @@ Deno.serve(async (req) => {
     // Create all default products
     const created = [];
     for (const product of DEFAULT_PRODUCTS) {
-      const result = await base44.entities.ProductService.create({
+      const result = await base44.asServiceRole.entities.ProductService.create({
         tenant_id: tenantId,
         ...product
       });
