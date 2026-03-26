@@ -1,0 +1,99 @@
+{
+  "name": "Contractor",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Reference to Tenant (isolation)"
+    },
+    "business_name": {
+      "type": "string",
+      "description": "Company or business name"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Primary contact person"
+    },
+    "contractor_type": {
+      "type": "string",
+      "enum": [
+        "cleaning_service",
+        "hvac",
+        "electrician",
+        "handyman",
+        "pest_control",
+        "plumber",
+        "pool_service",
+        "landscape",
+        "other"
+      ],
+      "description": "Type of contractor service"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "secondary_phone": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "license_number": {
+      "type": "string"
+    },
+    "insurance_info": {
+      "type": "string",
+      "description": "Insurance details"
+    },
+    "hourly_rate": {
+      "type": "number"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "tenant_id",
+    "business_name",
+    "contractor_type"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "read": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "superadmin"
+          }
+        }
+      ]
+    }
+  }
+}
