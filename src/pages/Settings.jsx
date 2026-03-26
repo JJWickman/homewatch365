@@ -52,7 +52,7 @@ import SubscriptionManagement from '@/components/settings/SubscriptionManagement
 import BillingEmailSection from '@/components/settings/BillingEmailSection';
 import ReviewsTab from '@/components/settings/ReviewsTab';
 import GeofencingSettings from '@/components/settings/GeofencingSettings';
-import BrandingSettings from '@/components/settings/BrandingSettings';
+
 import { getLimits } from '@/lib/planLimits';
 
 export default function Settings() {
@@ -1244,13 +1244,7 @@ ${company.name}
             </CardContent>
           </Card>
 
-          <BrandingSettings
-            company={company}
-            companyForm={companyForm}
-            setCompanyForm={setCompanyForm}
-            onSave={saveCompanySettings}
-            saving={saving}
-          />
+  
         </TabsContent>
 
         <TabsContent value="subscription">
