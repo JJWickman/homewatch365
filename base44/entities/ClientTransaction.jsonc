@@ -1,0 +1,90 @@
+{
+  "name": "ClientTransaction",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company (tenant isolation)"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "Reference to Client"
+    },
+    "description": {
+      "type": "string",
+      "description": "Transaction description"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Transaction amount"
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of transaction"
+    },
+    "billing_month": {
+      "type": "string",
+      "description": "Month this transaction applies to (YYYY-MM format)"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "service",
+        "product",
+        "add_on",
+        "custom"
+      ],
+      "default": "custom",
+      "description": "Type of transaction"
+    },
+    "product_service_id": {
+      "type": "string",
+      "description": "Reference to ProductService if applicable"
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a recurring charge"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "invoiced",
+        "paid"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "company_id",
+    "client_id",
+    "description",
+    "amount",
+    "billing_month"
+  ],
+  "rls": {
+    "create": {
+      "data.company_id": "{{user.data.primary_tenant_id}}"
+    },
+    "read": {
+      "data.company_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "data.company_id": "{{user.data.primary_tenant_id}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.company_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
