@@ -82,6 +82,93 @@ Deno.serve(async (req) => {
       console.log('Template seeding failed (non-fatal):', e.message);
     }
 
+    // Seed sample celebrity properties
+    try {
+      const sampleClients = [
+        {
+          tenant_id: tenant.id,
+          first_name: 'Chevy',
+          last_name: 'Chase',
+          email: 'chevy.chase@sample.com',
+          phone: '239-555-0101',
+          address: '1234 Gulf Shore Boulevard',
+          city: 'Naples',
+          state: 'FL',
+          zip: '34102',
+          portal_access: true,
+          portal_user_email: 'chevy.chase@sample.com',
+          billing_status: 'active',
+          monthly_rate: 500
+        },
+        {
+          tenant_id: tenant.id,
+          first_name: 'Steve',
+          last_name: 'Martin',
+          email: 'steve.martin@sample.com',
+          phone: '239-555-0102',
+          address: '567 Boca Grande Avenue',
+          city: 'Boca Grande',
+          state: 'FL',
+          zip: '33921',
+          portal_access: true,
+          portal_user_email: 'steve.martin@sample.com',
+          billing_status: 'active',
+          monthly_rate: 600
+        }
+      ];
+
+      const createdClients = await base44.asServiceRole.entities.Client.bulkCreate(sampleClients);
+
+      const sampleProperties = [
+        {
+          tenant_id: tenant.id,
+          client_id: createdClients[0].id,
+          name: 'Beachfront Estate',
+          address: '1234 Gulf Shore Boulevard',
+          city: 'Naples',
+          state: 'FL',
+          zip: '34102',
+          latitude: 26.1403,
+          longitude: -81.7945,
+          property_type: 'single_family',
+          status: 'seasonal',
+          bedrooms: 4,
+          bathrooms: 3.5,
+          square_feet: 4500,
+          year_built: 2012,
+          access_instructions: 'Key in lockbox by front door',
+          notes: 'Seasonal property - weekly inspections recommended',
+          visit_frequency: 'weekly'
+        },
+        {
+          tenant_id: tenant.id,
+          client_id: createdClients[1].id,
+          name: 'Waterfront Villa',
+          address: '567 Boca Grande Avenue',
+          city: 'Boca Grande',
+          state: 'FL',
+          zip: '33921',
+          latitude: 26.7533,
+          longitude: -82.2700,
+          property_type: 'single_family',
+          status: 'seasonal',
+          bedrooms: 5,
+          bathrooms: 4,
+          square_feet: 5500,
+          year_built: 2015,
+          access_instructions: 'Keypad code on request',
+          security_gate: true,
+          gate_code: '5555',
+          notes: 'Premium waterfront property',
+          visit_frequency: 'weekly'
+        }
+      ];
+
+      await base44.asServiceRole.entities.Property.bulkCreate(sampleProperties);
+    } catch (e) {
+      console.log('Sample data seeding failed (non-fatal):', e.message);
+    }
+
     // Fetch price_id for paid plans
     let price_id = null;
     if (subscriptionPlan && subscriptionPlan !== 'trial') {
