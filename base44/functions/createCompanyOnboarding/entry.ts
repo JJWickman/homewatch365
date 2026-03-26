@@ -46,36 +46,9 @@ Deno.serve(async (req) => {
       is_active: true
     });
 
-    // Also create legacy Company record so old code doesn't break
-    const company = await base44.asServiceRole.entities.Company.create({
-      name: companyName,
-      slug: subdomain,
-      email: email || user.email,
-      subscription_plan: subscriptionPlan || 'trial',
-      subscription_status: subscriptionPlan === 'trial' ? 'trial' : 'active',
-      trial_ends_at: (!subscriptionPlan || subscriptionPlan === 'trial')
-        ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
-        : null,
-      is_active: true
-    });
-
-    // Create CompanyMember for legacy support
-    await base44.asServiceRole.entities.CompanyMember.create({
-      company_id: company.id,
-      user_email: user.email,
-      user_name: fullName || user.full_name,
-      role: 'administrator',
-      access_level: 'admin',
-      is_owner: true,
-      is_active: true
-    });
-
-    // Set company_id and primary_tenant_id on user
+    // Set primary_tenant_id on user
     await base44.auth.updateMe({
       primary_tenant_id: tenant.id
-    });
-    await base44.asServiceRole.entities.User.update(user.id, {
-      company_id: company.id
     });
 
     // Seed checklist templates for the new tenant
@@ -198,10 +171,7 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       tenant_id: tenant.id,
-      company_id: company.id,
       tenant,
-      price_id,
-      subscription_plan: subscriptionPlan || 'trial'
     });
 
   } catch (error) {
