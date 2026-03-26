@@ -53,6 +53,11 @@
     "is_active": {
       "type": "boolean",
       "default": true
+    },
+    "is_standard_template": {
+      "type": "boolean",
+      "default": false,
+      "description": "Marks this product as a standard template to be copied to new tenants"
     }
   },
   "required": [
@@ -67,6 +72,18 @@
       "data.tenant_id": "{{user.primary_tenant_id}}"
     },
     "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
       "data.tenant_id": "{{user.primary_tenant_id}}"
     },
     "delete": {
