@@ -89,9 +89,8 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   useEffect(() => {
-    // Subscribe to company updates
     if (company?.id) {
-      const unsubscribe = base44.entities.Company.subscribe((event) => {
+      const unsubscribe = base44.entities.Tenant.subscribe((event) => {
         if (event.type === 'update' && event.id === company.id) {
           setCompany(event.data);
         }
@@ -150,22 +149,14 @@ export default function Layout({ children, currentPageName }) {
       }
       
       // Load user's CompanyMember record (role/permissions)
-      const members = await base44.entities.CompanyMember.filter({ 
-        company_id: currentUser.company_id,
-        user_email: currentUser.email 
-      });
+      const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
       if (members.length > 0) {
         setCompanyMember(members[0]);
       }
 
-      // Load tenant details (preferred) or fall back to company
+      // Load tenant
       const tenants = await base44.entities.Tenant.filter({ id: currentUser.primary_tenant_id });
-      if (tenants.length > 0) {
-        setCompany(tenants[0]);
-      } else {
-        const companies = await base44.entities.Company.filter({ id: currentUser.company_id });
-        if (companies.length > 0) setCompany(companies[0]);
-      }
+      if (tenants.length > 0) setCompany(tenants[0]);
     } catch (error) {
       console.log('User not authenticated');
     } finally {
