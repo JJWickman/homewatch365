@@ -356,24 +356,18 @@ export default function Settings() {
     }
   };
 
-  const handleSuspendMember
-
-  const handleForcePasswordReset = async (member) => {
+  const handleSuspendMember = async (member) => {
     try {
-      const response = await base44.functions.invoke('adminResetUserPassword', {
-        user_email: member.user_email
+      await base44.entities.CompanyMember.update(member.id, { 
+        is_active: member.is_active === false ? true : false 
       });
-      
-      if (response.data.success) {
-        alert(`Password reset email sent to ${member.user_email}`);
-      } else {
-        alert('Failed to send password reset: ' + (response.data.error || 'Unknown error'));
-      }
+      loadData();
     } catch (error) {
-      console.error('Error forcing password reset:', error);
-      alert('Failed to send password reset email');
+      console.error('Error suspending member:', error);
     }
   };
+
+  const handleForcePasswordReset = async (member) => {
 
   const handleInviteStaff = async () => {
     if (!inviteForm.email) {
@@ -1731,6 +1725,8 @@ ${company.name}
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
+      </div>
+      );
+      }
+
+      export default Settings;
