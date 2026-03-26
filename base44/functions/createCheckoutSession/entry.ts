@@ -99,12 +99,13 @@ Deno.serve(async (req) => {
           request_three_d_secure: 'automatic'
         }
       },
-      allow_promotion_codes: true,
     };
 
-    // Add promo code if provided
+    // Add promo code if provided, otherwise allow manual entry
     if (promo_code) {
       sessionParams.discounts = [{ promotion_code: promo_code }];
+    } else {
+      sessionParams.allow_promotion_codes = true;
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
