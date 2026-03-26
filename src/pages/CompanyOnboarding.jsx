@@ -129,6 +129,7 @@ export default function CompanyOnboarding() {
       });
 
       if (response.data?.success) {
+        console.log('Onboarding success, company_id:', response.data.company_id);
         if (form.plan !== 'trial' && response.data.price_id) {
           const checkout = await base44.functions.invoke('createCheckoutSession', {
             price_id: response.data.price_id,
@@ -141,7 +142,11 @@ export default function CompanyOnboarding() {
           }
         }
         toast.success('Welcome to Home Watch 365!');
-        setTimeout(() => navigate(createPageUrl('Dashboard')), 300);
+        // Wait 1s for user record to update in backend before Layout checks for company_id
+        setTimeout(() => {
+          console.log('Navigating to Dashboard');
+          navigate(createPageUrl('Dashboard'));
+        }, 1000);
       } else {
         toast.error(response.data?.error || 'Something went wrong. Please try again.');
       }
