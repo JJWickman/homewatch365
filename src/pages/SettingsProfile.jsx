@@ -14,7 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import PageHeader from '@/components/shared/PageHeader';
 import PasswordResetDialog from '@/components/auth/PasswordResetDialog';
 import { Shield } from 'lucide-react';
@@ -36,6 +35,10 @@ export default function SettingsProfile() {
   const [homeAddress, setHomeAddress] = useState({ address: '', city: '', state: '', zip: '' });
   const [calendarUrlCopied, setCalendarUrlCopied] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const loadData = async () => {
     try {
@@ -124,6 +127,8 @@ export default function SettingsProfile() {
       setSaveSuccess(true);
       toast.success('Profile saved successfully');
       setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (error) {
+      toast.error('Failed to save: ' + (error.message || 'Unknown error'));
     } finally {
       setSaving(false);
     }
@@ -142,11 +147,6 @@ export default function SettingsProfile() {
     setTimeout(() => setCalendarUrlCopied(false), 2000);
   };
 
-  const getInitials = (name) => {
-    if (!name) return 'U';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -156,12 +156,13 @@ export default function SettingsProfile() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto space-y-6">
       <PageHeader
         title="My Profile"
         subtitle="Update your personal information"
       />
 
+      {/* Profile Settings */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -321,11 +322,11 @@ export default function SettingsProfile() {
               {saveSuccess ? (<><Check className="h-4 w-4 mr-2" /> Saved</>) : (<><Save className="h-4 w-4 mr-2" /> {saving ? 'Saving...' : 'Save Changes'}</>) }
             </Button>
           </div>
-          </CardContent>
-          </Card>
+        </CardContent>
+      </Card>
 
-          {/* Route Optimization Addresses */}
-          <Card className="mt-6">
+      {/* Calendar Sync */}
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
@@ -355,7 +356,7 @@ export default function SettingsProfile() {
                   {calendarUrlCopied ? (
                     <Check className="h-4 w-4 text-green-600" />
                   ) : (
-                    <i className="h-4 w-4">📋</i>
+                    <span>📋</span>
                   )}
                 </Button>
               </div>
