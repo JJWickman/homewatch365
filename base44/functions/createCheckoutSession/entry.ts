@@ -19,45 +19,44 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Validate user has access to this company
-    const members = await base44.entities.CompanyMember.filter({ 
-      user_email: user.email,
-      company_id: company_id 
+    // Validate user is part of tenant
+    const tenantUsers = await base44.asServiceRole.entities.TenantUser.filter({
+      user_id: user.id,
+      tenant_id: company_id
     });
-
-    if (!members || members.length === 0) {
-      return Response.json({ error: 'Access denied: You do not belong to this company' }, { status: 403 });
+    if (!tenantUsers || tenantUsers.length === 0) {
+      return Response.json({ error: 'Access denied: You do not belong to this tenant' }, { status: 403 });
     }
 
-    // Validate user is admin for subscription changes
-    if (members[0].access_level !== 'admin' && !members[0].is_owner) {
+    // Validate user is admin
+    if (tenantUsers[0].role_in_tenant !== 'admin' && !tenantUsers[0].is_owner) {
       return Response.json({ error: 'Admin access required to change subscription' }, { status: 403 });
     }
 
-    // Get company
-    const companies = await base44.asServiceRole.entities.Company.filter({ id: company_id });
-    const company = companies[0];
+    // Get tenant
+    const tenants = await base44.asServiceRole.entities.Tenant.filter({ id: company_id });
+    const tenant = tenants[0];
 
-    if (!company) {
-      return Response.json({ error: 'Company not found' }, { status: 404 });
+    if (!tenant) {
+      return Response.json({ error: 'Tenant not found' }, { status: 404 });
     }
 
     // Create or get Stripe customer
-    let customerId = company.stripe_customer_id;
+    let customerId = tenant.stripe_customer_id;
     
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email,
-        name: company.name,
+        name: tenant.name,
         metadata: {
-          company_id: company.id,
+          tenant_id: tenant.id,
           user_email: user.email
         }
       });
       
       customerId = customer.id;
       
-      await base44.asServiceRole.entities.Company.update(company.id, {
+      await base44.asServiceRole.entities.Tenant.update(tenant.id, {
         stripe_customer_id: customerId
       });
     }
@@ -65,14 +64,14 @@ Deno.serve(async (req) => {
     // Create checkout session - only add trial for new customers (not upgrading from trial)
     const subscriptionData = {
       metadata: {
-        company_id: company.id,
+        tenant_id: tenant.id,
         subscription_plan,
         billing_cycle
       }
     };
     
     // Only include trial if they don't already have an active trial or subscription
-    if (company.subscription_status !== 'trial' && !company.stripe_subscription_id) {
+    if (tenant.subscription_status !== 'trial' && !tenant.stripe_subscription_id) {
       subscriptionData.trial_period_days = 14;
     }
 
@@ -91,7 +90,7 @@ Deno.serve(async (req) => {
       success_url: `${new URL(req.url).origin}/Dashboard?checkout=success`,
       cancel_url: `${new URL(req.url).origin}/Settings?tab=billing`,
       metadata: {
-        company_id: company.id,
+        tenant_id: tenant.id,
         subscription_plan,
         billing_cycle
       },

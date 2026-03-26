@@ -121,6 +121,7 @@ export default function CompanyOnboarding() {
             price_id: response.data.price_id,
             company_id: response.data.company_id,
             subscription_plan: form.plan,
+            promo_code: form.promoCode || null,
           });
           if (checkout.data?.url) {
             window.location.href = checkout.data.url;
