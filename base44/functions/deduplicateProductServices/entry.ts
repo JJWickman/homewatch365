@@ -11,10 +11,12 @@ Deno.serve(async (req) => {
 
     const tenantId = '69c4784908cbd3c8bce515f0';
 
-    // Fetch all products for this tenant
-    const allProducts = await base44.entities.ProductService.filter({
+    // Fetch all products for this tenant using service role
+    const allProducts = await base44.asServiceRole.entities.ProductService.filter({
       tenant_id: tenantId
     });
+
+    console.log('Total products found:', allProducts.length);
 
     // Group by visit_type and find newest in each group
     const groupedByVisitType = {};
@@ -28,11 +30,15 @@ Deno.serve(async (req) => {
       groupedByVisitType[vt].push(product);
     }
 
+    console.log('Visit types found:', Object.keys(groupedByVisitType).length);
+
     // For each visit_type, keep newest and mark others for deletion
     for (const visitType in groupedByVisitType) {
       const products = groupedByVisitType[visitType].sort(
         (a, b) => new Date(b.created_date) - new Date(a.created_date)
       );
+      
+      console.log(`${visitType}: ${products.length} products`);
       
       // Skip first (newest), delete rest
       for (let i = 1; i < products.length; i++) {
@@ -42,7 +48,7 @@ Deno.serve(async (req) => {
 
     // Delete duplicates
     for (const productId of toDelete) {
-      await base44.entities.ProductService.delete(productId);
+      await base44.asServiceRole.entities.ProductService.delete(productId);
     }
 
     return Response.json({
@@ -52,6 +58,7 @@ Deno.serve(async (req) => {
       deletedIds: toDelete
     });
   } catch (error) {
+    console.error('Error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
