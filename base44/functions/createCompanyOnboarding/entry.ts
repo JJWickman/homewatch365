@@ -159,7 +159,7 @@ Deno.serve(async (req) => {
         const pricesRes = await base44.functions.invoke('getStripePrices', {});
         const plans = pricesRes.data?.plans || [];
         const plan = plans.find(p => p.id === subscriptionPlan);
-        if (plan?.prices?.monthly?.id) price_id = plan.prices.monthly.id;
+        if (plan?.prices?.monthly?.priceId) price_id = plan.prices.monthly.priceId;
       } catch (e) {
         console.log('Could not fetch stripe price:', e.message);
       }
