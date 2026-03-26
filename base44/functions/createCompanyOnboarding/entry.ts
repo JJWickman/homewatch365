@@ -17,8 +17,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Company name and subdomain are required' }, { status: 400 });
     }
 
-    // Check subdomain uniqueness
-    const existing = await base44.asServiceRole.entities.Tenant.filter({ slug: subdomain });
+    // Check subdomain uniqueness (should be verified on frontend, but double-check)
+    const existing = await base44.asServiceRole.entities.Tenant.filter({ slug: subdomain.toLowerCase() });
     if (existing.length > 0) {
       return Response.json({ error: 'That subdomain is already taken. Please choose another.' }, { status: 409 });
     }

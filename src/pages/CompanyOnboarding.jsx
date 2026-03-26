@@ -57,18 +57,7 @@ export default function CompanyOnboarding() {
     init();
   }, []);
 
-  // Auto-generate unique subdomain from company name with timestamp
-  useEffect(() => {
-    if (!form.companyName || step !== 1) return;
-    const slug = form.companyName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-    const timestamp = Date.now().toString().slice(-6);
-    const uniqueSlug = `${slug}-${timestamp}`;
-    setForm(f => ({ ...f, subdomain: uniqueSlug }));
-    setSubdomainAvailable(null);
-  }, [form.companyName]);
+
 
   const init = async () => {
     try {
@@ -219,23 +208,52 @@ export default function CompanyOnboarding() {
                 <div className="flex gap-2">
                   <Input
                     value={form.subdomain}
-                    onChange={e => field('subdomain', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                    onChange={e => {
+                      const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                      field('subdomain', val);
+                      setSubdomainAvailable(null);
+                    }}
                     placeholder="my-company"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/40 flex-1"
                   />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={async () => {
+                      if (!form.subdomain) return;
+                      setCheckingSubdomain(true);
+                      try {
+                        const res = await base44.functions.invoke('checkSubdomainAvailability', { subdomain: form.subdomain });
+                        setSubdomainAvailable(res.data?.available ?? true);
+                      } catch (err) {
+                        setSubdomainAvailable(false);
+                      } finally {
+                        setCheckingSubdomain(false);
+                      }
+                    }}
+                    disabled={!form.subdomain || checkingSubdomain}
+                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 whitespace-nowrap"
+                  >
+                    {checkingSubdomain ? 'Checking...' : 'Check'}
+                  </Button>
+                </div>
+                {form.subdomain && (
+                  <div className={`flex items-center gap-2 text-sm ${
+                    subdomainAvailable === null ? 'text-blue-200' :
+                    subdomainAvailable ? 'text-green-300' : 'text-red-300'
+                  }`}>
+                    <Globe className="h-4 w-4" />
+                    <span>{form.subdomain}.estatewatch365.app</span>
+                    {subdomainAvailable === true && ' ✓ Available'}
+                    {subdomainAvailable === false && ' ✗ Taken'}
                   </div>
-                  {form.subdomain && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Globe className="h-4 w-4 text-blue-300" />
-                    <span className="text-blue-200">{form.subdomain}.estatewatch365.app</span>
-                  </div>
-                  )}
+                )}
               </div>
 
               <Button
                 onClick={() => setStep(2)}
-                disabled={!form.companyName || !form.subdomain}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold"
+                disabled={!form.companyName || !form.subdomain || subdomainAvailable === false}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <>Continue <ArrowRight className="h-4 w-4 ml-2" /></>
               </Button>
