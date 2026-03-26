@@ -177,7 +177,7 @@ export default function SettingsProducts() {
           <CardContent>
             <div className="space-y-3">
               {products.map(product => (
-                <div key={product.id} className="flex items-start justify-between p-4 border rounded-lg bg-slate-50">
+                <div key={product.id} className="flex items-start justify-between p-4 border rounded-lg bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleEdit(product)}>
                   <div className="flex-1">
                     <h3 className="font-semibold text-slate-900">{product.name}</h3>
                     {product.description && <p className="text-sm text-slate-600 mt-1">{product.description}</p>}
@@ -185,8 +185,20 @@ export default function SettingsProducts() {
                       <span>Type: <strong>{product.visit_type?.replace(/_/g, ' ')}</strong></span>
                       <span>Price: <strong>${product.base_price}</strong></span>
                     </div>
+                    {product.add_on_charges && Object.keys(product.add_on_charges).length > 0 && (
+                      <div className="mt-3 p-2 bg-white rounded border border-slate-200">
+                        <p className="text-xs font-semibold text-slate-700 mb-2">Additional Charges:</p>
+                        <div className="space-y-1">
+                          {Object.entries(product.add_on_charges).map(([key, charge]) => (
+                            <div key={key} className="text-xs text-slate-600">
+                              <strong>{key.replace(/_/g, ' ')}:</strong> ${charge.unit_price} — {charge.description}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -198,7 +210,10 @@ export default function SettingsProducts() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleDelete(product.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(product.id);
+                      }}
                       disabled={deleting === product.id}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
