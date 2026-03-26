@@ -301,17 +301,6 @@ export default function Settings() {
     setSaveSuccess(false);
     try {
       await base44.entities.Company.update(company.id, companyForm);
-      
-      // Also update Tenant so header/layout reflects the new logo immediately
-      if (user?.primary_tenant_id) {
-        await base44.entities.Tenant.update(user.primary_tenant_id, {
-          logo_url: companyForm.logo_url,
-          name: companyForm.name,
-          primary_color: companyForm.primary_color,
-          accent_color: companyForm.accent_color
-        });
-      }
-      
       setCompany({ ...company, ...companyForm });
       setSaveSuccess(true);
       toast.success('Company settings saved!', { duration: 5000 });
@@ -322,18 +311,6 @@ export default function Settings() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleEditMember = (member) => {
-    setEditingMember({
-      id: member.id,
-      user_name: member.user_name || '',
-      user_email: member.user_email,
-      role: member.role,
-      access_level: member.access_level || 'user',
-      crm_marketing_access: member.crm_marketing_access || false
-    });
-    setShowEditDialog(true);
   };
 
   const handleSaveEdit = async () => {
