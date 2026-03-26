@@ -53,7 +53,7 @@ export default function SettingsTemplates() {
         }
       }
 
-      // Get stored company templates (from settings.checklists) - custom 8
+      // Get stored company templates (from settings.checklists) - custom
       const storedTemplates = [];
       if (companyData?.settings?.checklists) {
         Object.entries(companyData.settings.checklists).forEach(([key, template]) => {
@@ -63,18 +63,21 @@ export default function SettingsTemplates() {
               name: template.name || key.charAt(0).toUpperCase() + key.slice(1),
               description: template.description || '',
               type: 'stored',
-              published: template.published
+              published: template.published,
+              section: 'custom'
             });
           }
         });
       }
 
-      // Fetch all ChecklistTemplate records - should be 11 system templates (3 home watch + 8 service visit)
+      // Fetch all ChecklistTemplate records - 11 system templates (3 core home watch + 8 additional service)
       const allTemplates = await base44.entities.ChecklistTemplate.filter({});
+      const CORE_CODES = ['single_family_standard', 'condo_villa_standard', 'high_rise_standard'];
       const dbTemplates = allTemplates.filter(t => t.active !== false).map(t => ({
         ...t,
         type: 'system',
-        isSystem: true
+        isSystem: true,
+        section: CORE_CODES.includes(t.code) ? 'core' : 'additional'
       }));
 
       // If fewer than 11 system templates found, reseed them
@@ -90,7 +93,8 @@ export default function SettingsTemplates() {
           const reloadedDbTemplates = reloadedTemplates.filter(t => t.active !== false).map(t => ({
             ...t,
             type: 'system',
-            isSystem: true
+            isSystem: true,
+            section: CORE_CODES.includes(t.code) ? 'core' : 'additional'
           }));
           setTemplates([...storedTemplates, ...reloadedDbTemplates]);
         } catch (seedError) {
@@ -132,7 +136,7 @@ export default function SettingsTemplates() {
       const updatedSettings = { ...(company.settings || {}), checklists: updatedChecklists };
       await base44.entities.Company.update(company.id, { settings: updatedSettings });
       
-      const newTemplate = { id: key, name: newTemplateName.trim(), description: '', type: 'stored', published: false };
+      const newTemplate = { id: key, name: newTemplateName.trim(), description: '', type: 'stored', published: false, section: 'custom' };
       setTemplates(prev => [...prev, newTemplate]);
       setShowCreateDialog(false);
       setNewTemplateName('');
@@ -172,6 +176,15 @@ export default function SettingsTemplates() {
     }
   };
 
+  const handleEdit = (template) => {
+    window.location.href = createPageUrl('ChecklistEditor') + `?templateId=${template.id}`;
+  };
+
+  const handleDelete = (template) => {
+    setDeletingTemplate(template);
+    setShowDeleteDialog(true);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -184,9 +197,9 @@ export default function SettingsTemplates() {
     <div className="max-w-4xl mx-auto">
       <PageHeader
         title="Checklist Templates"
-        subtitle="Create and manage inspection checklist templates for different property types"
-        action={handleCreateTemplate}
-        actionLabel="New Template"
+        subtitle="Manage inspection templates"
+        action={() => setShowCreateDialog(true)}
+        actionLabel="New Custom Template"
         actionIcon={Plus}
       />
 
@@ -204,71 +217,66 @@ export default function SettingsTemplates() {
           </Button>
         </div>
       ) : (
-        <div className="space-y-4">
-          {templates.map((template) => (
-            <Card key={template.id} className="hover:border-slate-300 transition-colors">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle>{template.name}</CardTitle>
-                    <CardDescription className="mt-2">
-                      {template.description || 'No description'}
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {template.isSystem && (
-                      <Badge variant="outline" className="bg-slate-100 text-slate-700">
-                        System Template
-                      </Badge>
-                    )}
-                    {template.type === 'system' && template.property_type && (
-                      <Badge variant="outline" className="capitalize">
-                        {template.property_type.replace('_', ' ')}
-                      </Badge>
-                    )}
-                    {template.type === 'stored' && (
-                      <Badge variant="outline" className="bg-amber-50 text-amber-700">
-                        Custom
-                      </Badge>
-                    )}
-                    {template.published && (
-                      <Badge variant="default" className="bg-green-600">Published</Badge>
-                    )}
-                    {template.active && (
-                      <Badge variant="default" className="bg-blue-600">Active</Badge>
-                    )}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem 
-                          onClick={() => window.location.href = createPageUrl('ChecklistEditor') + `?templateId=${template.id}`}
-                        >
-                          <Edit2 className="h-4 w-4 mr-2" />
-                          Edit
-                        </DropdownMenuItem>
-                        {!template.isSystem && (
-                          <DropdownMenuItem 
-                            onClick={() => {
-                              setDeletingTemplate(template);
-                              setShowDeleteDialog(true);
-                            }}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          ))}
+        <div className="space-y-8">
+          {/* CORE Templates Section */}
+          {templates.some(t => t.section === 'core') && (
+            <div>
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-slate-900">Core Templates</h3>
+                <p className="text-sm text-slate-500 mt-1">Essential templates for property inspections</p>
+              </div>
+              <div className="space-y-4">
+                {templates.filter(t => t.section === 'core').map((template) => (
+                  <TemplateCard 
+                    key={template.id} 
+                    template={template} 
+                    onEdit={handleEdit} 
+                    onDelete={handleDelete} 
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ADDITIONAL Templates Section */}
+          {templates.some(t => t.section === 'additional') && (
+            <div>
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-slate-900">Additional Templates</h3>
+                <p className="text-sm text-slate-500 mt-1">Service-specific templates for specialized visits</p>
+              </div>
+              <div className="space-y-4">
+                {templates.filter(t => t.section === 'additional').map((template) => (
+                  <TemplateCard 
+                    key={template.id} 
+                    template={template} 
+                    onEdit={handleEdit} 
+                    onDelete={handleDelete} 
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* CUSTOM Templates Section */}
+          {templates.some(t => t.section === 'custom') && (
+            <div>
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-slate-900">Custom Templates</h3>
+                <p className="text-sm text-slate-500 mt-1">Your custom inspection templates</p>
+              </div>
+              <div className="space-y-4">
+                {templates.filter(t => t.section === 'custom').map((template) => (
+                  <TemplateCard 
+                    key={template.id} 
+                    template={template} 
+                    onEdit={handleEdit} 
+                    onDelete={handleDelete} 
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -337,5 +345,63 @@ export default function SettingsTemplates() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+// Template Card Sub-component
+function TemplateCard({ template, onEdit, onDelete }) {
+  return (
+    <Card className="hover:border-slate-300 transition-colors">
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle>{template.name}</CardTitle>
+            <CardDescription className="mt-2">
+              {template.description || 'No description'}
+            </CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            {template.isSystem && (
+              <Badge variant="outline" className="bg-slate-100 text-slate-700">
+                System
+              </Badge>
+            )}
+            {template.section === 'custom' && (
+              <Badge variant="outline" className="bg-amber-50 text-amber-700">
+                Custom
+              </Badge>
+            )}
+            {template.published && (
+              <Badge variant="default" className="bg-green-600">Published</Badge>
+            )}
+            {template.active && (
+              <Badge variant="default" className="bg-blue-600">Active</Badge>
+            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => onEdit(template)}>
+                  <Edit2 className="h-4 w-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                {!template.isSystem && (
+                  <DropdownMenuItem 
+                    onClick={() => onDelete(template)}
+                    className="text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </CardHeader>
+    </Card>
   );
 }
