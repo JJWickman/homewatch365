@@ -100,8 +100,10 @@ export default function CompanyOnboarding() {
     try {
       const results = await base44.entities.Tenant.filter({ slug });
       setSubdomainAvailable(results.length === 0);
-    } catch {
-      setSubdomainAvailable(true);
+    } catch (error) {
+      console.error('Error checking subdomain:', error);
+      toast.error('Could not check subdomain availability. Please try again.');
+      setSubdomainAvailable(null);
     } finally {
       setCheckingSubdomain(false);
     }
@@ -116,6 +118,10 @@ export default function CompanyOnboarding() {
     }
     if (subdomainAvailable === false) {
       toast.error('That subdomain is taken. Please choose another.');
+      return;
+    }
+    if (subdomainAvailable === null) {
+      toast.error('Please verify your subdomain is available before continuing.');
       return;
     }
 
