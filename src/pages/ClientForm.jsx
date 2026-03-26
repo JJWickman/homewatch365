@@ -61,8 +61,7 @@ export default function ClientForm() {
         setLoading(false);
         return;
       }
-        const compId = members[0].company_id;
-        setCompanyId(compId);
+      setCompanyId(user.primary_tenant_id);
         
       // Load available per-visit services
       try {

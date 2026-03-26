@@ -37,8 +37,8 @@ import GeofencingSettings from '@/components/settings/GeofencingSettings';
 import { createPageUrl } from '@/utils';
 
 export default function SettingsAdmin() {
-  const [company, setCompany] = useState(null);
-  const [companyMember, setCompanyMember] = useState(null);
+  const [tenant, setTenant] = useState(null);
+  const [tenantUser, setTenantUser] = useState(null);
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [geocoding, setGeocoding] = useState(false);
@@ -67,17 +67,19 @@ export default function SettingsAdmin() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-      if (members.length > 0) {
-        setCompanyMember(members[0]);
-        const companyId = members[0].company_id;
+      const tenantUsers = await base44.entities.TenantUser.filter({ 
+        user_id: currentUser.id,
+        tenant_id: currentUser.primary_tenant_id
+      });
+      if (tenantUsers.length > 0) {
+        setTenantUser(tenantUsers[0]);
 
-        const [companies, staffData] = await Promise.all([
-          base44.entities.Company.filter({ id: companyId }),
-          base44.entities.CompanyMember.filter({ company_id: companyId })
+        const [tenants, staffData] = await Promise.all([
+          base44.entities.Tenant.filter({ id: currentUser.primary_tenant_id }),
+          base44.entities.TenantUser.filter({ tenant_id: currentUser.primary_tenant_id })
         ]);
 
-        if (companies.length > 0) setCompany(companies[0]);
+        if (tenants.length > 0) setTenant(tenants[0]);
         setStaff(staffData);
       }
     } catch (error) {
@@ -100,7 +102,7 @@ export default function SettingsAdmin() {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
       const invitation = await base44.entities.Invitation.create({
-        tenant_id: company?.id,
+        tenant_id: tenant?.id,
         invitee_email: inviteForm.email,
         inviter_email: user.email,
         token: inviteToken,
@@ -115,9 +117,9 @@ export default function SettingsAdmin() {
       const invitationUrl = `${appUrl}${createPageUrl('InvitationAccept')}?token=${invitation.token}`;
 
       const emailBody = `
-Hello ${inviteForm.name || ''},
+      Hello ${inviteForm.name || ''},
 
-You've been invited to join ${company.name} as a ${roleLabel}.
+      You've been invited to join ${tenant.name} as a ${roleLabel}.
 
 Click the link below to accept the invitation and create your account:
 ${invitationUrl}
@@ -125,13 +127,13 @@ ${invitationUrl}
 This link will expire in 7 days.
 
 Best regards,
-${company.name}
+${tenant.name}
       `.trim();
 
       await base44.integrations.Core.SendEmail({
         from_name: 'Estate Watch 365',
         to: inviteForm.email,
-        subject: `You've been invited to join ${company.name}`,
+        subject: `You've been invited to join ${tenant.name}`,
         body: emailBody
       });
 
@@ -150,11 +152,8 @@ ${company.name}
   const handleSaveEdit = async () => {
     if (!editingMember) return;
     try {
-      await base44.entities.CompanyMember.update(editingMember.id, {
-        user_name: editingMember.user_name,
-        role: editingMember.role,
-        access_level: editingMember.access_level,
-        crm_marketing_access: editingMember.crm_marketing_access
+      await base44.entities.TenantUser.update(editingMember.id, {
+        role_in_tenant: editingMember.role_in_tenant
       });
       setShowEditDialog(false);
       setEditingMember(null);
@@ -168,7 +167,7 @@ ${company.name}
   const handleDeleteMember = async () => {
     if (!deletingMember) return;
     try {
-      await base44.entities.CompanyMember.delete(deletingMember.id);
+      await base44.entities.TenantUser.delete(deletingMember.id);
       setShowDeleteDialog(false);
       setDeletingMember(null);
       loadData();
@@ -179,7 +178,7 @@ ${company.name}
 
   const handleSuspendMember = async (member) => {
     try {
-      await base44.entities.CompanyMember.update(member.id, { 
+      await base44.entities.TenantUser.update(member.id, { 
         is_active: member.is_active === false ? true : false 
       });
       loadData();
@@ -225,7 +224,7 @@ ${company.name}
     );
   }
 
-  const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'owner';
+  const isAdmin = tenantUser?.role_in_tenant === 'admin' || tenantUser?.is_owner;
   const canManageStaff = isAdmin;
 
   return (
@@ -236,13 +235,13 @@ ${company.name}
       />
 
       {/* Billing Email */}
-      {company && (
-        <BillingEmailSection company={company} onUpdate={loadData} />
+      {tenant && (
+        <BillingEmailSection company={tenant} onUpdate={loadData} />
       )}
 
       {/* Stripe Connect */}
-      {company && (
-        <StripeConnectCard company={company} onRefresh={loadData} />
+      {tenant && (
+        <StripeConnectCard company={tenant} onRefresh={loadData} />
       )}
 
       {/* Team Members */}
@@ -288,14 +287,14 @@ ${company.name}
                     <Shield className="h-5 w-5 text-blue-600" title="Admin Access" />
                   )}
                   <Badge variant="outline" className="capitalize">
-                    {member.role === 'field_inspector' ? 'Reporter' : 
-                     member.role === 'dispatcher' ? 'Dispatcher/Manager' : 
-                     'Administrator'}
+                    {member.role_in_tenant === 'field_inspector' ? 'Reporter' : 
+                     member.role_in_tenant === 'dispatcher' ? 'Dispatcher/Manager' : 
+                     'Admin'}
                   </Badge>
                   {member.is_active === false && (
                     <Badge variant="destructive">Suspended</Badge>
                   )}
-                  {canManageStaff && member.user_email !== companyMember?.user_email && (
+                  {canManageStaff && member.user_id !== tenantUser?.user_id && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
@@ -347,10 +346,10 @@ ${company.name}
       </Card>
 
       {/* Geofencing */}
-      {company && (
+      {tenant && (
         <GeofencingSettings
-          company={company}
-          onUpdate={(updated) => setCompany(updated)}
+          company={tenant}
+          onUpdate={(updated) => setTenant(updated)}
         />
       )}
 

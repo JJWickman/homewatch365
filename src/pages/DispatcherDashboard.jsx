@@ -14,7 +14,7 @@ export default function DispatcherDashboard() {
   const [properties, setProperties] = useState([]);
   const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [companyMember, setCompanyMember] = useState(null);
+  const [tenantUser, setTenantUser] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -23,22 +23,23 @@ export default function DispatcherDashboard() {
   const loadData = async () => {
     try {
       const user = await base44.auth.me();
-      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
+      const tenantUsers = await base44.entities.TenantUser.filter({ 
+        user_id: user.id,
+        tenant_id: user.primary_tenant_id
+      });
       
-      if (members.length === 0) return;
-      
-      const member = members[0];
-      setCompanyMember(member);
+      if (tenantUsers.length === 0) return;
+      setTenantUser(tenantUsers[0]);
 
       const today = new Date().toISOString().split('T')[0];
       
       const [visitsData, propertiesData, teamData] = await Promise.all([
         base44.entities.Visit.filter({ 
-          company_id: member.company_id,
+          tenant_id: user.primary_tenant_id,
           scheduled_date: today
         }),
-        base44.entities.Property.filter({ company_id: member.company_id }),
-        base44.entities.CompanyMember.filter({ company_id: member.company_id })
+        base44.entities.Property.filter({ tenant_id: user.primary_tenant_id }),
+        base44.entities.TenantUser.filter({ tenant_id: user.primary_tenant_id })
       ]);
 
       setVisits(visitsData);
@@ -139,9 +140,9 @@ export default function DispatcherDashboard() {
         {/* Team Availability Sidebar */}
         <div className="lg:col-span-1">
           <TeamAvailability 
-            team={team}
-            companyId={companyMember?.company_id}
-          />
+              team={team}
+              tenantId={tenantUser?.tenant_id}
+            />
         </div>
       </div>
     </div>
