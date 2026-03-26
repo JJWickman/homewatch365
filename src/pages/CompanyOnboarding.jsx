@@ -134,11 +134,18 @@ export default function CompanyOnboarding() {
           navigate(createPageUrl('Dashboard'));
         }, 1000);
       } else {
-        const errMsg = response.data?.error || response.statusText || 'Something went wrong';
+        let errMsg = response.data?.error || 'Something went wrong';
+        if (response.status === 409) {
+          errMsg = 'That subdomain is already taken. Please choose another.';
+        }
         toast.error(errMsg);
       }
     } catch (error) {
-      toast.error(error.message || 'Failed to create account.');
+      let errMsg = error.message || 'Failed to create account.';
+      if (error.response?.status === 409) {
+        errMsg = 'That subdomain is already taken. Please choose another.';
+      }
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
