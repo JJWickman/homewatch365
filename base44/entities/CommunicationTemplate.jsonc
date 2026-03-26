@@ -1,0 +1,72 @@
+{
+  "name": "CommunicationTemplate",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Reference to Tenant (isolation)"
+    },
+    "name": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Email subject line"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms"
+      ],
+      "description": "Communication type"
+    },
+    "content": {
+      "type": "string",
+      "description": "Template content with optional variables like {{client_name}}, {{property_name}}"
+    },
+    "description": {
+      "type": "string"
+    },
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Available variables for this template"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "tenant_id",
+    "name",
+    "type",
+    "content"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "read": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "superadmin"
+          }
+        }
+      ]
+    }
+  }
+}
