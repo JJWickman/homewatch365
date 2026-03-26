@@ -5,8 +5,8 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (!user || user.role !== 'admin') {
-      return Response.json({ error: 'Admin access required' }, { status: 403 });
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const tenantId = user.primary_tenant_id || '69c4784908cbd3c8bce515f0';
@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
       }
     ];
 
-    const createdClients = await base44.asServiceRole.entities.Client.bulkCreate(sampleClients);
+    const createdClients = await base44.entities.Client.bulkCreate(sampleClients);
 
     const sampleProperties = [
       {
@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
       }
     ];
 
-    await base44.asServiceRole.entities.Property.bulkCreate(sampleProperties);
+    await base44.entities.Property.bulkCreate(sampleProperties);
 
     return Response.json({
       success: true,
