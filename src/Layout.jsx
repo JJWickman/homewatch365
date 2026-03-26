@@ -144,7 +144,7 @@ export default function Layout({ children, currentPageName }) {
       }
 
       // Check if user has completed onboarding
-      if (currentUser.onboarding_completed !== true && currentPageName !== 'CompanyOnboarding') {
+      if (!currentUser.primary_tenant_id && currentPageName !== 'CompanyOnboarding') {
         navigate(createPageUrl('CompanyOnboarding'));
         return;
       }

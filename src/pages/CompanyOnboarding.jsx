@@ -56,16 +56,20 @@ export default function CompanyOnboarding() {
     init();
   }, []);
 
-  // Auto-generate subdomain from company name
+  // Auto-generate subdomain from company name and auto-check it
   useEffect(() => {
-    if (form.companyName && step === 1) {
-      const slug = form.companyName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-      setForm(f => ({ ...f, subdomain: slug }));
-      setSubdomainAvailable(null);
-    }
+    if (!form.companyName || step !== 1) return;
+    const slug = form.companyName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+    setForm(f => ({ ...f, subdomain: slug }));
+    setSubdomainAvailable(null);
+    // Debounce the availability check
+    const timer = setTimeout(() => {
+      if (slug) checkSubdomainFor(slug);
+    }, 600);
+    return () => clearTimeout(timer);
   }, [form.companyName]);
 
   const init = async () => {
@@ -89,11 +93,11 @@ export default function CompanyOnboarding() {
     }
   };
 
-  const checkSubdomain = async () => {
-    if (!form.subdomain) return;
+  const checkSubdomainFor = async (slug) => {
+    if (!slug) return;
     setCheckingSubdomain(true);
     try {
-      const results = await base44.entities.Tenant.filter({ slug: form.subdomain });
+      const results = await base44.entities.Tenant.filter({ slug });
       setSubdomainAvailable(results.length === 0);
     } catch {
       setSubdomainAvailable(true);
@@ -101,6 +105,8 @@ export default function CompanyOnboarding() {
       setCheckingSubdomain(false);
     }
   };
+
+  const checkSubdomain = () => checkSubdomainFor(form.subdomain);
 
   const handleSubmit = async () => {
     if (!form.companyName || !form.subdomain || !form.email) {
@@ -239,11 +245,17 @@ export default function CompanyOnboarding() {
               </div>
 
               <Button
-                onClick={() => setStep(2)}
-                disabled={!form.companyName || !form.subdomain || subdomainAvailable === false}
+                onClick={() => {
+                  if (subdomainAvailable === true) {
+                    setStep(2);
+                  } else {
+                    checkSubdomainFor(form.subdomain);
+                  }
+                }}
+                disabled={!form.companyName || !form.subdomain || subdomainAvailable === false || checkingSubdomain}
                 className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold"
               >
-                Continue <ArrowRight className="h-4 w-4 ml-2" />
+                {checkingSubdomain ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Checking...</> : <>Continue <ArrowRight className="h-4 w-4 ml-2" /></>}
               </Button>
             </div>
           )}

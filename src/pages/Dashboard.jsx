@@ -64,12 +64,18 @@ export default function Dashboard() {
 
      setCompanyMember(members[0]);
      const companyId = members[0]?.company_id;
+     const tenantId = currentUser.primary_tenant_id;
+
+     // Use tenant_id for data isolation (new accounts), fall back to company_id
+     const clientFilter = tenantId ? { tenant_id: tenantId, is_active: true } : { company_id: companyId, is_active: true };
+     const propertyFilter = tenantId ? { tenant_id: tenantId, is_active: true } : { company_id: companyId, is_active: true };
+     const visitFilter = tenantId ? { tenant_id: tenantId } : { company_id: companyId };
 
      const [companies, clients, properties, visits, transactions] = await Promise.all([
-      base44.entities.Company.filter({ id: companyId }),
-       base44.entities.Client.filter({ company_id: companyId, is_active: true }),
-       base44.entities.Property.filter({ company_id: companyId, is_active: true }),
-       base44.entities.Visit.filter({ company_id: companyId }, '-updated_date', 100),
+      tenantId ? base44.entities.Tenant.filter({ id: tenantId }) : base44.entities.Company.filter({ id: companyId }),
+       base44.entities.Client.filter(clientFilter),
+       base44.entities.Property.filter(propertyFilter),
+       base44.entities.Visit.filter(visitFilter, '-updated_date', 100),
        base44.entities.ClientTransaction.filter({ company_id: companyId })
      ]);
 
@@ -122,9 +128,11 @@ export default function Dashboard() {
 
       // Enrich with property and client data
       const enrichedVisits = await Promise.all(todayScheduled.map(async (visit) => {
+        const propQuery = tenantId ? { id: visit.property_id, tenant_id: tenantId } : { id: visit.property_id, company_id: companyId };
+        const clientQuery = tenantId ? { id: visit.client_id, tenant_id: tenantId } : { id: visit.client_id, company_id: companyId };
         const [props, cls] = await Promise.all([
-          base44.entities.Property.filter({ id: visit.property_id, company_id: companyId }),
-          base44.entities.Client.filter({ id: visit.client_id, company_id: companyId })
+          base44.entities.Property.filter(propQuery),
+          base44.entities.Client.filter(clientQuery)
         ]);
         return { ...visit, property: props[0], client: cls[0] };
       }));

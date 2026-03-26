@@ -97,6 +97,9 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Small delay to let DB writes propagate before frontend redirects
+    await new Promise(r => setTimeout(r, 500));
+
     return Response.json({
       success: true,
       tenant_id: tenant.id,
