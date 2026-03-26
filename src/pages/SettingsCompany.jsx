@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Building, Link2, ExternalLink, Unlink, Save, Check } from 'lucide-react';
+import { Building, Link2, ExternalLink, Unlink, Save, Check, CreditCard, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -333,13 +333,52 @@ export default function SettingsCompany() {
           )}
 
           <div className="pt-4 flex justify-end">
-            <Button onClick={saveCompanySettings} disabled={saving} className="bg-slate-900 hover:bg-slate-800">
-              <Save className="h-4 w-4 mr-2" />
-              {saving ? 'Saving...' : 'Save Profiles'}
-            </Button>
+           <Button onClick={saveCompanySettings} disabled={saving} className="bg-slate-900 hover:bg-slate-800">
+             <Save className="h-4 w-4 mr-2" />
+             {saving ? 'Saving...' : 'Save Profiles'}
+           </Button>
           </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+          </CardContent>
+          </Card>
+
+          {/* Subscription Management */}
+          <Card className="mt-6">
+          <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+           <CreditCard className="h-5 w-5" />
+           Subscription Management
+          </CardTitle>
+          <CardDescription>Manage your billing and subscription</CardDescription>
+          </CardHeader>
+          <CardContent>
+          <div className="space-y-4">
+           <div>
+             <p className="text-sm text-slate-600 mb-3">
+               Current Plan: <span className="font-semibold capitalize">{company?.subscription_plan}</span>
+             </p>
+             <p className="text-sm text-slate-600 mb-4">
+               Status: <span className="font-semibold capitalize">{company?.subscription_status}</span>
+             </p>
+           </div>
+           <Button
+             onClick={async () => {
+               try {
+                 const res = await base44.functions.invoke('createBillingPortalSession', {});
+                 if (res.data?.url) {
+                   window.location.href = res.data.url;
+                 }
+               } catch (error) {
+                 console.error('Error opening billing portal:', error);
+                 alert('Failed to open billing portal');
+               }
+             }}
+             className="bg-blue-600 hover:bg-blue-700"
+           >
+             Manage Billing
+           </Button>
+          </div>
+          </CardContent>
+          </Card>
+          </div>
+          );
+          }
