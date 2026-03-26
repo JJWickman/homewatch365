@@ -67,29 +67,5 @@
     "type",
     "base_price"
   ],
-  "rls": {
-    "create": {
-      "data.tenant_id": "{{user.primary_tenant_id}}"
-    },
-    "read": {
-      "$or": [
-        {
-          "data.tenant_id": "{{user.primary_tenant_id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
-    "update": {
-      "data.tenant_id": "{{user.primary_tenant_id}}"
-    },
-    "delete": {
-      "user_condition": {
-        "role": "superadmin"
-      }
-    }
-  }
+  "rls": {}
 }
