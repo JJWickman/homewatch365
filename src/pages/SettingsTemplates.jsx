@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { ClipboardList, Plus, Edit2, Trash2, MoreVertical, Loader2 } from 'lucide-react';
+import { 
+  ClipboardList, Plus, Edit2, Trash2, MoreVertical, Loader2,
+  Home, Building2, Building, MapPin, AlertTriangle,
+  Users, Package, Car, Clock, Eye, Zap
+} from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -185,6 +189,30 @@ export default function SettingsTemplates() {
     setShowDeleteDialog(true);
   };
 
+  // Icon mapping for templates by code/name
+  const getTemplateIcon = (template) => {
+    const code = template.code || '';
+    const name = template.name?.toLowerCase() || '';
+
+    // Core templates
+    if (code === 'single_family_standard' || name.includes('single family')) return Home;
+    if (code === 'condo_villa_standard' || name.includes('condo') || name.includes('villa')) return Building2;
+    if (code === 'high_rise_standard' || name.includes('high rise')) return Building;
+
+    // Service templates
+    if (code.includes('arrival') || code.includes('departure')) return Clock;
+    if (code.includes('access')) return MapPin;
+    if (code.includes('emergency')) return AlertTriangle;
+    if (code.includes('damage') || code.includes('recovery')) return Eye;
+    if (code.includes('auto_care') || code.includes('vehicle')) return Car;
+    if (code.includes('client') || code.includes('service')) return Users;
+    if (code.includes('concierge') || code.includes('package')) return Package;
+    if (code.includes('storm') || code.includes('pre_storm') || code.includes('post_storm')) return Zap;
+
+    // Fallback
+    return ClipboardList;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -230,6 +258,7 @@ export default function SettingsTemplates() {
                   <TemplateCard 
                     key={template.id} 
                     template={template} 
+                    icon={getTemplateIcon(template)}
                     onEdit={handleEdit} 
                     onDelete={handleDelete} 
                   />
@@ -250,6 +279,7 @@ export default function SettingsTemplates() {
                   <TemplateCard 
                     key={template.id} 
                     template={template} 
+                    icon={getTemplateIcon(template)}
                     onEdit={handleEdit} 
                     onDelete={handleDelete} 
                   />
@@ -270,6 +300,7 @@ export default function SettingsTemplates() {
                   <TemplateCard 
                     key={template.id} 
                     template={template} 
+                    icon={getTemplateIcon(template)}
                     onEdit={handleEdit} 
                     onDelete={handleDelete} 
                   />
@@ -349,18 +380,26 @@ export default function SettingsTemplates() {
 }
 
 // Template Card Sub-component
-function TemplateCard({ template, onEdit, onDelete }) {
+function TemplateCard({ template, icon: IconComponent, onEdit, onDelete }) {
   return (
-    <Card className="hover:border-slate-300 transition-colors">
+    <Card className="hover:border-slate-300 transition-colors cursor-pointer" onClick={() => onEdit(template)}>
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle>{template.name}</CardTitle>
-            <CardDescription className="mt-2">
-              {template.description || 'No description'}
-            </CardDescription>
+        <div className="flex items-start justify-between gap-4">
+          {/* Icon and Content */}
+          <div className="flex items-start gap-4 flex-1">
+            <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center flex-shrink-0">
+              <IconComponent className="h-6 w-6 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <CardTitle>{template.name}</CardTitle>
+              <CardDescription className="mt-2">
+                {template.description || 'No description'}
+              </CardDescription>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          {/* Badges and Menu */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             {template.isSystem && (
               <Badge variant="outline" className="bg-slate-100 text-slate-700">
                 System
@@ -378,19 +417,25 @@ function TemplateCard({ template, onEdit, onDelete }) {
               <Badge variant="default" className="bg-blue-600">Active</Badge>
             )}
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Button variant="ghost" size="icon">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onEdit(template)}>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(template);
+                }}>
                   <Edit2 className="h-4 w-4 mr-2" />
                   Edit
                 </DropdownMenuItem>
                 {!template.isSystem && (
                   <DropdownMenuItem 
-                    onClick={() => onDelete(template)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(template);
+                    }}
                     className="text-red-600"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
