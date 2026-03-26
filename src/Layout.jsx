@@ -134,17 +134,11 @@ export default function Layout({ children, currentPageName }) {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      // Check if user has primary_tenant_id (new tenant isolation)
-      if (!currentUser.primary_tenant_id) {
+      // Check if user has completed onboarding (has company_id or tenant membership)
+      if (!currentUser.company_id) {
         if (currentPageName !== 'CompanyOnboarding') {
           navigate(createPageUrl('CompanyOnboarding'));
         }
-        return;
-      }
-
-      // Check if user has completed onboarding
-      if (!currentUser.primary_tenant_id && currentPageName !== 'CompanyOnboarding') {
-        navigate(createPageUrl('CompanyOnboarding'));
         return;
       }
       
