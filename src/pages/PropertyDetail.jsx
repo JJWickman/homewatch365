@@ -183,12 +183,10 @@ export default function PropertyDetail() {
 
     try {
       const user = await base44.auth.me();
-      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
-      const companyId = members[0]?.company_id;
 
       const [propertyData, visitsData] = await Promise.all([
-        base44.entities.Property.filter({ id, company_id: companyId }),
-        base44.entities.Visit.filter({ property_id: id, company_id: companyId }, '-scheduled_date', 20)
+        base44.entities.Property.filter({ id }),
+        base44.entities.Visit.filter({ property_id: id }, '-scheduled_date', 20)
       ]);
 
       if (propertyData.length > 0) {
@@ -199,7 +197,7 @@ export default function PropertyDetail() {
         if (prop.client_id) {
           const [clientData, allClientsData] = await Promise.all([
             base44.entities.Client.filter({ id: prop.client_id }),
-            base44.entities.Client.filter({ company_id: prop.company_id, is_active: true })
+            base44.entities.Client.filter({ is_active: true })
           ]);
           if (clientData.length > 0) setClient(clientData[0]);
           setClients(allClientsData);
@@ -210,10 +208,10 @@ export default function PropertyDetail() {
           setContractors(contractorsData);
         }
 
-        const allPropsData = await base44.entities.Property.filter({ company_id: prop.company_id });
+        const allPropsData = await base44.entities.Property.list();
         setAllProperties(allPropsData);
 
-        const checklistData = await base44.entities.PropertyChecklist.filter({ property_id: id, company_id: companyId, is_active: true });
+        const checklistData = await base44.entities.PropertyChecklist.filter({ property_id: id, is_active: true });
         if (checklistData.length > 0) setPropertyChecklist(checklistData[0]);
 
         const uniqueTags = Array.from(new Set(allPropsData.flatMap(p => p.tags || [])));
