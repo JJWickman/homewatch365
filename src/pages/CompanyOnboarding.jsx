@@ -141,7 +141,7 @@ export default function CompanyOnboarding() {
           }
         }
         toast.success('Welcome to Home Watch 365!');
-        setTimeout(() => { window.location.href = createPageUrl('Dashboard'); }, 500);
+        setTimeout(() => { window.location.reload(); }, 500);
       } else {
         toast.error(response.data?.error || 'Something went wrong. Please try again.');
       }
