@@ -30,13 +30,32 @@ Deno.serve(async (req) => {
     const deleted = [];
     const failed = [];
 
-    for (const productId of unreferencedIds) {
-      try {
-        await base44.asServiceRole.entities.ProductService.delete(productId);
-        deleted.push(productId);
-      } catch (error) {
-        console.error(`Failed to delete ${productId}:`, error.message);
-        failed.push({ id: productId, error: error.message });
+    for (let i = 0; i < unreferencedIds.length; i++) {
+      const productId = unreferencedIds[i];
+      let retries = 0;
+      let success = false;
+
+      while (retries < 3 && !success) {
+        try {
+          await base44.asServiceRole.entities.ProductService.delete(productId);
+          deleted.push(productId);
+          success = true;
+        } catch (error) {
+          retries++;
+          if (retries < 3 && error.message.includes('Rate limit')) {
+            // Exponential backoff: 500ms, 1000ms, 2000ms
+            const delay = Math.pow(2, retries - 1) * 500;
+            await new Promise(r => setTimeout(r, delay));
+          } else {
+            console.error(`Failed to delete ${productId}:`, error.message);
+            failed.push({ id: productId, error: error.message });
+            success = true; // Stop retrying on non-rate-limit errors
+          }
+        }
+      }
+
+      if (!success) {
+        failed.push({ id: productId, error: 'Max retries exceeded' });
       }
     }
 
