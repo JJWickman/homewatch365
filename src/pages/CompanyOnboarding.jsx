@@ -108,6 +108,8 @@ export default function CompanyOnboarding() {
       if (response.data?.success) {
         console.log('Onboarding success, company_id:', response.data.company_id);
         if (form.plan !== 'trial' && response.data.price_id) {
+          // For paid plans, redirect to Stripe
+          // After Stripe success, user will see success page and can click to dashboard
           const checkout = await base44.functions.invoke('createCheckoutSession', {
             price_id: response.data.price_id,
             company_id: response.data.company_id,
@@ -117,6 +119,15 @@ export default function CompanyOnboarding() {
           if (checkout.data?.url) {
             window.location.href = checkout.data.url;
             return;
+          }
+        } else {
+          // For trial plans, finalize onboarding immediately
+          try {
+            await base44.functions.invoke('finalizeOnboarding', {
+              tenant_id: response.data.company_id
+            });
+          } catch (e) {
+            console.error('Error finalizing onboarding:', e);
           }
         }
         toast.success('Welcome to Home Watch 365!');

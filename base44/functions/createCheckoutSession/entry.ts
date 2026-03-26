@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
         },
       ],
       subscription_data: subscriptionData,
-      success_url: `${new URL(req.url).origin}/Dashboard?checkout=success`,
+      success_url: `${new URL(req.url).origin}/Dashboard?checkout=success&tenant_id=${company_id}`,
       cancel_url: `${new URL(req.url).origin}/Settings?tab=billing`,
       metadata: {
         tenant_id: tenant.id,

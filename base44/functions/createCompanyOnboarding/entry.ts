@@ -46,10 +46,13 @@ Deno.serve(async (req) => {
       is_active: true
     });
 
-    // Set primary_tenant_id on user
-    await base44.auth.updateMe({
-      primary_tenant_id: tenant.id
-    });
+    // Only set primary_tenant_id for trial plans
+    // For paid plans, it will be set after successful Stripe checkout
+    if (!subscriptionPlan || subscriptionPlan === 'trial') {
+      await base44.auth.updateMe({
+        primary_tenant_id: tenant.id
+      });
+    }
 
     // Seed checklist templates for the new tenant
     try {
