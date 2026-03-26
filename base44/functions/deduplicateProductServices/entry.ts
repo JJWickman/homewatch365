@@ -43,15 +43,22 @@ Deno.serve(async (req) => {
     }
 
     // Delete duplicates
+    const deletedIds = [];
     for (const productId of toDelete) {
-      await base44.asServiceRole.entities.ProductService.delete(productId);
+      try {
+        await base44.asServiceRole.entities.ProductService.delete(productId);
+        deletedIds.push(productId);
+      } catch (error) {
+        console.error(`Failed to delete product ${productId}:`, error.message);
+      }
     }
 
     return Response.json({
       message: 'Deduplication complete',
       kept: Object.keys(groupedByVisitType).length,
-      deleted: toDelete.length,
-      deletedIds: toDelete
+      deleted: deletedIds.length,
+      deletedIds: deletedIds,
+      failedToDelete: toDelete.length - deletedIds.length
     });
   } catch (error) {
     console.error('Error:', error);
