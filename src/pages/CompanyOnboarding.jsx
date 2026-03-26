@@ -57,20 +57,17 @@ export default function CompanyOnboarding() {
     init();
   }, []);
 
-  // Auto-generate subdomain from company name and auto-check it
+  // Auto-generate unique subdomain from company name with timestamp
   useEffect(() => {
     if (!form.companyName || step !== 1) return;
     const slug = form.companyName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
-    setForm(f => ({ ...f, subdomain: slug }));
+    const timestamp = Date.now().toString().slice(-6);
+    const uniqueSlug = `${slug}-${timestamp}`;
+    setForm(f => ({ ...f, subdomain: uniqueSlug }));
     setSubdomainAvailable(null);
-    // Debounce the availability check
-    const timer = setTimeout(() => {
-      if (slug) checkSubdomainFor(slug);
-    }, 600);
-    return () => clearTimeout(timer);
   }, [form.companyName]);
 
   const init = async () => {
