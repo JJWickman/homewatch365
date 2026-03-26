@@ -24,17 +24,6 @@ export default function ProductServiceWizard() {
     base_price: ''
   });
 
-  const seedDefaults = async () => {
-    try {
-      const res = await base44.functions.invoke('seedDefaultProducts', {});
-      if (res.data?.success) {
-        await loadData();
-      }
-    } catch (error) {
-      console.log('Seeding failed or not needed');
-    }
-  };
-
   const loadData = async () => {
     try {
       const user = await base44.auth.me();
@@ -42,13 +31,22 @@ export default function ProductServiceWizard() {
         const tenants = await base44.entities.Tenant.filter({ id: user.primary_tenant_id });
         if (tenants.length > 0) setTenant(tenants[0]);
 
-        const prods = await base44.entities.ProductService.filter({ tenant_id: user.primary_tenant_id });
-        setProducts(prods.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)));
+        let prods = await base44.entities.ProductService.filter({ tenant_id: user.primary_tenant_id });
         
         // Auto-seed defaults if tenant has no products
         if (prods.length === 0) {
-          await seedDefaults();
+          try {
+            const res = await base44.functions.invoke('seedDefaultProducts', {});
+            if (res.data?.success) {
+              // Re-fetch after seeding
+              prods = await base44.entities.ProductService.filter({ tenant_id: user.primary_tenant_id });
+            }
+          } catch (error) {
+            console.error('Seed error:', error);
+          }
         }
+        
+        setProducts(prods.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)));
       }
     } catch (error) {
       console.error('Error loading data:', error);
