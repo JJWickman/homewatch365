@@ -19,7 +19,7 @@ export default function CreateClientDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-gradient-to-br from-blue-900/80 to-blue-950/80 border-blue-800/50 backdrop-blur-xl text-white shadow-2xl">
+      <DialogContent className="sm:max-w-md rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 text-white shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-white">Create New Client</DialogTitle>
           <DialogDescription className="text-blue-200">
@@ -27,9 +27,9 @@ export default function CreateClientDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
-          <div>
-            <Label htmlFor="new_first_name" className="text-blue-100">
-              First Name *
+          <div className="space-y-2">
+            <Label htmlFor="new_first_name" className="text-white">
+              First Name <span className="text-red-400">*</span>
             </Label>
             <Input
               id="new_first_name"
@@ -41,12 +41,12 @@ export default function CreateClientDialog({
                 }))
               }
               placeholder="John"
-              className="bg-white/10 border-blue-700/50 text-white placeholder-blue-300"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
             />
           </div>
-          <div>
-            <Label htmlFor="new_last_name" className="text-blue-100">
-              Last Name *
+          <div className="space-y-2">
+            <Label htmlFor="new_last_name" className="text-white">
+              Last Name <span className="text-red-400">*</span>
             </Label>
             <Input
               id="new_last_name"
@@ -58,12 +58,12 @@ export default function CreateClientDialog({
                 }))
               }
               placeholder="Doe"
-              className="bg-white/10 border-blue-700/50 text-white placeholder-blue-300"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
             />
           </div>
-          <div>
-            <Label htmlFor="new_email" className="text-blue-100">
-              Email *
+          <div className="space-y-2">
+            <Label htmlFor="new_email" className="text-white">
+              Email <span className="text-red-400">*</span>
             </Label>
             <Input
               id="new_email"
@@ -76,7 +76,7 @@ export default function CreateClientDialog({
                 }))
               }
               placeholder="john@example.com"
-              className="bg-white/10 border-blue-700/50 text-white placeholder-blue-300"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
             />
           </div>
           <div className="flex gap-3 justify-end pt-4">
@@ -85,7 +85,7 @@ export default function CreateClientDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={creatingClient}
-              className="border-blue-600/50 text-blue-100 hover:bg-blue-800/50"
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
             >
               Cancel
             </Button>
@@ -93,7 +93,7 @@ export default function CreateClientDialog({
               type="button"
               onClick={onCreateClient}
               disabled={creatingClient}
-              className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg"
+              className="bg-green-500 hover:bg-green-600 text-white font-semibold"
             >
               {creatingClient ? "Creating..." : "Create Client"}
             </Button>
