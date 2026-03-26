@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
 import { User, Lock, Camera, Save, Check, Calendar, MapPin } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +61,7 @@ export default function SettingsProfile() {
       }
     } catch (error) {
       console.error('Error loading data:', error);
+      toast.error('Failed to load profile');
     } finally {
       setLoading(false);
     }
@@ -74,8 +76,10 @@ export default function SettingsProfile() {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       await base44.auth.updateMe({ avatar_url: file_url });
       setUser({ ...user, avatar_url: file_url });
+      toast.success('Profile picture updated');
     } catch (error) {
       console.error('Error uploading profile picture:', error);
+      toast.error('Failed to upload profile picture');
     } finally {
       setUploading(false);
     }
@@ -120,10 +124,10 @@ export default function SettingsProfile() {
         home_address: homeAddress
       });
       
-      window.location.reload();
+      toast.success('Profile saved successfully');
     } catch (error) {
       console.error('Error saving profile:', error);
-      alert('Failed to save profile changes');
+      toast.error('Failed to save: ' + (error.message || 'Unknown error'));
     } finally {
       setSaving(false);
     }
