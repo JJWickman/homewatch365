@@ -61,7 +61,8 @@ export default function ClientForm() {
         setLoading(false);
         return;
       }
-      setCompanyId(user.primary_tenant_id);
+        const compId = members[0].company_id;
+        setCompanyId(compId);
         
       // Load available per-visit services
       try {
@@ -87,21 +88,14 @@ export default function ClientForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!companyId) {
-      toast.error('Tenant not loaded');
-      return;
-    }
-
-    if (!formData.first_name || !formData.last_name || !formData.email) {
-      toast.error('Please fill in first name, last name, and email');
-      return;
-    }
+    if (!companyId) return;
 
     setSaving(true);
     try {
       const data = {
         ...formData,
         tenant_id: companyId,
+        company_id: companyId,
         monthly_rate: formData.monthly_rate ? parseFloat(formData.monthly_rate) : null,
         portal_user_email: formData.portal_access ? formData.email : null
       };
@@ -116,7 +110,7 @@ export default function ClientForm() {
       navigate(createPageUrl('Clients'));
     } catch (error) {
       console.error('Error saving client:', error);
-      toast.error(`Failed to save client: ${error.message || 'Unknown error'}`);
+      toast.error('Failed to save client');
     } finally {
       setSaving(false);
     }
