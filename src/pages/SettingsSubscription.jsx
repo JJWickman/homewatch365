@@ -107,7 +107,7 @@ export default function SettingsSubscription() {
             {openingPortal ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Opening Portal...</>
             ) : (
-              'Manage Billing & Payment Methods'
+              'Manage Subscription and Payment Methods'
             )}
           </Button>
         </CardContent>
