@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const TEMPLATES = [
   {
@@ -22,7 +22,6 @@ const TEMPLATES = [
       { title: 'Departure', sort_order: 8, icon: 'LogOut' }
     ],
     items: [
-      // Section 0: Upon Arrival
       { section: 0, label: 'Check mailbox, remove newspapers, forward mail if requested', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 0, label: 'Exterior check of landscape for brown spots or dead plants', sort_order: 2, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 0, label: 'Check for signs of rodents, insects or other critters', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
@@ -30,10 +29,8 @@ const TEMPLATES = [
       { section: 0, label: 'Visual exterior check including windows, roof from the ground, screens, AC unit, pavers, and pool cage', sort_order: 5, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 0, label: 'Pool water level checked', sort_order: 6, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 0, label: 'Pool equipment checked', sort_order: 7, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 1: Interior Check
       { section: 1, label: 'Disarm security system', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 1, label: 'Test the phone line', sort_order: 2, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: false, allow_severity: true },
-      // Section 2: Water Zone
       { section: 2, label: 'Short cycle on the dishwasher, check for visible leaks', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 2, label: 'Operate the garbage disposal, check for proper operation and leaks', sort_order: 2, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 2, label: 'Short cycle on the washing machine, check for visible leaks', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
@@ -46,23 +43,18 @@ const TEMPLATES = [
       { section: 2, label: 'Run water in showers and tubs, checking for visible leaks', sort_order: 10, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 2, label: 'Brush and flush toilets, check for visible leaks and signs of water damage', sort_order: 11, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 2, label: 'Check the water heater for signs of leaks and rust', sort_order: 12, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 3: AC System
       { section: 3, label: 'Record temperature in main room', sort_order: 1, response_type: 'number', required: false, placeholder: 'Enter temperature (°F)', metadata_json: { unit: 'F' } },
       { section: 3, label: 'Record humidity in main room', sort_order: 2, response_type: 'percentage', required: false, placeholder: 'Enter humidity (%)', metadata_json: { unit: '%' } },
       { section: 3, label: 'Lower thermostat(s) by a couple of degrees. Confirm AC system is set to Auto-Cool', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 3, label: 'AC is blowing cold air', sort_order: 4, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 3, label: 'AC filters checked', sort_order: 5, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 3, label: 'Check for visible leaks or water in the secondary pan, if accessible', sort_order: 6, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 4: Observe and Report
       { section: 4, label: 'Confirm the residence is in Home Watch Mode', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 5: Storm Protection
       { section: 5, label: 'Exercise electric storm shutters and confirm all OK', sort_order: 1, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 5, label: 'Confirm shutter wall switch is in neutral position and all OK, or shutter remote control tested', sort_order: 2, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 6: Garage
       { section: 6, label: 'Check visible ceiling, walls, and baseboards for signs of damage', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 6, label: 'Exercise the garage door', sort_order: 2, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 6, label: 'Check breaker box', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 7: Departure
       { section: 7, label: 'Thermostat(s) returned to proper setting', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 7, label: 'Turn water OFF at the main supply valve slowly and gingerly', sort_order: 2, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 7, label: 'Photo of water valve in OFF position', sort_order: 3, response_type: 'photo_only', required: true, allow_note: false, allow_photo: true },
@@ -92,19 +84,15 @@ const TEMPLATES = [
       { title: 'Departure', sort_order: 9, icon: 'LogOut' }
     ],
     items: [
-      // Section 0: Upon Arrival
       { section: 0, label: 'Check mailbox, remove newspapers, forward mail if requested, etc.', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 0, label: 'Exterior check of landscape for brown spots or dead plants', sort_order: 2, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 0, label: 'Check for signs of rodents, insects, or other critters', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 0, label: 'Turn the water ON at the main supply valve, slowly and gingerly', sort_order: 4, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 0, label: 'Visual exterior check including windows, roof from the ground, screens, AC unit, pavers, and pool cage', sort_order: 5, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 1: Pool and Spa
       { section: 1, label: 'Pool water level checked', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 1, label: 'Pool equipment checked', sort_order: 2, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 2: Interior Check
       { section: 2, label: 'Disarm security system', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 2, label: 'Test the phone line', sort_order: 2, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 3: Water Zone
       { section: 3, label: 'Short cycle on the dishwasher, check for visible leaks', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 3, label: 'Run the garbage disposal, check for proper operation and visible leaks', sort_order: 2, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 3, label: 'Short cycle on the washing machine, check for visible leaks', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
@@ -120,14 +108,12 @@ const TEMPLATES = [
       { section: 3, label: 'Brush and flush toilets, check for visible leaks and signs of water damage', sort_order: 13, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 3, label: 'Water heater should be OFF at the breaker or set to Vacation Mode. Circulator pump must be OFF.', sort_order: 14, response_type: 'instruction_only', required: false },
       { section: 3, label: 'Check water heater for signs of visible leaks and rust', sort_order: 15, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 4: AC System
       { section: 4, label: 'Main room temperature', sort_order: 1, response_type: 'number', required: false, placeholder: 'Enter temperature', metadata_json: { unit: 'F' } },
       { section: 4, label: 'Main room humidity', sort_order: 2, response_type: 'percentage', required: false, placeholder: 'Enter humidity %', metadata_json: { unit: '%' } },
       { section: 4, label: 'Lower the thermostat(s) by a couple of degrees. Confirm AC system is set to Auto-Cool', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 4, label: 'AC is blowing cold air', sort_order: 4, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 4, label: 'AC filters, if accessible, checked', sort_order: 5, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 4, label: 'Check for signs of visible leaks or water in the secondary pan, if accessible', sort_order: 6, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 5: Observe and Report
       { section: 5, label: 'Check visible ceilings for signs of water intrusion or other damage', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 5, label: 'Check visible walls for signs of water intrusion or other damage', sort_order: 2, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 5, label: 'Check visible baseboards for signs of water or other damage', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
@@ -136,15 +122,12 @@ const TEMPLATES = [
       { section: 5, label: 'Ceiling fans are ON', sort_order: 6, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: false, allow_severity: true },
       { section: 5, label: 'Check for signs of insects or rodents', sort_order: 7, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 5, label: 'Is the residence in Home Watch Mode', sort_order: 8, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 6: Storm Protection
       { section: 6, label: 'Everything about storm protection will need to be customized for the property', sort_order: 1, response_type: 'instruction_only', required: false },
       { section: 6, label: 'Exercise electric storm shutters', sort_order: 2, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 6, label: 'Confirm shutter wall switch is neutral and operating properly, or shutter remote control tested', sort_order: 3, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 7: Garage
       { section: 7, label: 'Check visible ceiling, walls, and baseboards for signs of damage', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 7, label: 'Exercise the garage door', sort_order: 2, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 7, label: 'Check breaker box', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 8: Departure
       { section: 8, label: 'Always take a few moments before leaving to listen for unusual sounds', sort_order: 1, response_type: 'instruction_only', required: false },
       { section: 8, label: 'Thermostat(s) returned to proper setting', sort_order: 2, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 8, label: 'Turn water OFF at the main supply valve, slowly and gingerly, water lines drained', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
@@ -173,16 +156,13 @@ const TEMPLATES = [
       { title: 'Departure', sort_order: 7, icon: 'LogOut' }
     ],
     items: [
-      // Section 0: Upon Arrival
       { section: 0, label: 'Check mailbox, remove newspapers, forward mail if requested', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 0, label: 'Check for signs of rodents, insects, or other critters in common areas', sort_order: 2, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 0, label: 'Turn the water ON at the main supply valve, slowly and gingerly', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 0, label: 'Visual exterior check of balcony including windows, screens, and sliders', sort_order: 4, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 1: Interior Check
       { section: 1, label: 'Disarm security system', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 1, label: 'Test the phone line', sort_order: 2, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: false, allow_severity: true },
       { section: 1, label: 'Check balcony/lanai for debris or damage', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 2: Water Zone
       { section: 2, label: 'Short cycle on the dishwasher, check for visible leaks', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 2, label: 'Run the garbage disposal, check for proper operation and visible leaks', sort_order: 2, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 2, label: 'Short cycle on the washing machine, check for visible leaks', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
@@ -196,14 +176,12 @@ const TEMPLATES = [
       { section: 2, label: 'Brush and flush toilets, check for visible leaks and signs of water damage', sort_order: 11, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 2, label: 'Water heater should be OFF at the breaker or set to Vacation Mode.', sort_order: 12, response_type: 'instruction_only', required: false },
       { section: 2, label: 'Check water heater for signs of visible leaks and rust', sort_order: 13, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 3: AC System
       { section: 3, label: 'Main room temperature', sort_order: 1, response_type: 'number', required: false, placeholder: 'Enter temperature', metadata_json: { unit: 'F' } },
       { section: 3, label: 'Main room humidity', sort_order: 2, response_type: 'percentage', required: false, placeholder: 'Enter humidity %', metadata_json: { unit: '%' } },
       { section: 3, label: 'Lower the thermostat(s) by a couple of degrees. Confirm AC system is set to Auto-Cool', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 3, label: 'AC is blowing cold air', sort_order: 4, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 3, label: 'AC filters, if accessible, checked', sort_order: 5, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 3, label: 'Check for signs of visible leaks or water in the secondary pan, if accessible', sort_order: 6, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 4: Observe and Report
       { section: 4, label: 'Check visible ceilings for signs of water intrusion or other damage', sort_order: 1, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 4, label: 'Check visible walls for signs of water intrusion or other damage', sort_order: 2, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 4, label: 'Check visible baseboards for signs of water or other damage', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
@@ -211,11 +189,9 @@ const TEMPLATES = [
       { section: 4, label: 'Ceiling fans are ON', sort_order: 5, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: false, allow_severity: true },
       { section: 4, label: 'Check for signs of insects or rodents', sort_order: 6, response_type: 'ok_issue_na', required: true, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 4, label: 'Is the residence in Home Watch Mode', sort_order: 7, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 5: Storm Protection
       { section: 5, label: 'Everything about storm protection will need to be customized for the property', sort_order: 1, response_type: 'instruction_only', required: false },
       { section: 5, label: 'Exercise electric storm shutters', sort_order: 2, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 5, label: 'Confirm shutter wall switch is neutral and operating properly, or shutter remote control tested', sort_order: 3, response_type: 'ok_issue_na', required: false, allow_na: true, allow_note: true, allow_photo: true, allow_severity: true },
-      // Section 6: Departure
       { section: 6, label: 'Always take a few moments before leaving to listen for unusual sounds', sort_order: 1, response_type: 'instruction_only', required: false },
       { section: 6, label: 'Thermostat(s) returned to proper setting', sort_order: 2, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
       { section: 6, label: 'Turn water OFF at the main supply valve, slowly and gingerly', sort_order: 3, response_type: 'ok_issue_na', required: true, allow_na: false, allow_note: true, allow_photo: true, allow_severity: true },
@@ -226,19 +202,26 @@ const TEMPLATES = [
   }
 ];
 
-async function seedTemplateForCompany(base44client, company_id) {
+async function seedTemplateForCompany(base44client, company_id, tenant_id) {
   const results = [];
 
   for (const tmpl of TEMPLATES) {
-    // Skip if already exists
-    const existing = await base44client.entities.ChecklistTemplate.filter({ code: tmpl.meta.code, company_id });
+    // Skip if already exists for this tenant or company
+    const existingQuery = tenant_id
+      ? { code: tmpl.meta.code, tenant_id }
+      : { code: tmpl.meta.code, company_id };
+    const existing = await base44client.entities.ChecklistTemplate.filter(existingQuery);
     if (existing.length > 0) {
       results.push({ name: tmpl.meta.name, status: 'skipped' });
       continue;
     }
 
-    // Create template
-    const template = await base44client.entities.ChecklistTemplate.create({ ...tmpl.meta, company_id });
+    // Create template with both IDs for backward compatibility
+    const template = await base44client.entities.ChecklistTemplate.create({
+      ...tmpl.meta,
+      company_id: company_id || null,
+      tenant_id: tenant_id || null
+    });
 
     // Create sections and build index map
     const sectionMap = {};
@@ -270,13 +253,18 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const payload = await req.json();
-    const company = payload.data;
 
-    const results = await seedTemplateForCompany(base44.asServiceRole, company.id);
+    // Support both calling conventions:
+    // 1. { company_id, tenant_id } from createCompanyOnboarding
+    // 2. { data: { id } } from entity automation
+    const company_id = payload.company_id || payload.data?.id || null;
+    const tenant_id = payload.tenant_id || null;
+
+    const results = await seedTemplateForCompany(base44.asServiceRole, company_id, tenant_id);
 
     return Response.json({
       success: true,
-      message: `Seeded templates for company: ${company.name}`,
+      message: 'Seeded templates for company/tenant',
       results
     });
   } catch (error) {

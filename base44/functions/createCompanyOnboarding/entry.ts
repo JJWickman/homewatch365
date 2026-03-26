@@ -83,6 +83,13 @@ Deno.serve(async (req) => {
       onboarding_completed: true
     });
 
+    // Seed checklist templates for the new tenant
+    try {
+      await base44.asServiceRole.functions.invoke('seedCompanyTemplates', { company_id: company.id, tenant_id: tenant.id });
+    } catch (e) {
+      console.log('Template seeding failed (non-fatal):', e.message);
+    }
+
     // Fetch price_id for paid plans
     let price_id = null;
     if (subscriptionPlan && subscriptionPlan !== 'trial') {
