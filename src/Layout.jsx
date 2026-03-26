@@ -302,8 +302,8 @@ export default function Layout({ children, currentPageName }) {
               <span className="text-slate-400">→</span>
             </a>
           </div>
-          </div>
-          </aside>
+        </div>
+      </aside>
 
       {/* Main content */}
       <div className="lg:pl-64 min-w-0">
