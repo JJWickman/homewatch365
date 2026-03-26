@@ -70,11 +70,9 @@ Deno.serve(async (req) => {
       is_active: true
     });
 
-    // Set primary_tenant_id, company_id, full_name, and onboarding_completed on user
+    // Set company_id on user (tenant relationship is via TenantUser junction)
     await base44.asServiceRole.entities.User.update(user.id, {
-      primary_tenant_id: tenant.id,
-      company_id: company.id,
-      onboarding_completed: true
+     company_id: company.id
     });
 
     // Seed checklist templates for the new tenant
