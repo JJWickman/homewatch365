@@ -37,8 +37,8 @@ Deno.serve(async (req) => {
       created_by_email: user.email
     });
 
-    // Create UserTenant junction
-    await base44.asServiceRole.entities.UserTenant.create({
+    // Create TenantUser junction
+    await base44.asServiceRole.entities.TenantUser.create({
       user_id: user.id,
       tenant_id: tenant.id,
       role_in_tenant: 'admin',
