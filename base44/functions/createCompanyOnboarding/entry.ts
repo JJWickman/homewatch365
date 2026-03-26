@@ -82,6 +82,13 @@ Deno.serve(async (req) => {
       console.log('Template seeding failed (non-fatal):', e.message);
     }
 
+    // Seed default products/services for the new tenant
+    try {
+      await base44.asServiceRole.functions.invoke('seedDefaultProducts', { tenant_id: tenant.id });
+    } catch (e) {
+      console.log('Default products seeding failed (non-fatal):', e.message);
+    }
+
     // Seed sample celebrity properties
     try {
       const sampleClients = [
