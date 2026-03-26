@@ -73,12 +73,34 @@ export default function SettingsTemplates() {
       const allTemplates = await base44.entities.ChecklistTemplate.filter({});
       const dbTemplates = allTemplates.filter(t => t.active !== false).map(t => ({
         ...t,
-        type: 'db'
+        type: 'system',
+        isSystem: true
       }));
 
-      // Combine both: stored custom templates + database system templates = 11+ total
-      const combined = [...storedTemplates, ...dbTemplates];
-      setTemplates(combined);
+      // If no system templates found, seed them
+      if (dbTemplates.length === 0 && companyData?.id) {
+        try {
+          await base44.functions.invoke('seedCompanyTemplates', { 
+            company_id: companyData.id, 
+            tenant_id: null 
+          });
+          // Reload templates after seeding
+          const reloadedTemplates = await base44.entities.ChecklistTemplate.filter({});
+          const reloadedDbTemplates = reloadedTemplates.filter(t => t.active !== false).map(t => ({
+            ...t,
+            type: 'system',
+            isSystem: true
+          }));
+          setTemplates([...storedTemplates, ...reloadedDbTemplates]);
+        } catch (seedError) {
+          console.warn('Failed to seed templates:', seedError);
+          setTemplates([...storedTemplates, ...dbTemplates]);
+        }
+      } else {
+        // Combine: stored custom templates + database system templates = 11+ total
+        const combined = [...storedTemplates, ...dbTemplates];
+        setTemplates(combined);
+      }
     } catch (error) {
       console.error('Error loading templates:', error);
     } finally {
@@ -193,9 +215,19 @@ export default function SettingsTemplates() {
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    {template.type === 'db' && (
+                    {template.isSystem && (
+                      <Badge variant="outline" className="bg-slate-100 text-slate-700">
+                        System Template
+                      </Badge>
+                    )}
+                    {template.type === 'system' && template.property_type && (
                       <Badge variant="outline" className="capitalize">
-                        {template.property_type?.replace('_', ' ')}
+                        {template.property_type.replace('_', ' ')}
+                      </Badge>
+                    )}
+                    {template.type === 'stored' && (
+                      <Badge variant="outline" className="bg-amber-50 text-amber-700">
+                        Custom
                       </Badge>
                     )}
                     {template.published && (
@@ -217,16 +249,18 @@ export default function SettingsTemplates() {
                           <Edit2 className="h-4 w-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => {
-                            setDeletingTemplate(template);
-                            setShowDeleteDialog(true);
-                          }}
-                          className="text-red-600"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
+                        {!template.isSystem && (
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setDeletingTemplate(template);
+                              setShowDeleteDialog(true);
+                            }}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
