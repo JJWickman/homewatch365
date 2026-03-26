@@ -298,8 +298,10 @@ export default function Settings() {
     try {
       await base44.entities.Company.update(company.id, companyForm);
       setCompany({ ...company, ...companyForm });
+      toast.success('Company settings saved!');
     } catch (error) {
       console.error('Error saving:', error);
+      toast.error(error.message || 'Failed to save settings');
     } finally {
       setSaving(false);
     }
