@@ -14,6 +14,19 @@ Deno.serve(async (req) => {
 
     const { price_id, company_id, subscription_plan, billing_cycle, return_url, promo_code } = await req.json();
 
+    // If promo_code provided, look up the Stripe promotion code ID from the DB
+    let stripePromotionCodeId = null;
+    if (promo_code) {
+      try {
+        const promos = await base44.asServiceRole.entities.Promotion.filter({ code: promo_code.toUpperCase() });
+        if (promos.length > 0 && promos[0].stripe_promotion_code_id) {
+          stripePromotionCodeId = promos[0].stripe_promotion_code_id;
+        }
+      } catch (e) {
+        console.log('Could not look up promo code:', e.message);
+      }
+    }
+
     // Validate required fields
     if (!price_id || !company_id || !subscription_plan) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
@@ -101,9 +114,9 @@ Deno.serve(async (req) => {
       },
     };
 
-    // Add promo code if provided, otherwise allow manual entry
-    if (promo_code) {
-      sessionParams.discounts = [{ promotion_code: promo_code }];
+    // Add promo code if found in DB, otherwise allow manual entry
+    if (stripePromotionCodeId) {
+      sessionParams.discounts = [{ promotion_code: stripePromotionCodeId }];
     } else {
       sessionParams.allow_promotion_codes = true;
     }
