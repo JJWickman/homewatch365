@@ -61,6 +61,25 @@ const DEFAULT_PRODUCTS = [
     is_active: true
   },
   // Add-on Services
+  // Per-Visit Pricing (property-based)
+  {
+    name: 'Per-Visit Inspection Service',
+    description: 'Property inspection charged per visit based on property size and features',
+    visit_type: 'check-in',
+    type: 'addon',
+    pricing_model: 'usage_based',
+    base_price: 60,
+    billing_frequency: 'one_time',
+    usage_unit: 'per visit',
+    add_on_charges: {
+      extra_bedrooms: { unit_price: 10, description: 'Per additional bedroom beyond 2' },
+      extra_bathrooms: { unit_price: 8, description: 'Per additional bathroom beyond 2' },
+      water_features: { unit_price: 15, description: 'Pool, spa, or water feature monitoring' },
+      gated_property: { unit_price: 12, description: 'Gated or secured access property' },
+      commercial: { unit_price: 25, description: 'Commercial property surcharge' }
+    },
+    is_active: true
+  },
   {
     name: 'Additional Visit',
     description: 'Single additional property visit for issue follow-up or special requests',
@@ -71,66 +90,6 @@ const DEFAULT_PRODUCTS = [
     billing_frequency: 'one_time',
     is_active: true
   },
-  {
-    name: 'Emergency Response Visit',
-    description: 'Emergency property visit for urgent situations',
-    visit_type: 'emergency_visit',
-    type: 'addon',
-    pricing_model: 'flat_rate',
-    base_price: 150,
-    billing_frequency: 'one_time',
-    is_active: true
-  },
-  {
-    name: 'Arrival Preparation Service',
-    description: 'Property preparation before owner arrival',
-    visit_type: 'arrival_departure',
-    type: 'addon',
-    pricing_model: 'flat_rate',
-    base_price: 100,
-    billing_frequency: 'one_time',
-    is_active: true
-  },
-  {
-    name: 'Departure Closing Service',
-    description: 'Property closing after owner departure',
-    visit_type: 'arrival_departure',
-    type: 'addon',
-    pricing_model: 'flat_rate',
-    base_price: 100,
-    billing_frequency: 'one_time',
-    is_active: true
-  },
-  {
-    name: 'Contractor Access Coordination',
-    description: 'Coordination and monitoring of contractor/vendor access to property',
-    visit_type: 'access_visit',
-    type: 'addon',
-    pricing_model: 'flat_rate',
-    base_price: 85,
-    billing_frequency: 'one_time',
-    is_active: true
-  },
-  {
-    name: 'Vehicle Care Service',
-    description: 'Vehicle maintenance and care service',
-    visit_type: 'auto_care',
-    type: 'addon',
-    pricing_model: 'flat_rate',
-    base_price: 65,
-    billing_frequency: 'one_time',
-    is_active: true
-  },
-  {
-    name: 'Concierge Service Package',
-    description: 'Premium concierge service including package handling and guest coordination',
-    visit_type: 'concierge',
-    type: 'addon',
-    pricing_model: 'flat_rate',
-    base_price: 120,
-    billing_frequency: 'one_time',
-    is_active: true
-  }
 ];
 
 Deno.serve(async (req) => {
