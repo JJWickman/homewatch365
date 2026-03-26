@@ -110,35 +110,30 @@ export default function Visits() {
     try {
       const user = await base44.auth.me();
       setCurrentUser(user);
-      
-      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
-      
-      if (members.length > 0) {
-        const member = members[0];
-        setCurrentMember(member);
-        const cId = member.company_id;
-        setCompanyId(cId);
-        
-        if (member.role === 'field_inspector') {
-          setAssignedFilter('me');
-        }
-        
-        const [visitsData, propertiesData, clientsData, templatesData, staffData, checklistsData] = await Promise.all([
-          base44.entities.Visit.filter({ company_id: cId }, '-scheduled_date'),
-          base44.entities.Property.filter({ company_id: cId, is_active: true }),
-          base44.entities.Client.filter({ company_id: cId }),
-          base44.entities.VisitTemplate.filter({ company_id: cId, is_active: true }),
-          base44.entities.CompanyMember.filter({ company_id: cId, is_active: true }),
-          base44.entities.PropertyChecklist.filter({ company_id: cId, is_active: true })
-        ]);
+
+      if (!user?.primary_tenant_id) {
+        setLoading(false);
+        return;
+      }
+
+      setCurrentUser(user);
+      setCompanyId(user.primary_tenant_id);
+
+      const [visitsData, propertiesData, clientsData, templatesData, staffData, checklistsData] = await Promise.all([
+        base44.entities.Visit.filter({ tenant_id: user.primary_tenant_id }, '-scheduled_date'),
+        base44.entities.Property.filter({ tenant_id: user.primary_tenant_id, is_active: true }),
+        base44.entities.Client.filter({ tenant_id: user.primary_tenant_id }),
+        base44.entities.VisitTemplate.filter({ tenant_id: user.primary_tenant_id, is_active: true }),
+        base44.entities.TenantUser.filter({ tenant_id: user.primary_tenant_id, is_active: true }),
+        base44.entities.PropertyChecklist.filter({ tenant_id: user.primary_tenant_id, is_active: true })
+      ]);
         
         setVisits(visitsData);
         setProperties(propertiesData);
         setClients(clientsData);
         setTemplates(templatesData);
         setStaff(staffData);
-        setChecklists(checklistsData);
-      }
+        setChecklists(checklistsData)
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {

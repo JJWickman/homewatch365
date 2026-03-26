@@ -65,6 +65,8 @@ export default function ClientDetail() {
         base44.entities.Property.filter({ client_id: id }),
         base44.entities.Visit.filter({ client_id: id }, '-scheduled_date', 20)
       ]);
+      
+      const [visitsForBilling] = await Promise.all([visitsData]);
 
       if (clientData.length > 0) {
         const c = clientData[0];
@@ -73,13 +75,7 @@ export default function ClientDetail() {
         setVisits(visitsData);
         setPortalEmail(c.portal_user_email || '');
 
-        // Load service billing configurations from ProductService
-        if (c.service_subscription_id) {
-          const serviceData = await base44.entities.ProductService.filter({ id: c.service_subscription_id }).catch(() => []);
-          if (serviceData.length > 0 && serviceData[0].included_visit_types) {
-            setBillingConfigs(serviceData[0].included_visit_types);
-          }
-        }
+        // No additional billing config needed
 
         // Load service subscription details
         if (c.service_subscription_id) {
