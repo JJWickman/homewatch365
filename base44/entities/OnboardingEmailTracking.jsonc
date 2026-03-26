@@ -1,0 +1,113 @@
+{
+  "name": "OnboardingEmailTracking",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "User's email address"
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "Reference to Tenant"
+    },
+    "trial_start_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the trial started"
+    },
+    "emails_sent": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "email_number": {
+            "type": "integer"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "sent_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "default": [],
+      "description": "Track which emails have been sent"
+    },
+    "trial_reminder_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether trial reminder has been sent"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the email journey is complete"
+    }
+  },
+  "required": [
+    "user_email",
+    "tenant_id",
+    "trial_start_date"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "superadmin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "superadmin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.tenant_id": "{{user.primary_tenant_id}}"
+        }
+      ]
+    }
+  }
+}
