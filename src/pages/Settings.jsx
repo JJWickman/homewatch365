@@ -373,14 +373,74 @@ export default function Settings() {
     }
   };
 
+  const handleInviteStaff = async () => {
+    if (!inviteForm.email) {
+      setInviteError('Email is required');
+      return;
+    }
+
+    setInviting(true);
+    setInviteError('');
+    try {
+      const inviteToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+      const invitation = await base44.entities.Invitation.create({
+        tenant_id: company?.id,
+        invitee_email: inviteForm.email,
+        inviter_email: user.email,
+        token: inviteToken,
+        role: inviteForm.role,
+        status: 'pending',
+        expires_at: expiresAt.toISOString()
+      });
+
+      const appUrl = window.location.origin;
+      const roleLabel = inviteForm.role === 'field_inspector' ? 'Reporter' : 
+                       inviteForm.role === 'dispatcher' ? 'Dispatcher/Manager' : 'Administrator';
+
+      const invitationUrl = `${appUrl}${createPageUrl('InvitationAccept')}?token=${invitation.token}`;
+
+      const emailBody = `
+Hello ${inviteForm.name || ''},
+
+You've been invited to join ${company.name} as a ${roleLabel}.
+
+Click the link below to accept the invitation and create your account:
+${invitationUrl}
+
+This link will expire in 7 days.
+
+Best regards,
+${company.name}
+      `.trim();
+
+      await base44.integrations.Core.SendEmail({
+        from_name: 'Estate Watch 365',
+        to: inviteForm.email,
+        subject: `You've been invited to join ${company.name}`,
+        body: emailBody
+      });
+
+      setShowInviteDialog(false);
+      setInviteForm({ email: '', name: '', role: 'field_inspector', access_level: 'user', crm_marketing_access: false });
+      toast.success('Invitation sent!');
+      loadData();
+    } catch (error) {
+      console.error('Error inviting staff:', error);
+      setInviteError(error.message || 'Failed to send invitation');
+    } finally {
+      setInviting(false);
+    }
+  };
+
   const handleResendInvite = async (member) => {
     if (!company) return;
 
     try {
-      // Check for existing invitation
       let invitation = null;
       const existingInvitations = await base44.entities.Invitation.filter({
-        company_id: company.id,
+        tenant_id: company?.id,
         invitee_email: member.user_email,
         status: 'pending'
       });
@@ -388,12 +448,11 @@ export default function Settings() {
       if (existingInvitations.length > 0) {
         invitation = existingInvitations[0];
       } else {
-        // Create new invitation if no pending one exists
         const inviteToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
         const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
         invitation = await base44.entities.Invitation.create({
-          company_id: company.id,
+          tenant_id: company.id,
           invitee_email: member.user_email,
           inviter_email: user.email,
           token: inviteToken,
@@ -410,35 +469,24 @@ export default function Settings() {
       const invitationUrl = `${appUrl}${createPageUrl('InvitationAccept')}?token=${invitation.token}`;
 
       const emailBody = `
-  Hello ${member.user_name || ''},
+Hello ${member.user_name || ''},
 
-  You've been invited to join ${company.name} as a ${roleLabel}.
+You've been invited to join ${company.name} as a ${roleLabel}.
 
-  Click the link below to accept the invitation and create your account:
-  ${invitationUrl}
+Click the link below to accept the invitation and create your account:
+${invitationUrl}
 
-  This link will expire in 7 days.
+This link will expire in 7 days.
 
-  Best regards,
-  ${company.name}
+Best regards,
+${company.name}
       `.trim();
 
-      const emailResponse = await base44.integrations.Core.SendEmail({
+      await base44.integrations.Core.SendEmail({
         from_name: 'Estate Watch 365',
         to: member.user_email,
         subject: `You've been invited to join ${company.name}`,
         body: emailBody
-      });
-
-      // Log the email to CommunicationLog
-      await base44.entities.CommunicationLog.create({
-        company_id: company.id,
-        type: 'email',
-        subject: `You've been invited to join ${company.name}`,
-        message: emailBody,
-        client_email: member.user_email,
-        status: emailResponse?.status === 'failed' ? 'failed' : 'sent',
-        sent_at: new Date().toISOString()
       });
 
       alert('Invitation sent to ' + member.user_email);
