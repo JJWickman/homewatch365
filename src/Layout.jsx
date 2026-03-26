@@ -123,6 +123,7 @@ export default function Layout({ children, currentPageName }) {
 
       // Check if user has completed onboarding (has company_id or tenant membership)
       if (!currentUser.company_id) {
+        setLoading(false);
         if (currentPageName !== 'CompanyOnboarding') {
           navigate(createPageUrl('CompanyOnboarding'));
         }
@@ -139,7 +140,7 @@ export default function Layout({ children, currentPageName }) {
       const tenants = await base44.entities.Tenant.filter({ id: currentUser.primary_tenant_id });
       if (tenants.length > 0) setCompany(tenants[0]);
     } catch (error) {
-      console.log('User not authenticated');
+      console.error('Error loading user data:', error);
     } finally {
       setLoading(false);
     }
