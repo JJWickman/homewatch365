@@ -34,17 +34,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Handle Stripe checkout success
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('checkout') === 'success') {
-      const tenantId = params.get('tenant_id');
-      if (tenantId) {
-        base44.functions.invoke('finalizeOnboarding', { tenant_id: tenantId })
-          .catch(e => console.error('Error finalizing onboarding:', e));
-      }
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
     loadDashboardData();
   }, []);
 
