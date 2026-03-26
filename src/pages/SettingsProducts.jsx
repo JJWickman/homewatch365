@@ -28,15 +28,22 @@ export default function SettingsProducts() {
   const loadProducts = async () => {
     try {
       const user = await base44.auth.me();
-      if (!user?.primary_tenant_id) return;
+      console.log('Current user:', user?.id, 'Primary tenant:', user?.primary_tenant_id);
+      
+      if (!user?.primary_tenant_id) {
+        console.error('User has no primary_tenant_id');
+        setLoading(false);
+        return;
+      }
 
       const prods = await base44.entities.ProductService.filter({
         tenant_id: user.primary_tenant_id
       });
-      setProducts(prods.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)));
+      console.log('Products loaded:', prods?.length || 0);
+      setProducts(prods?.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)) || []);
     } catch (error) {
-      console.error('Error loading products:', error);
-      toast.error('Failed to load products');
+      console.error('Error loading products:', error?.message || error);
+      toast.error('Failed to load products: ' + (error?.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }
