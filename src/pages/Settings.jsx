@@ -63,6 +63,7 @@ export default function Settings() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [extractingBranding, setExtractingBranding] = useState(false);
   const [extractWebsiteUrl, setExtractWebsiteUrl] = useState('');
@@ -296,10 +297,13 @@ export default function Settings() {
     if (!company) return;
     
     setSaving(true);
+    setSaveSuccess(false);
     try {
       await base44.entities.Company.update(company.id, companyForm);
       setCompany({ ...company, ...companyForm });
-      toast.success('Company settings saved!');
+      setSaveSuccess(true);
+      toast.success('Company settings saved!', { duration: 5000 });
+      setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error) {
       console.error('Error saving:', error);
       toast.error(error.message || 'Failed to save settings');
@@ -1084,7 +1088,12 @@ ${company.name}
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-end">
+              <div className="pt-4 flex items-center justify-end gap-3">
+                {saveSuccess && (
+                  <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
+                    <Check className="h-4 w-4" /> Saved!
+                  </div>
+                )}
                 <Button onClick={saveCompanySettings} disabled={saving} className="bg-slate-900 hover:bg-slate-800">
                   <Save className="h-4 w-4 mr-2" />
                   {saving ? 'Saving...' : 'Save Changes'}
