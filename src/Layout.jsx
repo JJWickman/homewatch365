@@ -117,8 +117,8 @@ export default function Layout({ children, currentPageName }) {
         return;
       }
 
-      // Load TenantUser (role/permissions) — use explicit tenant_id, not just filter
-      const tenantUsers = await base44.asServiceRole.entities.TenantUser.filter({
+      // Load TenantUser (role/permissions) — use user-scoped query
+      const tenantUsers = await base44.entities.TenantUser.filter({
         user_id: currentUser.id,
         tenant_id: currentUser.primary_tenant_id
       });
