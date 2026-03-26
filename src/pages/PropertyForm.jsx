@@ -1824,6 +1824,7 @@ export default function PropertyForm() {
                 Cancel
               </Button>
               <Button
+                type="button"
                 onClick={handleCreateClient}
                 disabled={creatingClient}
                 className="bg-slate-900 hover:bg-slate-800"
