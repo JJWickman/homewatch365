@@ -32,17 +32,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Validate user is part of tenant
+    // Validate user is part of tenant (or it's their primary tenant from onboarding)
+    const isUsersTenant = user.primary_tenant_id === company_id;
     const tenantUsers = await base44.asServiceRole.entities.TenantUser.filter({
       user_id: user.id,
       tenant_id: company_id
     });
-    if (!tenantUsers || tenantUsers.length === 0) {
+    
+    // Allow if primary tenant from onboarding OR if they have a TenantUser record
+    if (!isUsersTenant && (!tenantUsers || tenantUsers.length === 0)) {
       return Response.json({ error: 'Access denied: You do not belong to this tenant' }, { status: 403 });
     }
 
-    // Validate user is admin
-    if (tenantUsers[0].role_in_tenant !== 'admin' && !tenantUsers[0].is_owner) {
+    // Validate user is admin (if TenantUser exists, they must be admin)
+    if (tenantUsers.length > 0 && tenantUsers[0].role_in_tenant !== 'admin' && !tenantUsers[0].is_owner) {
       return Response.json({ error: 'Admin access required to change subscription' }, { status: 403 });
     }
 
@@ -83,8 +86,8 @@ Deno.serve(async (req) => {
       }
     };
     
-    // Only include trial if they don't already have an active trial or subscription
-    if (tenant.subscription_status !== 'trial' && !tenant.stripe_subscription_id) {
+    // Only include trial if they don't have an existing subscription
+    if (!tenant.stripe_subscription_id) {
       subscriptionData.trial_period_days = 14;
     }
 
