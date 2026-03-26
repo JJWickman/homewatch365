@@ -367,8 +367,6 @@ export default function Settings() {
     }
   };
 
-  const handleForcePasswordReset = async (member) => {
-
   const handleInviteStaff = async () => {
     if (!inviteForm.email) {
       setInviteError('Email is required');
@@ -1728,5 +1726,3 @@ ${company.name}
       </div>
       );
       }
-
-      export default Settings;
