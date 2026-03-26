@@ -29,47 +29,37 @@ const getPageRestrictions = () => {
   };
 };
 
-const getNavigationItems = (subscriptionPlan, memberRole) => {
-// Use a safe default if companyMember doesn't exist
-const role = memberRole || 'administrator';
+const getNavigationItems = (subscriptionPlan, roleInTenant) => {
+  const role = roleInTenant || 'field_inspector';
 
-// Field Inspector - limited access (includes backward compatibility for 'technician')
-if (role === 'field_inspector' || role === 'technician') {
-  // Reporter role (formerly field_inspector)
-  const items = [
+  // Field Inspector - limited access
+  if (role === 'field_inspector') {
+    return [
+      { name: 'Dashboard', icon: Home, page: 'Dashboard' },
+      { name: 'My Visits', icon: ClipboardCheck, page: 'Visits' },
+      { name: 'My Schedule', icon: Calendar, page: 'Schedule' }
+    ];
+  }
+
+  // Dispatcher/Admin - full access
+  const baseItems = [
     { name: 'Dashboard', icon: Home, page: 'Dashboard' },
-    { name: 'My Visits', icon: ClipboardCheck, page: 'Visits' },
-    { name: 'My Schedule', icon: Calendar, page: 'Schedule' }
+    { name: 'Clients', icon: Users, page: 'Clients' },
+    { name: 'Properties', icon: Building2, page: 'Properties' },
+    { name: 'Visits', icon: ClipboardCheck, page: 'Visits' },
+    { name: 'Schedule', icon: Calendar, page: 'Schedule' },
+    { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
+    { name: 'Help & Tutorials', icon: BookOpen, page: 'HelpTutorials' },
+    { name: 'AI Assistant', icon: Bot, page: 'AIAssistant' },
   ];
-  
 
-  
-  return items;
-}
+  // Only show Billing and Import Data for Admins
+  if (role === 'admin') {
+    baseItems.splice(7, 0, { name: 'Billing', icon: DollarSign, page: 'Billing' });
+    baseItems.splice(8, 0, { name: 'Import Data', icon: Download, page: 'ImportData' });
+  }
 
-// Dispatcher/Manager and Administrator - full access
-const baseItems = [
-  { name: 'Dashboard', icon: Home, page: 'Dashboard' },
-  { name: 'Clients', icon: Users, page: 'Clients' },
-  { name: 'Properties', icon: Building2, page: 'Properties' },
-  { name: 'Visits', icon: ClipboardCheck, page: 'Visits' },
-  { name: 'Schedule', icon: Calendar, page: 'Schedule' },
-  { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
-  { name: 'Help & Tutorials', icon: BookOpen, page: 'HelpTutorials' },
-  { name: 'AI Assistant', icon: Bot, page: 'AIAssistant' },
-];
-
-// Only show Billing and Import Data for Administrators
-if (role === 'administrator' || role === 'owner') {
-  baseItems.splice(7, 0, { name: 'Billing', icon: DollarSign, page: 'Billing' });
-  baseItems.splice(8, 0, { name: 'Import Data', icon: Download, page: 'ImportData' });
-}
-
-// Show Marketing for Enterprise plan or if add-on is active
-// Note: company object needed to check marketing_addon_active
-// This will be checked in the layout component itself
-
-return baseItems;
+  return baseItems;
 };
 
 const clientPortalPages = ['ClientPortal', 'ClientInspectionView'];
@@ -77,7 +67,7 @@ const publicPages = ['CompanyOnboarding', 'ClientLogin', 'Home'];
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
-  const [companyMember, setCompanyMember] = useState(null);
+  const [userTenant, setUserTenant] = useState(null);
   const [company, setCompany] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -99,14 +89,12 @@ export default function Layout({ children, currentPageName }) {
   }, [company?.id]);
 
   useEffect(() => {
-    // Verify user still exists every 30 seconds
     if (!user) return;
 
     const verifyUserExists = async () => {
       try {
         await base44.auth.me();
       } catch (error) {
-        // User has been deleted, log them out
         base44.auth.logout();
       }
     };
@@ -120,8 +108,8 @@ export default function Layout({ children, currentPageName }) {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      // Check if user has completed onboarding (has company_id or tenant membership)
-      if (!currentUser.company_id) {
+      // Check if user has primary_tenant_id (completed onboarding)
+      if (!currentUser.primary_tenant_id) {
         setLoading(false);
         if (currentPageName !== 'CompanyOnboarding') {
           navigate(createPageUrl('CompanyOnboarding'));
@@ -129,10 +117,13 @@ export default function Layout({ children, currentPageName }) {
         return;
       }
       
-      // Load user's CompanyMember record (role/permissions)
-      const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-      if (members.length > 0) {
-        setCompanyMember(members[0]);
+      // Load UserTenant (role/permissions via new Tenant model)
+      const userTenants = await base44.entities.UserTenant.filter({ 
+        user_id: currentUser.id,
+        tenant_id: currentUser.primary_tenant_id 
+      });
+      if (userTenants.length > 0) {
+        setUserTenant(userTenants[0]);
       }
 
       // Load tenant
@@ -182,12 +173,12 @@ export default function Layout({ children, currentPageName }) {
   const hasMarketingAccess = company?.subscription_plan === 'enterprise' || 
                              company?.marketing_addon_active === true ||
                              ['solopreneur_crm', 'growth_crm', 'professional_crm'].includes(company?.subscription_plan);
-  const isAdminOrOwner = companyMember?.role === 'administrator' || companyMember?.is_owner === true;
+  const isAdminOrOwner = userTenant?.role_in_tenant === 'admin' || userTenant?.is_owner === true;
 
-  let navigationItems = getNavigationItems(company?.subscription_plan, companyMember?.role);
+  let navigationItems = getNavigationItems(company?.subscription_plan, userTenant?.role_in_tenant);
 
-  // Add CRM & Marketing if company has access AND (user is admin/owner OR has explicit permission)
-  if (hasMarketingAccess && (isAdminOrOwner || companyMember?.crm_marketing_access === true)) {
+  // Add CRM & Marketing if company has access AND user is admin/owner
+  if (hasMarketingAccess && isAdminOrOwner) {
     const hasMarketing = navigationItems.some(item => item.name === 'CRM & Marketing');
     if (!hasMarketing) {
       navigationItems.push({ name: 'CRM & Marketing', icon: Megaphone, page: 'Marketing' });
@@ -197,7 +188,7 @@ export default function Layout({ children, currentPageName }) {
   const pageRestrictions = getPageRestrictions();
   const hasMarketingAccessForPage = company?.subscription_plan === 'enterprise' || company?.marketing_addon_active === true;
   const isPageRestricted = pageRestrictions[currentPageName] === 'enterprise_or_addon' && !hasMarketingAccessForPage;
-  const isAdmin = companyMember?.role === 'administrator' || companyMember?.role === 'admin';
+  const isAdmin = userTenant?.role_in_tenant === 'admin';
 
   return (
     <OfflineProvider>
@@ -230,7 +221,7 @@ export default function Layout({ children, currentPageName }) {
               </div>
             )}
               <span className="font-semibold text-white truncate">
-                {company?.name || 'My Company'}
+                {company?.name || 'My Tenant'}
               </span>
             </div>
             <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-400">
@@ -355,15 +346,15 @@ export default function Layout({ children, currentPageName }) {
                           </AvatarFallback>
                         </Avatar>
                     <div className="hidden sm:block text-left min-w-0">
-                      <p className="text-sm font-medium text-slate-900 truncate">{companyMember?.user_name || user?.full_name}</p>
-                      <p className="text-xs text-slate-500 capitalize truncate">{companyMember?.role || 'Member'}</p>
+                      <p className="text-sm font-medium text-slate-900 truncate">{user?.full_name}</p>
+                      <p className="text-xs text-slate-500 capitalize truncate">{userTenant?.role_in_tenant || 'Member'}</p>
                     </div>
                     <ChevronDown className="h-4 w-4 text-slate-400 hidden sm:block shrink-0" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="px-2 py-1.5">
-                    <p className="text-sm font-medium">{companyMember?.user_name || user?.full_name}</p>
+                    <p className="text-sm font-medium">{user?.full_name}</p>
                     <p className="text-xs text-slate-500">{user?.email}</p>
                   </div>
                   <DropdownMenuSeparator />
@@ -386,7 +377,7 @@ export default function Layout({ children, currentPageName }) {
 
         {/* Page content */}
         <main className="p-4 lg:p-6 min-w-0 overflow-x-hidden">
-          <TrialBanner company={company} companyMember={companyMember} />
+          <TrialBanner company={company} userTenant={userTenant} />
           {isPageRestricted && isAdmin && (
             <Alert className="mb-6 bg-blue-50 border-blue-200">
               <AlertCircle className="h-4 w-4 text-blue-600" />
@@ -496,5 +487,5 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
       </div>
       </OfflineProvider>
-      );
-      }
+  );
+}
