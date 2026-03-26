@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const tenantId = '69c4784908cbd3c8bce515f0';
+    
 
     // Fetch all products for this tenant using service role
     const allProducts = await base44.asServiceRole.entities.ProductService.filter({
