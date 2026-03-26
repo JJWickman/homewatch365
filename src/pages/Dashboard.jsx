@@ -32,7 +32,6 @@ export default function Dashboard() {
   const [todayInspections, setTodayInspections] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
 
   useEffect(() => {
     loadDashboardData();
@@ -56,21 +55,6 @@ export default function Dashboard() {
      setUser(currentUser);
 
      let members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-
-     // Check if user has no company - redirect to onboarding
-     if (members.length === 0) {
-        setCheckingOnboarding(false);
-        navigate(createPageUrl('CompanyOnboarding'));
-        return;
-      }
-
-     // Check if user needs onboarding (field is false, undefined, or null)
-     if (currentUser.onboarding_completed !== true && members.length > 0) {
-        // User has company but hasn't completed onboarding - show it again
-        setCheckingOnboarding(false);
-        navigate(createPageUrl('CompanyOnboarding'));
-        return;
-      }
 
           // Retry once if not found (company might have just been created)
           if (members.length === 0) {
@@ -163,11 +147,9 @@ export default function Dashboard() {
 
       setTodayInspections(enrichedVisits);
       setRecentActivity(recentVisits);
-      setCheckingOnboarding(false);
 
     } catch (error) {
       console.error('Error loading dashboard:', error);
-      setCheckingOnboarding(false);
     } finally {
       setLoading(false);
     }
@@ -198,7 +180,7 @@ export default function Dashboard() {
     return createPageUrl(page) + params;
   };
 
-  if (loading || checkingOnboarding) {
+  if (loading) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-64" />
