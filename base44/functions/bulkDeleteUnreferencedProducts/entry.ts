@@ -9,11 +9,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const body = await req.json();
-    const unreferencedIds = body.unreferencedIds || [];
+    // Fetch unreferenced IDs using the reference checker
+    const allProducts = await base44.asServiceRole.entities.ProductService.list();
+    const allClients = await base44.asServiceRole.entities.Client.list();
+    
+    const unreferencedIds = [];
+    for (const product of allProducts) {
+      const mainRefs = allClients.filter(c => c.service_subscription_id === product.id);
+      const addonRefs = allClients.filter(c => c.additional_products && c.additional_products.includes(product.id));
+      
+      if (mainRefs.length === 0 && addonRefs.length === 0) {
+        unreferencedIds.push(product.id);
+      }
+    }
 
     if (unreferencedIds.length === 0) {
-      return Response.json({ error: 'unreferencedIds array required' }, { status: 400 });
+      return Response.json({ message: 'No unreferenced products to delete', deleted: 0 });
     }
 
     const deleted = [];
