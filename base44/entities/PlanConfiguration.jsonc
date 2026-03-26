@@ -1,0 +1,76 @@
+{
+  "name": "PlanConfiguration",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company (tenant isolation)"
+    },
+    "visit_type": {
+      "type": "string",
+      "enum": [
+        "inspection",
+        "followup",
+        "pre_storm",
+        "post_storm"
+      ],
+      "description": "Type of visit"
+    },
+    "inspection_subtype": {
+      "type": "string",
+      "enum": [
+        "routine",
+        "customer_called_in",
+        "drop_in",
+        "other"
+      ],
+      "description": "Specific inspection subtype (only for visit_type=inspection)"
+    },
+    "included_in_plan": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this visit type is included in the subscription plan"
+    },
+    "extra_charge": {
+      "type": "number",
+      "default": 0,
+      "description": "Additional charge if not included in plan (e.g., $50 for follow-ups)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Admin notes about this configuration"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this configuration is active"
+    }
+  },
+  "required": [
+    "company_id",
+    "visit_type"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "read": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
