@@ -56,63 +56,23 @@ export default function ClientForm() {
     setLoading(true);
     try {
       const user = await base44.auth.me();
-      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
-      
-      if (members.length > 0) {
+      if (!user?.primary_tenant_id) {
+        toast.error('No tenant found');
+        setLoading(false);
+        return;
+      }
         const compId = members[0].company_id;
         setCompanyId(compId);
         
-         // Load available per-visit services
-        try {
-          const allItems = await base44.entities.ProductService.filter({ 
-            tenant_id: user.primary_tenant_id,
-            is_active: true
-          });
-          setAvailableProducts(allItems);
-        } catch (e) {
-          console.warn('Failed to load products:', e);
-        }
-      }
-      
-      // Check if editing existing client
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get('id');
-      
-      if (id) {
-        setClientId(id);
-        const clients = await base44.entities.Client.filter({ id });
-        if (clients.length > 0) {
-          const client = clients[0];
-          setFormData({
-            first_name: client.first_name || '',
-            last_name: client.last_name || '',
-            email: client.email || '',
-            phone: client.phone || '',
-            secondary_phone: client.secondary_phone || '',
-            address: client.address || '',
-            city: client.city || '',
-            state: client.state || '',
-            zip: client.zip || '',
-            service_subscription_id: client.service_subscription_id || '',
-            additional_products: client.additional_products || [],
-            monthly_rate: client.monthly_rate || '',
-            billing_frequency: client.billing_frequency || 'monthly',
-            portal_access: client.portal_access !== false,
-            portal_pin: client.portal_pin || '',
-            notes: client.notes || '',
-            is_active: client.is_active !== false
-          });
-          
-          // Load monthly transactions if entity exists
-          try {
-            const transactions = await base44.entities.ClientTransaction.filter({ 
-              client_id: id 
-            });
-            setMonthlyTransactions(transactions);
-          } catch (e) {
-            console.warn('ClientTransaction entity not available:', e);
-          }
-        }
+      // Load available per-visit services
+      try {
+        const allItems = await base44.entities.ProductService.filter({ 
+          tenant_id: user.primary_tenant_id,
+          is_active: true
+        });
+        setAvailableProducts(allItems);
+      } catch (e) {
+        console.warn('Failed to load products:', e);
       }
     } catch (error) {
       console.error('Error loading data:', error);
