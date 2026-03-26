@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Loader2, Download } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 
@@ -31,6 +31,27 @@ export default function TestingDashboard() {
       toast.error('Authentication failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const downloadInstructions = async () => {
+    try {
+      const response = await base44.functions.invoke('generateTestingInstructionsPDF', {});
+      if (response.data) {
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Estate-Watch-365-Testing-Instructions.pdf';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        toast.success('Instructions PDF downloaded');
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Failed to download instructions');
     }
   };
 
@@ -146,8 +167,16 @@ export default function TestingDashboard() {
 
       {/* Testing Instructions */}
       <Card className="mb-6 bg-blue-50 border-blue-200">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg text-blue-900">Testing Instructions</CardTitle>
+          <Button 
+            onClick={downloadInstructions}
+            variant="outline"
+            className="text-blue-700 border-blue-300 hover:bg-blue-100"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Download PDF for Test Users
+          </Button>
         </CardHeader>
         <CardContent className="text-sm text-blue-800 space-y-2">
           <p>1. Create 3 separate tenant accounts (Tenant A, B, C)</p>
