@@ -33,26 +33,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Only pass promo code to Stripe if it's valid AND won't make charge $0
-    // (Promo codes that reduce to $0 trigger "Start trial" button which is misleading for paid plans)
-    let stripePromotionCodeId = null;
-    if (promo_code && subscription_plan !== 'trial') {
-      try {
-        const promos = await base44.asServiceRole.entities.Promotion.filter({ code: promo_code.toUpperCase() });
-        if (promos.length > 0) {
-          const promo = promos[0];
-          // Only use promo if it doesn't result in $0 charge (discount, not free)
-          if (promo.benefit_type === 'subscription_discount' && promo.discount_percent && promo.discount_percent < 100) {
-            if (promo.stripe_promotion_code_id) {
-              stripePromotionCodeId = promo.stripe_promotion_code_id;
-            }
-          }
-        }
-      } catch (e) {
-        console.log('Could not validate promo code:', e.message);
-      }
-    }
-
     // Create checkout session
     const subscriptionData = {
       metadata: {
@@ -86,12 +66,8 @@ Deno.serve(async (req) => {
           request_three_d_secure: 'automatic'
         }
       },
+      allow_promotion_codes: true
     };
-
-    // Add promo code only if it won't reduce charge to $0
-    if (stripePromotionCodeId) {
-      sessionParams.discounts = [{ promotion_code: stripePromotionCodeId }];
-    }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
 
