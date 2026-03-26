@@ -12,18 +12,19 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const failedIds = body.failedIds || [];
 
-    if (failedIds.length === 0) {
-      return Response.json({ error: 'failedIds array required' }, { status: 400 });
+    // If no failed IDs provided, find all products and check which aren't referenced
+    let idsToCheck = failedIds;
+    if (idsToCheck.length === 0) {
+      const allProducts = await base44.asServiceRole.entities.ProductService.list();
+      idsToCheck = allProducts.map(p => p.id);
     }
 
     // Fetch all clients once
     const allClients = await base44.asServiceRole.entities.Client.list();
-    const references = {};
-
-    // Check references for each failed ProductService ID
     const referencedByClient = {};
+    const unreferenced = [];
 
-    for (const psId of failedIds) {
+    for (const psId of idsToCheck) {
       const clientsUsingAsMain = allClients.filter(c => c.service_subscription_id === psId);
       const clientsUsingAsAddon = allClients.filter(c => 
         c.additional_products && c.additional_products.includes(psId)
@@ -34,14 +35,17 @@ Deno.serve(async (req) => {
           mainService: clientsUsingAsMain.map(c => c.id),
           addOnService: clientsUsingAsAddon.map(c => c.id)
         };
+      } else {
+        unreferenced.push(psId);
       }
     }
 
     const summary = {
-      failedToDeleteCount: failedIds.length,
+      checkedCount: idsToCheck.length,
       referencedByClientCount: Object.keys(referencedByClient).length,
-      unreferencedCount: failedIds.length - Object.keys(referencedByClient).length,
-      referencedByClient
+      unreferencedCount: unreferenced.length,
+      referencedByClient,
+      unreferencedIds: unreferenced.length > 0 ? unreferenced : 'none'
     };
 
     return Response.json(summary);
