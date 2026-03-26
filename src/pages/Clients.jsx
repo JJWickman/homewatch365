@@ -54,20 +54,19 @@ export default function Clients() {
   const loadClients = async () => {
     try {
       const user = await base44.auth.me();
-      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
-      
-      if (members.length > 0) {
-        const cId = members[0].company_id;
-        setCompanyId(cId);
-        
-        const [clientsData, propertiesData] = await Promise.all([
-          base44.entities.Client.filter({ company_id: cId }, '-created_date'),
-          base44.entities.Property.filter({ company_id: cId })
-        ]);
-        
-        setClients(clientsData);
-        setProperties(propertiesData);
+      if (!user?.primary_tenant_id) {
+        setLoading(false);
+        return;
       }
+      
+      setCompanyId(user.primary_tenant_id);
+      const [clientsData, propertiesData] = await Promise.all([
+        base44.entities.Client.filter({ tenant_id: user.primary_tenant_id }, '-created_date'),
+        base44.entities.Property.filter({ tenant_id: user.primary_tenant_id })
+      ]);
+        
+      setClients(clientsData);
+      setProperties(propertiesData);
     } catch (error) {
       console.error('Error loading clients:', error);
     } finally {

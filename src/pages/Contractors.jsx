@@ -98,21 +98,20 @@ export default function Contractors() {
   const loadData = async () => {
     try {
       const user = await base44.auth.me();
-      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
-      
-      if (members.length > 0) {
-        const cId = members[0].company_id;
-        setCompanyId(cId);
-        
-        const [contractorsData, customTypesData, propertiesData] = await Promise.all([
-          base44.entities.Contractor.filter({ company_id: cId }),
-          base44.entities.CustomContractorType.filter({ company_id: cId }),
-          base44.entities.Property.filter({ company_id: cId })
-        ]);
-        setContractors(contractorsData);
-        setCustomTypes(customTypesData);
-        setProperties(propertiesData);
+      if (!user?.primary_tenant_id) {
+        setLoading(false);
+        return;
       }
+      
+      setCompanyId(user.primary_tenant_id);
+      const [contractorsData, customTypesData, propertiesData] = await Promise.all([
+        base44.entities.Contractor.filter({ tenant_id: user.primary_tenant_id }),
+        base44.entities.CustomContractorType.filter({ tenant_id: user.primary_tenant_id }),
+        base44.entities.Property.filter({ tenant_id: user.primary_tenant_id })
+        ]);
+      setContractors(contractorsData);
+      setCustomTypes(customTypesData);
+      setProperties(propertiesData);
     } catch (error) {
       console.error('Error loading contractors:', error);
     } finally {

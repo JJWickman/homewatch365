@@ -69,26 +69,25 @@ export default function Properties() {
   const loadProperties = async () => {
     try {
       const user = await base44.auth.me();
-      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
+      if (!user?.primary_tenant_id) {
+        setLoading(false);
+        return;
+      }
       
-      if (members.length > 0) {
-        const cId = members[0].company_id;
-        setCompanyId(cId);
-        
-        const [propertiesData, clientsData, visitsData, checklistsData, companiesData] = await Promise.all([
-          base44.entities.Property.filter({ company_id: cId, is_active: true }, '-created_date'),
-          base44.entities.Client.filter({ company_id: cId }),
-          base44.entities.Visit.filter({ company_id: cId }),
-          base44.entities.PropertyChecklist.filter({ company_id: cId, is_active: true }),
-          base44.entities.Company.filter({ id: cId })
+      setCompanyId(user.primary_tenant_id);
+      const [propertiesData, clientsData, visitsData, checklistsData, tenantsData] = await Promise.all([
+        base44.entities.Property.filter({ tenant_id: user.primary_tenant_id, is_active: true }, '-created_date'),
+        base44.entities.Client.filter({ tenant_id: user.primary_tenant_id }),
+        base44.entities.Visit.filter({ tenant_id: user.primary_tenant_id }),
+        base44.entities.PropertyChecklist.filter({ tenant_id: user.primary_tenant_id, is_active: true }),
+        base44.entities.Tenant.filter({ id: user.primary_tenant_id })
         ]);
         
-        setProperties(propertiesData);
-        setClients(clientsData);
-        setVisits(visitsData);
-        setChecklists(checklistsData);
-        if (companiesData.length > 0) setCompany(companiesData[0]);
-      }
+      setProperties(propertiesData);
+      setClients(clientsData);
+      setVisits(visitsData);
+      setChecklists(checklistsData);
+      if (tenantsData.length > 0) setCompany(tenantsData[0]);
     } catch (error) {
       console.error('Error loading properties:', error);
     } finally {
