@@ -301,6 +301,14 @@ export default function Settings() {
     setSaveSuccess(false);
     try {
       await base44.entities.Company.update(company.id, companyForm);
+      
+      // Sync logo to Tenant entity for sidebar reactivity
+      if (user?.primary_tenant_id) {
+        await base44.entities.Tenant.update(user.primary_tenant_id, {
+          logo_url: companyForm.logo_url
+        });
+      }
+      
       setCompany({ ...company, ...companyForm });
       setSaveSuccess(true);
       toast.success('Company settings saved!', { duration: 5000 });
@@ -310,25 +318,6 @@ export default function Settings() {
       toast.error(error.message || 'Failed to save settings');
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleSaveEdit = async () => {
-    if (!editingMember) return;
-    
-    try {
-      await base44.entities.CompanyMember.update(editingMember.id, {
-        user_name: editingMember.user_name,
-        role: editingMember.role,
-        access_level: editingMember.access_level,
-        crm_marketing_access: editingMember.crm_marketing_access
-      });
-      setShowEditDialog(false);
-      setEditingMember(null);
-      await loadData();
-    } catch (error) {
-      console.error('Error updating member:', error);
-      alert('Failed to update team member: ' + error.message);
     }
   };
 
