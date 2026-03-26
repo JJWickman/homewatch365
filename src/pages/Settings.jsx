@@ -6,7 +6,7 @@ import SettingsProfile from './SettingsProfile';
 import SettingsCompany from './SettingsCompany';
 import SettingsAdmin from './SettingsAdmin';
 import SettingsTemplates from './SettingsTemplates';
-import SettingsBilling from './SettingsBilling';
+import SettingsSubscription from './SettingsSubscription';
 
 export default function Settings() {
   return (
@@ -49,7 +49,7 @@ export default function Settings() {
         </TabsContent>
 
         <TabsContent value="billing">
-          <SettingsBilling />
+          <SettingsSubscription />
         </TabsContent>
 
         <TabsContent value="admin">
