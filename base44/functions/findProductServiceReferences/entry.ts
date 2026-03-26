@@ -9,44 +9,42 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const { productServiceId } = await req.json();
-    if (!productServiceId) {
-      return Response.json({ error: 'productServiceId required' }, { status: 400 });
+    const body = await req.json();
+    const failedIds = body.failedIds || [];
+
+    if (failedIds.length === 0) {
+      return Response.json({ error: 'failedIds array required' }, { status: 400 });
     }
 
-    // Check references across entities
+    // Fetch all clients once
+    const allClients = await base44.asServiceRole.entities.Client.list();
     const references = {};
 
-    // Check Client.service_subscription_id
-    try {
-      const clients = await base44.asServiceRole.entities.Client.filter({
-        service_subscription_id: productServiceId
-      });
-      if (clients.length > 0) {
-        references.Client_service_subscription = clients.map(c => ({ id: c.id, name: c.first_name + ' ' + c.last_name }));
-      }
-    } catch (e) {
-      console.log('Client.service_subscription_id check skipped');
-    }
+    // Check references for each failed ProductService ID
+    const referencedByClient = {};
 
-    // Check Client.additional_products (array field)
-    try {
-      const allClients = await base44.asServiceRole.entities.Client.list();
-      const clientsWithAddons = allClients.filter(c => 
-        c.additional_products && c.additional_products.includes(productServiceId)
+    for (const psId of failedIds) {
+      const clientsUsingAsMain = allClients.filter(c => c.service_subscription_id === psId);
+      const clientsUsingAsAddon = allClients.filter(c => 
+        c.additional_products && c.additional_products.includes(psId)
       );
-      if (clientsWithAddons.length > 0) {
-        references.Client_additional_products = clientsWithAddons.map(c => ({ id: c.id, name: c.first_name + ' ' + c.last_name }));
+
+      if (clientsUsingAsMain.length > 0 || clientsUsingAsAddon.length > 0) {
+        referencedByClient[psId] = {
+          mainService: clientsUsingAsMain.map(c => c.id),
+          addOnService: clientsUsingAsAddon.map(c => c.id)
+        };
       }
-    } catch (e) {
-      console.log('Client.additional_products check skipped');
     }
 
-    return Response.json({
-      productServiceId,
-      referencedIn: references,
-      hasReferences: Object.keys(references).length > 0
-    });
+    const summary = {
+      failedToDeleteCount: failedIds.length,
+      referencedByClientCount: Object.keys(referencedByClient).length,
+      unreferencedCount: failedIds.length - Object.keys(referencedByClient).length,
+      referencedByClient
+    };
+
+    return Response.json(summary);
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
