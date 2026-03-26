@@ -9,6 +9,9 @@ import ChecklistEditor from './pages/ChecklistEditor';
 import AIAssistant from './pages/AIAssistant';
 import AdminSubscriptions from './pages/AdminSubscriptions';
 import ApproveFounder from './pages/ApproveFounder';
+import SettingsProfile from './pages/SettingsProfile';
+import SettingsCompany from './pages/SettingsCompany';
+import SettingsAdmin from './pages/SettingsAdmin';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ClientPortal from './pages/ClientPortal';
@@ -88,6 +91,21 @@ const AuthenticatedApp = () => {
       <Route path="/ApproveFounder" element={<ApproveFounder />} />
       <Route path="/ClientPortal" element={<ClientPortal />} />
       <Route path="/ClientLogin" element={<ClientLogin />} />
+      <Route path="/SettingsProfile" element={
+        <LayoutWrapper currentPageName="SettingsProfile">
+          <SettingsProfile />
+        </LayoutWrapper>
+      } />
+      <Route path="/SettingsCompany" element={
+        <LayoutWrapper currentPageName="SettingsCompany">
+          <SettingsCompany />
+        </LayoutWrapper>
+      } />
+      <Route path="/SettingsAdmin" element={
+        <LayoutWrapper currentPageName="SettingsAdmin">
+          <SettingsAdmin />
+        </LayoutWrapper>
+      } />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
