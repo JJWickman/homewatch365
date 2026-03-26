@@ -69,7 +69,7 @@ export default function SettingsTemplates() {
         });
       }
 
-      // Fetch all ChecklistTemplate records - system 11 templates (3 home watch + 8 service visit)
+      // Fetch all ChecklistTemplate records - should be 11 system templates (3 home watch + 8 service visit)
       const allTemplates = await base44.entities.ChecklistTemplate.filter({});
       const dbTemplates = allTemplates.filter(t => t.active !== false).map(t => ({
         ...t,
@@ -77,9 +77,10 @@ export default function SettingsTemplates() {
         isSystem: true
       }));
 
-      // If no system templates found, seed them
-      if (dbTemplates.length === 0 && companyData?.id) {
+      // If fewer than 11 system templates found, reseed them
+      if (dbTemplates.length < 11 && companyData?.id) {
         try {
+          console.log(`Found ${dbTemplates.length} templates, reseeding all 11...`);
           await base44.functions.invoke('seedCompanyTemplates', { 
             company_id: companyData.id, 
             tenant_id: null 
@@ -97,7 +98,7 @@ export default function SettingsTemplates() {
           setTemplates([...storedTemplates, ...dbTemplates]);
         }
       } else {
-        // Combine: stored custom templates + database system templates = 11+ total
+        // Combine: stored custom templates + database system templates
         const combined = [...storedTemplates, ...dbTemplates];
         setTemplates(combined);
       }
