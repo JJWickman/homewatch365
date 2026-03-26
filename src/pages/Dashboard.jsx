@@ -74,9 +74,9 @@ export default function Dashboard() {
      const tenantId = currentUser?.data?.primary_tenant_id || currentUser?.primary_tenant_id;
      const [tenants, clients, properties, visits] = await Promise.all([
        base44.entities.Tenant.filter({ id: tenantId }),
-       base44.entities.Client.filter({ is_active: true }),
-       base44.entities.Property.filter({ is_active: true }),
-       base44.entities.Visit.list('-updated_date', 100),
+       base44.entities.Client.filter({ tenant_id: tenantId, is_active: true }),
+       base44.entities.Property.filter({ tenant_id: tenantId, is_active: true }),
+       base44.entities.Visit.filter({ tenant_id: tenantId }, '-updated_date', 100),
      ]);
 
      setCompany(tenants[0]);
