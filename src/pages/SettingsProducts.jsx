@@ -37,10 +37,8 @@ export default function SettingsProducts() {
   const loadProducts = async () => {
     try {
       const user = await base44.auth.me();
-      console.log('Current user:', user?.id, 'Primary tenant:', user?.primary_tenant_id);
       
       if (!user?.primary_tenant_id) {
-        console.error('User has no primary_tenant_id');
         setLoading(false);
         return;
       }
@@ -48,11 +46,10 @@ export default function SettingsProducts() {
       const prods = await base44.entities.ProductService.filter({
         tenant_id: user.primary_tenant_id
       });
-      console.log('Products loaded:', prods?.length || 0);
       setProducts(prods?.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)) || []);
     } catch (error) {
-      console.error('Error loading products:', error?.message || error);
-      toast.error('Failed to load products: ' + (error?.message || 'Unknown error'));
+      console.error('Error loading products:', error);
+      toast.error('Failed to load products');
     } finally {
       setLoading(false);
     }
@@ -75,13 +72,15 @@ export default function SettingsProducts() {
         visit_type: form.visit_type,
         base_price: parseFloat(form.base_price),
         type: 'addon',
-        is_active: true
+        is_active: true,
+        description: form.description || undefined
       });
       
       setForm({
         name: '',
         visit_type: 'check-in',
-        base_price: ''
+        base_price: '',
+        description: ''
       });
       setShowForm(false);
       toast.success('Product added');
@@ -117,7 +116,7 @@ export default function SettingsProducts() {
         name: form.name,
         visit_type: form.visit_type,
         base_price: parseFloat(form.base_price),
-        description: form.description
+        description: form.description || undefined
       });
       setEditingId(null);
       setForm({
@@ -169,20 +168,16 @@ export default function SettingsProducts() {
         subtitle="Configure the services you offer to clients"
       />
 
+      {/* Product List */}
       {products.length > 0 && (
-        <div className="space-y-6">
-          {/* Standard Visit Section */}
-          {products.some(p => p.name === 'Standard Home Watch Visit') && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Standard Visit</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {products
-                    .filter(p => p.name === 'Standard Home Watch Visit')
-                    .map(product => (
-                <div key={product.id} className="flex items-start justify-between p-4 border rounded-lg bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleEdit(product)}>
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Your Products & Services</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {products.map(product => (
+                <div key={product.id} className="flex items-start justify-between p-4 border rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
                   <div className="flex-1">
                     <h3 className="font-semibold text-slate-900">{product.name}</h3>
                     {product.description && <p className="text-sm text-slate-600 mt-1">{product.description}</p>}
@@ -190,20 +185,8 @@ export default function SettingsProducts() {
                       <span>Type: <strong>{product.visit_type?.replace(/_/g, ' ')}</strong></span>
                       <span>Price: <strong>${product.base_price}</strong></span>
                     </div>
-                    {product.add_on_charges && Object.keys(product.add_on_charges).length > 0 && (
-                      <div className="mt-3 p-2 bg-white rounded border border-slate-200">
-                        <p className="text-xs font-semibold text-slate-700 mb-2">Additional Charges:</p>
-                        <div className="space-y-1">
-                          {Object.entries(product.add_on_charges).map(([key, charge]) => (
-                            <div key={key} className="text-xs text-slate-600">
-                              <strong>{key.replace(/_/g, ' ')}:</strong> ${charge.unit_price} — {charge.description}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
-                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex gap-2">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -215,10 +198,7 @@ export default function SettingsProducts() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(product.id);
-                      }}
+                      onClick={() => handleDelete(product.id)}
                       disabled={deleting === product.id}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
@@ -231,81 +211,15 @@ export default function SettingsProducts() {
                   </div>
                 </div>
               ))}
-              </div>
-              </CardContent>
-              </Card>
-              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-              {/* Add-On Products Section */}
-              {products.some(p => p.name !== 'Standard Home Watch Visit') && (
-              <Card>
-              <CardHeader>
-              <CardTitle>Add-On Products/Services</CardTitle>
-              </CardHeader>
-              <CardContent>
-              <div className="space-y-3">
-                {products
-                  .filter(p => p.name !== 'Standard Home Watch Visit')
-                  .map(product => (
-              <div key={product.id} className="flex items-start justify-between p-4 border rounded-lg bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleEdit(product)}>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-slate-900">{product.name}</h3>
-                  {product.description && <p className="text-sm text-slate-600 mt-1">{product.description}</p>}
-                  <div className="flex gap-4 mt-2 text-sm text-slate-600">
-                    <span>Type: <strong>{product.visit_type?.replace(/_/g, ' ')}</strong></span>
-                    <span>Price: <strong>${product.base_price}</strong></span>
-                  </div>
-                  {product.add_on_charges && Object.keys(product.add_on_charges).length > 0 && (
-                    <div className="mt-3 p-2 bg-white rounded border border-slate-200">
-                      <p className="text-xs font-semibold text-slate-700 mb-2">Additional Charges:</p>
-                      <div className="space-y-1">
-                        {Object.entries(product.add_on_charges).map(([key, charge]) => (
-                          <div key={key} className="text-xs text-slate-600">
-                            <strong>{key.replace(/_/g, ' ')}:</strong> ${charge.unit_price} — {charge.description}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(product)}
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(product.id);
-                    }}
-                    disabled={deleting === product.id}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    {deleting === product.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-              ))}
-              </div>
-              </CardContent>
-              </Card>
-              )}
-              </div>
-              )}
-
-              <Card>
+      {/* Add Product Form */}
+      <Card>
         <CardHeader>
-          <CardTitle>{showForm ? 'Add Product' : 'New Product'}</CardTitle>
+          <CardTitle>{showForm ? 'Add New Product' : 'Add Product'}</CardTitle>
         </CardHeader>
         <CardContent>
           {!showForm ? (
@@ -402,6 +316,7 @@ export default function SettingsProducts() {
         </CardContent>
       </Card>
 
+      {/* Edit Dialog */}
       <Dialog open={!!editingId} onOpenChange={(open) => !open && setEditingId(null)}>
         <DialogContent>
           <DialogHeader>
