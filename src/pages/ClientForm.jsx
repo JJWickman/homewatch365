@@ -24,8 +24,6 @@ export default function ClientForm() {
   const [availableProducts, setAvailableProducts] = useState([]);
   const [monthlyTransactions, setMonthlyTransactions] = useState([]);
   const [showStatementDialog, setShowStatementDialog] = useState(false);
-  const [isAutoSaving, setIsAutoSaving] = useState(false);
-  const [lastSaved, setLastSaved] = useState(null);
   const currentBillingMonth = new Date().toISOString().slice(0, 7);
 
   const [newTransaction, setNewTransaction] = useState({
@@ -64,12 +62,16 @@ export default function ClientForm() {
         const compId = members[0].company_id;
         setCompanyId(compId);
         
-        // Load available per-visit services
-        const allItems = await base44.entities.ProductService.filter({ 
-          tenant_id: user.primary_tenant_id,
-          is_active: true
-        });
-        setAvailableProducts(allItems);
+         // Load available per-visit services
+        try {
+          const allItems = await base44.entities.ProductService.filter({ 
+            tenant_id: user.primary_tenant_id,
+            is_active: true
+          });
+          setAvailableProducts(allItems);
+        } catch (e) {
+          console.warn('Failed to load products:', e);
+        }
       }
       
       // Check if editing existing client
@@ -101,11 +103,15 @@ export default function ClientForm() {
             is_active: client.is_active !== false
           });
           
-          // Load monthly transactions
-          const transactions = await base44.entities.ClientTransaction.filter({ 
-            client_id: id 
-          });
-          setMonthlyTransactions(transactions);
+          // Load monthly transactions if entity exists
+          try {
+            const transactions = await base44.entities.ClientTransaction.filter({ 
+              client_id: id 
+            });
+            setMonthlyTransactions(transactions);
+          } catch (e) {
+            console.warn('ClientTransaction entity not available:', e);
+          }
         }
       }
     } catch (error) {
