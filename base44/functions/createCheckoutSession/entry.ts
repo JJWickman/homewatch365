@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 import Stripe from 'npm:stripe@17.5.0';
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
@@ -14,67 +14,43 @@ Deno.serve(async (req) => {
 
     const { price_id, company_id, subscription_plan, billing_cycle, return_url, promo_code } = await req.json();
 
-    // If promo_code provided, look up the Stripe promotion code ID from the DB
-    let stripePromotionCodeId = null;
-    if (promo_code) {
-      try {
-        const promos = await base44.asServiceRole.entities.Promotion.filter({ code: promo_code.toUpperCase() });
-        if (promos.length > 0 && promos[0].stripe_promotion_code_id) {
-          stripePromotionCodeId = promos[0].stripe_promotion_code_id;
-        }
-      } catch (e) {
-        console.log('Could not look up promo code:', e.message);
-      }
-    }
-
-    // Validate required fields
-    if (!price_id || !company_id || !subscription_plan) {
-      return Response.json({ error: 'Missing required fields' }, { status: 400 });
-    }
-
-    // Validate user is part of tenant (or it's their primary tenant from onboarding)
-    const isUsersTenant = user.primary_tenant_id === company_id;
-    const tenantUsers = await base44.asServiceRole.entities.TenantUser.filter({
-      user_id: user.id,
-      tenant_id: company_id
-    });
-    
-    // Allow if primary tenant from onboarding OR if they have a TenantUser record
-    if (!isUsersTenant && (!tenantUsers || tenantUsers.length === 0)) {
-      return Response.json({ error: 'Access denied: You do not belong to this tenant' }, { status: 403 });
-    }
-
-    // Validate user is admin (if TenantUser exists, they must be admin)
-    if (tenantUsers.length > 0 && tenantUsers[0].role_in_tenant !== 'admin' && !tenantUsers[0].is_owner) {
-      return Response.json({ error: 'Admin access required to change subscription' }, { status: 403 });
-    }
-
     // Get tenant
     const tenants = await base44.asServiceRole.entities.Tenant.filter({ id: company_id });
-    const tenant = tenants[0];
-
-    if (!tenant) {
+    if (!tenants.length) {
       return Response.json({ error: 'Tenant not found' }, { status: 404 });
     }
+    const tenant = tenants[0];
 
-    // Create or get Stripe customer
+    // Get or create Stripe customer
     let customerId = tenant.stripe_customer_id;
-    
     if (!customerId) {
       const customer = await stripe.customers.create({
-        email: user.email,
-        name: tenant.name,
-        metadata: {
-          tenant_id: tenant.id,
-          user_email: user.email
-        }
+        metadata: { tenant_id: tenant.id }
       });
-      
       customerId = customer.id;
-      
       await base44.asServiceRole.entities.Tenant.update(tenant.id, {
         stripe_customer_id: customerId
       });
+    }
+
+    // Only pass promo code to Stripe if it's valid AND won't make charge $0
+    // (Promo codes that reduce to $0 trigger "Start trial" button which is misleading for paid plans)
+    let stripePromotionCodeId = null;
+    if (promo_code && subscription_plan !== 'trial') {
+      try {
+        const promos = await base44.asServiceRole.entities.Promotion.filter({ code: promo_code.toUpperCase() });
+        if (promos.length > 0) {
+          const promo = promos[0];
+          // Only use promo if it doesn't result in $0 charge (discount, not free)
+          if (promo.benefit_type === 'subscription_discount' && promo.discount_percent && promo.discount_percent < 100) {
+            if (promo.stripe_promotion_code_id) {
+              stripePromotionCodeId = promo.stripe_promotion_code_id;
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Could not validate promo code:', e.message);
+      }
     }
 
     // Create checkout session
@@ -85,9 +61,6 @@ Deno.serve(async (req) => {
         billing_cycle
       }
     };
-    
-    // Never set trial_period_days here — trial is managed at tenant level in the database
-    // All plans charge immediately (or are free if already on trial at tenant level)
 
     const sessionParams = {
       customer: customerId,
@@ -115,11 +88,9 @@ Deno.serve(async (req) => {
       },
     };
 
-    // Add promo code if found in DB, otherwise allow manual entry
+    // Add promo code only if it won't reduce charge to $0
     if (stripePromotionCodeId) {
       sessionParams.discounts = [{ promotion_code: stripePromotionCodeId }];
-    } else {
-      sessionParams.allow_promotion_codes = true;
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
