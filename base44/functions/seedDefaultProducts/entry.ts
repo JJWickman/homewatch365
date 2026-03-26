@@ -1,70 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const DEFAULT_PRODUCTS = [
-  // Subscription Services
+  // Per-Visit Services (charged to property owners per visit)
   {
-    name: 'Weekly Home Watch Service',
-    description: 'Weekly property inspection and monitoring with detailed reporting',
-    visit_type: 'check-in',
-    type: 'subscription',
-    pricing_model: 'flat_rate',
-    base_price: 199,
-    billing_frequency: 'monthly',
-    visit_frequency: 'weekly',
-    included_visits: 4,
-    is_active: true
-  },
-  {
-    name: 'Bi-Weekly Home Watch Service',
-    description: 'Bi-weekly property inspection and monitoring',
-    visit_type: 'check-in',
-    type: 'subscription',
-    pricing_model: 'flat_rate',
-    base_price: 149,
-    billing_frequency: 'monthly',
-    visit_frequency: 'bi_weekly',
-    included_visits: 2,
-    is_active: true
-  },
-  {
-    name: 'Monthly Home Watch Service',
-    description: 'Monthly property inspection and monitoring',
-    visit_type: 'check-in',
-    type: 'subscription',
-    pricing_model: 'flat_rate',
-    base_price: 99,
-    billing_frequency: 'monthly',
-    visit_frequency: 'monthly',
-    included_visits: 1,
-    is_active: true
-  },
-  {
-    name: 'Pre-Storm Preparation Service',
-    description: 'Property preparation service before storm season',
-    visit_type: 'pre_storm',
-    type: 'subscription',
-    pricing_model: 'flat_rate',
-    base_price: 299,
-    billing_frequency: 'annually',
-    included_pre_storm_visits: 1,
-    is_active: true
-  },
-  {
-    name: 'Post-Storm Assessment Service',
-    description: 'Post-storm damage assessment and recovery coordination',
-    visit_type: 'post_storm',
-    type: 'subscription',
-    pricing_model: 'flat_rate',
-    base_price: 349,
-    billing_frequency: 'annually',
-    included_post_storm_visits: 1,
-    is_active: true
-  },
-  // Add-on Services
-  // Per-Visit Pricing (property-based)
-  {
-    name: 'Per-Visit Inspection Service',
-    description: 'Property inspection charged per visit based on property size and features',
+    name: 'Standard Home Watch Visit',
+    description: 'Standard property inspection and monitoring visit',
     visit_type: 'check-in',
     type: 'addon',
     pricing_model: 'usage_based',
@@ -81,8 +21,28 @@ const DEFAULT_PRODUCTS = [
     is_active: true
   },
   {
-    name: 'Additional Visit',
-    description: 'Single additional property visit for issue follow-up or special requests',
+    name: 'Pre-Storm Visit',
+    description: 'Property preparation visit before storm season',
+    visit_type: 'pre_storm',
+    type: 'addon',
+    pricing_model: 'flat_rate',
+    base_price: 85,
+    billing_frequency: 'one_time',
+    is_active: true
+  },
+  {
+    name: 'Post-Storm Visit',
+    description: 'Post-storm damage assessment visit',
+    visit_type: 'post_storm',
+    type: 'addon',
+    pricing_model: 'flat_rate',
+    base_price: 100,
+    billing_frequency: 'one_time',
+    is_active: true
+  },
+  {
+    name: 'Follow-up Visit',
+    description: 'Follow-up visit for issue resolution or contractor coordination',
     visit_type: 'followup',
     type: 'addon',
     pricing_model: 'flat_rate',
@@ -90,6 +50,66 @@ const DEFAULT_PRODUCTS = [
     billing_frequency: 'one_time',
     is_active: true
   },
+  {
+    name: 'Arrival Preparation Visit',
+    description: 'Property preparation before owner arrival',
+    visit_type: 'arrival_departure',
+    type: 'addon',
+    pricing_model: 'flat_rate',
+    base_price: 100,
+    billing_frequency: 'one_time',
+    is_active: true
+  },
+  {
+    name: 'Departure Closing Visit',
+    description: 'Property closing after owner departure',
+    visit_type: 'arrival_departure',
+    type: 'addon',
+    pricing_model: 'flat_rate',
+    base_price: 100,
+    billing_frequency: 'one_time',
+    is_active: true
+  },
+  {
+    name: 'Emergency Response Visit',
+    description: 'Emergency property visit for urgent situations',
+    visit_type: 'emergency_visit',
+    type: 'addon',
+    pricing_model: 'flat_rate',
+    base_price: 150,
+    billing_frequency: 'one_time',
+    is_active: true
+  },
+  {
+    name: 'Contractor Access Visit',
+    description: 'Coordination and monitoring of contractor/vendor access to property',
+    visit_type: 'access_visit',
+    type: 'addon',
+    pricing_model: 'flat_rate',
+    base_price: 85,
+    billing_frequency: 'one_time',
+    is_active: true
+  },
+  {
+    name: 'Vehicle Care Visit',
+    description: 'Vehicle maintenance and care service visit',
+    visit_type: 'auto_care',
+    type: 'addon',
+    pricing_model: 'flat_rate',
+    base_price: 65,
+    billing_frequency: 'one_time',
+    is_active: true
+  },
+  {
+    name: 'Concierge Service Visit',
+    description: 'Premium concierge service including package handling and guest coordination',
+    visit_type: 'concierge',
+    type: 'addon',
+    pricing_model: 'flat_rate',
+    base_price: 120,
+    billing_frequency: 'one_time',
+    is_active: true
+  }
 ];
 
 Deno.serve(async (req) => {
@@ -128,7 +148,7 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
-      message: `Created ${created.length} default products and services`,
+      message: `Created ${created.length} default visit-based services`,
       count: created.length,
       products: created
     });
