@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
     };
     
     // Only include trial for trial plans, never for paid plans
-    if (subscriptionPlan === 'trial') {
+    if (subscription_plan === 'trial') {
       subscriptionData.trial_period_days = 14;
     }
 
@@ -103,8 +103,8 @@ Deno.serve(async (req) => {
         },
       ],
       subscription_data: subscriptionData,
-      success_url: `${new URL(req.url).origin}/Dashboard?checkout=success&tenant_id=${company_id}`,
-      cancel_url: `${new URL(req.url).origin}/Settings?tab=billing`,
+      success_url: `${new URL(req.url).origin}/?checkout=success&tenant_id=${company_id}`,
+      cancel_url: `${new URL(req.url).origin}/?tab=billing`,
       metadata: {
         tenant_id: tenant.id,
         subscription_plan,
