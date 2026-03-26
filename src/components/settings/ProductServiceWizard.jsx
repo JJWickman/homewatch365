@@ -33,10 +33,11 @@ export default function ProductServiceWizard() {
         return;
       }
 
+      // Load tenant info
       const tenants = await base44.entities.Tenant.filter({ id: user.primary_tenant_id });
       if (tenants.length > 0) setTenant(tenants[0]);
 
-      // Just load products directly
+      // Load products
       const prods = await base44.entities.ProductService.filter({ 
         tenant_id: user.primary_tenant_id,
         is_active: true
