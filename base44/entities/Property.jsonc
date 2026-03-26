@@ -1,0 +1,293 @@
+{
+  "name": "Property",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Reference to Tenant (isolation)"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "Reference to Client"
+    },
+    "name": {
+      "type": "string",
+      "description": "Property nickname (e.g., 'Beach House')"
+    },
+    "address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "latitude": {
+      "type": "number"
+    },
+    "longitude": {
+      "type": "number"
+    },
+    "property_type": {
+      "type": "string",
+      "enum": [
+        "single_family",
+        "condo",
+        "townhouse",
+        "estate",
+        "commercial"
+      ],
+      "default": "single_family"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "occupied",
+        "vacant",
+        "seasonal",
+        "for_sale"
+      ],
+      "default": "seasonal"
+    },
+    "unit_number": {
+      "type": "string",
+      "description": "Unit number for condos, villas, high-rises"
+    },
+    "square_feet": {
+      "type": "number"
+    },
+    "bedrooms": {
+      "type": "number"
+    },
+    "bathrooms": {
+      "type": "number"
+    },
+    "lot_size": {
+      "type": "string"
+    },
+    "year_built": {
+      "type": "number"
+    },
+    "access_instructions": {
+      "type": "string",
+      "description": "How to access the property"
+    },
+    "gate_procedure": {
+      "type": "string",
+      "description": "Gate access procedure for high-rises/condos"
+    },
+    "parking_assignment": {
+      "type": "string",
+      "description": "Parking assignment/instructions"
+    },
+    "front_desk_signin_procedure": {
+      "type": "string",
+      "description": "Front desk sign-in procedure"
+    },
+    "key_policy": {
+      "type": "string",
+      "description": "Key access procedures and policies"
+    },
+    "alarm_code": {
+      "type": "string"
+    },
+    "lockbox_code": {
+      "type": "string"
+    },
+    "security_gate": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether property has a security gate"
+    },
+    "gate_code": {
+      "type": "string"
+    },
+    "wifi_network": {
+      "type": "string"
+    },
+    "wifi_password": {
+      "type": "string"
+    },
+    "hoa_name": {
+      "type": "string",
+      "description": "Homeowners Association name"
+    },
+    "hoa_website": {
+      "type": "string",
+      "description": "HOA website URL"
+    },
+    "hoa_email": {
+      "type": "string",
+      "description": "HOA contact email"
+    },
+    "hoa_phone": {
+      "type": "string",
+      "description": "HOA contact phone"
+    },
+    "hoa_notes": {
+      "type": "string",
+      "description": "Additional HOA notes"
+    },
+    "emergency_notification_contact_name": {
+      "type": "string"
+    },
+    "emergency_notification_contact_phone": {
+      "type": "string"
+    },
+    "emergency_notification_contact_email": {
+      "type": "string"
+    },
+    "storm_protection_description": {
+      "type": "string"
+    },
+    "storm_panels_notes": {
+      "type": "string"
+    },
+    "equipment_water_valve_location": {
+      "type": "string"
+    },
+    "equipment_breaker_box_location": {
+      "type": "string"
+    },
+    "equipment_water_heater_location": {
+      "type": "string"
+    },
+    "equipment_air_handler_location": {
+      "type": "string"
+    },
+    "utilities": {
+      "type": "object",
+      "properties": {
+        "electric_provider": {
+          "type": "string"
+        },
+        "electric_account": {
+          "type": "string"
+        },
+        "water_provider": {
+          "type": "string"
+        },
+        "water_account": {
+          "type": "string"
+        },
+        "gas_provider": {
+          "type": "string"
+        },
+        "gas_account": {
+          "type": "string"
+        },
+        "internet_provider": {
+          "type": "string"
+        },
+        "internet_account": {
+          "type": "string"
+        }
+      }
+    },
+    "contractors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Contractor IDs assigned to this property"
+    },
+    "emergency_contacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "relationship": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "visit_frequency": {
+      "type": "string",
+      "enum": [
+        "weekly",
+        "bi_weekly",
+        "monthly",
+        "custom"
+      ],
+      "default": "weekly"
+    },
+    "assigned_staff": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "primary_photo_url": {
+      "type": "string"
+    },
+    "photo_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "custom_fields": {
+      "type": "object",
+      "description": "Custom fields imported or added by user"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "address"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "read": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "delete": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "write": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    }
+  }
+}
