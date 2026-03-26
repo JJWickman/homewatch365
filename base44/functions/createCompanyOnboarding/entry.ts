@@ -9,13 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // If user already has a tenant, return it
-    if (user.primary_tenant_id) {
-      const existing = await base44.asServiceRole.entities.Tenant.filter({ id: user.primary_tenant_id });
-      if (existing.length > 0) {
-        return Response.json({ success: true, tenant_id: existing[0].id, tenant: existing[0], message: 'Tenant already exists' });
-      }
-    }
+    // Do NOT return early if user already has a tenant — always process the new data they entered
 
     const { companyName, fullName, email, subdomain, subscriptionPlan, promoCode } = await req.json();
 
