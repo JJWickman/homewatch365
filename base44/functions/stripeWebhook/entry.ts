@@ -29,30 +29,28 @@ Deno.serve(async (req) => {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
-        const companyId = session.metadata.company_id;
-        const subscriptionPlan = session.metadata.subscription_plan;
+        const tenantId = session.metadata.tenant_id;
         
         // Set to trial if subscription has trial period, otherwise active
         const subscription = await stripe.subscriptions.retrieve(session.subscription);
         const status = subscription.status === 'trialing' ? 'trial' : 'active';
         
-        await base44.asServiceRole.entities.Company.update(companyId, {
+        await base44.asServiceRole.entities.Tenant.update(tenantId, {
           subscription_plan: subscriptionPlan,
           subscription_status: status,
           stripe_subscription_id: session.subscription,
           trial_ends_at: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null
         });
-        break;
       }
 
       case 'customer.subscription.updated': {
         const subscription = event.data.object;
         
-        // Get company_id from subscription metadata or customer metadata
-        let companyId = subscription.metadata?.company_id;
-        if (!companyId) {
+        // Get tenant_id from subscription metadata or customer metadata
+        let tenantId = subscription.metadata?.tenant_id;
+        if (!tenantId) {
           const customer = await stripe.customers.retrieve(subscription.customer);
-          companyId = customer.metadata?.company_id;
+          tenantId = customer.metadata?.tenant_id;
         }
         
         let status = 'active';
@@ -64,9 +62,9 @@ Deno.serve(async (req) => {
         // Use plan from subscription metadata (set at checkout time) — no hardcoded price IDs
         let subscriptionPlan = subscription.metadata?.subscription_plan || 'solopreneur';
         
-        if (companyId) {
+        if (tenantId) {
           const hasCrm = subscriptionPlan.includes('_crm') || subscriptionPlan === 'enterprise';
-          await base44.asServiceRole.entities.Company.update(companyId, {
+          await base44.asServiceRole.entities.Tenant.update(tenantId, {
             subscription_plan: subscriptionPlan,
             subscription_status: status,
             stripe_subscription_id: subscription.id,
@@ -79,13 +77,12 @@ Deno.serve(async (req) => {
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object;
-        const companyId = subscription.metadata.company_id;
+        const tenantId = subscription.metadata.tenant_id;
         
-        await base44.asServiceRole.entities.Company.update(companyId, {
+        await base44.asServiceRole.entities.Tenant.update(tenantId, {
           subscription_status: 'cancelled',
-          subscription_plan: 'solopreneur'
+          subscription_plan: 'trial'
         });
-        break;
       }
 
       case 'invoice.payment_succeeded': {
@@ -96,14 +93,13 @@ Deno.serve(async (req) => {
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object;
-        const companyId = invoice.subscription_details?.metadata?.company_id;
+        const tenantId = invoice.subscription_details?.metadata?.tenant_id;
         
-        if (companyId) {
-          await base44.asServiceRole.entities.Company.update(companyId, {
+        if (tenantId) {
+          await base44.asServiceRole.entities.Tenant.update(tenantId, {
             subscription_status: 'past_due'
           });
         }
-        break;
       }
     }
 
