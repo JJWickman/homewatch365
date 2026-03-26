@@ -135,8 +135,8 @@ export default function Layout({ children, currentPageName }) {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      // Check if user has company_id (tenant isolation - required field)
-      if (!currentUser.company_id) {
+      // Check if user has primary_tenant_id (new tenant isolation)
+      if (!currentUser.primary_tenant_id) {
         if (currentPageName !== 'CompanyOnboarding') {
           navigate(createPageUrl('CompanyOnboarding'));
         }
@@ -149,8 +149,7 @@ export default function Layout({ children, currentPageName }) {
         return;
       }
       
-      // Load user's CompanyMember record (role/permissions) - OPTIONAL
-      // Users can access their tenant via company_id alone; CompanyMember is for team roles
+      // Load user's CompanyMember record (role/permissions)
       const members = await base44.entities.CompanyMember.filter({ 
         company_id: currentUser.company_id,
         user_email: currentUser.email 
@@ -158,12 +157,14 @@ export default function Layout({ children, currentPageName }) {
       if (members.length > 0) {
         setCompanyMember(members[0]);
       }
-      // If no CompanyMember record exists, user still has access to their tenant
 
-      // Load company details
-      const companies = await base44.entities.Company.filter({ id: currentUser.company_id });
-      if (companies.length > 0) {
-        setCompany(companies[0]);
+      // Load tenant details (preferred) or fall back to company
+      const tenants = await base44.entities.Tenant.filter({ id: currentUser.primary_tenant_id });
+      if (tenants.length > 0) {
+        setCompany(tenants[0]);
+      } else {
+        const companies = await base44.entities.Company.filter({ id: currentUser.company_id });
+        if (companies.length > 0) setCompany(companies[0]);
       }
     } catch (error) {
       console.log('User not authenticated');

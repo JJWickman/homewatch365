@@ -9,91 +9,88 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // If user already has a company, return it (prevent duplicates)
-    if (user.company_id) {
-      const existingCompany = await base44.asServiceRole.entities.Company.filter({ id: user.company_id });
-      if (existingCompany.length > 0) {
-        return Response.json({
-          success: true,
-          company_id: existingCompany[0].id,
-          company: existingCompany[0],
-          message: 'Company already exists'
-        });
+    // If user already has a tenant, return it
+    if (user.primary_tenant_id) {
+      const existing = await base44.asServiceRole.entities.Tenant.filter({ id: user.primary_tenant_id });
+      if (existing.length > 0) {
+        return Response.json({ success: true, tenant_id: existing[0].id, tenant: existing[0], message: 'Tenant already exists' });
       }
     }
 
-    const { companyName, email, phone, address, city, state, zip, subscriptionPlan } = await req.json();
+    const { companyName, fullName, email, subdomain, subscriptionPlan, promoCode } = await req.json();
 
-    if (!companyName || !email) {
-      return Response.json({ error: 'Company name and email are required' }, { status: 400 });
+    if (!companyName || !subdomain) {
+      return Response.json({ error: 'Company name and subdomain are required' }, { status: 400 });
     }
 
-    // Ensure user has a CompanyMember record for their company
-    if (user.company_id) {
-      const existingMembers = await base44.asServiceRole.entities.CompanyMember.filter({ user_email: user.email });
-      if (existingMembers.length === 0) {
-        // User has company_id but no CompanyMember - create it
-        const company = await base44.asServiceRole.entities.Company.filter({ id: user.company_id });
-        if (company.length > 0) {
-          await base44.asServiceRole.entities.CompanyMember.create({
-            company_id: user.company_id,
-            user_email: user.email,
-            user_name: user.full_name,
-            role: 'administrator',
-            access_level: 'admin',
-            is_owner: true,
-            is_active: true
-          });
-          return Response.json({
-            success: true,
-            company_id: company[0].id,
-            company: company[0],
-            message: 'CompanyMember record created for existing company'
-          });
-        }
-      }
+    // Check subdomain uniqueness
+    const existing = await base44.asServiceRole.entities.Tenant.filter({ slug: subdomain });
+    if (existing.length > 0) {
+      return Response.json({ error: 'That subdomain is already taken. Please choose another.' }, { status: 409 });
     }
 
-    // Create company with service role (bypasses RLS)
-    const newCompany = await base44.asServiceRole.entities.Company.create({
+    // Create Tenant
+    const tenant = await base44.asServiceRole.entities.Tenant.create({
       name: companyName,
-      slug: companyName.toLowerCase().replace(/\s+/g, '-'),
-      email,
-      phone: phone || '',
-      address: address || '',
-      city: city || '',
-      state: state || '',
-      zip: zip || '',
+      slug: subdomain,
+      email: email || user.email,
       subscription_plan: subscriptionPlan || 'trial',
       subscription_status: subscriptionPlan === 'trial' ? 'trial' : 'active',
-      trial_ends_at: subscriptionPlan === 'trial' ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() : null,
+      trial_ends_at: (!subscriptionPlan || subscriptionPlan === 'trial')
+        ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+        : null,
+      is_active: true,
+      created_by_email: user.email
+    });
+
+    // Create UserTenant junction
+    await base44.asServiceRole.entities.UserTenant.create({
+      user_id: user.id,
+      tenant_id: tenant.id,
+      role_in_tenant: 'admin',
+      is_owner: true,
       is_active: true
     });
 
-    // Add user as company owner/admin
+    // Also create legacy Company record so old code doesn't break
+    const company = await base44.asServiceRole.entities.Company.create({
+      name: companyName,
+      slug: subdomain,
+      email: email || user.email,
+      subscription_plan: subscriptionPlan || 'trial',
+      subscription_status: subscriptionPlan === 'trial' ? 'trial' : 'active',
+      trial_ends_at: (!subscriptionPlan || subscriptionPlan === 'trial')
+        ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+        : null,
+      is_active: true
+    });
+
+    // Create CompanyMember for legacy support
     await base44.asServiceRole.entities.CompanyMember.create({
-      company_id: newCompany.id,
+      company_id: company.id,
       user_email: user.email,
-      user_name: user.full_name,
+      user_name: fullName || user.full_name,
       role: 'administrator',
       access_level: 'admin',
       is_owner: true,
       is_active: true
     });
 
-    // Link user to company
-    await base44.auth.updateMe({ company_id: newCompany.id });
+    // Set primary_tenant_id, company_id, full_name, and onboarding_completed on user
+    await base44.asServiceRole.entities.User.update(user.id, {
+      primary_tenant_id: tenant.id,
+      company_id: company.id,
+      onboarding_completed: true
+    });
 
-    // Fetch price_id for the selected plan if it's paid
+    // Fetch price_id for paid plans
     let price_id = null;
     if (subscriptionPlan && subscriptionPlan !== 'trial') {
       try {
-        const stripePricesResponse = await base44.functions.invoke('getStripePrices', {});
-        const plans = stripePricesResponse.data?.plans || [];
-        const selectedPlanData = plans.find(p => p.id === subscriptionPlan);
-        if (selectedPlanData && selectedPlanData.prices?.monthly?.id) {
-          price_id = selectedPlanData.prices.monthly.id;
-        }
+        const pricesRes = await base44.functions.invoke('getStripePrices', {});
+        const plans = pricesRes.data?.plans || [];
+        const plan = plans.find(p => p.id === subscriptionPlan);
+        if (plan?.prices?.monthly?.id) price_id = plan.prices.monthly.id;
       } catch (e) {
         console.log('Could not fetch stripe price:', e.message);
       }
@@ -101,13 +98,15 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
-      company_id: newCompany.id,
-      company: newCompany,
-      price_id: price_id,
-      subscription_plan: subscriptionPlan
+      tenant_id: tenant.id,
+      company_id: company.id,
+      tenant,
+      price_id,
+      subscription_plan: subscriptionPlan || 'trial'
     });
+
   } catch (error) {
-    console.error('Error creating company:', error);
+    console.error('Error in createCompanyOnboarding:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
