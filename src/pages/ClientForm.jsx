@@ -92,49 +92,13 @@ export default function ClientForm() {
         const compId = members[0].company_id;
         setCompanyId(compId);
         
-        // Load available products/services
+        // Load available per-visit services
         const allItems = await base44.entities.ProductService.filter({ 
-          company_id: compId,
-          is_active: true 
+          tenant_id: user.primary_tenant_id,
+          is_active: true
         });
-        
-        // Separate services (monthly subscriptions only) and products/add-ons
-        setAvailableServices(allItems.filter(item => 
-          item.type === 'service' && item.billing_frequency === 'monthly'
-        ));
-        setAvailableProducts(allItems.filter(item => 
-          item.type === 'product' || (item.type === 'service' && item.billing_frequency === 'one_time')
-        ));
-      }
-
-      // Check if editing existing client
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get('id');
-      
-      if (id) {
-        setClientId(id);
-        const clients = await base44.entities.Client.filter({ id });
-        if (clients.length > 0) {
-          const client = clients[0];
-          setFormData({
-            first_name: client.first_name || '',
-            last_name: client.last_name || '',
-            email: client.email || '',
-            phone: client.phone || '',
-            secondary_phone: client.secondary_phone || '',
-            address: client.address || '',
-            city: client.city || '',
-            state: client.state || '',
-            zip: client.zip || '',
-            service_subscription_id: client.service_subscription_id || '',
-            additional_products: client.additional_products || [],
-            monthly_rate: client.monthly_rate || '',
-            billing_frequency: client.billing_frequency || 'monthly',
-            portal_access: client.portal_access !== false,
-            portal_pin: client.portal_pin || '',
-            notes: client.notes || '',
-            is_active: client.is_active !== false
-          });
+        setAvailableProducts(allItems);
+        });
           
           // Load monthly transactions
           const transactions = await base44.entities.ClientTransaction.filter({ 
@@ -383,41 +347,15 @@ export default function ClientForm() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Service Subscription */}
-            <div>
-              <Label className="flex items-center gap-2 mb-3 text-base">
-                <CreditCard className="h-4 w-4" />
-                Service Subscription
-              </Label>
-              <Select
-                value={formData.service_subscription_id}
-                onValueChange={(value) => handleChange('service_subscription_id', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={availableServices.length === 0 ? "No subscriptions available - add in Settings" : "Select a service subscription..."} />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableServices.map((service) => (
-                    <SelectItem key={service.id} value={service.id}>
-                      <div className="flex items-center justify-between w-full">
-                        <span>{service.name}</span>
-                        <span className="ml-4 text-slate-500">${service.price}/{service.billing_frequency}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Additional Products */}
+            {/* Available Per-Visit Services */}
             <div>
               <Label className="flex items-center gap-2 mb-3 text-base">
                 <Package className="h-4 w-4" />
-                Additional Products & Services
+                Available Visit Services
               </Label>
               <div className="space-y-2 border rounded-lg p-4 max-h-60 overflow-y-auto">
                 {availableProducts.length === 0 ? (
-                  <p className="text-sm text-slate-500 text-center py-2">No additional products available</p>
+                  <p className="text-sm text-slate-500 text-center py-2">No visit services available - add in Settings</p>
                 ) : (
                   availableProducts.map((product) => (
                     <div key={product.id} className="flex items-start gap-3">
@@ -438,8 +376,7 @@ export default function ClientForm() {
                             <p className="text-xs text-slate-500">{product.description}</p>
                           </div>
                           <div className="text-right ml-4">
-                            <p className="font-semibold text-sm">${product.price}</p>
-                            <p className="text-xs text-slate-500 capitalize">{product.billing_frequency.replace('_', ' ')}</p>
+                            <p className="font-semibold text-sm">${product.base_price?.toFixed(2)}/visit</p>
                           </div>
                         </div>
                       </label>
@@ -449,252 +386,50 @@ export default function ClientForm() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="monthly_rate">Custom Monthly Rate ($)</Label>
-                <Input
-                  id="monthly_rate"
-                  type="number"
-                  step="0.01"
-                  value={formData.monthly_rate}
-                  onChange={(e) => handleChange('monthly_rate', e.target.value)}
-                  placeholder="Leave empty to use product prices"
-                />
-              </div>
-            </div>
-
             <div>
-              <Label htmlFor="billing_frequency">Billing Frequency</Label>
-              <Select
-                value={formData.billing_frequency}
-                onValueChange={(value) => handleChange('billing_frequency', value)}
-              >
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                  <SelectItem value="quarterly">Quarterly</SelectItem>
-                  <SelectItem value="annually">Annually</SelectItem>
-                </SelectContent>
-              </Select>
+             <Label htmlFor="billing_frequency">Billing Frequency</Label>
+             <Select
+               value={formData.billing_frequency}
+               onValueChange={(value) => handleChange('billing_frequency', value)}
+             >
+               <SelectTrigger className="w-full sm:w-48">
+                 <SelectValue />
+               </SelectTrigger>
+               <SelectContent>
+                 <SelectItem value="monthly">Monthly</SelectItem>
+                 <SelectItem value="quarterly">Quarterly</SelectItem>
+                 <SelectItem value="annually">Annually</SelectItem>
+               </SelectContent>
+             </Select>
             </div>
 
             <div className="flex items-center justify-between py-2">
-              <div>
-                <Label>Portal Access</Label>
-                <p className="text-sm text-slate-500">Allow client to view inspections and reports online</p>
-              </div>
-              <Switch
-                checked={formData.portal_access}
-                onCheckedChange={(checked) => handleChange('portal_access', checked)}
-              />
+             <div>
+               <Label>Portal Access</Label>
+               <p className="text-sm text-slate-500">Allow client to view inspections and reports online</p>
+             </div>
+             <Switch
+               checked={formData.portal_access}
+               onCheckedChange={(checked) => handleChange('portal_access', checked)}
+             />
             </div>
 
             {formData.portal_access && (
-              <div>
-                <Label htmlFor="portal_pin">Portal PIN (6 digits) *</Label>
-                <Input
-                  id="portal_pin"
-                  type="password"
-                  maxLength={6}
-                  value={formData.portal_pin || ''}
-                  onChange={(e) => handleChange('portal_pin', e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="000000"
-                  className="text-center text-lg tracking-widest"
-                />
-                <p className="text-xs text-slate-500 mt-1">Client will use this PIN to access the portal</p>
-              </div>
+             <div>
+               <Label htmlFor="portal_pin">Portal PIN (6 digits) *</Label>
+               <Input
+                 id="portal_pin"
+                 type="password"
+                 maxLength={6}
+                 value={formData.portal_pin || ''}
+                 onChange={(e) => handleChange('portal_pin', e.target.value.replace(/\D/g, '').slice(0, 6))}
+                 placeholder="000000"
+                 className="text-center text-lg tracking-widest"
+               />
+               <p className="text-xs text-slate-500 mt-1">Client will use this PIN to access the portal</p>
+             </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Monthly Billing Transactions */}
-        {clientId && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Monthly Billing Transactions
-              </CardTitle>
-              <CardDescription>Add custom items to include in monthly invoices</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Add New Transaction */}
-              <div className="border rounded-lg p-4 bg-slate-50">
-                <Label className="text-sm font-medium mb-3 block">Add New Item</Label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <Input
-                    placeholder="Description"
-                    value={newTransaction.description}
-                    onChange={(e) => setNewTransaction(prev => ({ ...prev, description: e.target.value }))}
-                  />
-                  <Input
-                    type="number"
-                    step="0.01"
-                    placeholder="Amount"
-                    value={newTransaction.amount}
-                    onChange={(e) => setNewTransaction(prev => ({ ...prev, amount: e.target.value }))}
-                  />
-                  <Input
-                    type="month"
-                    value={newTransaction.billing_month}
-                    onChange={(e) => setNewTransaction(prev => ({ ...prev, billing_month: e.target.value }))}
-                  />
                 </div>
-                <Button 
-                  type="button"
-                  onClick={handleAddTransaction} 
-                  className="mt-3"
-                  size="sm"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Item
-                </Button>
-              </div>
-
-              {/* Current Month Summary */}
-              <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
-                <div className="flex items-center justify-between mb-3">
-                  <Label className="text-sm font-medium">Current Month Bill Preview</Label>
-                  <Button 
-                    type="button"
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setShowStatementDialog(true)}
-                  >
-                    <FileText className="h-4 w-4 mr-2" />
-                    View Full Statement
-                  </Button>
-                </div>
-                
-                <div className="space-y-2 text-sm">
-                  {/* Subscription Service */}
-                  {formData.service_subscription_id && (() => {
-                    const service = availableServices.find(s => s.id === formData.service_subscription_id);
-                    return service ? (
-                      <div className="flex justify-between">
-                        <span className="text-slate-700">{service.name} (Subscription)</span>
-                        <span className="font-medium">${service.price.toFixed(2)}</span>
-                      </div>
-                    ) : null;
-                  })()}
-                  
-                  {/* Additional Products */}
-                  {formData.additional_products?.map(productId => {
-                    const product = availableProducts.find(p => p.id === productId);
-                    return product ? (
-                      <div key={productId} className="flex justify-between">
-                        <span className="text-slate-700">{product.name}</span>
-                        <span className="font-medium">${product.price.toFixed(2)}</span>
-                      </div>
-                    ) : null;
-                  })}
-                  
-                  {/* Custom Transactions for current month */}
-                  {monthlyTransactions
-                    .filter(t => t.billing_month === currentBillingMonth)
-                    .map(transaction => (
-                      <div key={transaction.id} className="flex justify-between">
-                        <span className="text-slate-700">{transaction.description}</span>
-                        <span className="font-medium">${transaction.amount.toFixed(2)}</span>
-                      </div>
-                    ))
-                  }
-                  
-                  {/* Total */}
-                  <div className="flex justify-between pt-2 border-t border-blue-300 font-bold text-base">
-                    <span>Monthly Total:</span>
-                    <span className="text-blue-700">
-                      ${(() => {
-                        let total = 0;
-                        
-                        // Add subscription
-                        const service = availableServices.find(s => s.id === formData.service_subscription_id);
-                        if (service) total += service.price;
-                        
-                        // Add products
-                        formData.additional_products?.forEach(productId => {
-                          const product = availableProducts.find(p => p.id === productId);
-                          if (product) total += product.price;
-                        });
-                        
-                        // Add transactions
-                        monthlyTransactions
-                          .filter(t => t.billing_month === currentBillingMonth)
-                          .forEach(t => total += t.amount);
-                        
-                        return total.toFixed(2);
-                      })()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Transactions List */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">All Custom Billing Items</Label>
-                {monthlyTransactions.length === 0 ? (
-                  <p className="text-sm text-slate-500 text-center py-4">No custom billing items yet</p>
-                ) : (
-                  monthlyTransactions.map((transaction) => (
-                    <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg bg-white">
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{transaction.description}</p>
-                        <p className="text-xs text-slate-500">
-                          {new Date(transaction.billing_month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="font-semibold">${transaction.amount.toFixed(2)}</span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteTransaction(transaction.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Notes */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Notes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              value={formData.notes}
-              onChange={(e) => handleChange('notes', e.target.value)}
-              placeholder="Add any additional notes about this client..."
-              rows={4}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Actions */}
-        <div className="flex items-center justify-end gap-3 pb-6">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate(createPageUrl('Clients'))}
-          >
-            <X className="h-4 w-4 mr-2" />
-            Cancel
-          </Button>
-          <Button type="submit" disabled={saving} className="bg-slate-900 hover:bg-slate-800">
-            <Save className="h-4 w-4 mr-2" />
-            {saving ? 'Saving...' : 'Save'}
-          </Button>
-        </div>
       </form>
 
       {/* Monthly Statement Dialog */}
