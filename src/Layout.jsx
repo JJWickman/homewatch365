@@ -4,19 +4,19 @@ import { createPageUrl } from './utils';
 import { base44 } from '@/api/base44Client';
 import OfflineProvider from '@/components/shared/OfflineProvider';
 import OfflineBanner from '@/components/shared/OfflineBanner';
-import { 
-        Home, Users, Building2, ClipboardCheck, Calendar, 
-        FileText, Settings, Menu, X, LogOut, ChevronDown,
-        Bell, Search, Plus, Building, UserCircle, Megaphone, Briefcase, BookOpen, DollarSign, Download, Bot
-      } from 'lucide-react';
+import {
+  Home, Users, Building2, ClipboardCheck, Calendar,
+  FileText, Settings, Menu, X, LogOut, ChevronDown,
+  Bell, Search, Plus, Building, UserCircle, Megaphone, Briefcase, BookOpen, DollarSign, Download, Bot } from
+'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuTrigger } from
+"@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -35,23 +35,23 @@ const getNavigationItems = (subscriptionPlan, roleInTenant) => {
   // Field Inspector - limited access
   if (role === 'field_inspector') {
     return [
-      { name: 'Dashboard', icon: Home, page: 'Dashboard' },
-      { name: 'My Visits', icon: ClipboardCheck, page: 'Visits' },
-      { name: 'My Schedule', icon: Calendar, page: 'Schedule' }
-    ];
+    { name: 'Dashboard', icon: Home, page: 'Dashboard' },
+    { name: 'My Visits', icon: ClipboardCheck, page: 'Visits' },
+    { name: 'My Schedule', icon: Calendar, page: 'Schedule' }];
+
   }
 
   // Dispatcher/Admin - full access
   const baseItems = [
-    { name: 'Dashboard', icon: Home, page: 'Dashboard' },
-    { name: 'Clients', icon: Users, page: 'Clients' },
-    { name: 'Properties', icon: Building2, page: 'Properties' },
-    { name: 'Visits', icon: ClipboardCheck, page: 'Visits' },
-    { name: 'Schedule', icon: Calendar, page: 'Schedule' },
-    { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
-    { name: 'Help & Tutorials', icon: BookOpen, page: 'HelpTutorials' },
-    { name: 'AI Assistant', icon: Bot, page: 'AIAssistant' },
-  ];
+  { name: 'Dashboard', icon: Home, page: 'Dashboard' },
+  { name: 'Clients', icon: Users, page: 'Clients' },
+  { name: 'Properties', icon: Building2, page: 'Properties' },
+  { name: 'Visits', icon: ClipboardCheck, page: 'Visits' },
+  { name: 'Schedule', icon: Calendar, page: 'Schedule' },
+  { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
+  { name: 'Help & Tutorials', icon: BookOpen, page: 'HelpTutorials' },
+  { name: 'AI Assistant', icon: Bot, page: 'AIAssistant' }];
+
 
   // Only show Billing and Import Data for Admins
   if (role === 'admin') {
@@ -116,11 +116,11 @@ export default function Layout({ children, currentPageName }) {
         }
         return;
       }
-      
+
       // Load TenantUser (role/permissions)
-      const tenantUsers = await base44.entities.TenantUser.filter({ 
+      const tenantUsers = await base44.entities.TenantUser.filter({
         user_id: currentUser.id,
-        tenant_id: currentUser.primary_tenant_id 
+        tenant_id: currentUser.primary_tenant_id
       });
       if (tenantUsers.length > 0) {
         setTenantUser(tenantUsers[0]);
@@ -148,8 +148,8 @@ export default function Layout({ children, currentPageName }) {
           <OfflineBanner />
           {children}
         </div>
-      </OfflineProvider>
-    );
+      </OfflineProvider>);
+
   }
 
   // Public pages (no layout)
@@ -161,25 +161,25 @@ export default function Layout({ children, currentPageName }) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
-      </div>
-    );
+      </div>);
+
   }
 
   const getInitials = (name) => {
     if (!name) return 'U';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  const hasMarketingAccess = company?.subscription_plan === 'enterprise' || 
-                             company?.marketing_addon_active === true ||
-                             ['solopreneur_crm', 'growth_crm', 'professional_crm'].includes(company?.subscription_plan);
+  const hasMarketingAccess = company?.subscription_plan === 'enterprise' ||
+  company?.marketing_addon_active === true ||
+  ['solopreneur_crm', 'growth_crm', 'professional_crm'].includes(company?.subscription_plan);
   const isAdminOrOwner = tenantUser?.role_in_tenant === 'admin' || tenantUser?.is_owner === true;
 
   let navigationItems = getNavigationItems(company?.subscription_plan, tenantUser?.role_in_tenant);
 
   // Add CRM & Marketing if company has access AND user is admin/owner
   if (hasMarketingAccess && isAdminOrOwner) {
-    const hasMarketing = navigationItems.some(item => item.name === 'CRM & Marketing');
+    const hasMarketing = navigationItems.some((item) => item.name === 'CRM & Marketing');
     if (!hasMarketing) {
       navigationItems.push({ name: 'CRM & Marketing', icon: Megaphone, page: 'Marketing' });
     }
@@ -195,12 +195,12 @@ export default function Layout({ children, currentPageName }) {
     <div className="min-h-screen bg-slate-50">
       <OfflineBanner />
       {/* Mobile sidebar backdrop */}
-      {sidebarOpen && (
-        <div 
+      {sidebarOpen &&
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+          onClick={() => setSidebarOpen(false)} />
+
+        }
 
       {/* Sidebar */}
       <aside className={`
@@ -211,15 +211,15 @@ export default function Layout({ children, currentPageName }) {
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-4 border-b border-blue-800">
           <div className="flex items-center gap-3">
-            {company?.logo_url ? (
-              <img src={company.logo_url} alt={company.name} className="h-8 w-8 rounded object-contain bg-white/10" />
-            ) : (
-              <div className="h-8 w-8 rounded bg-green-500 flex items-center justify-center shrink-0">
+            {company?.logo_url ?
+                <img src={company.logo_url} alt={company.name} className="h-8 w-8 rounded object-contain bg-white/10" /> :
+
+                <div className="h-8 w-8 rounded bg-green-500 flex items-center justify-center shrink-0">
                 <span className="text-white font-bold text-sm">
                   {company?.name ? company.name.charAt(0).toUpperCase() : <Building className="h-5 w-5 text-white" />}
                 </span>
               </div>
-            )}
+                }
               <span className="font-semibold text-white truncate">
                 {company?.name || 'My Tenant'}
               </span>
@@ -232,38 +232,38 @@ export default function Layout({ children, currentPageName }) {
           {/* Navigation */}
           <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
             {navigationItems.map((item) => {
-              const isActive = currentPageName === item.page;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.page === 'Settings' ? createPageUrl('Settings') + '?tab=templates' : createPageUrl(item.page)}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`
+                const isActive = currentPageName === item.page;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.page === 'Settings' ? createPageUrl('Settings') + '?tab=templates' : createPageUrl(item.page)}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`
                     flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                    ${isActive 
-                      ? 'bg-green-500/20 text-green-400' 
-                      : 'text-slate-300 hover:text-white hover:bg-blue-800'}
-                  `}
-                >
+                    ${isActive ?
+                    'bg-green-500/20 text-green-400' :
+                    'text-slate-300 hover:text-white hover:bg-blue-800'}
+                  `}>
+                    
                   <item.icon className="h-5 w-5" />
                   {item.name}
-                </Link>
-              );
-            })}
+                </Link>);
+
+              })}
           </nav>
 
           {/* Settings & User */}
           <div className="p-3 border-t border-blue-800">
             <Link
-              to={createPageUrl('Settings')}
-              onClick={() => setSidebarOpen(false)}
-              className={`
+                to={createPageUrl('Settings')}
+                onClick={() => setSidebarOpen(false)}
+                className={`
                 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                ${currentPageName === 'Settings' 
-                  ? 'bg-green-500/20 text-green-400' 
-                  : 'text-slate-300 hover:text-white hover:bg-blue-800'}
-              `}
-            >
+                ${currentPageName === 'Settings' ?
+                'bg-green-500/20 text-green-400' :
+                'text-slate-300 hover:text-white hover:bg-blue-800'}
+              `}>
+                
               <Settings className="h-5 w-5" />
               Settings
             </Link>
@@ -272,23 +272,23 @@ export default function Layout({ children, currentPageName }) {
           {/* Home Watch 365 Footer */}
           <div className="p-4 border-t border-slate-200 bg-white">
             <div className="flex items-center justify-center mb-3">
-              <a 
-                href="https://www.estatewatch365.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="hover:opacity-80 transition-opacity"
-              >
-                <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/c534cf318_NewEstateWatchLogo.png" 
-                  alt="Home Watch 365" 
-                  className="h-20 w-auto object-contain" 
-                />
+              <a
+                  href="https://www.estatewatch365.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:opacity-80 transition-opacity">
+                  
+                <img src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/c920e3364_NewHomeWatch365logo.png"
+
+                  alt="Home Watch 365" className="h-20 w-auto object-contain" />
+
+                  
               </a>
             </div>
             <a
-              href="#support"
-              className="flex items-center justify-center gap-2 text-xs text-slate-600 hover:text-green-600 transition-colors"
-            >
+                href="#support"
+                className="flex items-center justify-center gap-2 text-xs text-slate-600 hover:text-green-600 transition-colors">
+                
               <span>Support</span>
               <span className="text-slate-400">→</span>
             </a>
@@ -302,20 +302,20 @@ export default function Layout({ children, currentPageName }) {
         <header className="sticky top-0 z-30 h-16 bg-white border-b border-slate-200">
           <div className="flex items-center justify-between h-full px-4 lg:px-6">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <button 
-                onClick={() => setSidebarOpen(true)} 
-                className="lg:hidden text-slate-600 shrink-0"
-              >
+              <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden text-slate-600 shrink-0">
+                  
                 <Menu className="h-6 w-6" />
               </button>
 
               <div className="hidden md:flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-2 max-w-xs flex-1">
                 <Search className="h-4 w-4 text-slate-400 shrink-0" />
-                <input 
-                  type="text" 
-                  placeholder="Search..." 
-                  className="bg-transparent text-sm outline-none w-full min-w-0"
-                />
+                <input
+                    type="text"
+                    placeholder="Search..."
+                    className="bg-transparent text-sm outline-none w-full min-w-0" />
+                  
               </div>
             </div>
 
@@ -378,7 +378,7 @@ export default function Layout({ children, currentPageName }) {
         {/* Page content */}
         <main className="p-4 lg:p-6 min-w-0 overflow-x-hidden">
           <TrialBanner company={company} tenantUser={tenantUser} />
-          {isPageRestricted && isAdmin && (
+          {isPageRestricted && isAdmin &&
             <Alert className="mb-6 bg-blue-50 border-blue-200">
               <AlertCircle className="h-4 w-4 text-blue-600" />
               <AlertDescription className="text-blue-900">
@@ -388,7 +388,7 @@ export default function Layout({ children, currentPageName }) {
                 </a>
               </AlertDescription>
             </Alert>
-          )}
+            }
           {children}
         </main>
       </div>
@@ -486,6 +486,6 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
       </div>
-      </OfflineProvider>
-  );
+      </OfflineProvider>);
+
 }
