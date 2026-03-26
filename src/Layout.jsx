@@ -108,7 +108,6 @@ export default function Layout({ children, currentPageName }) {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      // Check if user has primary_tenant_id (completed onboarding)
       if (!currentUser.primary_tenant_id) {
         setLoading(false);
         if (currentPageName !== 'CompanyOnboarding') {
@@ -117,23 +116,24 @@ export default function Layout({ children, currentPageName }) {
         return;
       }
 
-      // Load TenantUser (role/permissions) — skip if query fails (RLS issue)
       try {
         const tenantUsers = await base44.entities.TenantUser.filter({
           user_id: currentUser.id
         });
         if (tenantUsers.length > 0) {
           setTenantUser(tenantUsers[0]);
-          console.log('✓ TenantUser loaded:', { role: tenantUsers[0].role_in_tenant, is_owner: tenantUsers[0].is_owner });
         }
       } catch (e) {
-        console.warn('Could not load TenantUser (non-blocking):', e.message);
-        // Default to admin to restore access
+        console.warn('Could not load TenantUser:', e.message);
         setTenantUser({ role_in_tenant: 'admin', is_owner: true, is_active: true });
       }
 
-      // Load tenant
-      if (tenants.length > 0) setCompany(tenants[0]);
+      try {
+        const tenants = await base44.entities.Tenant.filter({ id: currentUser.primary_tenant_id });
+        if (tenants.length > 0) setCompany(tenants[0]);
+      } catch (e) {
+        console.warn('Could not load Tenant:', e.message);
+      }
     } catch (error) {
       console.error('Error loading user data:', error);
     } finally {
