@@ -1,0 +1,118 @@
+{
+  "name": "ActivityLog",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company (tenant isolation)"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "create",
+        "update",
+        "delete",
+        "view",
+        "login",
+        "logout",
+        "complete",
+        "assign",
+        "notify"
+      ]
+    },
+    "entity_type": {
+      "type": "string",
+      "enum": [
+        "client",
+        "property",
+        "inspection",
+        "task",
+        "staff",
+        "billing",
+        "template",
+        "settings"
+      ]
+    },
+    "entity_id": {
+      "type": "string"
+    },
+    "entity_name": {
+      "type": "string",
+      "description": "Human-readable name of the entity"
+    },
+    "details": {
+      "type": "string",
+      "description": "Additional context"
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "user_agent": {
+      "type": "string"
+    },
+    "user_timezone": {
+      "type": "string",
+      "description": "User's local timezone (e.g., America/New_York)"
+    },
+    "local_timestamp": {
+      "type": "string",
+      "description": "Timestamp in user's local timezone for display"
+    }
+  },
+  "required": [
+    "company_id",
+    "user_email",
+    "action",
+    "entity_type"
+  ],
+  "rls": {
+    "create": {
+      "data.company_id": "{{user.data.primary_tenant_id}}"
+    },
+    "read": {
+      "data.company_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "data.company_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.company_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "data.company_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
