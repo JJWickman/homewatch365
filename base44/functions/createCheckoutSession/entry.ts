@@ -45,6 +45,7 @@ Deno.serve(async (req) => {
     const sessionParams = {
       customer: customerId,
       mode: 'subscription',
+      submit_type: 'pay',
       payment_method_types: ['card'],
       payment_method_collection: 'if_required',
       line_items: [
