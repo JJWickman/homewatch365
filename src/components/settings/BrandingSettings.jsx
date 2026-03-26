@@ -4,13 +4,25 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Palette, Upload, Building, Trash2, Save } from 'lucide-react';
+import { Palette, Upload, Building, Trash2, Save, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function BrandingSettings({ company, companyForm, setCompanyForm, onSave, saving }) {
   const [uploading, setUploading] = useState(false);
   const [extractingBranding, setExtractingBranding] = useState(false);
   const [extractWebsiteUrl, setExtractWebsiteUrl] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const handleSave = async () => {
+    setSaveSuccess(false);
+    try {
+      await onSave();
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (e) {
+      console.error('Error saving:', e);
+    }
+  };
 
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
@@ -177,8 +189,13 @@ export default function BrandingSettings({ company, companyForm, setCompanyForm,
           </div>
         </div>
 
-        <div className="pt-4 flex justify-end">
-          <Button onClick={onSave} disabled={saving} className="bg-slate-900 hover:bg-slate-800">
+        <div className="pt-4 flex items-center justify-end gap-3">
+          {saveSuccess && (
+            <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
+              <Check className="h-4 w-4" /> Saved!
+            </div>
+          )}
+          <Button onClick={handleSave} disabled={saving} className="bg-slate-900 hover:bg-slate-800">
             <Save className="h-4 w-4 mr-2" />
             {saving ? 'Saving...' : 'Save Branding'}
           </Button>
