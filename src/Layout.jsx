@@ -67,7 +67,7 @@ const publicPages = ['CompanyOnboarding', 'ClientLogin', 'Home'];
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
-  const [userTenant, setUserTenant] = useState(null);
+  const [tenantUser, setTenantUser] = useState(null);
   const [company, setCompany] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -117,13 +117,13 @@ export default function Layout({ children, currentPageName }) {
         return;
       }
       
-      // Load UserTenant (role/permissions via new Tenant model)
-      const userTenants = await base44.entities.UserTenant.filter({ 
+      // Load TenantUser (role/permissions via new Tenant model)
+      const tenantUsers = await base44.entities.TenantUser.filter({ 
         user_id: currentUser.id,
         tenant_id: currentUser.primary_tenant_id 
       });
-      if (userTenants.length > 0) {
-        setUserTenant(userTenants[0]);
+      if (tenantUsers.length > 0) {
+        setTenantUser(tenantUsers[0]);
       }
 
       // Load tenant
@@ -173,9 +173,9 @@ export default function Layout({ children, currentPageName }) {
   const hasMarketingAccess = company?.subscription_plan === 'enterprise' || 
                              company?.marketing_addon_active === true ||
                              ['solopreneur_crm', 'growth_crm', 'professional_crm'].includes(company?.subscription_plan);
-  const isAdminOrOwner = userTenant?.role_in_tenant === 'admin' || userTenant?.is_owner === true;
+  const isAdminOrOwner = tenantUser?.role_in_tenant === 'admin' || tenantUser?.is_owner === true;
 
-  let navigationItems = getNavigationItems(company?.subscription_plan, userTenant?.role_in_tenant);
+  let navigationItems = getNavigationItems(company?.subscription_plan, tenantUser?.role_in_tenant);
 
   // Add CRM & Marketing if company has access AND user is admin/owner
   if (hasMarketingAccess && isAdminOrOwner) {
@@ -188,7 +188,7 @@ export default function Layout({ children, currentPageName }) {
   const pageRestrictions = getPageRestrictions();
   const hasMarketingAccessForPage = company?.subscription_plan === 'enterprise' || company?.marketing_addon_active === true;
   const isPageRestricted = pageRestrictions[currentPageName] === 'enterprise_or_addon' && !hasMarketingAccessForPage;
-  const isAdmin = userTenant?.role_in_tenant === 'admin';
+  const isAdmin = tenantUser?.role_in_tenant === 'admin';
 
   return (
     <OfflineProvider>
@@ -347,7 +347,7 @@ export default function Layout({ children, currentPageName }) {
                         </Avatar>
                     <div className="hidden sm:block text-left min-w-0">
                       <p className="text-sm font-medium text-slate-900 truncate">{user?.full_name}</p>
-                      <p className="text-xs text-slate-500 capitalize truncate">{userTenant?.role_in_tenant || 'Member'}</p>
+                      <p className="text-xs text-slate-500 capitalize truncate">{tenantUser?.role_in_tenant || 'Member'}</p>
                     </div>
                     <ChevronDown className="h-4 w-4 text-slate-400 hidden sm:block shrink-0" />
                   </button>
@@ -377,7 +377,7 @@ export default function Layout({ children, currentPageName }) {
 
         {/* Page content */}
         <main className="p-4 lg:p-6 min-w-0 overflow-x-hidden">
-          <TrialBanner company={company} userTenant={userTenant} />
+          <TrialBanner company={company} tenantUser={tenantUser} />
           {isPageRestricted && isAdmin && (
             <Alert className="mb-6 bg-blue-50 border-blue-200">
               <AlertCircle className="h-4 w-4 text-blue-600" />

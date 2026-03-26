@@ -4,7 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { base44 } from '@/api/base44Client';
 
-export default function TrialBanner({ company, companyMember }) {
+export default function TrialBanner({ company, tenantUser }) {
   const [loading, setLoading] = useState(false);
 
   const handleManageSubscription = async () => {
@@ -36,7 +36,7 @@ export default function TrialBanner({ company, companyMember }) {
           <span>
             <strong>Trial Expired:</strong> Your trial has ended. Subscribe to continue using Estate Watch.
           </span>
-          {companyMember?.is_owner && (
+          {tenantUser?.is_owner && (
             <Button 
               onClick={handleManageSubscription}
               disabled={loading}
@@ -62,7 +62,7 @@ export default function TrialBanner({ company, companyMember }) {
         <span>
           <strong>Trial Ending Soon:</strong> {daysRemaining} day{daysRemaining !== 1 ? 's' : ''} remaining in your free trial.
         </span>
-        {companyMember?.is_owner && (
+        {tenantUser?.is_owner && (
           <Button 
             onClick={handleManageSubscription}
             disabled={loading}
