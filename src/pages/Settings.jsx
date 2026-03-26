@@ -301,6 +301,17 @@ export default function Settings() {
     setSaveSuccess(false);
     try {
       await base44.entities.Company.update(company.id, companyForm);
+      
+      // Also update Tenant so header/layout reflects the new logo immediately
+      if (user?.primary_tenant_id) {
+        await base44.entities.Tenant.update(user.primary_tenant_id, {
+          logo_url: companyForm.logo_url,
+          name: companyForm.name,
+          primary_color: companyForm.primary_color,
+          accent_color: companyForm.accent_color
+        });
+      }
+      
       setCompany({ ...company, ...companyForm });
       setSaveSuccess(true);
       toast.success('Company settings saved!', { duration: 5000 });
@@ -310,114 +321,6 @@ export default function Settings() {
       toast.error(error.message || 'Failed to save settings');
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleInviteStaff = async () => {
-    if (!company || !inviteForm.email) return;
-
-    // Enforce user limit for the current plan
-    const limits = getLimits(company?.subscription_plan);
-    const activeStaff = staff.filter(m => m.is_active !== false);
-    if (activeStaff.length >= limits.maxUsers) {
-      setInviteError(`Your ${company.subscription_plan || 'current'} plan supports up to ${limits.maxUsers} user(s). Please upgrade your plan to add more team members.`);
-      return;
-    }
-
-    setInviting(true);
-    setInviteError('');
-
-    try {
-      // Generate unique invitation token
-      const inviteToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
-      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
-
-      // Create invitation record
-      await base44.entities.Invitation.create({
-        company_id: company.id,
-        invitee_email: inviteForm.email,
-        inviter_email: user.email,
-        token: inviteToken,
-        role: inviteForm.role,
-        status: 'pending',
-        expires_at: expiresAt.toISOString()
-      });
-
-      // Check if member already exists
-      const existing = await base44.entities.CompanyMember.filter({ 
-        company_id: company.id, 
-        user_email: inviteForm.email 
-      });
-      
-      if (existing.length === 0) {
-        // Create new inactive member
-        await base44.entities.CompanyMember.create({
-          company_id: company.id,
-          user_email: inviteForm.email,
-          user_name: inviteForm.name,
-          role: inviteForm.role,
-          access_level: inviteForm.access_level,
-          crm_marketing_access: inviteForm.role === 'administrator' ? true : inviteForm.crm_marketing_access,
-          is_active: false
-        });
-      } else if (inviteForm.name || inviteForm.role || inviteForm.access_level) {
-        // Update existing member
-        await base44.entities.CompanyMember.update(existing[0].id, {
-          user_name: inviteForm.name || existing[0].user_name,
-          role: inviteForm.role || existing[0].role,
-          access_level: inviteForm.access_level || existing[0].access_level,
-          crm_marketing_access: inviteForm.role === 'administrator' ? true : (inviteForm.crm_marketing_access || existing[0].crm_marketing_access)
-        });
-      }
-      
-      // Send invite email with invitation link
-      const appUrl = window.location.origin;
-      const roleLabel = inviteForm.role === 'field_inspector' ? 'Field Inspector' : 
-                       inviteForm.role === 'dispatcher' ? 'Dispatcher/Manager' : 'Administrator';
-      
-      const invitationUrl = `${appUrl}${createPageUrl('InvitationAccept')}?token=${inviteToken}`;
-      
-      const emailBody = `
-Hello ${inviteForm.name || ''},
-
-You've been invited to join ${company.name} as a ${roleLabel}.
-
-Click the link below to accept the invitation and create your account:
-${invitationUrl}
-
-This link will expire in 7 days.
-
-Best regards,
-${company.name}
-        `.trim();
-
-      const emailResponse = await base44.integrations.Core.SendEmail({
-        from_name: 'Estate Watch 365',
-        to: inviteForm.email,
-        subject: `You've been invited to join ${company.name}`,
-        body: emailBody
-      });
-
-      // Log the email in CommunicationLog
-      await base44.entities.CommunicationLog.create({
-        company_id: company.id,
-        type: 'email',
-        subject: `You've been invited to join ${company.name}`,
-        message: emailBody,
-        client_email: inviteForm.email,
-        status: emailResponse?.status === 'failed' ? 'failed' : 'sent',
-        sent_at: new Date().toISOString()
-      });
-      
-      setShowInviteDialog(false);
-      setInviteForm({ email: '', name: '', role: 'field_inspector', access_level: 'user', crm_marketing_access: false });
-      setInviteError('');
-      loadData();
-    } catch (error) {
-      console.error('Error inviting staff:', error);
-      setInviteError(error.message || 'Failed to send invitation');
-    } finally {
-      setInviting(false);
     }
   };
 
