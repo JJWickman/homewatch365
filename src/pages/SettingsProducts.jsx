@@ -37,9 +37,10 @@ export default function SettingsProducts() {
   const loadProducts = async () => {
     try {
       const user = await base44.auth.me();
-      const tenantId = user?.data?.primary_tenant_id || user?.primary_tenant_id;
+      const tenantId = user?.primary_tenant_id;
       
       if (!tenantId) {
+        console.warn('No tenant ID found on user:', user);
         setLoading(false);
         return;
       }
@@ -47,8 +48,7 @@ export default function SettingsProducts() {
       const prods = await base44.entities.ProductService.filter({
         tenant_id: tenantId
       });
-      console.log('Tenant ID:', tenantId);
-      console.log('Products loaded:', prods);
+      console.log('Tenant ID:', tenantId, 'Products:', prods);
       setProducts(prods?.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)) || []);
     } catch (error) {
       console.error('Error loading products:', error);
@@ -69,7 +69,7 @@ export default function SettingsProducts() {
     setAdding(true);
     try {
       const user = await base44.auth.me();
-      const tenantId = user?.data?.primary_tenant_id || user?.primary_tenant_id;
+      const tenantId = user?.primary_tenant_id;
       await base44.entities.ProductService.create({
         tenant_id: tenantId,
         name: form.name,
