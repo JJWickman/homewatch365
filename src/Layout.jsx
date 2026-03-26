@@ -117,13 +117,16 @@ export default function Layout({ children, currentPageName }) {
         return;
       }
 
-      // Load TenantUser (role/permissions)
-      const tenantUsers = await base44.entities.TenantUser.filter({
+      // Load TenantUser (role/permissions) — use explicit tenant_id, not just filter
+      const tenantUsers = await base44.asServiceRole.entities.TenantUser.filter({
         user_id: currentUser.id,
         tenant_id: currentUser.primary_tenant_id
       });
       if (tenantUsers.length > 0) {
         setTenantUser(tenantUsers[0]);
+        console.log('✓ TenantUser loaded:', { role: tenantUsers[0].role_in_tenant, is_owner: tenantUsers[0].is_owner });
+      } else {
+        console.warn('⚠ No TenantUser found for user', currentUser.id, 'tenant', currentUser.primary_tenant_id);
       }
 
       // Load tenant
