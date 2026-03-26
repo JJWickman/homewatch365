@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { CreditCard, Loader2 } from 'lucide-react';
+import { CreditCard, Loader2, Check, AlertCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import PageHeader from '@/components/shared/PageHeader';
@@ -54,39 +54,47 @@ export default function SettingsSubscription() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <Card>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <PageHeader
+        title="Subscription & Billing"
+        subtitle="Manage your plan, payment methods, and billing"
+      />
+
+      {/* Current Plan Card */}
+      <Card className="rounded-2xl backdrop-blur-xl bg-white/5 border-white/10">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white">
             <CreditCard className="h-5 w-5" />
-            Subscription & Billing
+            Current Plan
           </CardTitle>
-          <CardDescription>Manage your billing and subscription plan</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium text-slate-600">Current Plan</p>
-              <p className="text-2xl font-bold capitalize mt-1">{company?.subscription_plan}</p>
+          <div className="grid grid-cols-3 gap-4">
+            {/* Plan Name */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-slate-400">Plan Name</p>
+              <p className="text-2xl font-bold text-white capitalize">{company?.subscription_plan}</p>
             </div>
 
-            <div>
-              <p className="text-sm font-medium text-slate-600">Subscription Status</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className={`inline-block h-2 w-2 rounded-full ${
+            {/* Status */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-slate-400">Status</p>
+              <div className="flex items-center gap-2">
+                <span className={`inline-block h-3 w-3 rounded-full ${
                   company?.subscription_status === 'active' ? 'bg-green-500' :
                   company?.subscription_status === 'trial' ? 'bg-blue-500' :
                   company?.subscription_status === 'past_due' ? 'bg-yellow-500' :
                   'bg-red-500'
                 }`} />
-                <span className="capitalize font-semibold">{company?.subscription_status}</span>
+                <span className="text-white capitalize font-semibold">{company?.subscription_status}</span>
               </div>
             </div>
 
+            {/* Trial Ends */}
             {company?.trial_ends_at && (
-              <div>
-                <p className="text-sm font-medium text-slate-600">Trial Ends</p>
-                <p className="mt-1">{new Date(company.trial_ends_at).toLocaleDateString()}</p>
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-slate-400">Trial Ends</p>
+                <p className="text-white font-semibold">{new Date(company.trial_ends_at).toLocaleDateString()}</p>
               </div>
             )}
           </div>
@@ -94,10 +102,10 @@ export default function SettingsSubscription() {
           <Button
             onClick={handleManageBilling}
             disabled={openingPortal}
-            className="w-full bg-blue-600 hover:bg-blue-700"
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold"
           >
             {openingPortal ? (
-              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Opening...</>
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Opening Portal...</>
             ) : (
               'Manage Billing & Payment Methods'
             )}
