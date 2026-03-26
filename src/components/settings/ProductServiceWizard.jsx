@@ -24,9 +24,16 @@ export default function ProductServiceWizard() {
     base_price: ''
   });
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const seedDefaults = async () => {
+    try {
+      const res = await base44.functions.invoke('seedDefaultProducts', {});
+      if (res.data?.success) {
+        await loadData();
+      }
+    } catch (error) {
+      console.log('Seeding failed or not needed');
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -37,6 +44,11 @@ export default function ProductServiceWizard() {
 
         const prods = await base44.entities.ProductService.filter({ tenant_id: user.primary_tenant_id });
         setProducts(prods.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)));
+        
+        // Auto-seed defaults if tenant has no products
+        if (prods.length === 0) {
+          await seedDefaults();
+        }
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -45,6 +57,10 @@ export default function ProductServiceWizard() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const handleAdd = async (e) => {
     e.preventDefault();
