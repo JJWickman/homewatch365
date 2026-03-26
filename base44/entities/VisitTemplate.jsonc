@@ -1,0 +1,107 @@
+{
+  "name": "VisitTemplate",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Reference to Tenant (isolation)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Template name (e.g., 'Standard Weekly Check')"
+    },
+    "description": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "pre_storm",
+        "post_storm"
+      ],
+      "default": "standard"
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "order": {
+            "type": "number"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "order": {
+                  "type": "number"
+                },
+                "requires_photo": {
+                  "type": "boolean"
+                },
+                "requires_note": {
+                  "type": "boolean"
+                },
+                "check_type": {
+                  "type": "string",
+                  "enum": [
+                    "pass_fail",
+                    "yes_no",
+                    "rating",
+                    "text",
+                    "number"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "estimated_duration_minutes": {
+      "type": "number",
+      "default": 30
+    },
+    "is_default": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "tenant_id",
+    "name",
+    "type"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "read": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "delete": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "write": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    }
+  }
+}
