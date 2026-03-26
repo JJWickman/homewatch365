@@ -9,12 +9,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    
-
-    // Fetch all products for this tenant using service role
-    const allProducts = await base44.asServiceRole.entities.ProductService.filter({
-      tenant_id: tenantId
-    });
+    // Fetch all products regardless of tenant
+    const allProducts = await base44.asServiceRole.entities.ProductService.list();
 
     console.log('Total products found:', allProducts.length);
 
