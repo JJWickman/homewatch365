@@ -1,0 +1,121 @@
+{
+  "name": "MonthlyStatement",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Reference to Tenant (isolation)"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "Reference to Client"
+    },
+    "billing_month": {
+      "type": "string",
+      "description": "Month for this statement (YYYY-MM format)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "finalized",
+        "sent",
+        "paid"
+      ],
+      "default": "draft"
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string"
+          },
+          "product_service_id": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Items included in this statement"
+    },
+    "subtotal": {
+      "type": "number",
+      "description": "Total before tax"
+    },
+    "tax_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "total": {
+      "type": "number",
+      "description": "Final total amount"
+    },
+    "finalized_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "paid_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payment_method": {
+      "type": "string"
+    },
+    "stripe_invoice_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "client_id",
+    "billing_month"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "superadmin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
