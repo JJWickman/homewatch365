@@ -94,7 +94,6 @@ export default function ClientForm() {
       const data = {
         ...formData,
         tenant_id: companyId,
-        company_id: companyId,
         monthly_rate: formData.monthly_rate ? parseFloat(formData.monthly_rate) : null,
         portal_user_email: formData.portal_access ? formData.email : null
       };
