@@ -64,34 +64,12 @@
   ],
   "rls": {
     "create": {
-      "$or": [
-        {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
-    "read": {
-      "data.tenant_id": "{{user.primary_tenant_id}}"
-    },
-    "update": {
       "data.tenant_id": "{{user.primary_tenant_id}}"
     },
     "delete": {
-      "$or": [
-        {
-          "data.tenant_id": "{{user.primary_tenant_id}}"
-        },
-        {
-          "user_condition": {
-            "role": "superadmin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "superadmin"
+      }
     }
   }
 }
