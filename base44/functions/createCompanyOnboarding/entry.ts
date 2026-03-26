@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
 
     // Seed checklist templates for the new tenant
     try {
-      await base44.asServiceRole.functions.invoke('seedCompanyTemplates', { company_id: company.id, tenant_id: tenant.id });
+      await base44.asServiceRole.functions.invoke('seedCompanyTemplates', { tenant_id: tenant.id });
     } catch (e) {
       console.log('Template seeding failed (non-fatal):', e.message);
     }
