@@ -13,22 +13,22 @@ Deno.serve(async (req) => {
     }
 
     // Update ActivityLog records
-    await base44.asServiceRole.entities.ActivityLog.bulkUpdate(
-      { company_id, user_email },
-      { user_name: new_name }
-    );
+    const logs = await base44.asServiceRole.entities.ActivityLog.filter({ company_id, user_email });
+    for (const log of logs) {
+      await base44.asServiceRole.entities.ActivityLog.update(log.id, { user_name: new_name });
+    }
 
-    // Update Inspection assigned_to_name records
-    await base44.asServiceRole.entities.Inspection.bulkUpdate(
-      { company_id, assigned_to: user_email },
-      { assigned_to_name: new_name }
-    );
+    // Update Visit assigned_to_name records (Visit, not Inspection)
+    const visits = await base44.asServiceRole.entities.Visit.filter({ assigned_to: user_email });
+    for (const visit of visits) {
+      await base44.asServiceRole.entities.Visit.update(visit.id, { assigned_to_name: new_name });
+    }
 
     // Update FollowUp assigned_to_name records
-    await base44.asServiceRole.entities.FollowUp.bulkUpdate(
-      { company_id, assigned_to: user_email },
-      { assigned_to_name: new_name }
-    );
+    const followups = await base44.asServiceRole.entities.FollowUp.filter({ assigned_to: user_email });
+    for (const followup of followups) {
+      await base44.asServiceRole.entities.FollowUp.update(followup.id, { assigned_to_name: new_name });
+    }
 
     // Update CompanyMember user_name
     const members = await base44.asServiceRole.entities.CompanyMember.filter({
