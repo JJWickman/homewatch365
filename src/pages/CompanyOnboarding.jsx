@@ -99,14 +99,19 @@ export default function CompanyOnboarding() {
       return;
     }
 
-
     setLoading(true);
     try {
+      // Ensure subdomain is unique by appending timestamp if needed
+      const timestamp = Date.now().toString().slice(-6);
+      const uniqueSubdomain = form.subdomain.includes('-') && form.subdomain.slice(-6).match(/^\d+$/) 
+        ? form.subdomain 
+        : `${form.subdomain}-${timestamp}`;
+
       const response = await base44.functions.invoke('createCompanyOnboarding', {
         companyName: form.companyName,
         fullName: form.fullName,
         email: form.email,
-        subdomain: form.subdomain,
+        subdomain: uniqueSubdomain,
         subscriptionPlan: form.plan,
         promoCode: form.promoCode || null,
       });
