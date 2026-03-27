@@ -946,7 +946,7 @@ export default function PropertyDetail() {
 
             {/* PRICING TAB */}
             <TabsContent value="pricing">
-              <PropertyPricingTab propertyId={property.id} companyId={property.tenant_id} />
+              <PropertyPricingTab propertyId={property.id} companyId={property.tenant_id} property={property} />
             </TabsContent>
 
             {/* CONTRACTORS TAB */}

@@ -14,40 +14,21 @@ const PAYMENT_TERMS = [
   { value: 'annual_prepay', label: 'Annual Pre-Pay' }
 ];
 
-export default function PropertyPricingTab({ propertyId, companyId }) {
-  const [pricing, setPricing] = useState({
+export default function PropertyPricingTab({ propertyId, companyId, property }) {
+  const DEFAULT_PRICING = {
     base_price: 60,
     water_zones: 0,
     visit_frequency: 'freq_1',
     payment_terms: 'per_visit',
     selected_add_ons: [],
     notes: ''
-  });
-  const [loading, setLoading] = useState(true);
+  };
+
+  const [pricing, setPricing] = useState(
+    property?.custom_fields?.pricing || DEFAULT_PRICING
+  );
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
-
-  useEffect(() => {
-    loadPricing();
-  }, [propertyId]);
-
-  const loadPricing = async () => {
-    try {
-      // Load existing pricing for this property if it exists
-      const existingPricing = await base44.entities.PropertyPricing?.filter({
-        property_id: propertyId,
-        company_id: companyId
-      });
-
-      if (existingPricing?.length > 0) {
-        setPricing(existingPricing[0]);
-      }
-    } catch (error) {
-      console.log('No existing pricing found, using defaults');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleAddOnToggle = (addonId) => {
     setPricing(prev => ({
@@ -61,15 +42,9 @@ export default function PropertyPricingTab({ propertyId, companyId }) {
   const handleSave = async () => {
     setSaving(true);
     setMessage(null);
-
     try {
-      const pricingData = {
-        property_id: propertyId,
-        company_id: companyId,
-        ...pricing
-      };
-
-      await base44.entities.PropertyPricing.create(pricingData);
+      const updatedCustomFields = { ...(property?.custom_fields || {}), pricing };
+      await base44.entities.Property.update(propertyId, { custom_fields: updatedCustomFields });
       setMessage({ type: 'success', text: 'Pricing saved successfully!' });
     } catch (error) {
       setMessage({ type: 'error', text: error.message || 'Failed to save pricing' });
@@ -84,13 +59,7 @@ export default function PropertyPricingTab({ propertyId, companyId }) {
     return (baseWithZones * frequency).toFixed(2);
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
-      </div>
-    );
-  }
+
 
   const VISIT_FREQUENCIES = [
     { id: 'freq_1', label: '4-5 per Month' },
