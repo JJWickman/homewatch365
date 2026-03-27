@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { User, Lock, Camera, Save, Check, Calendar } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +27,7 @@ export default function SettingsProfile() {
   const [userTimezone, setUserTimezone] = useState('America/New_York');
   const [calendarUrlCopied, setCalendarUrlCopied] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [showCertificationBadge, setShowCertificationBadge] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -40,6 +42,7 @@ export default function SettingsProfile() {
       setUserTimezone(currentUser.timezone || 'America/New_York');
       setUserFirstName(currentUser.first_name || '');
       setUserLastName(currentUser.last_name || '');
+      setShowCertificationBadge(currentUser.show_certification_badge || false);
 
       // Load TenantUser for role display
       const tenantUsers = await base44.entities.TenantUser.filter({
@@ -78,10 +81,11 @@ export default function SettingsProfile() {
     setSaving(true);
     try {
       await base44.auth.updateMe({
-        first_name: userFirstName,
-        last_name: userLastName,
-        phone: userPhone,
-        timezone: userTimezone,
+       first_name: userFirstName,
+       last_name: userLastName,
+       phone: userPhone,
+       timezone: userTimezone,
+       show_certification_badge: showCertificationBadge,
       });
 
       setUser({ ...user, first_name: userFirstName, last_name: userLastName, phone: userPhone, timezone: userTimezone });
@@ -243,14 +247,40 @@ export default function SettingsProfile() {
 
           {/* Role (display only) */}
           {tenantUser && (
-            <div>
-              <Label className="text-sm text-slate-500">Role</Label>
-              <p className="font-medium mt-1">
-                {roleLabel}
-                {tenantUser.is_owner && <span className="ml-2 text-amber-600">(Owner)</span>}
-              </p>
-            </div>
+           <div>
+             <Label className="text-sm text-slate-500">Role</Label>
+             <p className="font-medium mt-1">
+               {roleLabel}
+               {tenantUser.is_owner && <span className="ml-2 text-amber-600">(Owner)</span>}
+             </p>
+           </div>
           )}
+
+          {/* Certification Badge */}
+          <div className="border-t pt-4 space-y-3">
+            <div className="flex items-start gap-4">
+              <img
+                src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/9369557c5_image.png"
+                alt="Certified Home Watch Reporter Badge"
+                className="h-20 w-auto object-contain flex-shrink-0"
+              />
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    id="show-badge"
+                    checked={showCertificationBadge}
+                    onCheckedChange={setShowCertificationBadge}
+                  />
+                  <Label htmlFor="show-badge" className="cursor-pointer font-medium">
+                    Display Badge on Profile
+                  </Label>
+                </div>
+                <p className="text-xs text-slate-600 ml-6">
+                  Show the Certified Home Watch Reporter badge alongside your profile picture
+                </p>
+              </div>
+            </div>
+          </div>
 
           <div className="border-t pt-4 flex justify-end">
             <Button onClick={handleSaveProfile} disabled={saving} className={saveSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-900 hover:bg-slate-800'}>
