@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
         },
       ],
       subscription_data: subscriptionData,
-      success_url: `${origin}/CheckoutSuccess`,
+      success_url: `${origin}/CheckoutSuccess?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/?tab=billing`,
       metadata: {
         tenant_id: tenant.id,
