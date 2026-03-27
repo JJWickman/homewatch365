@@ -35,7 +35,6 @@ Deno.serve(async (req) => {
 
     // Create checkout session
     const subscriptionData = {
-      trial_period_days: 0,
       metadata: {
         tenant_id: tenant.id,
         subscription_plan,
