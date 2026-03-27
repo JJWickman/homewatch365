@@ -42,10 +42,6 @@
     "tenant_id": {
       "type": "string",
       "description": "Reference to Tenant (null for system templates)"
-    },
-    "company_id": {
-      "type": "string",
-      "description": "Legacy company reference"
     }
   },
   "required": [
@@ -53,12 +49,20 @@
     "code"
   ],
   "rls": {
-    "create": {},
-    "read": {
+    "create": {
       "$or": [
         {
           "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
         {
           "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
@@ -73,9 +77,6 @@
           "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
         {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
-        },
-        {
           "user_condition": {
             "role": "admin"
           }
@@ -84,24 +85,6 @@
     },
     "delete": {
       "$or": [
-        {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
-        },
-        {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
-    "write": {
-      "$or": [
-        {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
-        },
         {
           "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },

@@ -1,0 +1,102 @@
+{
+  "name": "Promotion",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "Unique promotional code (e.g., SAVE20)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the promotion"
+    },
+    "benefit_type": {
+      "type": "string",
+      "enum": [
+        "extended_trial",
+        "subscription_discount",
+        "free_addon"
+      ],
+      "description": "Type of promotional benefit"
+    },
+    "applicable_plan": {
+      "type": "string",
+      "description": "Which subscription plan this applies to \u2014 matches Stripe product plan ID (null = all plans)"
+    },
+    "trial_days_added": {
+      "type": "number",
+      "default": 0,
+      "description": "Additional trial days to add (for extended_trial)"
+    },
+    "discount_percent": {
+      "type": "number",
+      "default": 0,
+      "description": "Discount percentage (for subscription_discount)"
+    },
+    "max_users": {
+      "type": "number",
+      "description": "Maximum number of users this discount applies to"
+    },
+    "free_addon": {
+      "type": "string",
+      "description": "Add-on to provide free (for free_addon)"
+    },
+    "addon_months": {
+      "type": "number",
+      "default": 1,
+      "description": "How many months to provide the free add-on"
+    },
+    "max_uses": {
+      "type": "number",
+      "description": "Maximum number of times this code can be used (null = unlimited)"
+    },
+    "uses_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Current number of times code has been used"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the promotion expires"
+    },
+    "stripe_coupon_id": {
+      "type": "string",
+      "description": "Stripe coupon ID for discount tracking"
+    },
+    "stripe_promotion_code_id": {
+      "type": "string",
+      "description": "Stripe promotion code ID"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "code",
+    "benefit_type"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
