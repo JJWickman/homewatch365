@@ -1,0 +1,51 @@
+{
+  "name": "EmailUsage",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Reference to Tenant (isolation)"
+    },
+    "month": {
+      "type": "string",
+      "description": "Month in YYYY-MM format"
+    },
+    "emails_sent": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of external emails sent this month"
+    },
+    "last_reset_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the counter was last reset"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "month"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "read": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
