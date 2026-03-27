@@ -6,6 +6,7 @@ const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
 
 Deno.serve(async (req) => {
   try {
+    // Webhooks don't have Base44 headers, so we get the app ID from env
     const signature = req.headers.get('stripe-signature');
     const body = await req.text();
     
@@ -22,8 +23,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
-    // For webhooks, use service role directly (no user auth required)
-    const base44 = createClientFromRequest(req);
+    // For webhooks, create client with service role (no user context needed)
+    const appId = Deno.env.get('BASE44_APP_ID');
+    const base44 = createClientFromRequest(req, { appId });
 
     // Handle the event
     switch (event.type) {
