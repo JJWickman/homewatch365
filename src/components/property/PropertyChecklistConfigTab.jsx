@@ -245,6 +245,16 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
         />
       )}
 
+      {/* Pricing notice */}
+      {!property?.custom_fields?.pricing && (
+        <Alert className="bg-amber-50 border-amber-200">
+          <AlertCircle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-amber-900">
+            <strong>Set pricing first:</strong> Please configure pricing for this property in the <strong>Pricing</strong> tab before setting up a checklist.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Create or Edit */}
       {!checklist ? (
         <Card>
