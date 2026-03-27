@@ -41,6 +41,9 @@ Deno.serve(async (req) => {
 
     // Create checkout session
     const origin = new URL(req.url).origin;
+    console.log('=== createCheckoutSession ===');
+    console.log('Request origin:', origin);
+    console.log('Tenant ID:', tenant.id);
     const subscriptionData = {
       metadata: {
         tenant_id: tenant.id,
@@ -48,6 +51,11 @@ Deno.serve(async (req) => {
         billing_cycle
       }
     };
+
+    console.log('Stripe URLs:', {
+      success_url: `${origin}/CheckoutSuccess?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/?tab=billing`
+    });
 
     const sessionParams = {
       customer: customerId,

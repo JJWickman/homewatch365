@@ -21,6 +21,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ClientPortal from './pages/ClientPortal';
 import ClientLogin from './pages/ClientLogin';
 import TestingDashboard from './pages/TestingDashboard';
+import DiagnosticDashboard from './pages/DiagnosticDashboard';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -123,6 +124,7 @@ const AuthenticatedApp = () => {
       } />
       <Route path="/TestingDashboard" element={<LayoutWrapper currentPageName="TestingDashboard"><TestingDashboard /></LayoutWrapper>} />
       <Route path="/SupportChat" element={<LayoutWrapper currentPageName="SupportChat"><SupportChat /></LayoutWrapper>} />
+      <Route path="/DiagnosticDashboard" element={<LayoutWrapper currentPageName="DiagnosticDashboard"><DiagnosticDashboard /></LayoutWrapper>} />
       <Route path="/CheckoutSuccess" element={<CheckoutSuccess />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
