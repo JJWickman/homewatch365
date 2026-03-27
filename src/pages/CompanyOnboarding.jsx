@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ArrowRight, Loader2, Check, Globe } from 'lucide-react';
+import { ArrowRight, Loader2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,15 +39,11 @@ const PLANS = [
 export default function CompanyOnboarding() {
   const { authError } = useAuth();
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // 1=subdomain, 2=info+plan
   const [loading, setLoading] = useState(false);
   const [checkingUser, setCheckingUser] = useState(true);
   const [user, setUser] = useState(null);
-  const [subdomainAvailable, setSubdomainAvailable] = useState(null);
-  const [checkingSubdomain, setCheckingSubdomain] = useState(false);
 
   const [form, setForm] = useState({
-    subdomain: '',
     companyName: '',
     fullName: '',
     email: '',
@@ -57,8 +53,6 @@ export default function CompanyOnboarding() {
   useEffect(() => {
     init();
   }, []);
-
-
 
   const init = async () => {
     try {
@@ -82,22 +76,22 @@ export default function CompanyOnboarding() {
     }
   };
 
-  // Frontend can't check Tenant availability due to RLS — backend validates on submit
-
   const handleSubmit = async () => {
-    if (!form.companyName || !form.subdomain || !form.email) {
+    if (!form.companyName || !form.email) {
       toast.error('Please fill in all required fields');
       return;
     }
+    
+    // Generate slug from company name (lowercase, no special chars)
+    const slug = form.companyName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
     setLoading(true);
     try {
-
       const response = await base44.functions.invoke('createCompanyOnboarding', {
         companyName: form.companyName,
         fullName: form.fullName,
         email: form.email,
-        subdomain: form.subdomain,
+        slug: slug,
         subscriptionPlan: form.plan,
         promoCode: form.promoCode || null,
       });
@@ -106,7 +100,6 @@ export default function CompanyOnboarding() {
         console.log('Onboarding success, tenant_id:', response.data.tenant_id);
         if (form.plan !== 'trial' && response.data.price_id) {
           // For paid plans, redirect to Stripe
-          // After Stripe success, user will see success page and can click to dashboard
           const checkout = await base44.functions.invoke('createCheckoutSession', {
             price_id: response.data.price_id,
             tenant_id: response.data.tenant_id,
@@ -123,25 +116,19 @@ export default function CompanyOnboarding() {
           });
         }
         toast.success('Welcome to Home Watch 365!');
-        // Redirect to tenant subdomain
+        // Redirect to dashboard with tenant query param
         const tenantSlug = response.data.tenant?.slug;
         if (tenantSlug) {
-          window.location.href = `https://${tenantSlug}.estatewatch365.com/dashboard`;
+          window.location.href = `/?tenant=${tenantSlug}`;
         } else {
           navigate(createPageUrl('Dashboard'));
         }
       } else {
         let errMsg = response.data?.error || 'Something went wrong';
-        if (response.status === 409) {
-          errMsg = 'That subdomain is already taken. Please choose another.';
-        }
         toast.error(errMsg);
       }
     } catch (error) {
       let errMsg = error.message || 'Failed to create account.';
-      if (error.response?.status === 409) {
-        errMsg = 'That subdomain is already taken. Please choose another.';
-      }
       toast.error(errMsg);
     } finally {
       setLoading(false);
@@ -151,7 +138,6 @@ export default function CompanyOnboarding() {
   const field = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
   // If there's an auth error indicating no tenant, show onboarding
-  // For other errors, let them be handled by the auth layer
   if (authError && authError.type !== 'no_tenant') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-900 to-slate-900 flex items-center justify-center p-4">
@@ -185,32 +171,15 @@ export default function CompanyOnboarding() {
           <p className="text-blue-200 mt-1">Let's get your account set up</p>
         </div>
 
-        {/* Step indicators */}
-        <div className="flex items-center justify-center gap-4 mb-8">
-          {[1, 2].map(s => (
-            <div key={s} className="flex items-center gap-2">
-              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${
-                step === s ? 'bg-blue-500 border-blue-400 text-white' :
-                step > s ? 'bg-green-500 border-green-400 text-white' :
-                'bg-white/10 border-white/30 text-white/50'
-              }`}>
-                {step > s ? <Check className="h-4 w-4" /> : s}
-              </div>
-              {s < 2 && <div className={`h-0.5 w-12 ${step > s ? 'bg-green-400' : 'bg-white/20'}`} />}
-            </div>
-          ))}
-        </div>
-
         <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl p-8">
+          {/* Single step: Personal info + plan (slug auto-generated) */}
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-1">Create Your Account</h2>
+              <p className="text-blue-200 text-sm">Set up your company and subscription</p>
+            </div>
 
-          {/* STEP 1: Company name + subdomain */}
-          {step === 1 && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-1">Your Company</h2>
-                <p className="text-blue-200 text-sm">This sets up your unique subdomain on estatewatch365.app</p>
-              </div>
-
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-white">Company Name <span className="text-red-400">*</span></Label>
                 <Input
@@ -219,147 +188,69 @@ export default function CompanyOnboarding() {
                   placeholder="Coastal Property Concierge"
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
                 />
+                <p className="text-xs text-blue-200">This will create a unique slug for your tenant account.</p>
               </div>
-
               <div className="space-y-2">
-                <Label className="text-white">Your Subdomain <span className="text-red-400">*</span></Label>
-                <div className="flex gap-2">
-                  <Input
-                    value={form.subdomain}
-                    onChange={e => {
-                      const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
-                      field('subdomain', val);
-                      setSubdomainAvailable(null);
-                    }}
-                    placeholder="my-company"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/40 flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={async () => {
-                      if (!form.subdomain) return;
-                      setCheckingSubdomain(true);
-                      try {
-                        const res = await base44.functions.invoke('checkSubdomainAvailability', { subdomain: form.subdomain });
-                        setSubdomainAvailable(res.data?.available ?? true);
-                      } catch (err) {
-                        setSubdomainAvailable(false);
-                      } finally {
-                        setCheckingSubdomain(false);
-                      }
-                    }}
-                    disabled={!form.subdomain || checkingSubdomain}
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 whitespace-nowrap"
+                <Label className="text-white">Full Name</Label>
+                <Input
+                  value={form.fullName}
+                  onChange={e => field('fullName', e.target.value)}
+                  placeholder="Jason Wickman"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-white">Contact Email <span className="text-red-400">*</span></Label>
+              <Input
+                type="email"
+                value={form.email}
+                onChange={e => field('email', e.target.value)}
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+              />
+              {form.email !== user?.email && (
+                <p className="text-xs text-yellow-300">Different from login email ({user?.email}) — that's OK, we'll link them.</p>
+              )}
+            </div>
+
+            {/* Plan selection */}
+            <div className="space-y-2">
+              <Label className="text-white">Choose Your Plan</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {PLANS.map(plan => (
+                  <button
+                    key={plan.id}
+                    onClick={() => field('plan', plan.id)}
+                    className={`text-left p-4 rounded-xl border-2 transition-all ${
+                      form.plan === plan.id
+                        ? 'border-blue-400 bg-blue-500/20'
+                        : 'border-white/20 bg-white/5 hover:border-white/40'
+                    }`}
                   >
-                    {checkingSubdomain ? 'Checking...' : 'Check'}
-                  </Button>
-                </div>
-                {form.subdomain && (
-                  <div className={`flex items-center gap-2 text-sm ${
-                    subdomainAvailable === null ? 'text-blue-200' :
-                    subdomainAvailable ? 'text-green-300' : 'text-red-300'
-                  }`}>
-                    <Globe className="h-4 w-4" />
-                    <span>{form.subdomain}.estatewatch365.app</span>
-                    {subdomainAvailable === true && ' ✓ Available'}
-                    {subdomainAvailable === false && ' ✗ Taken'}
-                  </div>
-                )}
-              </div>
-
-              <Button
-                onClick={() => setStep(2)}
-                disabled={!form.companyName || !form.subdomain || subdomainAvailable === false}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <>Continue <ArrowRight className="h-4 w-4 ml-2" /></>
-              </Button>
-            </div>
-          )}
-
-          {/* STEP 2: Personal info + plan */}
-          {step === 2 && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-1">Your Info & Plan</h2>
-                <p className="text-blue-200 text-sm">Confirm your details and choose a subscription</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-white">Full Name</Label>
-                  <Input
-                    value={form.fullName}
-                    onChange={e => field('fullName', e.target.value)}
-                    placeholder="Jason Wickman"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-white">Contact Email <span className="text-red-400">*</span></Label>
-                  <Input
-                    type="email"
-                    value={form.email}
-                    onChange={e => field('email', e.target.value)}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
-                  />
-                  {form.email !== user?.email && (
-                    <p className="text-xs text-yellow-300">Different from login email ({user?.email}) — that's OK, we'll link them.</p>
-                  )}
-                </div>
-              </div>
-
-
-
-              {/* Plan selection */}
-              <div className="space-y-2">
-               <Label className="text-white">Choose Your Plan</Label>
-               <div className="grid grid-cols-2 gap-3">
-                  {PLANS.map(plan => (
-                    <button
-                      key={plan.id}
-                      onClick={() => field('plan', plan.id)}
-                      className={`text-left p-4 rounded-xl border-2 transition-all ${
-                        form.plan === plan.id
-                          ? 'border-blue-400 bg-blue-500/20'
-                          : 'border-white/20 bg-white/5 hover:border-white/40'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-semibold text-white text-sm">{plan.name}</span>
-                        {form.plan === plan.id && <Check className="h-4 w-4 text-blue-400" />}
-                      </div>
-                      <div className="text-blue-300 font-bold text-sm">{plan.price}</div>
-                      <div className="text-white/50 text-xs mt-1">{plan.description}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Button
-                  onClick={() => setStep(1)}
-                  variant="outline"
-                  className="bg-white/10 border-white/20 text-white"
-                  disabled={loading}
-                >
-                  Back
-                </Button>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={loading || !form.email}
-                  className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold"
-                >
-                  {loading ? (
-                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Setting up...</>
-                  ) : (
-                    <>{form.plan === 'trial' ? 'Start Free Trial' : 'Continue to Payment'} <ArrowRight className="h-4 w-4 ml-2" /></>
-                  )}
-                </Button>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-semibold text-white text-sm">{plan.name}</span>
+                      {form.plan === plan.id && <Check className="h-4 w-4 text-blue-400" />}
+                    </div>
+                    <div className="text-blue-300 font-bold text-sm">{plan.price}</div>
+                    <div className="text-white/50 text-xs mt-1">{plan.description}</div>
+                  </button>
+                ))}
               </div>
             </div>
-          )}
+
+            <Button
+              onClick={handleSubmit}
+              disabled={loading || !form.email || !form.companyName}
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold"
+            >
+              {loading ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Setting up...</>
+              ) : (
+                <>{form.plan === 'trial' ? 'Start Free Trial' : 'Continue to Payment'} <ArrowRight className="h-4 w-4 ml-2" /></>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

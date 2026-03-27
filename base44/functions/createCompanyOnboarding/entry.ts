@@ -11,14 +11,14 @@ Deno.serve(async (req) => {
 
     // Do NOT return early if user already has a tenant — always process the new data they entered
 
-    const { companyName, fullName, email, subdomain, subscriptionPlan, promoCode } = await req.json();
+    const { companyName, fullName, email, slug, subscriptionPlan, promoCode } = await req.json();
 
-    if (!companyName || !subdomain) {
-      return Response.json({ error: 'Company name and subdomain are required' }, { status: 400 });
+    if (!companyName || !slug) {
+      return Response.json({ error: 'Company name and slug are required' }, { status: 400 });
     }
 
-    // Check subdomain uniqueness (should be verified on frontend, but double-check)
-    const existing = await base44.asServiceRole.entities.Tenant.filter({ slug: subdomain.toLowerCase() });
+    // Check slug uniqueness
+    const existing = await base44.asServiceRole.entities.Tenant.filter({ slug: slug.toLowerCase() });
     if (existing.length > 0) {
       return Response.json({ error: 'That subdomain is already taken. Please choose another.' }, { status: 409 });
     }
@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
     // Create Tenant
     const tenant = await base44.asServiceRole.entities.Tenant.create({
       name: companyName,
-      slug: subdomain,
+      slug: slug,
       email: email || user.email,
       subscription_plan: subscriptionPlan || 'trial',
       subscription_status: subscriptionPlan === 'trial' ? 'trial' : 'active',
