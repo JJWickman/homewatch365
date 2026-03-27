@@ -181,14 +181,14 @@ export default function CompanyOnboarding() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-white">Company Name <span className="text-red-400">*</span></Label>
+                <Label className="text-white">Tenant Name <span className="text-red-400">*</span></Label>
                 <Input
                   value={form.companyName}
                   onChange={e => field('companyName', e.target.value)}
-                  placeholder="Coastal Property Concierge"
+                  placeholder="My Home Watch Company"
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
                 />
-                <p className="text-xs text-blue-200">This will be your unique tenant ID in the URL (e.g., ?tenant=coastal-property-concierge).</p>
+                <p className="text-xs text-blue-200">Your unique tenant identifier in the URL (e.g., ?tenant=my-home-watch-company).</p>
               </div>
               <div className="space-y-2">
                 <Label className="text-white">Full Name</Label>
