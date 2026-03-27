@@ -8,8 +8,19 @@ export default function CheckoutSuccess() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Verify session exists in URL, then redirect after a brief display
+    // Webhook is the source of truth for subscription activation
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    
+    if (!sessionId) {
+      setError('No checkout session found');
+      setStatus('error');
+      return;
+    }
+
     // After 3 seconds, redirect to dashboard
-    // Webhook is handling the actual subscription activation
+    // Webhook handles all real activation
     const timer = setTimeout(() => {
       navigate('/Dashboard');
     }, 3000);

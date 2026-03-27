@@ -40,9 +40,12 @@ Deno.serve(async (req) => {
     }
 
     // Create checkout session
-    const origin = new URL(req.url).origin;
+    // CRITICAL: Use FRONTEND app URL, not Deno backend host
+    // Stripe success_url must redirect to the frontend app page, not a function endpoint
+    const frontendUrl = Deno.env.get('FRONTEND_URL') || 'https://wise-sparrow-76-ggbq403gfxsv.base44.app';
     console.log('=== createCheckoutSession ===');
-    console.log('Request origin:', origin);
+    console.log('Request origin (backend):', new URL(req.url).origin);
+    console.log('Frontend URL (for Stripe redirect):', frontendUrl);
     console.log('Tenant ID:', tenant.id);
     const subscriptionData = {
       metadata: {
@@ -53,8 +56,8 @@ Deno.serve(async (req) => {
     };
 
     console.log('Stripe URLs:', {
-      success_url: `${origin}/CheckoutSuccess?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/?tab=billing`
+      success_url: `${frontendUrl}/CheckoutSuccess?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${frontendUrl}/?tab=billing`
     });
 
     const sessionParams = {
@@ -70,11 +73,12 @@ Deno.serve(async (req) => {
         },
       ],
       subscription_data: subscriptionData,
-      success_url: `${origin}/CheckoutSuccess?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/?tab=billing`,
+      success_url: `${frontendUrl}/CheckoutSuccess?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${frontendUrl}/?tab=billing`,
       metadata: {
         tenant_id: tenant.id,
-        subscription_plan
+        subscription_plan,
+        frontend_url: frontendUrl
       },
       payment_method_options: {
         card: {
