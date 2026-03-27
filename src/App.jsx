@@ -8,6 +8,7 @@ import PageNotFound from './lib/PageNotFound';
 import ChecklistEditor from './pages/ChecklistEditor';
 import AIAssistant from './pages/AIAssistant';
 import SupportChat from './pages/SupportChat';
+import CheckoutSuccess from './pages/CheckoutSuccess';
 import AdminSubscriptions from './pages/AdminSubscriptions';
 import ApproveFounder from './pages/ApproveFounder';
 import SettingsProfile from './pages/SettingsProfile';
@@ -122,6 +123,7 @@ const AuthenticatedApp = () => {
       } />
       <Route path="/TestingDashboard" element={<LayoutWrapper currentPageName="TestingDashboard"><TestingDashboard /></LayoutWrapper>} />
       <Route path="/SupportChat" element={<LayoutWrapper currentPageName="SupportChat"><SupportChat /></LayoutWrapper>} />
+      <Route path="/CheckoutSuccess" element={<CheckoutSuccess />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

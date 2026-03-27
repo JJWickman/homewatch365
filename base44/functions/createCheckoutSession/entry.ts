@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { price_id, tenant_id, subscription_plan, billing_cycle, return_url } = await req.json();
+    const { price_id, tenant_id, subscription_plan, billing_cycle } = await req.json();
 
     // Get tenant
     let tenants;
@@ -39,6 +39,7 @@ Deno.serve(async (req) => {
     }
 
     // Create checkout session
+    const origin = new URL(req.url).origin;
     const subscriptionData = {
       metadata: {
         tenant_id: tenant.id,
@@ -60,8 +61,8 @@ Deno.serve(async (req) => {
         },
       ],
       subscription_data: subscriptionData,
-      success_url: `${new URL(req.url).origin}/?checkout=success`,
-      cancel_url: `${new URL(req.url).origin}/?tab=billing`,
+      success_url: `${origin}/CheckoutSuccess`,
+      cancel_url: `${origin}/?tab=billing`,
       metadata: {
         tenant_id: tenant.id,
         subscription_plan
@@ -74,17 +75,11 @@ Deno.serve(async (req) => {
       allow_promotion_codes: true
     };
 
-    let session;
-    try {
-      session = await stripe.checkout.sessions.create(sessionParams);
-    } catch (stripeError) {
-      console.error('Stripe error:', stripeError);
-      return Response.json({ error: stripeError.message }, { status: 400 });
-    }
+    const checkoutSession = await stripe.checkout.sessions.create(sessionParams);
 
     return Response.json({ 
-      url: session.url,
-      session_id: session.id
+      url: checkoutSession.url,
+      session_id: checkoutSession.id
     });
   } catch (error) {
     console.error('Error creating checkout session:', error);
