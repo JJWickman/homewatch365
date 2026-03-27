@@ -53,11 +53,16 @@ export default function SettingsProfile() {
       const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
       if (members.length > 0) {
         setCompanyMember(members[0]);
-        const fullName = members[0].user_name || '';
+        const fullName = members[0].user_name || currentUser.full_name || '';
         const nameParts = fullName.split(' ');
         setUserFirstName(nameParts[0] || '');
         setUserLastName(nameParts.slice(1).join(' ') || '');
         setUserRole(members[0].role || 'field_inspector');
+      } else {
+        const fullName = currentUser.full_name || '';
+        const nameParts = fullName.split(' ');
+        setUserFirstName(nameParts[0] || '');
+        setUserLastName(nameParts.slice(1).join(' ') || '');
       }
     } catch (error) {
       console.error('Error loading data:', error);
