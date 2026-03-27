@@ -76,8 +76,6 @@ export default function CheckoutSuccess() {
         const tenant = await base44.entities.Tenant.filter({ id: finalUser.primary_tenant_id });
         if (tenant.length > 0) {
           window.location.href = `https://${tenant[0].slug}.estatewatch365.com/dashboard`;
-        } else {
-          navigate('/Dashboard');
         }
       } else {
         setError('Setup took too long. Please refresh or contact support.');

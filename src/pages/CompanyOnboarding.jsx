@@ -127,6 +127,7 @@ export default function CompanyOnboarding() {
         const tenantSlug = response.data.tenant?.slug;
         if (tenantSlug) {
           window.location.href = `https://${tenantSlug}.estatewatch365.com/dashboard`;
+        }
         } else {
           navigate(createPageUrl('Dashboard'));
         }
