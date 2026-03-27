@@ -99,7 +99,7 @@ export default function SettingsSubscription() {
       const checkout = await base44.functions.invoke('createCheckoutSession', {
         price_id: priceId,
         subscription_plan: planId,
-        company_id: tenant.id,
+        tenant_id: tenant.id,
       });
 
       if (checkout.data?.url) {

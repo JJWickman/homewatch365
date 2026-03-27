@@ -12,12 +12,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { price_id, company_id, subscription_plan, billing_cycle, return_url, promo_code } = await req.json();
+    const { price_id, tenant_id, subscription_plan, billing_cycle, return_url, promo_code } = await req.json();
 
     // Get tenant
     let tenants;
     try {
-      tenants = await base44.asServiceRole.entities.Tenant.filter({ id: company_id });
+      tenants = await base44.asServiceRole.entities.Tenant.filter({ id: tenant_id });
     } catch (error) {
       return Response.json({ error: 'Tenant not found' }, { status: 404 });
     }
