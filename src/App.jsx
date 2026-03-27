@@ -47,10 +47,10 @@ const AuthenticatedApp = () => {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Don't redirect portal pages — they have their own PIN-based auth
-      const portalPages = ['/ClientPortal', '/ClientLogin'];
-      const isPortalPage = portalPages.some(p => window.location.pathname.startsWith(p));
-      if (isPortalPage) {
+      // Don't redirect portal pages or checkout pages — they have their own auth
+      const bypassPages = ['/ClientPortal', '/ClientLogin', '/CheckoutSuccess'];
+      const isBypassPage = bypassPages.some(p => window.location.pathname.startsWith(p));
+      if (isBypassPage) {
         // Fall through to render routes normally
       } else {
         navigateToLogin();
@@ -128,7 +128,6 @@ const AuthenticatedApp = () => {
     </Routes>
   );
 };
-
 
 function App() {
 
