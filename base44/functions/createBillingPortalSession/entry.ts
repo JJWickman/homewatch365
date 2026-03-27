@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 import Stripe from 'npm:stripe@17.5.0';
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
@@ -21,47 +21,43 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { company_id, return_url } = body;
+    const { tenant_id, return_url } = body;
 
-    // Get company - either from body or from user's membership
-    let company;
+    // Get tenant from user's primary_tenant_id
+    let tenant;
     
-    if (company_id) {
-      const companies = await base44.entities.Company.filter({ id: company_id });
-      if (companies.length === 0) {
-        return Response.json({ error: 'Company not found' }, { status: 404 });
+    if (tenant_id) {
+      const tenants = await base44.entities.Tenant.filter({ id: tenant_id });
+      if (tenants.length === 0) {
+        return Response.json({ error: 'Tenant not found' }, { status: 404 });
       }
-      company = companies[0];
+      tenant = tenants[0];
+    } else if (user?.primary_tenant_id) {
+      const tenants = await base44.entities.Tenant.filter({ id: user.primary_tenant_id });
+      if (tenants.length === 0) {
+        return Response.json({ error: 'Tenant not found' }, { status: 404 });
+      }
+      tenant = tenants[0];
     } else {
-      // Get user's company membership
-      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
-      if (members.length === 0) {
-        return Response.json({ error: 'No company found for user' }, { status: 404 });
-      }
-      
-      const companies = await base44.entities.Company.filter({ id: members[0].company_id });
-      if (companies.length === 0) {
-        return Response.json({ error: 'Company not found' }, { status: 404 });
-      }
-      company = companies[0];
+      return Response.json({ error: 'No tenant found for user' }, { status: 404 });
     }
 
     // Create Stripe customer if it doesn't exist
-    let customerId = company.stripe_customer_id;
+    let customerId = tenant.stripe_customer_id;
     
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email,
-        name: company.name,
+        name: tenant.name,
         metadata: {
-          company_id: company.id,
+          tenant_id: tenant.id,
           user_email: user.email
         }
       });
       
       customerId = customer.id;
       
-      await base44.asServiceRole.entities.Company.update(company.id, {
+      await base44.asServiceRole.entities.Tenant.update(tenant.id, {
         stripe_customer_id: customerId
       });
     }

@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 Deno.serve(async (req) => {
   try {
@@ -12,30 +12,30 @@ Deno.serve(async (req) => {
 
     const targetEmails = ['diane@yourhwp.com', 'djoeadhiya@gmail.com'];
     
-    // Find companies for these users
-    const allMembers = await base44.asServiceRole.entities.CompanyMember.list();
-    const targetMembers = allMembers.filter(m => targetEmails.includes(m.user_email));
+    // Find TenantUser records for these emails
+    const allTenantUsers = await base44.asServiceRole.entities.TenantUser.list();
+    const targetTenantUsers = allTenantUsers.filter(tu => targetEmails.includes(tu.user_email || ''));
 
     const results = [];
 
-    for (const member of targetMembers) {
+    for (const tenantUser of targetTenantUsers) {
       try {
-        // Update company to professional paid plan
-        await base44.asServiceRole.entities.Company.update(member.company_id, {
+        // Update tenant to professional paid plan
+        await base44.asServiceRole.entities.Tenant.update(tenantUser.tenant_id, {
           subscription_plan: 'professional',
           subscription_status: 'active',
           trial_ends_at: '2024-01-01T00:00:00Z' // Set to past date
         });
 
         results.push({
-          email: member.user_email,
-          company_id: member.company_id,
+          email: tenantUser.user_email,
+          tenant_id: tenantUser.tenant_id,
           status: 'success'
         });
       } catch (error) {
         results.push({
-          email: member.user_email,
-          company_id: member.company_id,
+          email: tenantUser.user_email,
+          tenant_id: tenantUser.tenant_id,
           status: 'failed',
           error: error.message
         });

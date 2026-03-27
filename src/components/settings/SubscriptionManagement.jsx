@@ -78,7 +78,7 @@ export default function SubscriptionManagement({ company, companyMember }) {
         : plan.prices?.yearly?.priceId;
       
       const response = await base44.functions.invoke('createCheckoutSession', {
-        company_id: company.id,
+        tenant_id: company.id,
         price_id: priceId,
         subscription_plan: planId,
         billing_cycle: billingCycle
