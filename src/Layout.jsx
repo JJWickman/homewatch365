@@ -350,7 +350,7 @@ export default function Layout({ children, currentPageName }) {
                           </AvatarFallback>
                         </Avatar>
                     <div className="hidden sm:block text-left min-w-0">
-                      <p className="text-sm font-medium text-slate-900 truncate">{user?.full_name}</p>
+                      <p className="text-sm font-medium text-slate-900 truncate">{[user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.full_name}</p>
                       <p className="text-xs text-slate-500 capitalize truncate">{tenantUser?.role_in_tenant || 'Member'}</p>
                     </div>
                     <ChevronDown className="h-4 w-4 text-slate-400 hidden sm:block shrink-0" />
