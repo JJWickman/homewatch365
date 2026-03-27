@@ -2,12 +2,13 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 import Stripe from 'npm:stripe@17.5.0';
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
-const appId = Deno.env.get('BASE44_APP_ID');
 
 Deno.serve(async (req) => {
   try {
     const { sessionId } = await req.json();
-    const base44 = createClientFromRequest(req, { appId });
+    
+    // Create client with appId from environment
+    const base44 = createClientFromRequest(req);
 
     // Get session from Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId);
@@ -16,7 +17,7 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: 'No tenant in session' }, { status: 400 });
     }
 
-    // Check if tenant subscription was already updated by webhook
+    // Check if tenant subscription was updated by webhook using service role
     const tenants = await base44.asServiceRole.entities.Tenant.filter({
       id: session.metadata.tenant_id
     });
