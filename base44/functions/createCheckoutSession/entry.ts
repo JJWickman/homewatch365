@@ -5,7 +5,8 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
+    const appId = Deno.env.get('BASE44_APP_ID');
+    const base44 = createClientFromRequest(req, { appId });
     const user = await base44.auth.me();
     
     if (!user) {
