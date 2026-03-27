@@ -60,12 +60,11 @@ Deno.serve(async (req) => {
         },
       ],
       subscription_data: subscriptionData,
-      success_url: `${new URL(req.url).origin}/${tenant.slug}/?checkout=success`,
-      cancel_url: `${new URL(req.url).origin}/${tenant.slug}/?tab=billing`,
+      success_url: `${new URL(req.url).origin}/?checkout=success`,
+      cancel_url: `${new URL(req.url).origin}/?tab=billing`,
       metadata: {
         tenant_id: tenant.id,
-        subscription_plan,
-        billing_cycle
+        subscription_plan
       },
       payment_method_options: {
         card: {
