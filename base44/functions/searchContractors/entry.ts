@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { service_type, address, radius_miles, min_rating, company_id } = body;
+    const { service_type, address, radius_miles, min_rating } = body;
 
     if (!service_type || !address) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
