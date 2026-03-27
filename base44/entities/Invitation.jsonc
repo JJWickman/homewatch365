@@ -1,0 +1,76 @@
+{
+  "name": "Invitation",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Reference to Tenant"
+    },
+    "invitee_email": {
+      "type": "string",
+      "description": "Email address of the invited person"
+    },
+    "inviter_email": {
+      "type": "string",
+      "description": "Email of the person who sent the invitation"
+    },
+    "token": {
+      "type": "string",
+      "description": "Unique invitation token"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "dispatcher",
+        "field_inspector"
+      ],
+      "description": "Role to assign when accepted"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "expired"
+      ],
+      "default": "pending"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Invitation expires after 7 days"
+    },
+    "accepted_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "invitee_email",
+    "token",
+    "role"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "read": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "delete": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "write": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    }
+  }
+}

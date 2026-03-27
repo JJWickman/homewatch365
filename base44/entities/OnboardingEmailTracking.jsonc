@@ -105,7 +105,7 @@
           }
         },
         {
-          "data.tenant_id": "{{user.primary_tenant_id}}"
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
         }
       ]
     }

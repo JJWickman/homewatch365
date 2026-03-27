@@ -1,0 +1,151 @@
+{
+  "name": "ChecklistTemplateItem",
+  "type": "object",
+  "properties": {
+    "template_id": {
+      "type": "string",
+      "description": "Reference to ChecklistTemplate"
+    },
+    "section_id": {
+      "type": "string",
+      "description": "Reference to ChecklistTemplateSection"
+    },
+    "label": {
+      "type": "string",
+      "description": "Item label/question"
+    },
+    "short_label": {
+      "type": "string",
+      "description": "Short label for compact display"
+    },
+    "instructions": {
+      "type": "string",
+      "description": "Detailed instructions"
+    },
+    "response_type": {
+      "type": "string",
+      "enum": [
+        "ok_issue_na",
+        "number",
+        "percentage",
+        "photo_only",
+        "instruction_only"
+      ],
+      "description": "Type of response"
+    },
+    "required": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether answer is required"
+    },
+    "sort_order": {
+      "type": "number",
+      "description": "Display order"
+    },
+    "allow_na": {
+      "type": "boolean",
+      "default": true,
+      "description": "Allow N/A response"
+    },
+    "allow_note": {
+      "type": "boolean",
+      "default": false,
+      "description": "Allow note for any response"
+    },
+    "allow_photo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Allow photo when issue flagged or always"
+    },
+    "allow_severity": {
+      "type": "boolean",
+      "default": false,
+      "description": "Allow severity selection when issue flagged"
+    },
+    "placeholder": {
+      "type": "string",
+      "description": "Input placeholder"
+    },
+    "default_value": {
+      "type": "string",
+      "description": "Default response value"
+    },
+    "options_json": {
+      "type": "object",
+      "description": "JSON options for select/radio fields"
+    },
+    "conditional_json": {
+      "type": "object",
+      "description": "Conditional display rules"
+    },
+    "metadata_json": {
+      "type": "object",
+      "description": "Additional metadata (unit, customizable, etc)"
+    }
+  },
+  "required": [
+    "template_id",
+    "section_id",
+    "label",
+    "response_type",
+    "sort_order"
+  ],
+  "rls": {
+    "create": {
+      "template_id": {
+        "$in": {
+          "collection": "ChecklistTemplate",
+          "query": {
+            "data.tenant_id": "{{user.data.primary_tenant_id}}"
+          }
+        }
+      }
+    },
+    "read": {
+      "template_id": {
+        "$in": {
+          "collection": "ChecklistTemplate",
+          "query": {
+            "$or": [
+              {
+                "data.tenant_id": "{{user.data.primary_tenant_id}}"
+              },
+              {
+                "data.tenant_id": null
+              }
+            ]
+          }
+        }
+      }
+    },
+    "update": {
+      "template_id": {
+        "$in": {
+          "collection": "ChecklistTemplate",
+          "query": {
+            "data.tenant_id": "{{user.data.primary_tenant_id}}"
+          }
+        }
+      }
+    },
+    "delete": {
+      "template_id": {
+        "$in": {
+          "collection": "ChecklistTemplate",
+          "query": {
+            "$or": [
+              {
+                "data.tenant_id": "{{user.data.primary_tenant_id}}"
+              },
+              {
+                "user_condition": {
+                  "role": "superadmin"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

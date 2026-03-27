@@ -1,0 +1,93 @@
+{
+  "name": "ChecklistSubmissionItem",
+  "type": "object",
+  "properties": {
+    "submission_id": {
+      "type": "string",
+      "description": "Reference to ChecklistSubmission"
+    },
+    "template_item_id": {
+      "type": "string",
+      "description": "Reference to ChecklistTemplateItem"
+    },
+    "response_value": {
+      "type": "string"
+    },
+    "issue_flag": {
+      "type": "boolean",
+      "default": false
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "note": {
+      "type": "string"
+    },
+    "photo_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "numeric_value": {
+      "type": "number"
+    },
+    "text_value": {
+      "type": "string"
+    },
+    "metadata_json": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "submission_id",
+    "template_item_id"
+  ],
+  "rls": {
+    "create": {
+      "submission_id": {
+        "$in": {
+          "collection": "ChecklistSubmission",
+          "query": {
+            "data.tenant_id": "{{user.data.primary_tenant_id}}"
+          }
+        }
+      }
+    },
+    "read": {
+      "submission_id": {
+        "$in": {
+          "collection": "ChecklistSubmission",
+          "query": {
+            "data.tenant_id": "{{user.data.primary_tenant_id}}"
+          }
+        }
+      }
+    },
+    "update": {
+      "submission_id": {
+        "$in": {
+          "collection": "ChecklistSubmission",
+          "query": {
+            "data.tenant_id": "{{user.data.primary_tenant_id}}"
+          }
+        }
+      }
+    },
+    "delete": {
+      "submission_id": {
+        "$in": {
+          "collection": "ChecklistSubmission",
+          "query": {
+            "data.tenant_id": "{{user.data.primary_tenant_id}}"
+          }
+        }
+      }
+    }
+  }
+}
