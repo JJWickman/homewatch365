@@ -29,27 +29,22 @@ Deno.serve(async (req) => {
     // Handle the event
     switch (event.type) {
       case 'checkout.session.completed': {
+        // At this point, the subscription may be created but not yet active
+        // We'll rely on customer.subscription.updated to finalize the status
         const session = event.data.object;
         const tenantId = session.metadata?.tenant_id;
-        const subscriptionPlan = session.metadata?.subscription_plan || 'solopreneur';
         
-        if (!tenantId || !session.subscription) {
-          console.error('Missing tenant_id or subscription in checkout.session.completed');
+        if (!tenantId) {
+          console.log('checkout.session.completed: No tenant_id in metadata');
           break;
         }
         
-        const subscription = await stripe.subscriptions.retrieve(session.subscription);
-        const status = subscription.status === 'trialing' ? 'trial' : 'active';
-        
-        await base44.asServiceRole.entities.Tenant.update(tenantId, {
-          subscription_plan: subscriptionPlan,
-          subscription_status: status,
-          stripe_subscription_id: session.subscription,
-          trial_ends_at: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null
-        });
+        // Just mark that checkout completed; subscription.updated will handle status
+        console.log(`Checkout session ${session.id} completed for tenant ${tenantId}`);
         break;
       }
 
+      case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const subscription = event.data.object;
         
@@ -69,6 +64,10 @@ Deno.serve(async (req) => {
         if (subscription.status === 'canceled') status = 'cancelled';
         if (subscription.status === 'unpaid') status = 'past_due';
         if (subscription.status === 'trialing') status = 'trial';
+        if (subscription.status === 'incomplete' || subscription.status === 'incomplete_expired') {
+          console.log(`Subscription ${subscription.id} is in ${subscription.status} status, not updating tenant yet`);
+          break;
+        }
         
         const subscriptionPlan = subscription.metadata?.subscription_plan || 'solopreneur';
         const hasCrm = subscriptionPlan.includes('_crm') || subscriptionPlan === 'enterprise';
