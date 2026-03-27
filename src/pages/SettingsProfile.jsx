@@ -119,7 +119,7 @@ export default function SettingsProfile() {
     );
   }
 
-  const roleLabel = tenantUser?.role_in_tenant === 'field_inspector' ? 'Field Inspector' :
+  const roleLabel = tenantUser?.role_in_tenant === 'field_inspector' ? 'Field Reporter' :
                     tenantUser?.role_in_tenant === 'dispatcher' ? 'Dispatcher / Manager' :
                     tenantUser?.role_in_tenant === 'admin' ? 'Administrator' : 'Member';
 
