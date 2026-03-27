@@ -45,11 +45,11 @@ export default function CheckoutSuccess() {
       }
     };
 
-    // Poll every 500ms for up to 60 seconds
+    // Poll every 500ms for up to 120 seconds
     const startPolling = async () => {
       let isReady = false;
       let attempts = 0;
-      const maxAttempts = 120; // 60 seconds at 500ms intervals
+      const maxAttempts = 240; // 120 seconds at 500ms intervals
 
       while (attempts < maxAttempts) {
         isReady = await pollTenantStatus();
