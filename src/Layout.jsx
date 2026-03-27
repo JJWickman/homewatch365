@@ -409,16 +409,15 @@ export default function Layout({ children, currentPageName }) {
           background-attachment: fixed;
         }
 
-        /* Glass cards - ALL card-like surfaces */
-        [class*="Card"], [class*="card"],
-        .rounded-lg, .rounded-xl,
-        [role="dialog"] > div,
-        [data-radix-popper-content-wrapper] > div,
-        [role="listbox"], [role="menu"],
-        .border.bg-popover,
-        .border.bg-background,
-        .border.bg-white,
-        .bg-white {
+        /* Glass cards - ALL card-like surfaces inside main content only */
+        main [class*="Card"], main [class*="card"],
+        main .rounded-lg, main .rounded-xl,
+        main [role="dialog"] > div,
+        main [role="listbox"], main [role="menu"],
+        main .border.bg-popover,
+        main .border.bg-background,
+        main .border.bg-white,
+        main .bg-white {
           background: rgba(219, 234, 254, 0.55) !important;
           backdrop-filter: blur(20px) !important;
           border: 1px solid rgba(147, 197, 253, 0.4) !important;
@@ -426,7 +425,7 @@ export default function Layout({ children, currentPageName }) {
         }
 
         /* Glass inputs and selects */
-        input, select, textarea, [role="combobox"] {
+        main input, main select, main textarea, main [role="combobox"] {
           background: rgba(219, 234, 254, 0.4) !important;
           backdrop-filter: blur(10px) !important;
           border: 1px solid rgba(147, 197, 253, 0.5) !important;
@@ -441,8 +440,8 @@ export default function Layout({ children, currentPageName }) {
         }
 
         /* Glass dropdowns and popovers */
-        [data-radix-popper-content-wrapper] {
-          background: rgba(219, 234, 254, 0.8) !important;
+        [data-radix-popper-content-wrapper] > div {
+          background: rgba(219, 234, 254, 0.85) !important;
           backdrop-filter: blur(20px) !important;
         }
 
