@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 Deno.serve(async (req) => {
   try {
@@ -11,52 +11,52 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, message: 'Not a create event' });
     }
     
-    // Get company details
-    const company = data;
+    // Get tenant details
+    const tenant = data;
     
-    if (!company || company.subscription_status !== 'trial') {
+    if (!tenant || tenant.subscription_status !== 'trial') {
       return Response.json({ success: true, message: 'Not a trial signup' });
     }
     
-    // Get the company owner/creator details
-    const members = await base44.asServiceRole.entities.CompanyMember.filter({ 
-      company_id: company.id, 
+    // Get the tenant owner/creator details from TenantUser
+    const tenantUsers = await base44.asServiceRole.entities.TenantUser.filter({ 
+      tenant_id: tenant.id, 
       is_owner: true 
     });
     
-    const owner = members[0];
+    const owner = tenantUsers[0];
     
     // Send notification email to platform admins
     const adminEmails = ['jason@estatewatch365.com', 'alex@estatewatch365.com'];
     
-    const subject = `🎉 New Trial Signup: ${company.name}`;
+    const subject = `🎉 New Trial Signup: ${tenant.name}`;
     const body = `
-A new company has signed up for a trial!
+A new tenant has signed up for a trial!
 
-Company Details:
-- Name: ${company.name}
-- Owner: ${owner?.user_name || 'Unknown'} (${owner?.user_email || 'N/A'})
-- Plan: ${company.subscription_plan || 'solopreneur'}
-- Trial Ends: ${company.trial_ends_at ? new Date(company.trial_ends_at).toLocaleDateString() : 'N/A'}
-- Phone: ${company.phone || 'N/A'}
-- Email: ${company.email || 'N/A'}
-- Address: ${[company.address, company.city, company.state, company.zip].filter(Boolean).join(', ') || 'N/A'}
+Tenant Details:
+- Name: ${tenant.name}
+- Owner: ${owner?.user_id || 'Unknown'}
+- Plan: ${tenant.subscription_plan || 'solopreneur'}
+- Trial Ends: ${tenant.trial_ends_at ? new Date(tenant.trial_ends_at).toLocaleDateString() : 'N/A'}
+- Phone: ${tenant.phone || 'N/A'}
+- Email: ${tenant.email || 'N/A'}
+- Address: ${[tenant.address, tenant.city, tenant.state, tenant.zip].filter(Boolean).join(', ') || 'N/A'}
 
-Created: ${new Date(company.created_date).toLocaleString()}
+Created: ${new Date(tenant.created_date).toLocaleString()}
 
 View in dashboard: https://estatewatch365.app/Dashboard
     `.trim();
     
-    // Send to all admin emails using SendGrid via external email
+    // Send to all admin emails using Core integration
     await Promise.all(adminEmails.map(email => 
-      base44.asServiceRole.functions.invoke('sendExternalEmail', {
+      base44.asServiceRole.integrations.Core.SendEmail({
         to: email,
         subject: subject,
         body: body
       })
     ));
     
-    console.log('Trial signup notification sent for company:', company.name);
+    console.log('Trial signup notification sent for tenant:', tenant.name);
     
     return Response.json({ 
       success: true, 

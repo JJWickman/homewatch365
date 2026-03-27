@@ -65,7 +65,7 @@ export default function StripeConnectCard({ company, onRefresh }) {
 
     setDisconnecting(true);
     try {
-      await base44.entities.Company.update(company.id, {
+      await base44.entities.Tenant.update(company.id, {
         stripe_connect_account_id: null
       });
       onRefresh?.();
@@ -80,7 +80,7 @@ export default function StripeConnectCard({ company, onRefresh }) {
   const handleSavePaymentMethod = async (method) => {
     setSaving(true);
     try {
-      await base44.entities.Company.update(company.id, {
+      await base44.entities.Tenant.update(company.id, {
         [method]: paymentMethods[method]
       });
       setEditingMethod(null);

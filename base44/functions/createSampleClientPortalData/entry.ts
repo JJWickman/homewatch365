@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 Deno.serve(async (req) => {
   try {
@@ -9,21 +9,17 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get company from user's membership
-    const members = await base44.entities.CompanyMember.filter({
-      user_email: user.email,
-    });
-
-    if (!members.length) {
-      return Response.json({ error: 'No company found for user' }, { status: 400 });
+    // Get tenant from user's primary_tenant_id
+    if (!user.primary_tenant_id) {
+      return Response.json({ error: 'No tenant found for user' }, { status: 400 });
     }
 
-    const companyId = members[0].company_id;
+    const tenantId = user.primary_tenant_id;
 
     // Create client
     const clientEmail = 'jason@biglynx.com';
     const client = await base44.entities.Client.create({
-      company_id: companyId,
+      tenant_id: tenantId,
       first_name: 'Jason',
       last_name: 'Carlson',
       email: clientEmail,
@@ -38,7 +34,7 @@ Deno.serve(async (req) => {
 
     // Create properties
     const property1 = await base44.entities.Property.create({
-      company_id: companyId,
+      tenant_id: tenantId,
       client_id: client.id,
       name: 'Beach House - Miami',
       address: '123 Ocean Drive',
@@ -54,7 +50,7 @@ Deno.serve(async (req) => {
     });
 
     const property2 = await base44.entities.Property.create({
-      company_id: companyId,
+      tenant_id: tenantId,
       client_id: client.id,
       name: 'Condo - Naples',
       address: '456 Gulf Shore Blvd',
@@ -77,7 +73,7 @@ Deno.serve(async (req) => {
     const visit1Date = new Date(today);
     visit1Date.setDate(visit1Date.getDate() - 21);
     const visit1 = await base44.entities.Visit.create({
-      company_id: companyId,
+      tenant_id: tenantId,
       property_id: property1.id,
       client_id: client.id,
       visit_type: 'check-in',
@@ -95,7 +91,7 @@ Deno.serve(async (req) => {
     const visit2Date = new Date(today);
     visit2Date.setDate(visit2Date.getDate() - 14);
     const visit2 = await base44.entities.Visit.create({
-      company_id: companyId,
+      tenant_id: tenantId,
       property_id: property2.id,
       client_id: client.id,
       visit_type: 'check-in',
@@ -113,7 +109,7 @@ Deno.serve(async (req) => {
     const visit3Date = new Date(today);
     visit3Date.setDate(visit3Date.getDate() - 7);
     const visit3 = await base44.entities.Visit.create({
-      company_id: companyId,
+      tenant_id: tenantId,
       property_id: property1.id,
       client_id: client.id,
       visit_type: 'check-in',
@@ -131,7 +127,7 @@ Deno.serve(async (req) => {
     const visit4Date = new Date(today);
     visit4Date.setDate(visit4Date.getDate() - 3);
     const visit4 = await base44.entities.Visit.create({
-      company_id: companyId,
+      tenant_id: tenantId,
       property_id: property1.id,
       client_id: client.id,
       visit_type: 'followup',
@@ -150,7 +146,7 @@ Deno.serve(async (req) => {
     // Create monthly statement
     const currentMonth = today.toISOString().split('T')[0].substring(0, 7);
     const statement = await base44.entities.MonthlyStatement.create({
-      company_id: companyId,
+      tenant_id: tenantId,
       client_id: client.id,
       billing_month: currentMonth,
       status: 'finalized',

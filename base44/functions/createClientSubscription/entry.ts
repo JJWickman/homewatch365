@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 import Stripe from 'npm:stripe@17.5.0';
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
@@ -7,24 +7,24 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     
-    const { client_id, company_id, email, amount, billing_frequency, product_service_id } = await req.json();
+    const { client_id, tenant_id, email, amount, billing_frequency, product_service_id } = await req.json();
 
-    if (!client_id || !company_id || !email || !amount) {
+    if (!client_id || !tenant_id || !email || !amount) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Load company
-    const companies = await base44.asServiceRole.entities.Company.filter({ id: company_id });
-    const company = companies[0];
-    if (!company) return Response.json({ error: 'Company not found' }, { status: 404 });
+    // Load tenant
+    const tenants = await base44.asServiceRole.entities.Tenant.filter({ id: tenant_id });
+    const tenant = tenants[0];
+    if (!tenant) return Response.json({ error: 'Tenant not found' }, { status: 404 });
 
     // Load client
     const clients = await base44.asServiceRole.entities.Client.filter({ id: client_id });
     const client = clients[0];
     if (!client) return Response.json({ error: 'Client not found' }, { status: 404 });
 
-    // Determine if company has a connected Stripe account — use it if available
-    const connectedAccountId = company.stripe_connect_account_id;
+    // Determine if tenant has a connected Stripe account — use it if available
+    const connectedAccountId = tenant.stripe_connect_account_id;
     const stripeOptions = connectedAccountId ? { stripeAccount: connectedAccountId } : {};
 
     // Get or create Stripe customer
@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
       const customer = await stripe.customers.create({
         email: email,
         name: `${client.first_name} ${client.last_name}`,
-        metadata: { client_id: client.id, company_id: company.id }
+        metadata: { client_id: client.id, tenant_id: tenant.id }
       }, stripeOptions);
       
       customerId = customer.id;
@@ -72,11 +72,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    // If no valid price found, create a new product+price on the company's Stripe account
+    // If no valid price found, create a new product+price on the tenant's Stripe account
     if (!priceId) {
       const product = await stripe.products.create({
         name: `Home Watch Service - ${client.first_name} ${client.last_name}`,
-        metadata: { client_id: client.id, company_id: company.id }
+        metadata: { client_id: client.id, tenant_id: tenant.id }
       }, stripeOptions);
 
       const price = await stripe.prices.create({
@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
         unit_amount: Math.round(amount * 100),
         currency: 'usd',
         recurring: { interval, interval_count: intervalCount },
-        metadata: { client_id: client.id, company_id: company.id }
+        metadata: { client_id: client.id, tenant_id: tenant.id }
       }, stripeOptions);
 
       priceId = price.id;
@@ -98,9 +98,9 @@ Deno.serve(async (req) => {
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${req.headers.get('origin')}/ClientPortal?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get('origin')}/ClientPortal`,
-      metadata: { client_id: client.id, company_id: company.id },
+      metadata: { client_id: client.id, tenant_id: tenant.id },
       subscription_data: {
-        metadata: { client_id: client.id, company_id: company.id }
+        metadata: { client_id: client.id, tenant_id: tenant.id }
       },
       allow_promotion_codes: true,
     };
