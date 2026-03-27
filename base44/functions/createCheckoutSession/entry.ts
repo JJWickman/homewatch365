@@ -15,8 +15,13 @@ Deno.serve(async (req) => {
     const { price_id, company_id, subscription_plan, billing_cycle, return_url, promo_code } = await req.json();
 
     // Get tenant
-    const tenants = await base44.asServiceRole.entities.Tenant.filter({ id: company_id });
-    if (!tenants.length) {
+    let tenants;
+    try {
+      tenants = await base44.asServiceRole.entities.Tenant.filter({ id: company_id });
+    } catch (error) {
+      return Response.json({ error: 'Tenant not found' }, { status: 404 });
+    }
+    if (!tenants || !tenants.length) {
       return Response.json({ error: 'Tenant not found' }, { status: 404 });
     }
     const tenant = tenants[0];
@@ -70,7 +75,13 @@ Deno.serve(async (req) => {
       allow_promotion_codes: true
     };
 
-    const session = await stripe.checkout.sessions.create(sessionParams);
+    let session;
+    try {
+      session = await stripe.checkout.sessions.create(sessionParams);
+    } catch (stripeError) {
+      console.error('Stripe error:', stripeError);
+      return Response.json({ error: stripeError.message }, { status: 400 });
+    }
 
     return Response.json({ 
       url: session.url,
