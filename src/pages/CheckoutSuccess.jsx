@@ -22,24 +22,28 @@ export default function CheckoutSuccess() {
         const maxAttempts = 30; // 30 seconds
         
         while (attempts < maxAttempts) {
-          const tenants = await base44.entities.Tenant.filter({
-            id: user.primary_tenant_id
-          });
+          try {
+            const tenants = await base44.entities.Tenant.filter({
+              id: user.primary_tenant_id
+            });
 
-          if (tenants.length > 0) {
-            const tenant = tenants[0];
-            
-            // Check if subscription is active or trial
-            if (
-              tenant.subscription_status === 'active' ||
-              tenant.subscription_status === 'trial'
-            ) {
-              setStatus('success');
-              setTimeout(() => {
-                navigate('/Dashboard');
-              }, 1500);
-              return;
+            if (tenants.length > 0) {
+              const tenant = tenants[0];
+              
+              // Check if subscription is active or trial
+              if (
+                tenant.subscription_status === 'active' ||
+                tenant.subscription_status === 'trial'
+              ) {
+                setStatus('success');
+                setTimeout(() => {
+                  navigate('/Dashboard');
+                }, 1500);
+                return;
+              }
             }
+          } catch (pollErr) {
+            console.warn(`Poll attempt ${attempts + 1} failed:`, pollErr.message);
           }
 
           // Wait 1 second before next check
@@ -47,10 +51,10 @@ export default function CheckoutSuccess() {
           attempts++;
         }
 
-        setError('Subscription did not activate. Please refresh the page.');
+        setError('Subscription activation is taking longer than expected. Please refresh or go to the dashboard.');
       } catch (err) {
         console.error('Checkout success error:', err);
-        setError(err.message || 'Something went wrong');
+        setError('Payment completed but we cannot verify your subscription. Please refresh the page.');
       }
     };
 
@@ -85,14 +89,22 @@ export default function CheckoutSuccess() {
             <div className="h-12 w-12 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
               <span className="text-red-400 text-xl">!</span>
             </div>
-            <h2 className="text-xl font-bold text-white mb-2">Error</h2>
-            <p className="text-red-300 text-sm mb-4">{error}</p>
-            <button
-              onClick={() => window.location.href = '/'}
-              className="text-blue-300 hover:text-blue-200 underline text-sm"
-            >
-              Go back to home
-            </button>
+            <h2 className="text-xl font-bold text-white mb-2">Verification In Progress</h2>
+            <p className="text-blue-200 text-sm mb-6">{error}</p>
+            <div className="space-y-2">
+              <button
+                onClick={() => navigate('/Dashboard')}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-lg text-sm transition-colors"
+              >
+                Go to Dashboard
+              </button>
+              <button
+                onClick={() => window.location.href = '/'}
+                className="w-full text-blue-300 hover:text-blue-200 underline text-sm py-2"
+              >
+                Return to Home
+              </button>
+            </div>
           </>
         )}
       </div>
