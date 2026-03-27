@@ -48,17 +48,10 @@ Deno.serve(async (req) => {
 
     // Set primary_tenant_id immediately for all plans (trial + paid)
     // For paid plans, this is already set before Stripe redirect; webhook will re-confirm
-    const userUpdate = {
+    await base44.auth.updateMe({
       primary_tenant_id: tenant.id,
       onboarding_completed: true
-    };
-
-    // If they're creating a new tenant, set their User.role to tenantadmin
-    if (isCreatingTenant) {
-      userUpdate.role = 'tenantadmin';
-    }
-
-    await base44.auth.updateMe(userUpdate);
+    });
     // Role authority is at the entity level (TenantUser.role_in_tenant), not User.role
     // Permission checks must always use tenantUser.role_in_tenant for multi-tenant isolation
 
