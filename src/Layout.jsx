@@ -325,13 +325,6 @@ export default function Layout({ children, currentPageName }) {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              {user?.show_certification_badge && (
-                <img
-                  src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/9369557c5_image.png"
-                  alt="Certified Home Watch Reporter"
-                  className="h-8 w-auto object-contain"
-                />
-              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative h-9 w-9">
@@ -351,6 +344,13 @@ export default function Layout({ children, currentPageName }) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 hover:bg-slate-100 rounded-lg px-2 py-1.5 transition-colors min-w-0">
+                    {user?.show_certification_badge && (
+                      <img
+                        src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/9369557c5_image.png"
+                        alt="Certified Home Watch Reporter"
+                        className="h-8 w-auto object-contain shrink-0"
+                      />
+                    )}
                     <Avatar className="h-8 w-8 shrink-0">
                           <AvatarImage src={user?.avatar_url} alt={user?.full_name} />
                           <AvatarFallback className="bg-blue-600 text-white text-xs">
