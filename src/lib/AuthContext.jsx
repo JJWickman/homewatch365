@@ -100,6 +100,19 @@ export const AuthProvider = ({ children }) => {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
+      
+      // CRITICAL: User MUST have a primary_tenant_id to access the application
+      // If user completes registration but hasn't completed a paid subscription,
+      // they should be redirected to complete the onboarding flow
+      if (!currentUser.primary_tenant_id) {
+        setIsLoadingAuth(false);
+        setAuthError({
+          type: 'no_tenant',
+          message: 'You must complete onboarding to access this application'
+        });
+        return;
+      }
+      
       setUser(currentUser);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
@@ -113,6 +126,11 @@ export const AuthProvider = ({ children }) => {
         setAuthError({
           type: 'auth_required',
           message: 'Authentication required'
+        });
+      } else if (error.status === 400 || error.message?.includes('no_tenant')) {
+        setAuthError({
+          type: 'no_tenant',
+          message: 'You must complete onboarding to access this application'
         });
       }
     }

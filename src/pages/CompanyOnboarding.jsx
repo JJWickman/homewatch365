@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { ArrowRight, Loader2, Check, Globe } from 'lucide-react';
@@ -36,6 +37,7 @@ const PLANS = [
 ];
 
 export default function CompanyOnboarding() {
+  const { authError } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1=subdomain, 2=info+plan
   const [loading, setLoading] = useState(false);
@@ -72,7 +74,8 @@ export default function CompanyOnboarding() {
       if (currentUser.primary_tenant_id && currentUser.onboarding_completed === true) {
         navigate(createPageUrl('Dashboard'));
       }
-    } catch {
+    } catch (error) {
+      // If user is not authenticated, redirect to login
       base44.auth.redirectToLogin(createPageUrl('CompanyOnboarding'));
     } finally {
       setCheckingUser(false);
@@ -149,6 +152,19 @@ export default function CompanyOnboarding() {
   };
 
   const field = (key, val) => setForm(f => ({ ...f, [key]: val }));
+
+  // If there's an auth error indicating no tenant, show onboarding
+  // For other errors, let them be handled by the auth layer
+  if (authError && authError.type !== 'no_tenant') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 to-slate-900 flex items-center justify-center p-4">
+        <div className="rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 p-8 max-w-md text-center">
+          <h2 className="text-xl font-bold text-white mb-2">Access Denied</h2>
+          <p className="text-blue-200">{authError.message}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (checkingUser) {
     return (
