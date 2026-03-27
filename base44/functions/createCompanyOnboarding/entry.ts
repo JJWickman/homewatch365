@@ -46,10 +46,11 @@ Deno.serve(async (req) => {
       is_active: true
     });
 
-    // Set primary_tenant_id immediately for all plans (trial + paid)
-    // For paid plans, this is already set before Stripe redirect; webhook will re-confirm
+    // Set primary_tenant_id AND role to admin at platform level
+    // This ensures Base44 recognizes them as admin on login
     await base44.auth.updateMe({
-      primary_tenant_id: tenant.id
+      primary_tenant_id: tenant.id,
+      role: 'admin'
     });
 
     // Seed checklist templates for the new tenant
