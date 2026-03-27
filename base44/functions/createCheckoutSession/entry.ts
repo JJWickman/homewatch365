@@ -77,6 +77,7 @@ Deno.serve(async (req) => {
       cancel_url: `${frontendUrl}/?tab=billing`,
       metadata: {
         tenant_id: tenant.id,
+        user_id: user.id,
         subscription_plan,
         frontend_url: frontendUrl
       },

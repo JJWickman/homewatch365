@@ -46,13 +46,11 @@ Deno.serve(async (req) => {
       is_active: true
     });
 
-    // Only set primary_tenant_id for trial plans
-    // For paid plans, it will be set after successful Stripe checkout
-    if (!subscriptionPlan || subscriptionPlan === 'trial') {
-      await base44.auth.updateMe({
-        primary_tenant_id: tenant.id
-      });
-    }
+    // Set primary_tenant_id immediately for all plans (trial + paid)
+    // For paid plans, this is already set before Stripe redirect; webhook will re-confirm
+    await base44.auth.updateMe({
+      primary_tenant_id: tenant.id
+    });
 
     // Seed checklist templates for the new tenant
     try {

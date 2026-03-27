@@ -31,6 +31,7 @@ Deno.serve(async (req) => {
       case 'checkout.session.completed': {
         const session = event.data.object;
         const tenantId = session.metadata?.tenant_id;
+        const userId = session.metadata?.user_id;
         
         if (!tenantId) {
           console.log('checkout.session.completed: No tenant_id in metadata');
@@ -47,6 +48,19 @@ Deno.serve(async (req) => {
           stripe_subscription_id: session.subscription,
           marketing_addon_active: hasCrm
         });
+        
+        // Set user's primary_tenant_id if user_id is in metadata
+        if (userId) {
+          try {
+            // Query for the user and update their primary_tenant_id
+            const userRecord = await base44.asServiceRole.entities.User.filter({ id: userId });
+            if (userRecord.length > 0) {
+              await base44.auth.updateMe({ primary_tenant_id: tenantId });
+            }
+          } catch (e) {
+            console.log('Could not set primary_tenant_id from webhook:', e.message);
+          }
+        }
         
         console.log(`Checkout session ${session.id} completed and tenant ${tenantId} marked active`);
         break;
