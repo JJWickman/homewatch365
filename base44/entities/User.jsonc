@@ -18,6 +18,14 @@
     "avatar_url": {
       "type": "string"
     },
+    "first_name": {
+      "type": "string",
+      "description": "User's first name"
+    },
+    "last_name": {
+      "type": "string",
+      "description": "User's last name"
+    },
     "phone": {
       "type": "string",
       "description": "User mobile phone number"

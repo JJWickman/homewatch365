@@ -38,12 +38,8 @@ export default function SettingsProfile() {
       setUserEmail(currentUser.email || '');
       setUserPhone(currentUser.phone || '');
       setUserTimezone(currentUser.timezone || 'America/New_York');
-
-      // Split full_name into first/last
-      const fullName = currentUser.full_name || '';
-      const nameParts = fullName.split(' ');
-      setUserFirstName(nameParts[0] || '');
-      setUserLastName(nameParts.slice(1).join(' ') || '');
+      setUserFirstName(currentUser.first_name || '');
+      setUserLastName(currentUser.last_name || '');
 
       // Load TenantUser for role display
       const tenantUsers = await base44.entities.TenantUser.filter({
@@ -81,15 +77,14 @@ export default function SettingsProfile() {
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
-      const fullName = `${userFirstName} ${userLastName}`.trim();
-
       await base44.auth.updateMe({
-        full_name: fullName,
+        first_name: userFirstName,
+        last_name: userLastName,
         phone: userPhone,
         timezone: userTimezone,
       });
 
-      setUser({ ...user, full_name: fullName, phone: userPhone, timezone: userTimezone });
+      setUser({ ...user, first_name: userFirstName, last_name: userLastName, phone: userPhone, timezone: userTimezone });
       setSaveSuccess(true);
       toast.success('Profile saved successfully');
       setTimeout(() => setSaveSuccess(false), 3000);
