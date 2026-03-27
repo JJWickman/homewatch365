@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
     // Get tenant info for email
     const tenant = await base44.entities.Tenant.list();
     const tenantData = tenant[0];
-    const billingEmail = tenantData?.billing_email || user.email;
+    const notificationEmails = ['jason@estatewatch365.com', 'jasonwi@live.com'];
 
     // Format conversation summary
     const conversationsSummary = activeConversations.map(conv => {
@@ -42,12 +42,14 @@ Deno.serve(async (req) => {
       return `- ${userEmail}: "${messagePreview}..."`;
     }).join('\n');
 
-    // Send email notification
-    await base44.integrations.Core.SendEmail({
-      to: billingEmail,
-      subject: `[Support Alert] ${activeConversations.length} Active Chat(s)`,
-      body: `You have ${activeConversations.length} active support conversations:\n\n${conversationsSummary}\n\nLog in to view and respond.`
-    });
+    // Send email notifications to both addresses
+    await Promise.all(notificationEmails.map(email =>
+      base44.integrations.Core.SendEmail({
+        to: email,
+        subject: `[Support Alert] ${activeConversations.length} Active Chat(s)`,
+        body: `You have ${activeConversations.length} active support conversations:\n\n${conversationsSummary}\n\nLog in to view and respond.`
+      })
+    ));
 
     return Response.json({
       active: activeConversations.map(c => ({
@@ -58,7 +60,7 @@ Deno.serve(async (req) => {
         lastMessage: c.messages?.[c.messages.length - 1]?.content?.substring(0, 100)
       })),
       sent: true,
-      notifiedTo: billingEmail
+      notifiedTo: notificationEmails.join(', ')
     });
   } catch (error) {
     console.error('Error monitoring support chats:', error);
