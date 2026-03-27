@@ -6,7 +6,6 @@ const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
 
 Deno.serve(async (req) => {
   try {
-    // Webhooks don't have Base44 headers, so we get the app ID from env
     const signature = req.headers.get('stripe-signature');
     const body = await req.text();
     
@@ -31,9 +30,14 @@ Deno.serve(async (req) => {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
-        const tenantId = session.metadata.tenant_id;
+        const tenantId = session.metadata?.tenant_id;
+        const subscriptionPlan = session.metadata?.subscription_plan || 'solopreneur';
         
-        // Set to trial if subscription has trial period, otherwise active
+        if (!tenantId || !session.subscription) {
+          console.error('Missing tenant_id or subscription in checkout.session.completed');
+          break;
+        }
+        
         const subscription = await stripe.subscriptions.retrieve(session.subscription);
         const status = subscription.status === 'trialing' ? 'trial' : 'active';
         
@@ -43,6 +47,7 @@ Deno.serve(async (req) => {
           stripe_subscription_id: session.subscription,
           trial_ends_at: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null
         });
+        break;
       }
 
       case 'customer.subscription.updated': {
@@ -55,36 +60,44 @@ Deno.serve(async (req) => {
           tenantId = customer.metadata?.tenant_id;
         }
         
+        if (!tenantId) {
+          console.error('Could not find tenant_id for subscription update');
+          break;
+        }
+        
         let status = 'active';
         if (subscription.status === 'past_due') status = 'past_due';
         if (subscription.status === 'canceled') status = 'cancelled';
         if (subscription.status === 'unpaid') status = 'past_due';
         if (subscription.status === 'trialing') status = 'trial';
         
-        // Use plan from subscription metadata (set at checkout time) — no hardcoded price IDs
-        let subscriptionPlan = subscription.metadata?.subscription_plan || 'solopreneur';
+        const subscriptionPlan = subscription.metadata?.subscription_plan || 'solopreneur';
+        const hasCrm = subscriptionPlan.includes('_crm') || subscriptionPlan === 'enterprise';
         
-        if (tenantId) {
-          const hasCrm = subscriptionPlan.includes('_crm') || subscriptionPlan === 'enterprise';
-          await base44.asServiceRole.entities.Tenant.update(tenantId, {
-            subscription_plan: subscriptionPlan,
-            subscription_status: status,
-            stripe_subscription_id: subscription.id,
-            trial_ends_at: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
-            marketing_addon_active: hasCrm
-          });
-        }
+        await base44.asServiceRole.entities.Tenant.update(tenantId, {
+          subscription_plan: subscriptionPlan,
+          subscription_status: status,
+          stripe_subscription_id: subscription.id,
+          trial_ends_at: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
+          marketing_addon_active: hasCrm
+        });
         break;
       }
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object;
-        const tenantId = subscription.metadata.tenant_id;
+        const tenantId = subscription.metadata?.tenant_id;
+        
+        if (!tenantId) {
+          console.error('Could not find tenant_id for subscription deletion');
+          break;
+        }
         
         await base44.asServiceRole.entities.Tenant.update(tenantId, {
           subscription_status: 'cancelled',
           subscription_plan: 'trial'
         });
+        break;
       }
 
       case 'invoice.payment_succeeded': {
@@ -102,7 +115,11 @@ Deno.serve(async (req) => {
             subscription_status: 'past_due'
           });
         }
+        break;
       }
+
+      default:
+        console.log('Unhandled event type:', event.type);
     }
 
     return Response.json({ received: true });
