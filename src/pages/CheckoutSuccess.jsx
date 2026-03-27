@@ -72,10 +72,10 @@ export default function CheckoutSuccess() {
         } catch (err) {
           console.warn('finalizeOnboarding call failed:', err);
         }
-        // Redirect to tenant subdomain, not core app
+        // Redirect to tenant subdomain
         const tenant = await base44.entities.Tenant.filter({ id: finalUser.primary_tenant_id });
         if (tenant.length > 0) {
-          window.location.href = `https://${tenant[0].slug}.estatewatch365.app/Dashboard`;
+          window.location.href = `https://${tenant[0].slug}.estatewatch365.com/dashboard`;
         } else {
           navigate('/Dashboard');
         }

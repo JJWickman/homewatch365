@@ -123,10 +123,10 @@ export default function CompanyOnboarding() {
           });
         }
         toast.success('Welcome to Home Watch 365!');
-        // Redirect to tenant subdomain, not core app
+        // Redirect to tenant subdomain
         const tenantSlug = response.data.tenant?.slug;
         if (tenantSlug) {
-          window.location.href = `https://${tenantSlug}.estatewatch365.app/Dashboard`;
+          window.location.href = `https://${tenantSlug}.estatewatch365.com/dashboard`;
         } else {
           navigate(createPageUrl('Dashboard'));
         }
