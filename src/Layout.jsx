@@ -325,6 +325,13 @@ export default function Layout({ children, currentPageName }) {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
+              {user?.show_certification_badge && (
+                <img
+                  src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/9369557c5_image.png"
+                  alt="Certified Home Watch Reporter"
+                  className="h-8 w-auto object-contain"
+                />
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative h-9 w-9">
@@ -350,18 +357,9 @@ export default function Layout({ children, currentPageName }) {
                             {getInitials(user?.full_name)}
                           </AvatarFallback>
                         </Avatar>
-                    <div className="hidden sm:flex items-center gap-2 text-left min-w-0">
-                      <div>
-                        <p className="text-sm font-medium text-slate-900 truncate">{[user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.full_name}</p>
-                        <p className="text-xs text-slate-500 capitalize truncate">{tenantUser?.role_in_tenant === 'field_inspector' ? 'Field Reporter' : tenantUser?.role_in_tenant || 'Member'}</p>
-                      </div>
-                      {user?.show_certification_badge && (
-                        <img
-                          src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/9369557c5_image.png"
-                          alt="Certified Home Watch Reporter"
-                          className="h-6 w-auto object-contain flex-shrink-0"
-                        />
-                      )}
+                    <div className="hidden sm:block text-left min-w-0">
+                      <p className="text-sm font-medium text-slate-900 truncate">{[user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.full_name}</p>
+                      <p className="text-xs text-slate-500 capitalize truncate">{tenantUser?.role_in_tenant === 'field_inspector' ? 'Field Reporter' : tenantUser?.role_in_tenant || 'Member'}</p>
                     </div>
                     <ChevronDown className="h-4 w-4 text-slate-400 hidden sm:block shrink-0" />
                   </button>
