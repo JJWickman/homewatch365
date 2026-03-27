@@ -37,7 +37,7 @@ export default function SettingsProducts() {
   const loadProducts = async () => {
     try {
       const user = await base44.auth.me();
-      const tenantId = user?.primary_tenant_id;
+      const tenantId = user?.primary_tenant_id || user?.data?.primary_tenant_id;
       
       if (!tenantId) {
         console.warn('No tenant ID found on user:', user);
@@ -69,7 +69,7 @@ export default function SettingsProducts() {
     setAdding(true);
     try {
       const user = await base44.auth.me();
-      const tenantId = user?.primary_tenant_id;
+      const tenantId = user?.primary_tenant_id || user?.data?.primary_tenant_id;
       await base44.entities.ProductService.create({
         tenant_id: tenantId,
         name: form.name,
