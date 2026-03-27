@@ -6,18 +6,19 @@ Deno.serve(async (req) => {
   try {
     const { sessionId } = await req.json();
 
-    // Get session from Stripe
+    // Fetch Stripe session for frontend display only
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     
-    // If session completed, subscription will be created by webhook
-    // Just verify session status — webhook handles DB updates
-    if (session.payment_status === 'paid' || session.payment_status === 'no_payment_required') {
-      return Response.json({ success: true });
-    }
-
-    return Response.json({ success: false, error: 'Payment not completed' });
+    return Response.json({
+      success: true,
+      status: session.payment_status,
+      amount: session.amount_total,
+      currency: session.currency,
+      customer_email: session.customer_email,
+      subscription_id: session.subscription
+    });
   } catch (error) {
-    console.error('Error verifying checkout session:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('Error fetching checkout session:', error);
+    return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 });
