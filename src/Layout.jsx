@@ -418,7 +418,7 @@ export default function Layout({ children, currentPageName }) {
         main .border.bg-background,
         main .border.bg-white,
         main .bg-white {
-          background: rgba(219, 234, 254, 0.55) !important;
+          background: rgba(240, 248, 255, 0.95) !important;
           backdrop-filter: blur(20px) !important;
           border: 1px solid rgba(147, 197, 253, 0.4) !important;
           box-shadow: 0 8px 32px 0 rgba(30, 58, 95, 0.15) !important;
