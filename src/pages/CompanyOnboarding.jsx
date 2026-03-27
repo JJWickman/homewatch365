@@ -123,11 +123,13 @@ export default function CompanyOnboarding() {
           });
         }
         toast.success('Welcome to Home Watch 365!');
-        // Wait 1s for user record to update in backend before Layout checks for tenant_id
-        setTimeout(() => {
-          console.log('Navigating to Dashboard');
+        // Redirect to tenant subdomain, not core app
+        const tenantSlug = response.data.tenant?.slug;
+        if (tenantSlug) {
+          window.location.href = `https://${tenantSlug}.estatewatch365.app/Dashboard`;
+        } else {
           navigate(createPageUrl('Dashboard'));
-        }, 1000);
+        }
       } else {
         let errMsg = response.data?.error || 'Something went wrong';
         if (response.status === 409) {
