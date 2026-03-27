@@ -409,8 +409,16 @@ export default function Layout({ children, currentPageName }) {
           background-attachment: fixed;
         }
 
-        /* Glass cards */
-        [class*="Card"] {
+        /* Glass cards - ALL card-like surfaces */
+        [class*="Card"], [class*="card"],
+        .rounded-lg, .rounded-xl,
+        [role="dialog"] > div,
+        [data-radix-popper-content-wrapper] > div,
+        [role="listbox"], [role="menu"],
+        .border.bg-popover,
+        .border.bg-background,
+        .border.bg-white,
+        .bg-white {
           background: rgba(219, 234, 254, 0.55) !important;
           backdrop-filter: blur(20px) !important;
           border: 1px solid rgba(147, 197, 253, 0.4) !important;
@@ -419,31 +427,28 @@ export default function Layout({ children, currentPageName }) {
 
         /* Glass inputs and selects */
         input, select, textarea, [role="combobox"] {
-          background: rgba(255, 255, 255, 0.6) !important;
+          background: rgba(219, 234, 254, 0.4) !important;
           backdrop-filter: blur(10px) !important;
-          border: 1px solid rgba(255, 255, 255, 0.3) !important;
-        }
-
-        /* Glass sidebar */
-        aside {
-          background: rgba(30, 58, 95, 0.85) !important;
-          backdrop-filter: blur(20px) !important;
-          border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
-        }
-
-        /* Glass header */
-        header {
-          background: rgba(255, 255, 255, 0.85) !important;
-          backdrop-filter: blur(20px) !important;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+          border: 1px solid rgba(147, 197, 253, 0.5) !important;
         }
 
         /* Glass dialogs */
         [role="dialog"] > div:first-child {
-          background: rgba(255, 255, 255, 0.9);
-          backdrop-filter: blur(30px);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2) !important;
+          background: rgba(219, 234, 254, 0.75) !important;
+          backdrop-filter: blur(30px) !important;
+          border: 1px solid rgba(147, 197, 253, 0.4) !important;
+          box-shadow: 0 8px 32px 0 rgba(30, 58, 95, 0.2) !important;
+        }
+
+        /* Glass dropdowns and popovers */
+        [data-radix-popper-content-wrapper] {
+          background: rgba(219, 234, 254, 0.8) !important;
+          backdrop-filter: blur(20px) !important;
+        }
+
+        /* Glass tables */
+        table, tr, td, th {
+          background: transparent !important;
         }
 
         /* Glass buttons */
@@ -454,7 +459,7 @@ export default function Layout({ children, currentPageName }) {
 
         button:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+          box-shadow: 0 4px 20px rgba(30, 58, 95, 0.2) !important;
         }
 
         /* Smooth scrollbar */
@@ -464,24 +469,24 @@ export default function Layout({ children, currentPageName }) {
         }
 
         ::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(219, 234, 254, 0.2);
           border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.3);
+          background: rgba(147, 197, 253, 0.5);
           border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.5);
+          background: rgba(147, 197, 253, 0.8);
         }
 
         /* Glass badges */
         [class*="badge"] {
-          background: rgba(255, 255, 255, 0.5) !important;
+          background: rgba(219, 234, 254, 0.5) !important;
           backdrop-filter: blur(10px) !important;
-          border: 1px solid rgba(255, 255, 255, 0.3) !important;
+          border: 1px solid rgba(147, 197, 253, 0.4) !important;
         }
 
         /* Animations */
