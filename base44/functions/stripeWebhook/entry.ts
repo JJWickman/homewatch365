@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 import Stripe from 'npm:stripe@17.5.0';
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
-    // For webhooks, create client with service role (no user context needed)
+    // For webhooks from Stripe (no auth headers), init with appId
     const appId = Deno.env.get('BASE44_APP_ID');
     const base44 = createClientFromRequest(req, { appId });
 
@@ -53,7 +53,6 @@ Deno.serve(async (req) => {
       case 'customer.subscription.updated': {
         const subscription = event.data.object;
         
-        // Get tenant_id from subscription metadata or customer metadata
         let tenantId = subscription.metadata?.tenant_id;
         if (!tenantId) {
           const customer = await stripe.customers.retrieve(subscription.customer);
