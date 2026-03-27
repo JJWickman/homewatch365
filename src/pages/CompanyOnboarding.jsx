@@ -188,7 +188,7 @@ export default function CompanyOnboarding() {
                   placeholder="Coastal Property Concierge"
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
                 />
-                <p className="text-xs text-blue-200">This will create a unique slug for your tenant account.</p>
+                <p className="text-xs text-blue-200">This will be your unique tenant ID in the URL (e.g., ?tenant=coastal-property-concierge).</p>
               </div>
               <div className="space-y-2">
                 <Label className="text-white">Full Name</Label>
