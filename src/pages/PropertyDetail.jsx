@@ -211,8 +211,9 @@ export default function PropertyDetail() {
         const allPropsData = await base44.entities.Property.list();
         setAllProperties(allPropsData);
 
-        const checklistData = await base44.entities.PropertyChecklist.filter({ property_id: id, is_active: true });
+        const checklistData = await base44.entities.PropertyChecklist.filter({ property_id: id, tenant_id: user.primary_tenant_id, is_active: true });
         if (checklistData.length > 0) setPropertyChecklist(checklistData[0]);
+  
 
         const uniqueTags = Array.from(new Set(allPropsData.flatMap(p => p.tags || [])));
         setAllTags(uniqueTags);
