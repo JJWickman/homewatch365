@@ -50,7 +50,6 @@ export default function CompanyOnboarding() {
     fullName: '',
     email: '',
     plan: 'trial',
-    promoCode: '',
   });
 
   useEffect(() => {
@@ -114,7 +113,6 @@ export default function CompanyOnboarding() {
             price_id: response.data.price_id,
             tenant_id: response.data.tenant_id,
             subscription_plan: form.plan,
-            promo_code: form.promoCode || null,
           });
           if (checkout.data?.url) {
             window.location.href = checkout.data.url;
@@ -299,16 +297,7 @@ export default function CompanyOnboarding() {
                 </div>
               </div>
 
-              {/* Promo Code */}
-              <div className="space-y-2">
-               <Label className="text-white">Promo Code <span className="text-white/50">(optional)</span></Label>
-               <Input
-                 value={form.promoCode}
-                 onChange={e => field('promoCode', e.target.value)}
-                 placeholder="Enter promo code if you have one"
-                 className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
-               />
-              </div>
+
 
               {/* Plan selection */}
               <div className="space-y-2">

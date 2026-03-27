@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { price_id, tenant_id, subscription_plan, billing_cycle, return_url, promo_code } = await req.json();
+    const { price_id, tenant_id, subscription_plan, billing_cycle, return_url } = await req.json();
 
     // Get tenant
     let tenants;
@@ -60,8 +60,8 @@ Deno.serve(async (req) => {
         },
       ],
       subscription_data: subscriptionData,
-      success_url: `${new URL(req.url).origin}/?checkout=success`,
-      cancel_url: `${new URL(req.url).origin}/?tab=billing`,
+      success_url: `${new URL(req.url).origin}/${tenant.slug}/?checkout=success`,
+      cancel_url: `${new URL(req.url).origin}/${tenant.slug}/?tab=billing`,
       metadata: {
         tenant_id: tenant.id,
         subscription_plan,
