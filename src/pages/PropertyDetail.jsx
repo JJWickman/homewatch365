@@ -617,6 +617,13 @@ export default function PropertyDetail() {
                         {fetchingAerial ? 'Fetching...' : 'Fetch Aerial View'}
                       </Button>
                     </div>
+                    {hasUnsavedChanges && property.primary_photo_url && (
+                      <div className="mt-2">
+                        <Button size="sm" onClick={handleSave} disabled={saving} className="bg-green-600 hover:bg-green-700 text-white">
+                          {saving ? 'Saving...' : 'Save Photo'}
+                        </Button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Status badge */}
