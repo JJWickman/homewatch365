@@ -7,7 +7,7 @@ import OfflineBanner from '@/components/shared/OfflineBanner';
 import {
   Home, Users, Building2, ClipboardCheck, Calendar,
   FileText, Settings, Menu, X, LogOut, ChevronDown,
-  Bell, Search, Plus, Building, UserCircle, Megaphone, Briefcase, BookOpen, DollarSign, Download, Bot } from
+  Bell, Search, Plus, Building, UserCircle, Megaphone, Briefcase, BookOpen, DollarSign, Download, Bot, MessageSquare } from
 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -54,7 +54,8 @@ const getNavigationItems = (subscriptionPlan, roleInTenant, globalRole) => {
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
   { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
   { name: 'Help & Tutorials', icon: BookOpen, page: 'HelpTutorials' },
-  { name: 'AI Assistant', icon: Bot, page: 'AIAssistant' }];
+  { name: 'AI Assistant', icon: Bot, page: 'AIAssistant' },
+  { name: 'Support Chat', icon: MessageSquare, page: 'SupportChat' }];
 
 
   // Only show Billing and Import Data for Admins

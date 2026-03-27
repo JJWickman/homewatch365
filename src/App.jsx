@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import ChecklistEditor from './pages/ChecklistEditor';
 import AIAssistant from './pages/AIAssistant';
+import SupportChat from './pages/SupportChat';
 import AdminSubscriptions from './pages/AdminSubscriptions';
 import ApproveFounder from './pages/ApproveFounder';
 import SettingsProfile from './pages/SettingsProfile';
@@ -119,11 +120,8 @@ const AuthenticatedApp = () => {
           <SettingsProducts />
         </LayoutWrapper>
       } />
-      <Route path="/TestingDashboard" element={
-        <LayoutWrapper currentPageName="TestingDashboard">
-          <TestingDashboard />
-        </LayoutWrapper>
-      } />
+      <Route path="/TestingDashboard" element={<LayoutWrapper currentPageName="TestingDashboard"><TestingDashboard /></LayoutWrapper>} />
+      <Route path="/SupportChat" element={<LayoutWrapper currentPageName="SupportChat"><SupportChat /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
