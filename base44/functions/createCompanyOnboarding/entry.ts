@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     // Check slug uniqueness
     const existing = await base44.asServiceRole.entities.Tenant.filter({ slug: slug.toLowerCase() });
     if (existing.length > 0) {
-      return Response.json({ error: 'That subdomain is already taken. Please choose another.' }, { status: 409 });
+      return Response.json({ error: 'That company name is already taken. Please choose another.' }, { status: 409 });
     }
 
     // Create Tenant
@@ -49,7 +49,8 @@ Deno.serve(async (req) => {
     // Set primary_tenant_id immediately for all plans (trial + paid)
     // For paid plans, this is already set before Stripe redirect; webhook will re-confirm
     await base44.auth.updateMe({
-      primary_tenant_id: tenant.id
+      primary_tenant_id: tenant.id,
+      onboarding_completed: true
     });
     // Role authority is at the entity level (TenantUser.role_in_tenant), not User.role
     // Permission checks must always use tenantUser.role_in_tenant for multi-tenant isolation
