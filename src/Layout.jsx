@@ -411,10 +411,10 @@ export default function Layout({ children, currentPageName }) {
 
         /* Glass cards */
         [class*="Card"] {
-          background: rgba(255, 255, 255, 0.85) !important;
+          background: rgba(219, 234, 254, 0.55) !important;
           backdrop-filter: blur(20px) !important;
-          border: 1px solid rgba(255, 255, 255, 0.3) !important;
-          box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15) !important;
+          border: 1px solid rgba(147, 197, 253, 0.4) !important;
+          box-shadow: 0 8px 32px 0 rgba(30, 58, 95, 0.15) !important;
         }
 
         /* Glass inputs and selects */
