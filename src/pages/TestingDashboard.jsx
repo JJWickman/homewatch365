@@ -24,7 +24,7 @@ export default function TestingDashboard() {
     try {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
-      if (currentUser.role !== 'admin') {
+      if (currentUser.role !== 'admin' && currentUser.role !== 'superadmin') {
         toast.error('Superadmin access required');
       }
     } catch (error) {
@@ -118,7 +118,7 @@ export default function TestingDashboard() {
     );
   }
 
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
     return (
       <div className="max-w-2xl mx-auto p-6">
         <Alert className="bg-red-50 border-red-200">
