@@ -8,7 +8,8 @@ Deno.serve(async (req) => {
     const { sessionId } = await req.json();
     
     // Create client with appId from environment
-    const base44 = createClientFromRequest(req);
+    const appId = Deno.env.get('BASE44_APP_ID');
+    const base44 = createClientFromRequest(req, { appId });
 
     // Get session from Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId);
