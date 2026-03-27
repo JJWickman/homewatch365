@@ -778,8 +778,7 @@ export default function PropertyForm() {
     if (!companyId || !formData.client_id) return;
 
     if (!formData.latitude || !formData.longitude) {
-      toast.error('GPS coordinates are required. Please select the address from the autocomplete dropdown or click the validate button to geocode the address.');
-      return;
+      toast.warning('No GPS coordinates — the property will be saved without a location pin. You can validate the address later.');
     }
 
     setSaving(true);
