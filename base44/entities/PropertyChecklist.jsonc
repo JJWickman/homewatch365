@@ -1,0 +1,58 @@
+{
+  "name": "PropertyChecklist",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Reference to Tenant (isolation)"
+    },
+    "property_id": {
+      "type": "string",
+      "description": "Reference to Property this checklist is for"
+    },
+    "template_id": {
+      "type": "string",
+      "description": "Reference to ChecklistTemplate this is based on"
+    },
+    "name": {
+      "type": "string",
+      "description": "Custom name for this property's checklist"
+    },
+    "description": {
+      "type": "string",
+      "description": "Custom description for this property's checklist"
+    },
+    "customized_sections": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Customized sections for this property (array of section objects)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this checklist is active for the property"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "property_id",
+    "template_id",
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "read": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "delete": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    }
+  }
+}
