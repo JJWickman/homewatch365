@@ -42,6 +42,7 @@ export default function CompanyOnboarding() {
   const [loading, setLoading] = useState(false);
   const [checkingUser, setCheckingUser] = useState(true);
   const [user, setUser] = useState(null);
+  const [onboardingType, setOnboardingType] = useState(null); // 'create' or 'join'
 
   const [form, setForm] = useState({
     companyName: '',
@@ -94,6 +95,7 @@ export default function CompanyOnboarding() {
         slug: slug,
         subscriptionPlan: form.plan,
         promoCode: form.promoCode || null,
+        isCreatingTenant: onboardingType === 'create',
       });
 
       if (response.data?.success) {
@@ -136,6 +138,58 @@ export default function CompanyOnboarding() {
   };
 
   const field = (key, val) => setForm(f => ({ ...f, [key]: val }));
+
+  // If onboarding type not selected, show selection screen
+  if (!onboardingType) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
+        <div className="w-full max-w-2xl">
+          <div className="text-center mb-8">
+            <img
+              src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/26b3196de_image.png"
+              alt="Home Watch 365"
+              className="h-16 w-16 rounded-2xl object-contain mx-auto mb-4 bg-white"
+            />
+            <h1 className="text-3xl font-bold text-white">Home Watch 365</h1>
+            <p className="text-blue-200 mt-1">Welcome</p>
+          </div>
+
+          <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl p-8">
+            <h2 className="text-2xl font-bold text-white mb-2">What brings you here?</h2>
+            <p className="text-blue-200 text-sm mb-6">Choose how you'd like to get started</p>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => setOnboardingType('create')}
+                className="w-full text-left p-4 rounded-xl border-2 border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10 transition-all"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-white">Create a New Company</p>
+                    <p className="text-white/60 text-sm mt-1">I'm starting a Home Watch business</p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-blue-300" />
+                </div>
+              </button>
+
+              <button
+                onClick={() => setOnboardingType('join')}
+                className="w-full text-left p-4 rounded-xl border-2 border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10 transition-all"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-white">Join Existing Company</p>
+                    <p className="text-white/60 text-sm mt-1">I was invited to join a company</p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-blue-300" />
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // If there's an auth error indicating no tenant, show onboarding
   if (authError && authError.type !== 'no_tenant') {
