@@ -344,12 +344,21 @@ export default function Layout({ children, currentPageName }) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 hover:bg-slate-100 rounded-lg px-2 py-1.5 transition-colors min-w-0">
-                    <Avatar className="h-8 w-8 shrink-0">
-                          <AvatarImage src={user?.avatar_url} alt={user?.full_name} />
-                          <AvatarFallback className="bg-blue-600 text-white text-xs">
-                            {getInitials(user?.full_name)}
-                          </AvatarFallback>
-                        </Avatar>
+                    <div className="relative">
+                      <Avatar className="h-8 w-8 shrink-0">
+                            <AvatarImage src={user?.avatar_url} alt={user?.full_name} />
+                            <AvatarFallback className="bg-blue-600 text-white text-xs">
+                              {getInitials(user?.full_name)}
+                            </AvatarFallback>
+                          </Avatar>
+                      {user?.show_certification_badge && (
+                        <img
+                          src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/9369557c5_image.png"
+                          alt="Certified Home Watch Reporter"
+                          className="absolute -bottom-1 -right-1 h-4 w-4 object-contain"
+                        />
+                      )}
+                    </div>
                     <div className="hidden sm:block text-left min-w-0">
                       <p className="text-sm font-medium text-slate-900 truncate">{[user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.full_name}</p>
                       <p className="text-xs text-slate-500 capitalize truncate">{tenantUser?.role_in_tenant === 'field_inspector' ? 'Field Reporter' : tenantUser?.role_in_tenant || 'Member'}</p>
