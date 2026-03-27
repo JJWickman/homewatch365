@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import StatsCard from '@/components/shared/StatsCard';
 import StatusBadge from '@/components/shared/StatusBadge';
+import ActiveChatsWidget from '@/components/admin/ActiveChatsWidget';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -303,6 +304,9 @@ export default function Dashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Active Chats Widget */}
+      <ActiveChatsWidget />
 
       {/* Recent Activity - Full Width */}
       <Card>
