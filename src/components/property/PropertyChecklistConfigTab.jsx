@@ -29,9 +29,9 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
   const loadData = async () => {
     setLoading(true);
     try {
-      // Load all checklist templates for company
+      // Load all checklist templates for tenant
       const allTemplates = await base44.entities.ChecklistTemplate.filter({ 
-        company_id: companyId,
+        tenant_id: companyId,
         active: true 
       });
       setTemplates(allTemplates);
@@ -39,7 +39,7 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
       // Try to load existing property-specific checklist
       const existingChecklists = await base44.entities.PropertyChecklist.filter({
         property_id: propertyId,
-        company_id: companyId,
+        tenant_id: companyId,
         is_active: true
       });
 
@@ -90,7 +90,7 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
     try {
       // Create property-specific checklist copy from the MAIN template
       const newChecklist = await base44.entities.PropertyChecklist.create({
-        company_id: companyId,
+        tenant_id: companyId,
         property_id: propertyId,
         template_id: selectedTemplate.id,
         name: checklistName,
@@ -143,7 +143,7 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
     setSaving(true);
     try {
       const checklistData = {
-        company_id: companyId, // Always enforce company_id for tenant isolation
+        tenant_id: companyId, // Always enforce tenant_id for tenant isolation
         property_id: propertyId,
         template_id: selectedTemplate.id,
         name: checklistName,
@@ -153,8 +153,8 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
 
       if (checklist?.id) {
         // Verify ownership before update (security)
-        if (checklist.company_id !== companyId) {
-          throw new Error('Unauthorized: Company mismatch');
+        if (checklist.tenant_id !== companyId) {
+          throw new Error('Unauthorized: Tenant mismatch');
         }
         await base44.entities.PropertyChecklist.update(checklist.id, checklistData);
         toast.success('Checklist updated successfully');
@@ -178,16 +178,16 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
     if (!checklist) return;
     
     // Tenant isolation security check
-    if (checklist.company_id !== companyId) {
-      toast.error('Unauthorized: Cannot duplicate checklist from another company');
+    if (checklist.tenant_id !== companyId) {
+      toast.error('Unauthorized: Cannot duplicate checklist from another tenant');
       return;
     }
     
     setSaving(true);
     try {
-      // Create a copy with a new name - preserve company_id for tenant isolation
+      // Create a copy with a new name - preserve tenant_id for tenant isolation
       const newChecklistData = {
-        company_id: checklist.company_id,
+        tenant_id: checklist.tenant_id,
         property_id: checklist.property_id,
         template_id: checklist.template_id,
         name: `${checklist.name} (Copy)`,
@@ -210,8 +210,8 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
     if (!checklist || !window.confirm('Delete this custom checklist?')) return;
     
     // Tenant isolation security check
-    if (checklist.company_id !== companyId) {
-      toast.error('Unauthorized: Cannot delete checklist from another company');
+    if (checklist.tenant_id !== companyId) {
+      toast.error('Unauthorized: Cannot delete checklist from another tenant');
       return;
     }
     
