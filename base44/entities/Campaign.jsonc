@@ -95,7 +95,7 @@
     "create": {
       "$or": [
         {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+          "data.company_id": "{{user.data.company_id}}"
         },
         {
           "user_condition": {
@@ -105,12 +105,12 @@
       ]
     },
     "read": {
-      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+      "data.company_id": "{{user.data.company_id}}"
     },
     "update": {
       "$or": [
         {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+          "data.company_id": "{{user.data.company_id}}"
         },
         {
           "user_condition": {
@@ -122,7 +122,7 @@
     "delete": {
       "$or": [
         {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+          "data.company_id": "{{user.data.company_id}}"
         },
         {
           "user_condition": {
@@ -134,7 +134,7 @@
     "write": {
       "$or": [
         {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+          "data.company_id": "{{user.data.company_id}}"
         },
         {
           "user_condition": {
