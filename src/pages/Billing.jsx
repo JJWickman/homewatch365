@@ -8,6 +8,7 @@ import { AlertCircle } from 'lucide-react';
 export default function Billing() {
   const [tenantId, setTenantId] = useState(null);
   const [tenantUser, setTenantUser] = useState(null);
+  const [globalRole, setGlobalRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,6 +20,7 @@ export default function Billing() {
       const currentUser = await base44.auth.me();
       if (!currentUser?.primary_tenant_id) { setLoading(false); return; }
       setTenantId(currentUser.primary_tenant_id);
+      setGlobalRole(currentUser.role);
       const tenantUsers = await base44.entities.TenantUser.filter({
         user_id: currentUser.id,
         tenant_id: currentUser.primary_tenant_id
@@ -39,7 +41,9 @@ export default function Billing() {
     );
   }
 
-  if (!tenantUser || (tenantUser.role_in_tenant !== 'admin' && !tenantUser.is_owner)) {
+  const isAdmin = globalRole === 'admin' || globalRole === 'superadmin' || tenantUser?.role_in_tenant === 'admin' || tenantUser?.is_owner;
+
+  if (!isAdmin) {
     return (
       <div className="space-y-4">
         <PageHeader title="Billing" subtitle="Billing and revenue overview" />
