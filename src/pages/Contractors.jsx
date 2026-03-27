@@ -203,7 +203,7 @@ export default function Contractors() {
       } else {
         await base44.entities.Contractor.create({
           ...formData,
-          company_id: companyId,
+          tenant_id: companyId,
           hourly_rate: formData.hourly_rate ? parseFloat(formData.hourly_rate) : null
         });
       }

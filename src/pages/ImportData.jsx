@@ -13,7 +13,7 @@ import ImportWizard from '@/components/import/ImportWizard';
 export default function ImportData() {
   const navigate = useNavigate();
   const [companyId, setCompanyId] = useState(null);
-  const [companyMember, setCompanyMember] = useState(null);
+  const [tenantUser, setTenantUser] = useState(null);
   const [showImport, setShowImport] = useState(false);
   const [selectedEntity, setSelectedEntity] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,12 +25,13 @@ export default function ImportData() {
   const loadUserData = async () => {
     try {
       const user = await base44.auth.me();
-      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
-      
-      if (members.length > 0) {
-        setCompanyId(members[0].company_id);
-        setCompanyMember(members[0]);
-      }
+      if (!user?.primary_tenant_id) { setLoading(false); return; }
+      setCompanyId(user.primary_tenant_id);
+      const tenantUsers = await base44.entities.TenantUser.filter({
+        user_id: user.id,
+        tenant_id: user.primary_tenant_id
+      });
+      if (tenantUsers.length > 0) setTenantUser(tenantUsers[0]);
     } catch (error) {
       console.error('Error loading user data:', error);
     } finally {
@@ -63,7 +64,7 @@ export default function ImportData() {
     );
   }
 
-  const isAdmin = companyMember?.role === 'administrator' || companyMember?.is_owner;
+  const isAdmin = tenantUser?.role_in_tenant === 'admin' || tenantUser?.is_owner;
 
   if (!isAdmin) {
     return (

@@ -158,7 +158,7 @@ export default function PropertyForm() {
     if (!companyId || !propertyId) return;
     const saveData = {
       ...data,
-      company_id: companyId,
+      tenant_id: companyId,
       square_feet: data.square_feet ? parseFloat(data.square_feet) : null,
       bedrooms: data.bedrooms ? parseInt(data.bedrooms) : null,
       bathrooms: data.bathrooms ? parseFloat(data.bathrooms) : null,
@@ -197,27 +197,22 @@ export default function PropertyForm() {
     setLoading(true);
     try {
       const user = await base44.auth.me();
-      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
-      
-      if (members.length > 0) {
-        const cId = members[0].company_id;
-        setCompanyId(cId);
-        
-        const [clientsData, staffData, contractorsData] = await Promise.all([
-          base44.entities.Client.filter({ company_id: cId, is_active: true }),
-          base44.entities.CompanyMember.filter({ company_id: cId, is_active: true }),
-          base44.entities.Contractor.filter({ company_id: cId, is_active: true })
-        ]);
-        
-        setClients(clientsData);
-        setStaff(staffData);
-        setContractors(contractorsData);
-        
-        // Collect all tags from properties
-        const propertiesData = await base44.entities.Property.filter({ company_id: cId });
-        const tags = Array.from(new Set(propertiesData.flatMap(p => p.tags || [])));
-        setAllTags(tags);
-      }
+      if (!user?.primary_tenant_id) { setLoading(false); return; }
+      const cId = user.primary_tenant_id;
+      setCompanyId(cId);
+
+      const [clientsData, staffData, contractorsData, propertiesData] = await Promise.all([
+        base44.entities.Client.filter({ tenant_id: cId, is_active: true }),
+        base44.entities.TenantUser.filter({ tenant_id: cId, is_active: true }),
+        base44.entities.Contractor.filter({ tenant_id: cId, is_active: true }),
+        base44.entities.Property.filter({ tenant_id: cId })
+      ]);
+
+      setClients(clientsData);
+      setStaff(staffData);
+      setContractors(contractorsData);
+      const tags = Array.from(new Set(propertiesData.flatMap(p => p.tags || [])));
+      setAllTags(tags);
 
       const params = new URLSearchParams(window.location.search);
       const id = params.get('id');
@@ -530,7 +525,7 @@ export default function PropertyForm() {
     setCreatingClient(true);
     try {
       const newClient = await base44.entities.Client.create({
-        company_id: companyId,
+        tenant_id: companyId,
         first_name: newClientData.first_name,
         last_name: newClientData.last_name,
         email: newClientData.email,
@@ -791,7 +786,7 @@ export default function PropertyForm() {
     try {
       const data = {
         ...formData,
-        company_id: companyId,
+        tenant_id: companyId,
         square_feet: formData.square_feet ? parseFloat(formData.square_feet) : null,
         bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
         bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
@@ -1746,7 +1741,7 @@ export default function PropertyForm() {
         onSelect={(newContractor) => {
           // Create the new contractor
           base44.entities.Contractor.create({
-            company_id: companyId,
+            tenant_id: companyId,
             business_name: newContractor.business_name,
             contact_name: newContractor.contact_name || '',
             contractor_type: newContractor.contractor_type || 'other',

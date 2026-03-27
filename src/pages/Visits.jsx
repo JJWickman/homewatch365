@@ -347,7 +347,7 @@ export default function Visits() {
         const isFlexibleType = ['other', 'customer_called_in', 'drop_in'].includes(newVisit.checkin_type);
         
         const visitData = {
-          company_id: companyId,
+          tenant_id: companyId,
           property_id: newVisit.property_id,
           client_id: property?.client_id,
           visit_type: 'check-in',
@@ -386,7 +386,7 @@ export default function Visits() {
         }
       } else {
         const visitData = {
-          company_id: companyId,
+          tenant_id: companyId,
           property_id: newVisit.property_id,
           client_id: property?.client_id,
           visit_type: 'followup',
@@ -460,7 +460,7 @@ export default function Visits() {
     const isFlexibleType = ['other', 'customer_called_in', 'drop_in'].includes(newVisit.checkin_type);
     
     const checkinData = {
-      company_id: companyId,
+      tenant_id: companyId,
       property_id: newVisit.property_id,
       client_id: property?.client_id,
       visit_type: 'check-in',
@@ -498,7 +498,7 @@ export default function Visits() {
     if (propertyChecklist) {
       const prop = properties.find(p => p.id === propertyId);
       const visit = await base44.entities.Visit.create({
-        company_id: companyId,
+        tenant_id: companyId,
         property_id: propertyId,
         client_id: prop?.client_id || null,
         visit_type: 'check-in',
@@ -1021,9 +1021,9 @@ export default function Visits() {
                     <Select value={newVisit.assigned_to} onValueChange={(value) => setNewVisit(prev => ({ ...prev, assigned_to: value }))}>
                       <SelectTrigger><SelectValue placeholder="Select staff member" /></SelectTrigger>
                       <SelectContent>
-                        {staff.filter(m => m.role === 'field_inspector' || m.role === 'dispatcher' || m.role === 'administrator').map((member) => (
-                          <SelectItem key={member.id} value={member.user_email}>
-                            {member.user_name || member.user_email}
+                        {staff.filter(m => m.role_in_tenant === 'field_inspector' || m.role_in_tenant === 'dispatcher' || m.role_in_tenant === 'admin').map((member) => (
+                          <SelectItem key={member.id} value={member.user_id}>
+                            {member.user_id}
                           </SelectItem>
                         ))}
                       </SelectContent>

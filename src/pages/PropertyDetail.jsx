@@ -378,11 +378,11 @@ export default function PropertyDetail() {
     setSavingTask(true);
     try {
       await base44.entities.FollowUp.create({
-        company_id: property.company_id, property_id: property.id, client_id: property.client_id,
+        tenant_id: property.tenant_id, property_id: property.id, client_id: property.client_id,
         title: newTask.title, description: newTask.description, priority: newTask.priority,
         due_date: newTask.due_date, type: 'other', status: 'open'
       });
-      setVisits(await base44.entities.Visit.filter({ property_id: property.id, company_id: property.company_id }, '-scheduled_date', 20));
+      setVisits(await base44.entities.Visit.filter({ property_id: property.id, tenant_id: property.tenant_id }, '-scheduled_date', 20));
       setNewTask({ title: '', description: '', priority: 'medium', due_date: '' });
       setShowAddTask(false);
       toast.success('Task created successfully');
@@ -430,7 +430,7 @@ export default function PropertyDetail() {
     try {
       const typeToUse = selectedContractorType || contractorData.contractor_type;
       const newContractor = await base44.entities.Contractor.create({
-        ...contractorData, contractor_type: typeToUse, company_id: property.company_id,
+        ...contractorData, contractor_type: typeToUse, tenant_id: property.tenant_id,
         hourly_rate: contractorData.hourly_rate ? parseFloat(contractorData.hourly_rate) : null, is_active: true
       });
       await handleAssignContractor(newContractor.id);
@@ -1002,7 +1002,7 @@ export default function PropertyDetail() {
 
             {/* CHECKLIST TAB */}
             <TabsContent value="checklist">
-              <PropertyChecklistConfigTab propertyId={property.id} companyId={property.company_id} property={property} />
+              <PropertyChecklistConfigTab propertyId={property.id} companyId={property.tenant_id} property={property} />
             </TabsContent>
 
             {/* REPORT TAB */}
@@ -1012,7 +1012,7 @@ export default function PropertyDetail() {
 
             {/* PRICING TAB */}
             <TabsContent value="pricing">
-              <PropertyPricingTab propertyId={property.id} companyId={property.company_id} />
+              <PropertyPricingTab propertyId={property.id} companyId={property.tenant_id} />
             </TabsContent>
 
             {/* CONTRACTORS TAB */}
@@ -1362,7 +1362,7 @@ export default function PropertyDetail() {
         onOpenChange={setShowContractorSearchModal}
         onSelect={handleContractorSearchSelect}
         properties={allProperties}
-        companyId={property?.company_id}
+        companyId={property?.tenant_id}
         currentProperty={property}
       />
 

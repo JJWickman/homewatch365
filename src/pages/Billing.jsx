@@ -6,8 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from 'lucide-react';
 
 export default function Billing() {
-  const [companyId, setCompanyId] = useState(null);
-  const [companyMember, setCompanyMember] = useState(null);
+  const [tenantId, setTenantId] = useState(null);
+  const [tenantUser, setTenantUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,13 +17,13 @@ export default function Billing() {
   const loadData = async () => {
     try {
       const currentUser = await base44.auth.me();
-      const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-      
-      if (members.length > 0) {
-        const member = members[0];
-        setCompanyMember(member);
-        setCompanyId(member.company_id);
-      }
+      if (!currentUser?.primary_tenant_id) { setLoading(false); return; }
+      setTenantId(currentUser.primary_tenant_id);
+      const tenantUsers = await base44.entities.TenantUser.filter({
+        user_id: currentUser.id,
+        tenant_id: currentUser.primary_tenant_id
+      });
+      if (tenantUsers.length > 0) setTenantUser(tenantUsers[0]);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -39,14 +39,10 @@ export default function Billing() {
     );
   }
 
-  // Only allow owners and administrators
-  if (!companyMember || (companyMember.role !== 'owner' && companyMember.role !== 'administrator')) {
+  if (!tenantUser || (tenantUser.role_in_tenant !== 'admin' && !tenantUser.is_owner)) {
     return (
       <div className="space-y-4">
-        <PageHeader
-          title="Billing"
-          subtitle="Billing and revenue overview"
-        />
+        <PageHeader title="Billing" subtitle="Billing and revenue overview" />
         <Card className="border-amber-200 bg-amber-50">
           <CardContent className="pt-6">
             <div className="flex gap-3">
@@ -64,11 +60,8 @@ export default function Billing() {
 
   return (
     <div>
-      <PageHeader
-        title="Billing"
-        subtitle="Revenue and billing overview"
-      />
-      <BillingOverview companyId={companyId} />
+      <PageHeader title="Billing" subtitle="Revenue and billing overview" />
+      <BillingOverview companyId={tenantId} />
     </div>
   );
 }

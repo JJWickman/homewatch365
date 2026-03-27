@@ -271,25 +271,23 @@ ${tenant.name}
                 <div className="flex items-center gap-3">
                   <Avatar>
                     <AvatarFallback className="bg-slate-900 text-white">
-                      {getInitials(member.user_name, member.user_email)}
+                      {getInitials(null, member.user_id)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium">{member.user_name || member.user_email}</p>
-                    <p className="text-sm text-slate-500">{member.user_email}</p>
+                   <p className="font-medium">{member.user_id}</p>
+                   <p className="text-sm text-slate-500">{member.role_in_tenant}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   {member.is_owner && (
                     <Shield className="h-5 w-5 text-amber-600" title="Company Owner" />
                   )}
-                  {member.access_level === 'admin' && !member.is_owner && (
-                    <Shield className="h-5 w-5 text-blue-600" title="Admin Access" />
-                  )}
+
                   <Badge variant="outline" className="capitalize">
-                    {member.role_in_tenant === 'field_inspector' ? 'Reporter' : 
-                     member.role_in_tenant === 'dispatcher' ? 'Dispatcher/Manager' : 
-                     'Admin'}
+                     {member.role_in_tenant === 'field_inspector' ? 'Reporter' : 
+                      member.role_in_tenant === 'dispatcher' ? 'Dispatcher/Manager' : 
+                      'Admin'}
                   </Badge>
                   {member.is_active === false && (
                     <Badge variant="destructive">Suspended</Badge>
@@ -314,15 +312,9 @@ ${tenant.name}
                           className={member.is_active === false ? "text-green-600" : "text-amber-600"}
                         >
                           {member.is_active === false ? (
-                            <>
-                              <Check className="h-4 w-4 mr-2" />
-                              Reactivate
-                            </>
+                            <><Check className="h-4 w-4 mr-2" />Reactivate</>
                           ) : (
-                            <>
-                              <X className="h-4 w-4 mr-2" />
-                              Suspend
-                            </>
+                            <><X className="h-4 w-4 mr-2" />Suspend</>
                           )}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
@@ -489,26 +481,14 @@ ${tenant.name}
           {editingMember && (
             <div className="space-y-4 py-4">
               <div>
-                <Label>Email</Label>
-                <Input value={editingMember.user_email} disabled className="bg-slate-50" />
-              </div>
-              <div>
-                <Label>Name</Label>
-                <Input
-                  value={editingMember.user_name}
-                  onChange={(e) => setEditingMember(prev => ({ ...prev, user_name: e.target.value }))}
-                  placeholder="Full name"
-                />
+                <Label>User ID</Label>
+                <Input value={editingMember.user_id} disabled className="bg-slate-50" />
               </div>
               <div>
                 <Label>Job Role</Label>
                 <Select
-                  value={editingMember.role}
-                  onValueChange={(value) => setEditingMember(prev => ({ 
-                    ...prev, 
-                    role: value,
-                    crm_marketing_access: value === 'administrator' ? true : prev.crm_marketing_access
-                  }))}
+                  value={editingMember.role_in_tenant}
+                  onValueChange={(value) => setEditingMember(prev => ({ ...prev, role_in_tenant: value }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -516,7 +496,7 @@ ${tenant.name}
                   <SelectContent>
                     <SelectItem value="field_inspector">Reporter</SelectItem>
                     <SelectItem value="dispatcher">Dispatcher/Manager</SelectItem>
-                    <SelectItem value="administrator">Administrator</SelectItem>
+                    <SelectItem value="admin">Administrator</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -540,7 +520,7 @@ ${tenant.name}
           <DialogHeader>
             <DialogTitle>Remove Team Member</DialogTitle>
             <DialogDescription>
-              Are you sure you want to remove {deletingMember?.user_name || deletingMember?.user_email}?
+              Are you sure you want to remove {deletingMember?.user_id}?
             </DialogDescription>
           </DialogHeader>
 

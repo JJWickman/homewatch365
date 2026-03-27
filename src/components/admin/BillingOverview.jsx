@@ -38,9 +38,9 @@ export default function BillingOverview({ companyId }) {
     setLoading(true);
     try {
       const [clientsData, transactionsData, statementsData] = await Promise.all([
-        base44.entities.Client.filter({ company_id: companyId, is_active: true }),
-        base44.entities.ClientTransaction.filter({ company_id: companyId }),
-        base44.entities.MonthlyStatement.filter({ company_id: companyId })
+        base44.entities.Client.filter({ tenant_id: companyId, is_active: true }),
+        base44.entities.ClientTransaction.filter({ tenant_id: companyId }),
+        base44.entities.MonthlyStatement.filter({ tenant_id: companyId })
       ]);
       setClients(clientsData);
       setTransactions(transactionsData);

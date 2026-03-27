@@ -107,7 +107,7 @@ export default function ImportWizard({ entityType, companyId, onComplete, onCanc
           mapped.custom_fields = customFields;
         }
         
-        mapped.company_id = companyId;
+        mapped.tenant_id = companyId;
         return mapped;
       });
 

@@ -94,27 +94,25 @@ export default function Marketing() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      const members = await base44.entities.CompanyMember.filter({ user_email: currentUser.email });
-      if (members.length > 0) {
-        const cId = members[0].company_id;
-        setCompanyId(cId);
+      if (!currentUser?.primary_tenant_id) { setLoading(false); return; }
+      const cId = currentUser.primary_tenant_id;
+      setCompanyId(cId);
 
-        const [templatesData, campaignsData, logsData, clientsData, contractorsData, listsData] = await Promise.all([
-          base44.entities.CommunicationTemplate.filter({ company_id: cId, is_active: true }),
-          base44.entities.Campaign.filter({ company_id: cId }, '-created_date'),
-          base44.entities.CommunicationLog.filter({ company_id: cId }, '-created_date', 50),
-          base44.entities.Client.filter({ company_id: cId, is_active: true }),
-          base44.entities.Contractor.filter({ company_id: cId, is_active: true }),
-          base44.entities.MarketingList.filter({ company_id: cId, is_active: true })
-        ]);
+      const [templatesData, campaignsData, logsData, clientsData, contractorsData, listsData] = await Promise.all([
+        base44.entities.CommunicationTemplate.filter({ tenant_id: cId, is_active: true }),
+        base44.entities.Campaign.filter({ tenant_id: cId }, '-created_date'),
+        base44.entities.CommunicationLog.filter({ tenant_id: cId }, '-created_date', 50),
+        base44.entities.Client.filter({ tenant_id: cId, is_active: true }),
+        base44.entities.Contractor.filter({ tenant_id: cId, is_active: true }),
+        base44.entities.MarketingList.filter({ tenant_id: cId, is_active: true })
+      ]);
 
-        setTemplates(templatesData);
-        setCampaigns(campaignsData);
-        setLogs(logsData);
-        setClients(clientsData);
-        setContractors(contractorsData);
-        setLists(listsData);
-      }
+      setTemplates(templatesData);
+      setCampaigns(campaignsData);
+      setLogs(logsData);
+      setClients(clientsData);
+      setContractors(contractorsData);
+      setLists(listsData);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -126,7 +124,7 @@ export default function Marketing() {
     if (!companyId || !templateForm.name || !templateForm.content) return;
 
     const data = {
-      company_id: companyId,
+      tenant_id: companyId,
       name: templateForm.name,
       subject: templateForm.subject,
       type: templateForm.type,
@@ -155,7 +153,7 @@ export default function Marketing() {
 
     const template = templates.find(t => t.id === campaignForm.template_id);
     const data = {
-      company_id: companyId,
+      tenant_id: companyId,
       name: campaignForm.name,
       description: campaignForm.description,
       type: campaignForm.type,
@@ -212,7 +210,7 @@ export default function Marketing() {
 
     const memberCount = (listForm.client_ids?.length || 0) + (listForm.contractor_ids?.length || 0);
     const data = {
-      company_id: companyId,
+      tenant_id: companyId,
       name: listForm.name,
       description: listForm.description,
       type: listForm.type,

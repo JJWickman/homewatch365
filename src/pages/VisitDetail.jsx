@@ -78,7 +78,7 @@ export default function VisitDetail() {
         const [propertyData, clientData, staffData] = await Promise.all([
           base44.entities.Property.filter({ id: vis.property_id }),
           vis.client_id ? base44.entities.Client.filter({ id: vis.client_id }) : [],
-          base44.entities.CompanyMember.filter({ company_id: vis.company_id, is_active: true })
+          base44.entities.TenantUser.filter({ tenant_id: vis.tenant_id, is_active: true })
         ]);
         
         if (propertyData.length > 0) setProperty(propertyData[0]);
@@ -97,12 +97,11 @@ export default function VisitDetail() {
     
     setUpdating(true);
     try {
-      const staffMember = staff.find(s => s.user_email === editData.assigned_to);
       const updateData = {
         scheduled_date: editData.scheduled_date,
         scheduled_time: editData.scheduled_time || null,
         assigned_to: editData.assigned_to || null,
-        assigned_to_name: staffMember?.user_name || null
+        assigned_to_name: editData.assigned_to || null
       };
       
       if (visit.visit_type === 'check-in') {
@@ -648,8 +647,8 @@ Your Property Management Team
                 <SelectContent>
                    <SelectItem value={null}>Unassigned</SelectItem>
                    {staff.map((member) => (
-                    <SelectItem key={member.id} value={member.user_email}>
-                      {member.user_name || member.user_email}
+                    <SelectItem key={member.id} value={member.user_id}>
+                      {member.user_id}
                     </SelectItem>
                   ))}
                 </SelectContent>

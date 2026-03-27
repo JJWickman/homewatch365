@@ -44,22 +44,19 @@ export default function Schedule() {
     try {
       const user = await base44.auth.me();
       setUserEmail(user.email);
-      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
-      
-      if (members.length > 0) {
-        const cId = members[0].company_id;
-        setCompanyId(cId);
-        
-        const [visitsData, propertiesData, staffData] = await Promise.all([
-          base44.entities.Visit.filter({ company_id: cId }),
-          base44.entities.Property.filter({ company_id: cId }),
-          base44.entities.CompanyMember.filter({ company_id: cId, is_active: true })
-        ]);
-        
-        setVisits(visitsData);
-        setProperties(propertiesData);
-        setStaffMembers(staffData);
-      }
+      if (!user?.primary_tenant_id) { setLoading(false); return; }
+      const tId = user.primary_tenant_id;
+      setCompanyId(tId);
+
+      const [visitsData, propertiesData, staffData] = await Promise.all([
+        base44.entities.Visit.filter({ tenant_id: tId }),
+        base44.entities.Property.filter({ tenant_id: tId }),
+        base44.entities.TenantUser.filter({ tenant_id: tId, is_active: true })
+      ]);
+
+      setVisits(visitsData);
+      setProperties(propertiesData);
+      setStaffMembers(staffData);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -235,8 +232,8 @@ export default function Schedule() {
                   <SelectItem value="my">My Schedule</SelectItem>
                   <SelectItem value="all">Everyone</SelectItem>
                   {staffMembers.map((member) => (
-                    <SelectItem key={member.id} value={member.user_email}>
-                      {member.user_name}
+                    <SelectItem key={member.id} value={member.user_id}>
+                      {member.user_id}
                     </SelectItem>
                   ))}
                 </SelectContent>
