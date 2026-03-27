@@ -172,6 +172,25 @@ export default function SettingsProducts() {
         subtitle="Configure the services you offer to clients"
       />
 
+      {/* Home Watch Academy Disclaimer */}
+      <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-6">
+        <div className="flex items-start gap-4">
+          <img
+            src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/7376e21d7_image.png"
+            alt="Home Watch Academy"
+            className="h-20 w-auto object-contain shrink-0"
+          />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-amber-900 mb-2">
+              Products & Services Best Practices from Home Watch Academy
+            </p>
+            <p className="text-xs text-amber-800 leading-relaxed">
+              The Products & Services offered are best-practices created by <strong>The Home Watch Academy</strong>. You have the rights to use them and/or modify them to suit your business needs.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Product List */}
       {products.length > 0 && (
         <Card className="mb-6">
