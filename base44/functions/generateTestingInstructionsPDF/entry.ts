@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
     // Title Page
     addTitle('Testing Instructions for HomeWatch365');
     yPosition += 5;
-    addText('Step-by-step guide to create your account and explore the home watch management platform');
+    addText('Complete step-by-step guide to validate the core functionality of the platform');
     yPosition += 10;
 
     doc.setFontSize(10);
@@ -71,103 +71,105 @@ Deno.serve(async (req) => {
 
     // Introduction
     addHeading('Overview');
-    addText('This guide walks you through creating your account and exploring the key features of HomeWatch365. You will:');
-    addText('- Set up your company account and profile', 5);
-    addText('- Create sample clients and properties', 5);
-    addText('- Configure products and pricing', 5);
-    addText('- Explore checklists and assign them to properties', 5);
-    yPosition += 10;
+    addText('This testing guide walks you through validating the core functionality of HomeWatch365. Complete each step in order to verify the platform works as expected.');
+    yPosition += 5;
 
     // Section 1: Account Creation
     checkPageBreak(80);
-    addHeading('Step 1: Create Your Account');
+    addHeading('Step 1: Create Your Account & Subdomain');
     addStep('1a', 'Sign Up', 'Go to the login page and click Sign Up. Enter your email address, create a password, and verify your email.');
-    addStep('1b', 'Complete Your Profile', 'Enter your first name, last name, and phone number. This creates your user account in the system.');
+    addStep('1b', 'Create Your Subdomain', 'On the Company Onboarding screen, enter a subdomain (e.g., mycompany). This becomes your permanent access URL: mycompany.estatewatch365.com');
+    addStep('1c', 'Verify Access', 'After creating your subdomain, log out and log back in using your subdomain URL. This ensures your account is linked correctly.');
     yPosition += 5;
 
     // Section 2: Company Setup
     checkPageBreak(80);
-    addHeading('Step 2: Create Your Company');
-    addStep('2a', 'Access Company Setup', 'After signing up, you will be taken to the Company Onboarding screen. This is where you create your first company/tenant.');
-    addStep('2b', 'Enter Company Details', 'Fill in your company name (e.g., My Home Watch Company), slug (URL-friendly name), address, city, state, and contact information.');
-    addStep('2c', 'Complete Onboarding', 'Click Create Company to finish setup. You now have your own isolated tenant workspace.');
+    addHeading('Step 2: Update Company Information');
+    addStep('2a', 'Go to Settings', 'From the dashboard, click Settings in the sidebar.');
+    addStep('2b', 'Update Company Details', 'In the Company tab, update: Company Name, Address, City, State, ZIP, Phone, and Email.');
+    addStep('2c', 'Add Branding', 'Upload your company logo and set primary/accent colors for your branded dashboard.');
+    addStep('2d', 'Save Changes', 'Click Save. Your company profile is now configured.');
     yPosition += 5;
 
-    // Section 3: Create Clients
+    // Section 3: Validate Checklist Templates
     checkPageBreak(80);
-    addHeading('Step 3: Create Sample Clients');
-    addStep('3a', 'Navigate to Clients', 'From the main dashboard, click Clients in the sidebar.');
-    addStep('3b', 'Add New Client', 'Click the Add Client button in the top right. Fill in required fields: First Name, Last Name, Email, and Address.');
-    addStep('3c', 'Configure Portal Access', 'Enable Portal Access for the client so they can log in to view their properties and reports.');
-    addStep('3d', 'Save Client', 'Click Create Client. You should now see this client in your list.');
+    addHeading('Step 3: Validate Checklist Templates are Loaded');
+    addStep('3a', 'Go to Settings', 'Click Settings, then select the Checklist Templates tab.');
+    addStep('3b', 'Verify Templates', 'Confirm you see default templates: Single Family Home, Condo/Villa, High-Rise, and Commercial.');
+    addStep('3c', 'Review Structure', 'Click on one template to see its sections and checklist items. Each template should have relevant categories for that property type.');
     yPosition += 5;
 
-    // Section 4: Create Properties
+    // Section 4: Validate Products
     checkPageBreak(80);
-    addHeading('Step 4: Create Sample Properties');
-    addStep('4a', 'Navigate to Properties', 'Click Properties in the sidebar.');
-    addStep('4b', 'Add New Property', 'Click Add Property button. Select a client you created, then enter property details.');
-    addStep('4c', 'Fill Key Information', 'Enter: Address, City, State, ZIP, Property Type (Single Family/Condo/Commercial), and Status (Occupied/Vacant/Seasonal).');
-    addStep('4d', 'Add Access Information', 'Fill in alarm codes, gate codes, WiFi details, and any special access instructions needed for visits.');
-    addStep('4e', 'Save Property', 'Click Create to add the property to the system.');
+    addHeading('Step 4: Validate Products are Loaded');
+    addStep('4a', 'Go to Settings', 'Click Settings, then select the Products tab.');
+    addStep('4b', 'Verify Default Products', 'Confirm you see the default product: Standard Home Watch Visit with base pricing.');
+    addStep('4c', 'Check Add-ons', 'Verify any add-on services are listed (e.g., Extra Bedroom Charge, Pool Maintenance).');
     yPosition += 5;
 
-    // Section 5: Explore Products
+    // Section 5: Create a Client
     checkPageBreak(80);
-    addHeading('Step 5: Review Products & Services');
-    addStep('5a', 'Navigate to Settings', 'Click Settings in the sidebar.');
-    addStep('5b', 'View Products', 'Go to the Products tab. This shows the default services (Standard Home Watch Visit) and any add-ons configured for your company.');
-    addStep('5c', 'Understand Pricing', 'Each product shows: Base Price (per visit), Visit Type, and Add-on Charges (e.g., extra bedrooms).');
-    addStep('5d', 'Create Custom Product', 'Optional: Click Add Product to create additional services your company offers.');
+    addHeading('Step 5: Create a Client');
+    addStep('5a', 'Navigate to Clients', 'Click Clients in the sidebar.');
+    addStep('5b', 'Add New Client', 'Click Add Client. Enter First Name, Last Name, Email, and Address.');
+    addStep('5c', 'Enable Portal Access', 'Toggle on Portal Access so the client can view their properties and reports.');
+    addStep('5d', 'Save', 'Click Create Client. Verify the client appears in your list.');
     yPosition += 5;
 
-    // Section 6: Explore Checklists
+    // Section 6: Create a Property with Aerial View
     checkPageBreak(80);
-    addHeading('Step 6: Review Checklists');
-    addStep('6a', 'Navigate to Settings - Templates', 'Click Settings, then select Checklist Templates tab.');
-    addStep('6b', 'View Available Templates', 'See the default checklists (Single Family, Condo/Villa, High-Rise, Commercial). Each has sections and items.');
-    addStep('6c', 'Understand Checklist Structure', 'Templates define what inspectors check during visits: exterior, interior, utilities, appliances, etc.');
+    addHeading('Step 6: Create a Property & Pull Aerial View');
+    addStep('6a', 'Navigate to Properties', 'Click Properties in the sidebar.');
+    addStep('6b', 'Add New Property', 'Click Add Property. Select the client you created.');
+    addStep('6c', 'Enter Address Details', 'Enter Address, City, State, ZIP, Property Type (Single Family/Condo/High-Rise), and Status.');
+    addStep('6d', 'Pull Aerial View', 'As you enter the address, the system will auto-populate GPS coordinates and pull down an aerial/satellite view of the property.');
+    addStep('6e', 'Add Access Info', 'Enter alarm codes, gate codes, WiFi details, and any access instructions.');
+    addStep('6f', 'Save Property', 'Click Create. The property is now in the system with its aerial view.');
     yPosition += 5;
 
-    // Section 7: Configure Client Pricing
+    // Section 7: Set Up Pricing
     checkPageBreak(80);
-    addHeading('Step 7: Create Pricing for a Client Property');
-    addStep('7a', 'Open Property Detail', 'Click Properties, find your property, and click to open it.');
-    addStep('7b', 'Go to Pricing Tab', 'In the property detail page, click the Pricing tab.');
-    addStep('7c', 'Set Service Subscription', 'Select a primary service (e.g., Standard Home Watch Visit) and set the monthly rate for this property.');
-    addStep('7d', 'Add Supplementary Services', 'Optional: Add extra services (add-ons) that apply to this property (e.g., Extra Bedroom Charge).');
-    addStep('7e', 'Save Pricing', 'Click Save to confirm. This pricing will be used for future invoices.');
+    addHeading('Step 7: Create Pricing for the Property');
+    addStep('7a', 'Open Property Detail', 'From Properties, click on the property you created.');
+    addStep('7b', 'Go to Pricing Tab', 'Click the Pricing tab.');
+    addStep('7c', 'Select Primary Service', 'Choose Standard Home Watch Visit (or your default product).');
+    addStep('7d', 'Set Monthly Rate', 'Enter the monthly service rate for this property based on your pricing model.');
+    addStep('7e', 'Add Add-ons (Optional)', 'Select any additional charges (extra bedrooms, pool maintenance, etc.).');
+    addStep('7f', 'Save', 'Click Save. Pricing is now configured for this property.');
     yPosition += 5;
 
-    // Section 8: Assign Checklist
+    // Section 8: Create Checklist for Property
     checkPageBreak(80);
-    addHeading('Step 8: Assign Checklist to Property');
-    addStep('8a', 'Open Property Detail', 'Click Properties, select your property.');
-    addStep('8b', 'Go to Checklist Tab', 'In the property detail, click the Checklist tab.');
-    addStep('8c', 'Select a Template', 'Click Select Checklist Template and choose a template (e.g., Single Family Home).');
-    addStep('8d', 'Customize if Needed', 'Optional: Customize sections/items for this specific property by removing irrelevant items.');
-    addStep('8e', 'Save Assignment', 'Click Save Checklist. Now when field staff visit, they will use this checklist.');
+    addHeading('Step 8: Create a Checklist for the Property');
+    addStep('8a', 'Open Property Detail', 'From Properties, click on your property.');
+    addStep('8b', 'Go to Checklist Tab', 'Click the Checklist tab.');
+    addStep('8c', 'Select Template', 'Click Select Checklist Template. Choose the appropriate template (Single Family Home, Condo/Villa, or High-Rise).');
+    addStep('8d', 'Customize (Optional)', 'You can customize sections or remove irrelevant items for this specific property.');
+    addStep('8e', 'Save Checklist', 'Click Save. Field staff will now use this checklist during property visits.');
     yPosition += 5;
 
-    // Final Section: Next Steps
+    // Final Section: Testing Complete
     checkPageBreak(60);
-    addHeading('Next Steps: Ready for Testing');
-    addText('Congratulations! You have successfully:');
-    addText('- Created your company account and workspace', 5);
-    addText('- Added sample clients and properties', 5);
-    addText('- Reviewed products and checklists', 5);
-    addText('- Configured pricing and checklists for a property', 5);
+    addHeading('Testing Complete!');
+    addText('You have successfully validated:');
+    addText('- User account creation with subdomain setup', 5);
+    addText('- Company information and branding', 5);
+    addText('- Checklist templates loaded correctly', 5);
+    addText('- Products/services loaded correctly', 5);
+    addText('- Client creation and management', 5);
+    addText('- Property creation with aerial view', 5);
+    addText('- Pricing configuration', 5);
+    addText('- Checklist assignment to properties', 5);
     yPosition += 10;
 
-    addText('Your isolated workspace is now ready for comprehensive testing. Each of the 3 test accounts has completely separate data.');
+    addHeading('Support & Feedback');
+    addText('If you encounter any issues or have questions during testing:');
+    addText('Use the Support Chat bubble in the app to message Jason directly', 5);
+    addText('Text: 248.798.3236', 5);
+    addText('Email: jason@estatewatch365.com', 5);
     yPosition += 10;
 
-    addHeading('Security & Data Isolation');
-    addText('Each test user account has a separate Company (tenant) workspace. Your clients, properties, visits, and pricing are completely isolated from other test users. This ensures multi-tenant data security.');
-    yPosition += 10;
-
-    addHeading('Need Help?');
-    addText('If you encounter any issues during setup, please document the problem and let the development team know. This feedback helps us improve the system.');
+    addText('Your feedback is critical to improving the platform. Please document any issues or suggestions and reach out!');
 
     // Generate and return PDF
     const pdfBytes = doc.output('arraybuffer');
