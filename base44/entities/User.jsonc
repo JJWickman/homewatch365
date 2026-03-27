@@ -6,40 +6,11 @@
       "type": "string",
       "enum": [
         "superadmin",
-        "tenant_user"
+        "admin",
+        "tenantadmin",
+        "user"
       ],
-      "default": "tenant_user",
-      "description": "superadmin = platform builder, tenant_user = subscriber"
-    },
-    "primary_tenant_id": {
-      "type": "string",
-      "description": "Default tenant for this user (null for superadmin)"
-    },
-    "avatar_url": {
-      "type": "string"
-    },
-    "first_name": {
-      "type": "string",
-      "description": "User's first name"
-    },
-    "last_name": {
-      "type": "string",
-      "description": "User's last name"
-    },
-    "phone": {
-      "type": "string",
-      "description": "User mobile phone number"
-    },
-    "timezone": {
-      "type": "string",
-      "description": "User's preferred timezone",
-      "default": "America/New_York"
-    },
-    "onboarding_completed": {
-      "type": "boolean",
-      "default": false,
-      "description": "Whether user completed tenant creation onboarding"
+      "default": "user"
     }
-  },
-  "required": []
+  }
 }
