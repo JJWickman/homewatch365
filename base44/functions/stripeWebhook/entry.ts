@@ -38,20 +38,15 @@ Deno.serve(async (req) => {
           break;
         }
         
-        try {
-          const subscription = await stripe.subscriptions.retrieve(session.subscription);
-          const status = subscription.status === 'trialing' ? 'trial' : 'active';
-          
-          await base44.asServiceRole.entities.Tenant.update(tenantId, {
-            subscription_plan: subscriptionPlan,
-            subscription_status: status,
-            stripe_subscription_id: session.subscription,
-            trial_ends_at: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null
-          });
-          console.log(`Updated tenant ${tenantId} to status ${status}`);
-        } catch (err) {
-          console.error('Error updating tenant:', err.message);
-        }
+        const subscription = await stripe.subscriptions.retrieve(session.subscription);
+        const status = subscription.status === 'trialing' ? 'trial' : 'active';
+        
+        await base44.asServiceRole.entities.Tenant.update(tenantId, {
+          subscription_plan: subscriptionPlan,
+          subscription_status: status,
+          stripe_subscription_id: session.subscription,
+          trial_ends_at: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null
+        });
         break;
       }
 
