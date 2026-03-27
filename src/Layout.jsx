@@ -284,7 +284,7 @@ export default function Layout({ children, currentPageName }) {
                   
                 <img src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/c920e3364_NewHomeWatch365logo.png"
 
-                  alt="Home Watch 365" className="h-20 w-auto object-contain" />
+                  alt="Home Watch 365" className="w-auto object-contain" style={{height: '104px'}} />
 
                   
               </a>
