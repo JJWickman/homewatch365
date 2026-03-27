@@ -75,7 +75,7 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
     try {
       // Create property-specific checklist with selected standard template
       const newChecklist = await base44.entities.PropertyChecklist.create({
-        company_id: property.company_id,
+        tenant_id: property.tenant_id,
         property_id: property.id,
         template_id: selectedTemplate.id,
         name: checklistName,
