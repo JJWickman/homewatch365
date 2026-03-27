@@ -4,6 +4,7 @@ import { createPageUrl } from './utils';
 import { base44 } from '@/api/base44Client';
 import OfflineProvider from '@/components/shared/OfflineProvider';
 import OfflineBanner from '@/components/shared/OfflineBanner';
+import FloatingChatWidget from '@/components/support/FloatingChatWidget';
 import {
   Home, Users, Building2, ClipboardCheck, Calendar,
   FileText, Settings, Menu, X, LogOut, ChevronDown,
@@ -494,6 +495,7 @@ export default function Layout({ children, currentPageName }) {
           transition: background-color 0.2s ease, border-color 0.2s ease;
         }
       `}</style>
+      <FloatingChatWidget />
       </div>
       </OfflineProvider>);
 
