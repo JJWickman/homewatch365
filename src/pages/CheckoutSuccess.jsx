@@ -49,16 +49,29 @@ export default function CheckoutSuccess() {
     const startPolling = async () => {
       let isReady = false;
       let attempts = 0;
+      let finalUser = null;
       const maxAttempts = 240; // 120 seconds at 500ms intervals
 
       while (attempts < maxAttempts) {
-        isReady = await pollTenantStatus();
-        if (isReady) break;
+        finalUser = await base44.auth.me();
+        if (finalUser?.primary_tenant_id) {
+          const tenants = await base44.entities.Tenant.filter({ id: finalUser.primary_tenant_id });
+          if (tenants.length > 0 && (tenants[0].subscription_status === 'active' || tenants[0].subscription_status === 'trial')) {
+            isReady = true;
+            break;
+          }
+        }
         await new Promise(r => setTimeout(r, 500));
         attempts++;
       }
 
-      if (isReady) {
+      if (isReady && finalUser) {
+        // Call finalizeOnboarding to ensure primary_tenant_id is set on user
+        try {
+          await base44.functions.invoke('finalizeOnboarding', { tenant_id: finalUser.primary_tenant_id });
+        } catch (err) {
+          console.warn('finalizeOnboarding call failed:', err);
+        }
         navigate('/Dashboard');
       } else {
         setError('Setup took too long. Please refresh or contact support.');
