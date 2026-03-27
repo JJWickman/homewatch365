@@ -29,8 +29,6 @@ Deno.serve(async (req) => {
     // Handle the event
     switch (event.type) {
       case 'checkout.session.completed': {
-        // At this point, the subscription may be created but not yet active
-        // We'll rely on customer.subscription.updated to finalize the status
         const session = event.data.object;
         const tenantId = session.metadata?.tenant_id;
         
@@ -39,8 +37,18 @@ Deno.serve(async (req) => {
           break;
         }
         
-        // Just mark that checkout completed; subscription.updated will handle status
-        console.log(`Checkout session ${session.id} completed for tenant ${tenantId}`);
+        // Set subscription status to active immediately (subscription.updated will refine it later)
+        const subscriptionPlan = session.metadata?.subscription_plan || 'solopreneur';
+        const hasCrm = subscriptionPlan.includes('_crm') || subscriptionPlan === 'enterprise';
+        
+        await base44.asServiceRole.entities.Tenant.update(tenantId, {
+          subscription_plan: subscriptionPlan,
+          subscription_status: 'active',
+          stripe_subscription_id: session.subscription,
+          marketing_addon_active: hasCrm
+        });
+        
+        console.log(`Checkout session ${session.id} completed and tenant ${tenantId} marked active`);
         break;
       }
 
