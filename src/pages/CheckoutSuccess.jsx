@@ -5,15 +5,6 @@ import { CheckCircle } from 'lucide-react';
 export default function CheckoutSuccess() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Webhook will handle the subscription update automatically
-    // Auto-redirect after 2 seconds
-    const timer = setTimeout(() => {
-      navigate('/Dashboard');
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [navigate]);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-slate-900 flex items-center justify-center p-4">
       <div className="rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 p-8 max-w-md text-center">
