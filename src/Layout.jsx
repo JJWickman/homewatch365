@@ -55,8 +55,7 @@ const getNavigationItems = (subscriptionPlan, roleInTenant, globalRole) => {
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
   { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
   { name: 'Help & Tutorials', icon: BookOpen, page: 'HelpTutorials' },
-  { name: 'AI Assistant', icon: Bot, page: 'AIAssistant' },
-  { name: 'Support Chat', icon: MessageSquare, page: 'SupportChat' }];
+  { name: 'AI Assistant', icon: Bot, page: 'AIAssistant' }];
 
 
   // Only show Billing and Import Data for Admins
