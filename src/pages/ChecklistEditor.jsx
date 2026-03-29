@@ -234,8 +234,17 @@ export default function ChecklistEditor() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {savedMsg && <span className="text-sm font-semibold text-green-300">{savedMsg}</span>}
+          {propertyChecklist && propertyId && (
+            <Button
+              variant="outline"
+              onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${propertyId}`)}
+              className="border-slate-300 text-slate-700 hover:bg-slate-100"
+            >
+              Done Editing
+            </Button>
+          )}
           {!propertyChecklist && (
             <Button
               variant="outline"
