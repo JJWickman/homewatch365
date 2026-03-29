@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { companyName, fullName, email, slug, subscriptionPlan, promoCode } = await req.json();
+    const { companyName, fullName, email, slug, subscriptionPlan, promoCode, price_id: passedPriceId } = await req.json();
 
     if (!companyName || !slug) {
       return Response.json({ error: 'Company name and slug are required' }, { status: 400 });
@@ -23,15 +23,8 @@ Deno.serve(async (req) => {
 
     // For PAID plans: do NOT create tenant yet — tenant will be created by Stripe webhook after payment
     if (subscriptionPlan && subscriptionPlan !== 'trial') {
-      let price_id = null;
-      try {
-        const pricesRes = await base44.asServiceRole.functions.invoke('getStripePrices', {});
-        const plans = pricesRes?.plans || [];
-        const plan = plans.find(p => p.id === subscriptionPlan);
-        if (plan?.prices?.monthly?.priceId) price_id = plan.prices.monthly.priceId;
-      } catch (e) {
-        console.log('Could not fetch stripe price:', e.message);
-      }
+      const price_id = passedPriceId || null;
+      console.log('Paid plan selected, price_id:', price_id);
       return Response.json({ success: true, price_id, pending_paid: true });
     }
 
