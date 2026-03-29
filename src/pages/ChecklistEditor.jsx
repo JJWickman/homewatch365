@@ -66,7 +66,10 @@ export default function ChecklistEditor() {
       
       // If editing a property-specific checklist
       if (checklistId) {
-        const checklists = await base44.entities.PropertyChecklist.filter({ id: checklistId });
+        const checklists = await base44.entities.PropertyChecklist.filter({ 
+          id: checklistId,
+          tenant_id: user.primary_tenant_id
+        });
         if (checklists.length > 0) {
           const pChecklist = checklists[0];
           setPropertyChecklist(pChecklist);
@@ -81,7 +84,7 @@ export default function ChecklistEditor() {
             }
           }
           
-          // Determine template type from PropertyChecklist's template_id
+            // Determine template type from PropertyChecklist's template_id
           if (pChecklist.template_id) {
             const templateData = await base44.entities.ChecklistTemplate.filter({ id: pChecklist.template_id });
             if (templateData.length > 0) {
@@ -94,6 +97,13 @@ export default function ChecklistEditor() {
           raw = pChecklist.customized_sections?.length > 0
             ? JSON.parse(JSON.stringify(pChecklist.customized_sections))
             : JSON.parse(JSON.stringify(effectiveTemplate.defaultSections));
+        } else {
+          // Checklist not found - fallback to template editing
+          const saved = c?.settings?.checklists?.[templateKey];
+          setChecklistInstructions(saved?.instructions || '');
+          raw = (saved?.sections?.length > 0)
+            ? JSON.parse(JSON.stringify(saved.sections))
+            : JSON.parse(JSON.stringify(template.defaultSections));
         }
       } else {
         // Editing company template
