@@ -91,59 +91,64 @@ export default function CompanyOnboarding() {
     }
 
     const slug = form.companyName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-
     setLoading(true);
+
     try {
+      // PAID plan: fetch price and go directly to Stripe checkout
+      if (form.plan !== 'trial') {
+        const pricesRes = await base44.functions.invoke('getStripePrices', {});
+        const plans = pricesRes?.data?.plans || [];
+        const plan = plans.find(p => p.id === form.plan);
+        const price_id = plan?.prices?.monthly?.priceId || null;
+
+        if (!price_id) {
+          toast.error('Could not load pricing for this plan. Please try again.');
+          setLoading(false);
+          return;
+        }
+
+        const checkout = await base44.functions.invoke('createCheckoutSession', {
+          price_id,
+          subscription_plan: form.plan,
+          company_name: form.companyName,
+          slug,
+          email: form.email,
+        });
+
+        if (checkout.data?.url) {
+          window.location.href = checkout.data.url;
+          return;
+        } else {
+          toast.error('Could not create checkout session. Please try again.');
+          setLoading(false);
+          return;
+        }
+      }
+
+      // TRIAL plan: create tenant directly
       const response = await base44.functions.invoke('createCompanyOnboarding', {
         companyName: form.companyName,
         fullName: form.fullName,
         email: form.email,
-        slug: slug,
+        slug,
         subscriptionPlan: form.plan,
         promoCode: form.promoCode || null,
-        isCreatingTenant: onboardingType === 'create',
+        isCreatingTenant: true,
       });
 
-      if (response.data?.success) {
-        if (response.data.pending_paid) {
-          if (!response.data.price_id) {
-            toast.error('Could not load pricing. Please try again or contact support.');
-            setLoading(false);
-            return;
-          }
-          const checkout = await base44.functions.invoke('createCheckoutSession', {
-            price_id: response.data.price_id,
-            subscription_plan: form.plan,
-            company_name: form.companyName,
-            slug: slug,
-            email: form.email,
-          });
-          if (checkout.data?.url) {
-            window.location.href = checkout.data.url;
-            return;
-          } else {
-            toast.error('Could not create checkout session. Please try again.');
-            setLoading(false);
-            return;
-          }
-        } else if (response.data.tenant_id) {
-          toast.success('Welcome to Home Watch 365!');
-          const tenantSlug = response.data.tenant?.slug;
-          if (tenantSlug) {
-            window.location.href = `/?tenant=${tenantSlug}`;
-          } else {
-            navigate(createPageUrl('Dashboard'));
-          }
+      if (response.data?.success && response.data?.tenant_id) {
+        toast.success('Welcome to Home Watch 365!');
+        const tenantSlug = response.data.tenant?.slug;
+        if (tenantSlug) {
+          window.location.href = `/?tenant=${tenantSlug}`;
         } else {
-          toast.error('Unexpected response. Please try again.');
+          navigate(createPageUrl('Dashboard'));
         }
       } else {
-        let errMsg = response.data?.error || 'Something went wrong';
-        toast.error(errMsg);
+        toast.error(response.data?.error || 'Something went wrong');
       }
     } catch (error) {
-      let errMsg = error.message || 'Failed to create account.';
-      toast.error(errMsg);
+      toast.error(error.message || 'Failed to create account.');
     } finally {
       setLoading(false);
     }
