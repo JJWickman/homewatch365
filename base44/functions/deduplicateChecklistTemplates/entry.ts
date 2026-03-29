@@ -5,17 +5,14 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (!user?.primary_tenant_id) {
-      return Response.json({ error: 'No tenant found' }, { status: 400 });
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const tenantId = user.primary_tenant_id;
     const CORE_CODES = ['single_family_standard', 'condo_villa_standard', 'high_rise_standard'];
 
-    // Fetch all templates for this tenant
-    const allTemplates = await base44.asServiceRole.entities.ChecklistTemplate.filter({
-      tenant_id: tenantId
-    });
+    // Fetch all templates across entire system
+    const allTemplates = await base44.asServiceRole.entities.ChecklistTemplate.list();
 
     // Group by code
     const byCode = {};
@@ -30,7 +27,7 @@ Deno.serve(async (req) => {
       if (byCode[code] && byCode[code].length > 1) {
         // Sort by created_date, keep oldest, delete rest
         const sorted = byCode[code].sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
-        const toDelete = sorted.slice(1); // Skip first (oldest)
+        const toDelete = sorted.slice(1);
         
         for (const template of toDelete) {
           await base44.asServiceRole.entities.ChecklistTemplate.delete(template.id);
@@ -46,11 +43,10 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
-      tenant_id: tenantId,
       user_email: user.email,
       duplicates_deleted: deleted.length,
       deleted_templates: deleted,
-      message: `Deleted ${deleted.length} duplicate core templates. Your tenant now has 3 core templates.`
+      message: `Deleted ${deleted.length} duplicate core templates.`
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
