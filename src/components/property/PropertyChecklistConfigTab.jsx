@@ -61,7 +61,9 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
       }
     } catch (error) {
       console.error('Error loading data:', error);
-      setChecklistError('Checklist not found');
+      console.error('PropertyChecklist filter attempted with:', { propertyId, companyId });
+      // Don't set error—let the UI show "Create checklist" if query fails
+      // This allows recovery even if there's a transient query issue
     } finally {
       setLoading(false);
     }
