@@ -6,6 +6,10 @@
       "type": "string",
       "description": "Reference to ChecklistSubmission"
     },
+    "tenant_id": {
+      "type": "string",
+      "description": "Reference to Tenant (for tenant isolation)"
+    },
     "template_item_id": {
       "type": "string",
       "description": "Reference to ChecklistTemplateItem"
@@ -46,48 +50,21 @@
   },
   "required": [
     "submission_id",
+    "tenant_id",
     "template_item_id"
   ],
   "rls": {
     "create": {
-      "submission_id": {
-        "$in": {
-          "collection": "ChecklistSubmission",
-          "query": {
-            "data.tenant_id": "{{user.data.primary_tenant_id}}"
-          }
-        }
-      }
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "read": {
-      "submission_id": {
-        "$in": {
-          "collection": "ChecklistSubmission",
-          "query": {
-            "data.tenant_id": "{{user.data.primary_tenant_id}}"
-          }
-        }
-      }
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "update": {
-      "submission_id": {
-        "$in": {
-          "collection": "ChecklistSubmission",
-          "query": {
-            "data.tenant_id": "{{user.data.primary_tenant_id}}"
-          }
-        }
-      }
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "delete": {
-      "submission_id": {
-        "$in": {
-          "collection": "ChecklistSubmission",
-          "query": {
-            "data.tenant_id": "{{user.data.primary_tenant_id}}"
-          }
-        }
-      }
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     }
   }
 }
