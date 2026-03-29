@@ -203,7 +203,7 @@ export default function PropertyDetail() {
           setClients(allClientsData);
         }
 
-        if (prop.contractors && prop.contractors.length > 0) {
+        if (prop.contractors?.length > 0) {
           const contractorsData = await base44.entities.Contractor.filter({ id: { $in: prop.contractors } });
           setContractors(contractorsData);
         }
@@ -418,8 +418,12 @@ export default function PropertyDetail() {
       const updatedContractors = [...(property.contractors || []), contractorId];
       await base44.entities.Property.update(property.id, { contractors: updatedContractors });
       setProperty({ ...property, contractors: updatedContractors });
-      const contractorsData = await base44.entities.Contractor.filter({ id: { $in: updatedContractors } });
-      setContractors(contractorsData);
+      if (updatedContractors.length > 0) {
+        const contractorsData = await base44.entities.Contractor.filter({ id: { $in: updatedContractors } });
+        setContractors(contractorsData);
+      } else {
+        setContractors([]);
+      }
       toast.success('Contractor assigned successfully');
     } catch (error) {
       console.error('Error assigning contractor:', error);
@@ -1016,83 +1020,15 @@ export default function PropertyDetail() {
                                     const updatedContractors = property.contractors?.filter(id => id !== contractor.id) || [];
                                     await base44.entities.Property.update(property.id, { contractors: updatedContractors });
                                     setProperty({ ...property, contractors: updatedContractors });
-                                    const contractorsData = await base44.entities.Contractor.filter({ id: { $in: updatedContractors } });
-                                    setContractors(contractorsData);
-                                  }} className="text-red-600 hover:text-red-700">
+                                    if (updatedContractors.length > 0) {
+                                      const contractorsData = await base44.entities.Contractor.filter({ id: { $in: updatedContractors } });
+                                      setContractors(contractorsData);
+                                    } else {
+                                      setContractors([]);
+                                    }
+                                    }} className="text-red-600 hover:text-red-700">
                                     Remove
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* TAGS TAB */}
-            <TabsContent value="tags">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Tag className="h-5 w-5" />
-                    Tags
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {propertyTags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {propertyTags.map(tag => (
-                          <div key={tag} className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-lg text-sm">
-                            {tag}
-                            <button onClick={() => setPropertyTags(prev => prev.filter(t => t !== tag))} className="text-blue-700 hover:text-blue-900 font-bold">×</button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {allTags.length > 0 && (
-                      <div className="p-3 bg-slate-50 rounded-lg">
-                        <p className="text-xs text-slate-600 mb-2 font-medium">Quick add from existing tags:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {allTags.filter(t => !propertyTags.includes(t)).map(tag => (
-                            <button key={tag} onClick={() => setPropertyTags(prev => [...prev, tag])} className="px-2 py-1 rounded-md bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs transition-colors">
-                              + {tag}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    <div>
-                      <p className="text-xs text-slate-600 mb-2 font-medium">Create new tag:</p>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={newTag}
-                          onChange={(e) => setNewTag(e.target.value)}
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              if (newTag.trim() && !propertyTags.includes(newTag.trim())) {
-                                setPropertyTags(prev => [...prev, newTag.trim()]);
-                                setNewTag('');
-                              }
-                            }
-                          }}
-                          placeholder="Type a new tag..."
-                          className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-black"
-                        />
-                        <Button variant="outline" size="sm" onClick={() => {
-                          if (newTag.trim() && !propertyTags.includes(newTag.trim())) {
-                            setPropertyTags(prev => [...prev, newTag.trim()]);
-                            setNewTag('');
-                          }
-                        }}>
-                          <Plus className="h-4 w-4" />
-                        </Button>
+                                    </Button>
                       </div>
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
