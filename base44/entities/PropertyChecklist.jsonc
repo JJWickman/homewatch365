@@ -47,72 +47,16 @@
   ],
   "rls": {
     "create": {
-      "$and": [
-        {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
-        },
-        {
-          "property_id": {
-            "$in": {
-              "collection": "Property",
-              "query": {
-                "data.tenant_id": "{{user.data.primary_tenant_id}}"
-              }
-            }
-          }
-        }
-      ]
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "read": {
-      "$and": [
-        {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
-        },
-        {
-          "property_id": {
-            "$in": {
-              "collection": "Property",
-              "query": {
-                "data.tenant_id": "{{user.data.primary_tenant_id}}"
-              }
-            }
-          }
-        }
-      ]
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "update": {
-      "$and": [
-        {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
-        },
-        {
-          "property_id": {
-            "$in": {
-              "collection": "Property",
-              "query": {
-                "data.tenant_id": "{{user.data.primary_tenant_id}}"
-              }
-            }
-          }
-        }
-      ]
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "delete": {
-      "$and": [
-        {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
-        },
-        {
-          "property_id": {
-            "$in": {
-              "collection": "Property",
-              "query": {
-                "data.tenant_id": "{{user.data.primary_tenant_id}}"
-              }
-            }
-          }
-        }
-      ]
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     }
   }
 }
