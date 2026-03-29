@@ -23,7 +23,6 @@ Deno.serve(async (req) => {
 
     // For PAID plans: do NOT create tenant yet — tenant will be created by Stripe webhook after payment
     if (subscriptionPlan && subscriptionPlan !== 'trial') {
-      // Just fetch the price_id and return — no tenant created
       let price_id = null;
       try {
         const pricesRes = await base44.asServiceRole.functions.invoke('getStripePrices', {});
@@ -50,15 +49,13 @@ Deno.serve(async (req) => {
       slug: slug,
       email: email || user.email,
       subscription_plan: subscriptionPlan || 'trial',
-      subscription_status: subscriptionPlan === 'trial' ? 'trial' : 'active',
-      trial_ends_at: (!subscriptionPlan || subscriptionPlan === 'trial')
-        ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
-        : null,
+      subscription_status: 'trial',
+      trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
       is_active: true,
       created_by_email: user.email
     });
 
-    // Create TenantUser junction (only if one doesn't already exist)
+    // Create TenantUser junction
     const existingTenantUser = await base44.asServiceRole.entities.TenantUser.filter({
       user_id: user.id,
       tenant_id: tenant.id
@@ -73,12 +70,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Set primary_tenant_id immediately and elevate role to admin for company owners
-    await base44.auth.updateMe({
+    // Set primary_tenant_id, elevate to admin, and save full name
+    const updateData = {
       primary_tenant_id: tenant.id,
       onboarding_completed: true,
       role: 'admin'
-    });
+    };
+    if (fullName) updateData.full_name = fullName;
+    await base44.auth.updateMe(updateData);
 
     // Seed checklist templates for the new tenant
     try {
@@ -181,19 +180,6 @@ Deno.serve(async (req) => {
       console.log('Sample data seeding failed (non-fatal):', e.message);
     }
 
-    // Fetch price_id for paid plans
-    let price_id = null;
-    if (subscriptionPlan && subscriptionPlan !== 'trial') {
-      try {
-        const pricesRes = await base44.asServiceRole.functions.invoke('getStripePrices', {});
-        const plans = pricesRes?.plans || [];
-        const plan = plans.find(p => p.id === subscriptionPlan);
-        if (plan?.prices?.monthly?.priceId) price_id = plan.prices.monthly.priceId;
-      } catch (e) {
-        console.log('Could not fetch stripe price:', e.message);
-      }
-    }
-
     // Small delay to let DB writes propagate before frontend redirects
     await new Promise(r => setTimeout(r, 500));
 
@@ -201,7 +187,6 @@ Deno.serve(async (req) => {
       success: true,
       tenant_id: tenant.id,
       company_id: tenant.id,
-      price_id,
       tenant,
     });
 
