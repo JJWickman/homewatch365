@@ -1016,44 +1016,33 @@ export default function PropertyDetail() {
                                       )}
                                     </div>
                                   </div>
-                                  <Button size="sm" variant="ghost" onClick={async () => {
-                                    const updatedContractors = property.contractors?.filter(id => id !== contractor.id) || [];
-                                    await base44.entities.Property.update(property.id, { contractors: updatedContractors });
-                                    setProperty({ ...property, contractors: updatedContractors });
-                                    if (updatedContractors.length > 0) {
-                                      const contractorsData = await base44.entities.Contractor.filter({ id: { $in: updatedContractors } });
-                                      setContractors(contractorsData);
-                                    } else {
-                                      setContractors([]);
-                                    }
-                                    }} className="text-red-600 hover:text-red-700">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={async () => {
+                                      const updatedContractors = property.contractors?.filter(id => id !== contractor.id) || [];
+                                      await base44.entities.Property.update(property.id, { contractors: updatedContractors });
+                                      setProperty({ ...property, contractors: updatedContractors });
+                                      if (updatedContractors.length > 0) {
+                                        const contractorsData = await base44.entities.Contractor.filter({ id: { $in: updatedContractors } });
+                                        setContractors(contractorsData);
+                                      } else {
+                                        setContractors([]);
+                                      }
+                                    }}
+                                    className="text-red-600 hover:text-red-700"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-1" />
                                     Remove
                                     </Button>
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-3 pt-4">
-                      <Button variant="outline" onClick={() => { setPropertyTags(property.tags || []); setNewTag(''); }}>Cancel</Button>
-                      <Button
-                        onClick={async () => {
-                          setSavingTags(true);
-                          try {
-                            await base44.entities.Property.update(property.id, { tags: propertyTags });
-                            setProperty({...property, tags: propertyTags});
-                            setNewTag('');
-                            toast.success('Tags updated successfully');
-                          } catch (error) {
-                            console.error('Error updating tags:', error);
-                            toast.error('Failed to update tags');
-                          } finally {
-                            setSavingTags(false);
-                          }
-                        }}
-                        disabled={savingTags}
-                        className="bg-slate-900 hover:bg-slate-800"
-                      >
-                        {savingTags ? 'Saving...' : 'Save Tags'}
-                      </Button>
-                    </div>
+                                    </div>
+                                    ))}
+                                    </div>
+                                    )}
+                                    </div>
+                                    );
+                                    })}
+                                    </div>
                   </div>
                 </CardContent>
               </Card>
