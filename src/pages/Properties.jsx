@@ -81,7 +81,7 @@ export default function Properties() {
         base44.entities.Visit.filter({ tenant_id: user.primary_tenant_id }),
         base44.entities.PropertyChecklist.filter({ tenant_id: user.primary_tenant_id, is_active: true }),
         base44.entities.Tenant.filter({ id: user.primary_tenant_id })
-        ]);
+      ]);
         
       setProperties(propertiesData);
       setClients(clientsData);
@@ -93,11 +93,6 @@ export default function Properties() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getClientName = (clientId) => {
-    const client = clients.find(c => c.id === clientId);
-    return client ? `${client.first_name} ${client.last_name}` : 'Unknown';
   };
 
   const handleDeleteProperty = async (propertyId) => {
