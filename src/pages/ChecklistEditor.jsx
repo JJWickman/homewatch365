@@ -2,11 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
-import {
-  Home, Building, Building2, Save, Globe, Plus, Trash2,
-  ChevronDown, ChevronRight, Loader2, ArrowLeft, MessageSquare, Camera, GripVertical
-} from 'lucide-react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -99,6 +95,10 @@ export default function ChecklistEditor() {
           raw = pChecklist.customized_sections?.length > 0
             ? JSON.parse(JSON.stringify(pChecklist.customized_sections))
             : JSON.parse(JSON.stringify(effectiveTemplate.defaultSections));
+        } else {
+          // Checklist was passed but not found - error state
+          console.error(`PropertyChecklist ${checklistId} not found for tenant ${user.primary_tenant_id}`);
+          throw new Error(`Checklist not found. Make sure you have access to this property.`);
         }
       } else {
         // Editing company template
@@ -114,6 +114,10 @@ export default function ChecklistEditor() {
       }));
       setSections(raw);
       setExpandedSections(Object.fromEntries(raw.map((_, i) => [i, true])));
+    } catch (error) {
+      console.error('Error loading data:', error);
+      toast.error(error.message || 'Failed to load checklist');
+      setTimeout(() => navigate(createPageUrl('Properties')), 2000);
     } finally {
       setLoading(false);
     }
