@@ -1034,16 +1034,11 @@ export default function PropertyDetail() {
                                   >
                                     <Trash2 className="h-4 w-4 mr-1" />
                                     Remove
-                                    </Button>
-                                    </div>
-                                    ))}
-                                    </div>
-                                    )}
-                                    </div>
-                                    );
-                                    })}
-                                    </div>
-                  </div>
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                 </CardContent>
               </Card>
             </TabsContent>
