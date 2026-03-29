@@ -62,6 +62,7 @@ export default function ChecklistEditor() {
       setCompany(c);
 
       let raw;
+      let effectiveTemplate = template; // Use the URL template key by default
       
       // If editing a property-specific checklist
       if (checklistId) {
@@ -80,10 +81,19 @@ export default function ChecklistEditor() {
             }
           }
           
+          // Determine template type from PropertyChecklist's template_id
+          if (pChecklist.template_id) {
+            const templateData = await base44.entities.ChecklistTemplate.filter({ id: pChecklist.template_id });
+            if (templateData.length > 0) {
+              const templateCode = templateData[0].code || 'sfh';
+              effectiveTemplate = TEMPLATES.find(t => t.key === templateCode) || TEMPLATES[0];
+            }
+          }
+          
           setChecklistInstructions(pChecklist.checklist_instructions || '');
           raw = pChecklist.customized_sections?.length > 0
             ? JSON.parse(JSON.stringify(pChecklist.customized_sections))
-            : JSON.parse(JSON.stringify(template.defaultSections));
+            : JSON.parse(JSON.stringify(effectiveTemplate.defaultSections));
         }
       } else {
         // Editing company template
@@ -91,7 +101,7 @@ export default function ChecklistEditor() {
         setChecklistInstructions(saved?.instructions || '');
         raw = (saved?.sections?.length > 0)
           ? JSON.parse(JSON.stringify(saved.sections))
-          : JSON.parse(JSON.stringify(template.defaultSections));
+          : JSON.parse(JSON.stringify(effectiveTemplate.defaultSections));
       }
       
       raw.forEach(s => s.items.forEach(item => {
