@@ -26,8 +26,8 @@ Deno.serve(async (req) => {
       code: code,
     });
 
-    // Store the connected account ID in the company record
-    await base44.asServiceRole.entities.Company.update(companyId, {
+    // Store the connected account ID in the tenant record
+    await base44.asServiceRole.entities.Tenant.update(companyId, {
       stripe_connect_account_id: response.stripe_user_id
     });
 
