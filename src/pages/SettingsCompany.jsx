@@ -294,8 +294,8 @@ export default function SettingsCompany() {
 
           {/* Yelp Business */}
           <div className="flex items-center gap-4 p-4 border rounded-lg">
-            <div className="h-10 w-10 rounded-lg bg-[#FF1A1A] flex items-center justify-center shrink-0">
-              <svg viewBox="0 0 24 24" className="h-5 w-5 text-white" fill="currentColor">
+            <div className="h-12 w-12 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
+              <svg viewBox="0 0 24 24" className="h-6 w-6 text-[#FF1A1A]" fill="currentColor">
                 <path d="M20.16 12.594l-4.995 1.433c-.96.276-1.74-.8-1.176-1.63l2.905-4.308a1.072 1.072 0 0 1 1.596-.206 9.194 9.194 0 0 1 2.364 3.252 1.073 1.073 0 0 1-.686 1.459zm-5.025 3.152l4.942 1.606a1.072 1.072 0 0 1 .636 1.48 9.194 9.194 0 0 1-2.56 3.12 1.073 1.073 0 0 1-1.588-.263l-2.78-4.357c-.55-.86.253-1.923 1.35-1.586zm-3.555.617c.96.097 1.453 1.318.737 2.02l-3.68 3.615a1.072 1.072 0 0 1-1.6-.003 9.194 9.194 0 0 1-1.97-3.58 1.073 1.073 0 0 1 .845-1.387l5.668-.665zm-.18-4.596c.198.95-.81 1.73-1.63 1.176L5.19 10.55a1.072 1.072 0 0 1-.206-1.596 9.194 9.194 0 0 1 3.252-2.364 1.073 1.073 0 0 1 1.459.686l1.699 4.491zm-2.39-6.14l5.162 2.16c.9.38.9 1.68 0 2.06l-5.163 2.16a1.073 1.073 0 0 1-1.48-.637 9.194 9.194 0 0 1 0-5.107 1.073 1.073 0 0 1 1.48-.637z"/>
               </svg>
             </div>
