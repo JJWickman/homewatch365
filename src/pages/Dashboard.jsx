@@ -55,13 +55,13 @@ export default function Dashboard() {
      const currentUser = await base44.auth.me();
      setUser(currentUser);
 
+     const tenantId = currentUser.primary_tenant_id;
+
      const tenantUsers = await base44.entities.TenantUser.filter({
        user_id: currentUser.id,
-       tenant_id: currentUser.primary_tenant_id
+       tenant_id: tenantId
      });
      if (tenantUsers.length > 0) setTenantUser(tenantUsers[0]);
-
-     const tenantId = currentUser?.data?.primary_tenant_id || currentUser?.primary_tenant_id;
      const [tenants, clients, properties, visits] = await Promise.all([
        base44.entities.Tenant.filter({ id: tenantId }),
        base44.entities.Client.filter({ tenant_id: tenantId, is_active: true }),
@@ -74,6 +74,7 @@ export default function Dashboard() {
       const today = format(new Date(), 'yyyy-MM-dd');
       const weekStart = format(startOfWeek(new Date()), 'yyyy-MM-dd');
       const weekEnd = format(endOfWeek(new Date()), 'yyyy-MM-dd');
+      const isFieldInspector = tenantUsers[0]?.role_in_tenant === 'field_inspector';
 
       // Filter visits based on user role
       const weekVisits = visits.filter(v => {
@@ -102,7 +103,6 @@ export default function Dashboard() {
         monthlyRevenue: recurringRevenue
       });
 
-      const isFieldInspector = tenantUser?.role_in_tenant === 'field_inspector';
       const todayScheduled = visits.filter(v => {
         const matchesDate = v.scheduled_date === today && v.status !== 'cancelled';
         const matchesAssignment = !isFieldInspector || v.assigned_to === currentUser.email;
