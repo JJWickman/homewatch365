@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { companyName, fullName, email, slug, subscriptionPlan, price_id: passedPriceId } = await req.json();
+    const { companyName, firstName, lastName, email, slug, subscriptionPlan, price_id: passedPriceId } = await req.json();
 
     if (!companyName || !slug) {
       return Response.json({ error: 'Company name and slug are required' }, { status: 400 });
@@ -63,12 +63,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Set primary_tenant_id, elevate to admin, and save full name
+    // Set primary_tenant_id, elevate to admin, and save first/last name
     const updateData = {
       primary_tenant_id: tenant.id,
       onboarding_completed: true,
       role: 'admin',
-      full_name: fullName || user.full_name || ''
+      first_name: firstName || '',
+      last_name: lastName || ''
     };
     await base44.auth.updateMe(updateData);
 

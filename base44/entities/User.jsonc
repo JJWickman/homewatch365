@@ -2,12 +2,19 @@
   "name": "User",
   "type": "object",
   "properties": {
+    "first_name": {
+      "type": "string",
+      "description": "User's first name"
+    },
+    "last_name": {
+      "type": "string",
+      "description": "User's last name"
+    },
     "role": {
       "type": "string",
       "enum": [
         "superadmin",
         "admin",
-        "tenantadmin",
         "user"
       ],
       "default": "user"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -49,7 +49,8 @@ export default function CompanyOnboarding() {
 
   const [form, setForm] = useState({
     companyName: '',
-    fullName: '',
+    firstName: '',
+    lastName: '',
     email: '',
     plan: 'trial',
   });
@@ -65,7 +66,8 @@ export default function CompanyOnboarding() {
       setForm(f => ({
         ...f,
         email: currentUser.email,
-        fullName: currentUser.full_name || '',
+        firstName: currentUser.first_name || '',
+        lastName: currentUser.last_name || '',
       }));
 
       if (currentUser.primary_tenant_id) {
@@ -89,10 +91,6 @@ export default function CompanyOnboarding() {
       toast.error('Please fill in all required fields');
       return;
     }
-    if (!form.promoCode) {
-      toast.error('An invite code is required to create an account.');
-      return;
-    }
 
     const slug = form.companyName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
     setLoading(true);
@@ -111,20 +109,14 @@ export default function CompanyOnboarding() {
           return;
         }
 
-        const validateRes = await base44.functions.invoke('validatePromoCode', { code: form.promoCode });
-        if (!validateRes.data?.valid) {
-          toast.error(validateRes.data?.message || 'Invalid invite code.');
-          setLoading(false);
-          return;
-        }
-
         const checkout = await base44.functions.invoke('createCheckoutSession', {
           price_id,
           subscription_plan: form.plan,
           company_name: form.companyName,
           slug,
           email: form.email,
-          promo_code: form.promoCode,
+          first_name: form.firstName,
+          last_name: form.lastName,
         });
 
         if (checkout.data?.url) {
@@ -140,12 +132,11 @@ export default function CompanyOnboarding() {
       // TRIAL plan: create tenant directly
       const response = await base44.functions.invoke('createCompanyOnboarding', {
         companyName: form.companyName,
-        fullName: form.fullName,
+        firstName: form.firstName,
+        lastName: form.lastName,
         email: form.email,
         slug,
         subscriptionPlan: form.plan,
-        promoCode: form.promoCode || null,
-        isCreatingTenant: true,
       });
 
       if (response.data?.success && response.data?.tenant_id) {
@@ -304,7 +295,7 @@ export default function CompanyOnboarding() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-white">Tenant Name <span className="text-red-400">*</span></Label>
+                <Label className="text-white">Company Name <span className="text-red-400">*</span></Label>
                 <Input
                   value={form.companyName}
                   onChange={e => field('companyName', e.target.value)}
@@ -314,27 +305,38 @@ export default function CompanyOnboarding() {
                 <p className="text-xs text-blue-200">Your unique tenant identifier in the URL (e.g., ?tenant=my-home-watch-company).</p>
               </div>
               <div className="space-y-2">
-                <Label className="text-white">Full Name</Label>
+                <Label className="text-white">First Name</Label>
                 <Input
-                  value={form.fullName}
-                  onChange={e => field('fullName', e.target.value)}
-                  placeholder="Jason Wickman"
+                  value={form.firstName}
+                  onChange={e => field('firstName', e.target.value)}
+                  placeholder="Jason"
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-white">Contact Email <span className="text-red-400">*</span></Label>
-              <Input
-                type="email"
-                value={form.email}
-                onChange={e => field('email', e.target.value)}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
-              />
-              {form.email !== user?.email && (
-                <p className="text-xs text-yellow-300">Different from login email ({user?.email}) — that's OK, we'll link them.</p>
-              )}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-white">Last Name</Label>
+                <Input
+                  value={form.lastName}
+                  onChange={e => field('lastName', e.target.value)}
+                  placeholder="Wickman"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-white">Contact Email <span className="text-red-400">*</span></Label>
+                <Input
+                  type="email"
+                  value={form.email}
+                  onChange={e => field('email', e.target.value)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                />
+                {form.email !== user?.email && (
+                  <p className="text-xs text-yellow-300">Different from login email ({user?.email}) — that's OK, we'll link them.</p>
+                )}
+              </div>
             </div>
 
             {/* Plan selection */}
@@ -361,9 +363,6 @@ export default function CompanyOnboarding() {
                 ))}
               </div>
             </div>
-
-
-
 
             {hasExistingTenant && (
               <div className="rounded-xl border-2 border-yellow-400/50 bg-yellow-400/10 p-4">
