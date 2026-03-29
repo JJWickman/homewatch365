@@ -362,17 +362,7 @@ export default function CompanyOnboarding() {
               </div>
             </div>
 
-            {/* Invite/Promo Code — required for all plans */}
-            <div className="space-y-2">
-              <Label className="text-white">Invite Code <span className="text-red-400">*</span></Label>
-              <Input
-                value={form.promoCode || ''}
-                onChange={e => field('promoCode', e.target.value)}
-                placeholder="Enter your invite or promo code"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
-              />
-              <p className="text-xs text-blue-200">An invite code is required to create an account. Contact us at <a href="mailto:support@estatewatch365.com" className="underline">support@estatewatch365.com</a> to get one.</p>
-            </div>
+
 
 
             {hasExistingTenant && (
@@ -395,7 +385,7 @@ export default function CompanyOnboarding() {
 
             <Button
               onClick={handleSubmit}
-              disabled={loading || !form.email || !form.companyName || !form.promoCode || (hasExistingTenant && !confirmedMultiTenant)}
+              disabled={loading || !form.email || !form.companyName || (hasExistingTenant && !confirmedMultiTenant)}
             >
               {loading ? (
                 <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Setting up...</>
