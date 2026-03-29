@@ -50,14 +50,6 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
         setChecklist(existingChecklist);
         setChecklistName(existingChecklist.name || 'Custom Checklist');
         setSections(existingChecklist.customized_sections || []);
-        
-        // Load template that this property checklist is based on
-        const templateData = await base44.entities.ChecklistTemplate.filter({
-          id: existingChecklist.template_id
-        });
-        if (templateData.length > 0) {
-          setSelectedTemplate(templateData[0]);
-        }
       }
     } catch (error) {
       console.error('Error loading data:', error);
