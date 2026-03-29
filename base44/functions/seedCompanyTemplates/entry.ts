@@ -366,8 +366,8 @@ const SERVICE_VISIT_TEMPLATES = [
   }
 ];
 
-// New tenants get ONLY the 3 core home watch templates
-const ALL_TEMPLATES = HOME_WATCH_TEMPLATES;
+// New tenants get the 3 core home watch templates + 8 service-specific templates
+const ALL_TEMPLATES = [...HOME_WATCH_TEMPLATES, ...SERVICE_VISIT_TEMPLATES];
 
 // ─── Core seeding function ────────────────────────────────────────────────────
 
