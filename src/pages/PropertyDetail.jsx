@@ -1039,6 +1039,8 @@ export default function PropertyDetail() {
                               ))}
                             </div>
                           )}
+                        </div>
+                      </div>
                 </CardContent>
               </Card>
             </TabsContent>
