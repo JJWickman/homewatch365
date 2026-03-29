@@ -303,7 +303,7 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
               </div>
             </CardContent>
           </Card>
-          <Alert className="bg-green-50 border-green-200">
+          <Alert className="bg-green-50 border-green-200 cursor-pointer hover:bg-green-100 transition-colors" onClick={handleEditPropertyChecklist}>
             <AlertCircle className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-900">
               <strong>Active Checklist:</strong> {checklistName}
