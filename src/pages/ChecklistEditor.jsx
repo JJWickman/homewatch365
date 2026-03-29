@@ -47,7 +47,7 @@ export default function ChecklistEditor() {
       saveTemplate(false);
     }, 60000);
     return () => clearInterval(interval);
-  }, [sections, checklistInstructions, company, propertyChecklist]);
+  }, [sections, checklistInstructions, company, propertyChecklist, checklistId, propertyId]);
 
   const loadData = async () => {
     setLoading(true);
