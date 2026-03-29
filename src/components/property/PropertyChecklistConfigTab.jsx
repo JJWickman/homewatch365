@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '@/utils';
+import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -307,6 +308,11 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
             <AlertCircle className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-900">
               <strong>Active Checklist:</strong> {checklistName}
+              {checklist?.updated_date && (
+                <div className="text-sm text-green-700 mt-1">
+                  Last used: {format(new Date(checklist.updated_date), 'MMM d, yyyy')}
+                </div>
+              )}
             </AlertDescription>
           </Alert>
         </div>
