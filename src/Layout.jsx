@@ -163,8 +163,9 @@ export default function Layout({ children, currentPageName }) {
   }
 
   // Subscription gate — block access if no valid trial or active subscription
-  // (skip for superadmin/admin platform users)
-  if (!loading && company && user?.role !== 'superadmin' && user?.role !== 'admin') {
+  // Bypass for: platform admins/superadmins, OR invited tenant members (have a tenantUser record)
+  const isBypassUser = user?.role === 'superadmin' || user?.role === 'admin' || !!tenantUser;
+  if (!loading && company && !isBypassUser) {
     const status = company.subscription_status;
     const trialExpired = status === 'trial' && company.trial_ends_at && new Date(company.trial_ends_at) < new Date();
     const isBlocked = status === 'cancelled' || trialExpired || (!status);
@@ -199,7 +200,6 @@ export default function Layout({ children, currentPageName }) {
       );
     }
   }
-
 
   const getInitials = (name) => {
     if (!name) return 'U';
