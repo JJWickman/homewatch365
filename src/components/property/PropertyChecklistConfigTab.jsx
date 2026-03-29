@@ -22,6 +22,7 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
   const [checklistName, setChecklistName] = useState('');
   const [sections, setSections] = useState([]);
   const [showWizard, setShowWizard] = useState(false);
+  const [checklistError, setChecklistError] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -29,6 +30,7 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
 
   const loadData = async () => {
     setLoading(true);
+    setChecklistError(null);
     try {
       // Load all checklist templates for tenant
       const allTemplates = await base44.entities.ChecklistTemplate.filter({ 
@@ -58,6 +60,7 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
       }
     } catch (error) {
       console.error('Error loading data:', error);
+      setChecklistError('Checklist not found');
     } finally {
       setLoading(false);
     }
@@ -278,6 +281,13 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
             </Button>
           </CardContent>
         </Card>
+      ) : checklistError ? (
+        <Alert className="bg-red-50 border-red-200">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-900">
+            {checklistError}
+          </AlertDescription>
+        </Alert>
       ) : (
         <div className="space-y-4">
           <Card>
