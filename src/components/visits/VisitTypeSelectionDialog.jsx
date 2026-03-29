@@ -133,11 +133,11 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
 
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
-      <DialogContent className="max-w-md rounded-2xl p-0 overflow-hidden border-0 shadow-lg" style={{padding: 0}}>
+      <DialogContent className="max-w-md max-h-[90vh] sm:max-h-[85vh] rounded-2xl p-0 overflow-hidden border-0 shadow-lg" style={{padding: 0}}>
         <DialogTitle className="sr-only">
           {step === 'property' ? 'Select Property' : 'Select Visit Type'}
         </DialogTitle>
-        <div className="bg-white border-b-4 border-green-500 px-6 py-6 flex items-center justify-between rounded-t-2xl">
+        <div className="bg-white border-b-4 border-green-500 px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between rounded-t-2xl">
           {step === 'type' && !property && (
             <button
               onClick={() => {
@@ -145,21 +145,21 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
                 setSelectedProperty(null);
               }}
               disabled={creating}
-              className="mr-2 p-1 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+              className="mr-2 p-2 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
             >
               <ChevronLeft className="h-5 w-5 text-slate-900" />
             </button>
           )}
           <div className="flex-1">
-            <h2 className="text-slate-900 text-lg font-bold">
+            <h2 className="text-slate-900 text-base sm:text-lg font-bold">
               {step === 'property' ? 'Select Property' : 'Select Visit Type'}
             </h2>
-            <p className="text-slate-600 text-sm mt-1">
+            <p className="text-slate-600 text-xs sm:text-sm mt-1">
               {step === 'property' ? 'Choose a property to record a visit for' : 'Choose what you\'re recording'}
             </p>
           </div>
         </div>
-        <div className="p-4 max-h-[70vh] overflow-y-auto bg-slate-50">
+        <div className="p-4 sm:p-4 max-h-[calc(90vh-180px)] sm:max-h-[calc(85vh-180px)] overflow-y-auto bg-slate-50">
           {step === 'property' ? (
             <div className="space-y-2">
               {properties.length === 0 ? (
@@ -170,7 +170,7 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
                     key={prop.id}
                     onClick={() => handleSelectProperty(prop)}
                     disabled={creating}
-                    className="w-full text-left p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors disabled:opacity-50"
+                    className="w-full text-left p-4 sm:p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors disabled:opacity-50 min-h-16 sm:min-h-auto"
                   >
                     <p className="font-medium text-slate-900">{prop.name || prop.address}</p>
                     <p className="text-sm text-slate-500">{prop.city}, {prop.state}</p>
@@ -179,16 +179,16 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {VISIT_TYPES.map(({ value, label, icon: Icon, color }) => (
                 <button
                   key={value}
                   disabled={creating}
                   onClick={() => handleSelectVisitType(value)}
-                  className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-colors font-medium text-sm ${color} ${creating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-95'}`}
+                  className={`flex flex-col items-center justify-center p-5 sm:p-4 rounded-xl border-2 transition-colors font-medium text-sm min-h-24 sm:min-h-20 ${color} ${creating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-95'}`}
                 >
-                  <Icon className="h-6 w-6 mb-2" />
-                  <span className="text-center leading-tight">{label}</span>
+                  <Icon className="h-7 w-7 sm:h-6 sm:w-6 mb-2" />
+                  <span className="text-center text-xs sm:text-sm leading-tight">{label}</span>
                 </button>
               ))}
             </div>
