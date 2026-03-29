@@ -383,13 +383,13 @@ export default function Layout({ children, currentPageName }) {
                       />
                     )}
                     <Avatar className="h-8 w-8 shrink-0">
-                          <AvatarImage src={user?.avatar_url} alt={user?.full_name} />
-                          <AvatarFallback className="bg-blue-600 text-white text-xs">
-                            {getInitials(user?.full_name)}
-                          </AvatarFallback>
-                        </Avatar>
+                      <AvatarImage src={user?.avatar_url} alt={user?.full_name} />
+                      <AvatarFallback className="bg-blue-600 text-white text-xs">
+                        {getInitials(user?.full_name)}
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="hidden sm:block text-left min-w-0">
-                      <p className="text-sm font-medium text-slate-900 truncate">{[user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.full_name}</p>
+                      <p className="text-sm font-medium text-slate-900 truncate">{[user?.first_name, user?.last_name].filter(Boolean).join(' ')}</p>
                       <p className="text-xs text-slate-500 capitalize truncate">{tenantUser?.role_in_tenant === 'field_inspector' ? 'Field Reporter' : tenantUser?.role_in_tenant || 'Member'}</p>
                     </div>
                     <ChevronDown className="h-4 w-4 text-slate-400 hidden sm:block shrink-0" />
