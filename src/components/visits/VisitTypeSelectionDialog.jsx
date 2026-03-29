@@ -73,7 +73,17 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         }
       }
 
-      const propertyChecklist = checklists.find(c => c.property_id === targetProperty.id);
+      let propertyChecklist = checklists.find(c => c.property_id === targetProperty.id);
+      
+      // For check-in visits, ensure we have the saved checklist
+      if (visitType === 'check-in' && !propertyChecklist) {
+        const savedChecklists = await base44.entities.PropertyChecklist.filter({
+          property_id: targetProperty.id,
+          is_active: true
+        });
+        propertyChecklist = savedChecklists[0];
+      }
+
       const visit = await base44.entities.Visit.create({
         company_id: targetProperty.company_id,
         property_id: targetProperty.id,
@@ -86,9 +96,6 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
       });
 
       navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${targetProperty.id}&checklist_id=${propertyChecklist?.id}`);
-      onOpenChange(false);
-      setStep(property ? 'type' : 'property');
-      setSelectedProperty(null);
     } catch (error) {
       console.error('Error creating visit:', error);
       toast.error('Failed to start visit');
