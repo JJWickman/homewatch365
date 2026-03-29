@@ -20,26 +20,16 @@ export default function ChecklistEditor() {
   const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
   const templateKey = urlParams.get('type') || 'sfh';
+  const templateId = urlParams.get('templateId'); // For editing system templates
   const checklistId = urlParams.get('checklistId');
-  const propertyId = urlParams.get('propertyId');
-
-  const [company, setCompany] = useState(null);
-  const [propertyChecklist, setPropertyChecklist] = useState(null);
-  const [property, setProperty] = useState(null);
-  const [client, setClient] = useState(null);
-  const [sections, setSections] = useState([]);
-  const [expandedSections, setExpandedSections] = useState({});
-  const [checklistInstructions, setChecklistInstructions] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [savedMsg, setSavedMsg] = useState('');
+  const propertyId = urlParams.get('propertyId');Msg, setSavedMsg] = useState('');
 
   const template = TEMPLATES.find(t => t.key === templateKey) || TEMPLATES[0];
   const Icon = template.icon;
 
   useEffect(() => {
     loadData();
-  }, [templateKey, checklistId]);
+  }, [templateKey, checklistId, templateId]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -71,7 +61,40 @@ export default function ChecklistEditor() {
   const loadData = async () => {
     setLoading(true);
     try {
-      let raw = JSON.parse(JSON.stringify(template.defaultSections));
+      let raw = [];
+
+      // If editing a system template, fetch it from the database
+      if (templateId) {
+        try {
+          const templates = await base44.entities.ChecklistTemplate.filter({ id: templateId });
+          if (templates.length > 0) {
+            const tmpl = templates[0];
+            setSystemTemplate(tmpl);
+            setChecklistInstructions('');
+            
+            // Fetch sections and items for this template
+            const sections = await base44.entities.ChecklistTemplateSection.filter({ template_id: templateId }, 'sort_order');
+            const items = await base44.entities.ChecklistTemplateItem.filter({ template_id: templateId });
+            
+            // Build sections with items
+            raw = sections.map(sec => ({
+              title: sec.title,
+              items: items.filter(item => item.section_id === sec.id).map(item => ({
+                label: item.label,
+                responseType: item.response_type || 'ok_issue_na',
+                instructions: item.instructions || '',
+                require_note: item.allow_note,
+                require_photo: item.allow_photo
+              }))
+            }));
+          }
+        } catch (err) {
+          console.error('Error loading system template:', err);
+          raw = JSON.parse(JSON.stringify(template.defaultSections));
+        }
+      } else {
+        raw = JSON.parse(JSON.stringify(template.defaultSections));
+      }
 
       if (checklistId) {
         try {

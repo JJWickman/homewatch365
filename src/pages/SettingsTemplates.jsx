@@ -181,7 +181,12 @@ export default function SettingsTemplates() {
   };
 
   const handleEdit = (template) => {
-    window.location.href = createPageUrl('ChecklistEditor') + `?templateId=${template.id}`;
+    // For system templates, pass templateId; for custom stored templates, pass checklistId
+    if (template.isSystem) {
+      window.location.href = createPageUrl('ChecklistEditor') + `?templateId=${template.id}`;
+    } else {
+      window.location.href = createPageUrl('ChecklistEditor') + `?checklistId=${template.id}`;
+    }
   };
 
   const handleDelete = (template) => {
