@@ -1040,7 +1040,9 @@ export default function PropertyDetail() {
                             </div>
                           )}
                         </div>
-                      </div>
+                      );
+                    })}
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
