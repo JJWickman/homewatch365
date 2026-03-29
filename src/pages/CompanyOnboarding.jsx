@@ -187,7 +187,7 @@ export default function CompanyOnboarding() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-semibold text-white">Create a New Company</p>
-                    <p className="text-white/60 text-sm mt-1">I operate a Home Watch business</p>
+                    <p className="text-white/60 text-sm mt-1">I Operate a Home Watch Business</p>
                   </div>
                   <ArrowRight className="h-5 w-5 text-blue-300" />
                 </div>
