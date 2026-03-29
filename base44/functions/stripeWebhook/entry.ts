@@ -73,8 +73,13 @@ Deno.serve(async (req) => {
             });
 
             // Seed templates and products
-            try { await base44.asServiceRole.functions.invoke('seedCompanyTemplates', { tenant_id: tenantId }); } catch(e) { console.log('template seed failed:', e.message); }
-            try { await base44.asServiceRole.functions.invoke('seedDefaultProducts', { tenant_id: tenantId }); } catch(e) { console.log('product seed failed:', e.message); }
+            try {
+              const checkExists = await base44.asServiceRole.entities.ChecklistTemplate.filter({ tenant_id: tenantId });
+              if (checkExists.length === 0) {
+                await base44.asServiceRole.functions.invoke('seedCompanyTemplates', { tenant_id: tenantId });
+                await base44.asServiceRole.functions.invoke('seedDefaultProducts', { tenant_id: tenantId });
+              }
+            } catch(e) { console.log('seeding failed:', e.message); }
 
             console.log(`New paid tenant ${tenantId} created from checkout session ${session.id}`);
           }

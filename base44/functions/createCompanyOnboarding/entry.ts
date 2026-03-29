@@ -73,18 +73,15 @@ Deno.serve(async (req) => {
     };
     await base44.auth.updateMe(updateData);
 
-    // Seed checklist templates for the new tenant
+    // Seed checklist templates and products for the new tenant
     try {
-      await base44.asServiceRole.functions.invoke('seedCompanyTemplates', { tenant_id: tenant.id });
+      const checkExists = await base44.asServiceRole.entities.ChecklistTemplate.filter({ tenant_id: tenant.id });
+      if (checkExists.length === 0) {
+        await base44.asServiceRole.functions.invoke('seedCompanyTemplates', { tenant_id: tenant.id });
+        await base44.asServiceRole.functions.invoke('seedDefaultProducts', { tenant_id: tenant.id });
+      }
     } catch (e) {
-      console.log('Template seeding failed (non-fatal):', e.message);
-    }
-
-    // Seed default products/services for the new tenant
-    try {
-      await base44.asServiceRole.functions.invoke('seedDefaultProducts', { tenant_id: tenant.id });
-    } catch (e) {
-      console.log('Default products seeding failed (non-fatal):', e.message);
+      console.log('Seeding failed (non-fatal):', e.message);
     }
 
     // Seed sample celebrity properties
