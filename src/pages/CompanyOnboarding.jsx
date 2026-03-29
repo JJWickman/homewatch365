@@ -99,31 +99,28 @@ export default function CompanyOnboarding() {
       });
 
       if (response.data?.success) {
-        console.log('Onboarding success, tenant_id:', response.data.tenant_id);
-        if (form.plan !== 'trial' && response.data.price_id) {
-          // For paid plans, redirect to Stripe
+        if (response.data.pending_paid && response.data.price_id) {
+          // Paid plan: no tenant created yet, go straight to Stripe
           const checkout = await base44.functions.invoke('createCheckoutSession', {
             price_id: response.data.price_id,
-            tenant_id: response.data.tenant_id,
             subscription_plan: form.plan,
+            company_name: form.companyName,
+            slug: slug,
+            email: form.email,
           });
           if (checkout.data?.url) {
             window.location.href = checkout.data.url;
             return;
           }
         } else {
-          // For trial plans, set primary_tenant_id directly
-          await base44.auth.updateMe({
-            primary_tenant_id: response.data.tenant_id
-          });
-        }
-        toast.success('Welcome to Home Watch 365!');
-        // Redirect to dashboard with tenant query param
-        const tenantSlug = response.data.tenant?.slug;
-        if (tenantSlug) {
-          window.location.href = `/?tenant=${tenantSlug}`;
-        } else {
-          navigate(createPageUrl('Dashboard'));
+          // Trial: tenant already created, redirect to dashboard
+          toast.success('Welcome to Home Watch 365!');
+          const tenantSlug = response.data.tenant?.slug;
+          if (tenantSlug) {
+            window.location.href = `/?tenant=${tenantSlug}`;
+          } else {
+            navigate(createPageUrl('Dashboard'));
+          }
         }
       } else {
         let errMsg = response.data?.error || 'Something went wrong';

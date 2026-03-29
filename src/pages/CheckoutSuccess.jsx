@@ -46,36 +46,29 @@ export default function CheckoutSuccess() {
     };
 
     // Poll every 500ms for up to 120 seconds
+    // Webhook creates the tenant and sets primary_tenant_id on user after payment
     const startPolling = async () => {
       let isReady = false;
       let attempts = 0;
       let finalUser = null;
-      const maxAttempts = 240; // 120 seconds at 500ms intervals
+      const maxAttempts = 240;
 
       while (attempts < maxAttempts) {
         finalUser = await base44.auth.me();
         if (finalUser?.primary_tenant_id) {
-          const tenants = await base44.entities.Tenant.filter({ id: finalUser.primary_tenant_id });
-          if (tenants.length > 0 && (tenants[0].subscription_status === 'active' || tenants[0].subscription_status === 'trial')) {
-            isReady = true;
-            break;
-          }
+          isReady = true;
+          break;
         }
         await new Promise(r => setTimeout(r, 500));
         attempts++;
       }
 
       if (isReady && finalUser) {
-        // Call finalizeOnboarding to ensure primary_tenant_id is set on user
-        try {
-          await base44.functions.invoke('finalizeOnboarding', { tenant_id: finalUser.primary_tenant_id });
-        } catch (err) {
-          console.warn('finalizeOnboarding call failed:', err);
-        }
-        // Redirect to dashboard with tenant query param
-        const tenant = await base44.entities.Tenant.filter({ id: finalUser.primary_tenant_id });
-        if (tenant.length > 0) {
-          window.location.href = `/?tenant=${tenant[0].slug}`;
+        const tenants = await base44.entities.Tenant.filter({ id: finalUser.primary_tenant_id });
+        if (tenants.length > 0) {
+          window.location.href = `/?tenant=${tenants[0].slug}`;
+        } else {
+          window.location.href = '/';
         }
       } else {
         setError('Setup took too long. Please refresh or contact support.');

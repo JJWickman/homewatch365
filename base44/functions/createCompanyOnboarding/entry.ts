@@ -9,9 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Do NOT return early if user already has a tenant — always process the new data they entered
-
-    const { companyName, fullName, email, slug, subscriptionPlan, promoCode, isCreatingTenant } = await req.json();
+    const { companyName, fullName, email, slug, subscriptionPlan, promoCode } = await req.json();
 
     if (!companyName || !slug) {
       return Response.json({ error: 'Company name and slug are required' }, { status: 400 });
@@ -23,7 +21,30 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'That company name is already taken. Please choose another.' }, { status: 409 });
     }
 
-    // Create Tenant
+    // For PAID plans: do NOT create tenant yet — tenant will be created by Stripe webhook after payment
+    if (subscriptionPlan && subscriptionPlan !== 'trial') {
+      // Just fetch the price_id and return — no tenant created
+      let price_id = null;
+      try {
+        const pricesRes = await base44.asServiceRole.functions.invoke('getStripePrices', {});
+        const plans = pricesRes?.plans || [];
+        const plan = plans.find(p => p.id === subscriptionPlan);
+        if (plan?.prices?.monthly?.priceId) price_id = plan.prices.monthly.priceId;
+      } catch (e) {
+        console.log('Could not fetch stripe price:', e.message);
+      }
+      return Response.json({ success: true, price_id, pending_paid: true });
+    }
+
+    // TRIAL PLAN: Check if user already has a tenant — prevent duplicates
+    if (user.primary_tenant_id) {
+      const existingTenants = await base44.asServiceRole.entities.Tenant.filter({ id: user.primary_tenant_id });
+      if (existingTenants.length > 0) {
+        return Response.json({ success: true, tenant_id: user.primary_tenant_id, tenant: existingTenants[0] });
+      }
+    }
+
+    // Create Tenant (trial only)
     const tenant = await base44.asServiceRole.entities.Tenant.create({
       name: companyName,
       slug: slug,

@@ -30,39 +30,71 @@ Deno.serve(async (req) => {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
-        const tenantId = session.metadata?.tenant_id;
+        let tenantId = session.metadata?.tenant_id;
         const userId = session.metadata?.user_id;
-        
-        if (!tenantId) {
-          console.log('checkout.session.completed: No tenant_id in metadata');
-          break;
-        }
-        
-        // Set subscription status to active immediately (subscription.updated will refine it later)
         const subscriptionPlan = session.metadata?.subscription_plan || 'solopreneur';
         const hasCrm = subscriptionPlan.includes('_crm') || subscriptionPlan === 'enterprise';
-        
-        await base44.asServiceRole.entities.Tenant.update(tenantId, {
-          subscription_plan: subscriptionPlan,
-          subscription_status: 'active',
-          stripe_subscription_id: session.subscription,
-          marketing_addon_active: hasCrm
-        });
-        
-        // Set user's primary_tenant_id if user_id is in metadata
-        if (userId) {
-          try {
-            // Query for the user and update their primary_tenant_id
-            const userRecord = await base44.asServiceRole.entities.User.filter({ id: userId });
-            if (userRecord.length > 0) {
-              await base44.auth.updateMe({ primary_tenant_id: tenantId });
-            }
-          } catch (e) {
-            console.log('Could not set primary_tenant_id from webhook:', e.message);
+
+        // If no tenant_id in metadata, this is a new paid signup — create the tenant now
+        if (!tenantId && session.metadata?.company_name && userId) {
+          const companyName = session.metadata.company_name;
+          const slug = session.metadata.slug;
+          const email = session.metadata.email;
+
+          // Check slug not already taken
+          const slugCheck = await base44.asServiceRole.entities.Tenant.filter({ slug });
+          if (slugCheck.length === 0) {
+            const newTenant = await base44.asServiceRole.entities.Tenant.create({
+              name: companyName,
+              slug,
+              email,
+              subscription_plan: subscriptionPlan,
+              subscription_status: 'active',
+              stripe_subscription_id: session.subscription,
+              marketing_addon_active: hasCrm,
+              is_active: true,
+              created_by_email: email
+            });
+            tenantId = newTenant.id;
+
+            // Create TenantUser
+            await base44.asServiceRole.entities.TenantUser.create({
+              user_id: userId,
+              tenant_id: tenantId,
+              role_in_tenant: 'admin',
+              is_owner: true,
+              is_active: true
+            });
+
+            // Set primary_tenant_id and role on user
+            await base44.asServiceRole.entities.User.update(userId, {
+              primary_tenant_id: tenantId,
+              role: 'admin'
+            });
+
+            // Seed templates and products
+            try { await base44.asServiceRole.functions.invoke('seedCompanyTemplates', { tenant_id: tenantId }); } catch(e) { console.log('template seed failed:', e.message); }
+            try { await base44.asServiceRole.functions.invoke('seedDefaultProducts', { tenant_id: tenantId }); } catch(e) { console.log('product seed failed:', e.message); }
+
+            console.log(`New paid tenant ${tenantId} created from checkout session ${session.id}`);
+          }
+        } else if (tenantId) {
+          // Existing tenant (shouldn't happen with new flow, but handle gracefully)
+          await base44.asServiceRole.entities.Tenant.update(tenantId, {
+            subscription_plan: subscriptionPlan,
+            subscription_status: 'active',
+            stripe_subscription_id: session.subscription,
+            marketing_addon_active: hasCrm
+          });
+
+          if (userId) {
+            try {
+              await base44.asServiceRole.entities.User.update(userId, { primary_tenant_id: tenantId, role: 'admin' });
+            } catch(e) { console.log('Could not set primary_tenant_id from webhook:', e.message); }
           }
         }
-        
-        console.log(`Checkout session ${session.id} completed and tenant ${tenantId} marked active`);
+
+        console.log(`Checkout session ${session.id} completed, tenant: ${tenantId}`);
         break;
       }
 

@@ -13,52 +13,29 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { price_id, tenant_id, subscription_plan, billing_cycle } = await req.json();
+    const { price_id, subscription_plan, billing_cycle, company_name, slug, email } = await req.json();
 
-    // Get tenant
-    let tenants;
-    try {
-      tenants = await base44.asServiceRole.entities.Tenant.filter({ id: tenant_id });
-    } catch (error) {
-      return Response.json({ error: 'Tenant not found' }, { status: 404 });
-    }
-    if (!tenants || !tenants.length) {
-      return Response.json({ error: 'Tenant not found' }, { status: 404 });
-    }
-    const tenant = tenants[0];
+    // For paid signups, NO tenant exists yet — create Stripe customer by email
+    const customer = await stripe.customers.create({
+      email: email || user.email,
+      metadata: { user_id: user.id }
+    });
+    const customerId = customer.id;
 
-    // Get or create Stripe customer
-    let customerId = tenant.stripe_customer_id;
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        metadata: { tenant_id: tenant.id }
-      });
-      customerId = customer.id;
-      await base44.asServiceRole.entities.Tenant.update(tenant.id, {
-        stripe_customer_id: customerId
-      });
-    }
-
-    // Create checkout session
-    // CRITICAL: Use FRONTEND app URL, not Deno backend host
-    // Stripe success_url must redirect to the frontend app page, not a function endpoint
     const frontendUrl = Deno.env.get('FRONTEND_URL') || 'https://wise-sparrow-76-ggbq403gfxsv.base44.app';
-    console.log('=== createCheckoutSession ===');
-    console.log('Request origin (backend):', new URL(req.url).origin);
-    console.log('Frontend URL (for Stripe redirect):', frontendUrl);
-    console.log('Tenant ID:', tenant.id);
+    console.log('=== createCheckoutSession (paid signup, no tenant yet) ===');
+    console.log('User:', user.id, '| Plan:', subscription_plan, '| Company:', company_name);
+
     const subscriptionData = {
       metadata: {
-        tenant_id: tenant.id,
         subscription_plan,
-        billing_cycle
+        billing_cycle,
+        company_name,
+        slug,
+        email: email || user.email,
+        user_id: user.id
       }
     };
-
-    console.log('Stripe URLs:', {
-      success_url: `${frontendUrl}/CheckoutSuccess?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${frontendUrl}/?tab=billing`
-    });
 
     const sessionParams = {
       customer: customerId,
@@ -66,26 +43,18 @@ Deno.serve(async (req) => {
       submit_type: 'subscribe',
       payment_method_types: ['card'],
       payment_method_collection: 'if_required',
-      line_items: [
-        {
-          price: price_id,
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: price_id, quantity: 1 }],
       subscription_data: subscriptionData,
       success_url: `${frontendUrl}/CheckoutSuccess?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${frontendUrl}/?tab=billing`,
+      cancel_url: `${frontendUrl}/CompanyOnboarding`,
       metadata: {
-        tenant_id: tenant.id,
         user_id: user.id,
         subscription_plan,
-        frontend_url: frontendUrl
+        company_name,
+        slug,
+        email: email || user.email
       },
-      payment_method_options: {
-        card: {
-          request_three_d_secure: 'automatic'
-        }
-      },
+      payment_method_options: { card: { request_three_d_secure: 'automatic' } },
       allow_promotion_codes: true
     };
 
