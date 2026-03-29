@@ -6,6 +6,7 @@ import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import ChecklistEditor from './pages/ChecklistEditor';
+import VisitFormRenderer from './components/visits/VisitFormRenderer';
 import AIAssistant from './pages/AIAssistant';
 import SupportChat from './pages/SupportChat';
 import CheckoutSuccess from './pages/CheckoutSuccess';
@@ -87,6 +88,11 @@ const AuthenticatedApp = () => {
       <Route path="/ChecklistEditor" element={
         <LayoutWrapper currentPageName="ChecklistEditor">
           <ChecklistEditor />
+        </LayoutWrapper>
+      } />
+      <Route path="/VisitFormRenderer" element={
+        <LayoutWrapper currentPageName="VisitFormRenderer">
+          <VisitFormRenderer />
         </LayoutWrapper>
       } />
       <Route path="/AdminSubscriptions" element={

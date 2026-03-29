@@ -4,7 +4,6 @@ import { base44 } from '@/api/base44Client';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -84,6 +83,13 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         propertyChecklist = savedChecklists[0];
       }
 
+      // Get template for the visit type
+      const templates = await base44.entities.ChecklistTemplate.filter({
+        code: visitType,
+        active: true,
+      });
+      const template = templates[0];
+
       const visit = await base44.entities.Visit.create({
         company_id: targetProperty.company_id,
         tenant_id: targetProperty.tenant_id,
@@ -93,10 +99,20 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         checkin_type: visitType === 'check-in' ? 'routine' : null,
         scheduled_date: format(new Date(), 'yyyy-MM-dd'),
         status: 'in_progress',
-        template_id: (visitType === 'check-in' && propertyChecklist) ? propertyChecklist.template_id : null,
+        template_id: template?.id || null,
       });
 
-      navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${targetProperty.id}&checklist_id=${propertyChecklist?.id}`);
+      // Route based on visit type
+      if (visitType === 'check-in' && propertyChecklist) {
+        navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${targetProperty.id}&checklist_id=${propertyChecklist?.id}`);
+      } else if (template) {
+        navigate(createPageUrl('VisitFormRenderer') + `?visit_id=${visit.id}&property_id=${targetProperty.id}&template_id=${template.id}&visit_type=${visitType}`);
+      } else {
+        toast.error(`No template found for ${visitType} visit type`);
+        setCreating(false);
+        return;
+      }
+
       onOpenChange(false);
       setStep(property ? 'type' : 'property');
       setSelectedProperty(null);
