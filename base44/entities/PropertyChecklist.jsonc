@@ -33,6 +33,10 @@
       "type": "boolean",
       "default": true,
       "description": "Whether this checklist is active for the property"
+    },
+    "checklist_instructions": {
+      "type": "string",
+      "description": "Instructions for field users"
     }
   },
   "required": [
@@ -43,16 +47,72 @@
   ],
   "rls": {
     "create": {
-      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+      "$and": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "property_id": {
+            "$in": {
+              "collection": "Property",
+              "query": {
+                "data.tenant_id": "{{user.data.primary_tenant_id}}"
+              }
+            }
+          }
+        }
+      ]
     },
     "read": {
-      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+      "$and": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "property_id": {
+            "$in": {
+              "collection": "Property",
+              "query": {
+                "data.tenant_id": "{{user.data.primary_tenant_id}}"
+              }
+            }
+          }
+        }
+      ]
     },
     "update": {
-      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+      "$and": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "property_id": {
+            "$in": {
+              "collection": "Property",
+              "query": {
+                "data.tenant_id": "{{user.data.primary_tenant_id}}"
+              }
+            }
+          }
+        }
+      ]
     },
     "delete": {
-      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+      "$and": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "property_id": {
+            "$in": {
+              "collection": "Property",
+              "query": {
+                "data.tenant_id": "{{user.data.primary_tenant_id}}"
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }
