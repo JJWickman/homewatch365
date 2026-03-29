@@ -20,7 +20,7 @@ export default function ChecklistEditor() {
   const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
   const templateKey = urlParams.get('type') || 'sfh';
-  const checklistId = urlParams.get('checklistId'); // Property-specific checklist
+  const checklistId = urlParams.get('checklistId');
   const propertyId = urlParams.get('propertyId');
 
   const [company, setCompany] = useState(null);
@@ -41,7 +41,6 @@ export default function ChecklistEditor() {
     loadData();
   }, [templateKey, checklistId]);
 
-  // Auto-save every 60 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       saveTemplate(false);
@@ -53,7 +52,6 @@ export default function ChecklistEditor() {
     setSaving(true);
     try {
       if (checklistId && propertyChecklist) {
-        // Save property-specific checklist
         await base44.entities.PropertyChecklist.update(checklistId, {
           name: propertyChecklist.name,
           customized_sections: sections,
@@ -73,67 +71,35 @@ export default function ChecklistEditor() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const user = await base44.auth.me();
-      const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
-      if (!members.length) return;
-      const companies = await base44.entities.Company.filter({ id: members[0].company_id });
-      const c = companies[0];
-      setCompany(c);
-
-      let raw;
-      let effectiveTemplate = template;
+      let raw = JSON.parse(JSON.stringify(template.defaultSections));
 
       if (checklistId) {
-        console.log('Loading PropertyChecklist:', checklistId, 'tenant:', user.primary_tenant_id);
-        const checklists = await base44.entities.PropertyChecklist.filter({ 
-          id: checklistId,
-          tenant_id: user.primary_tenant_id
-        });
-        console.log('Found checklists:', checklists);
-        if (checklists.length > 0) {
-          const pChecklist = checklists[0];
-          setPropertyChecklist(pChecklist);
+        try {
+          const checklists = await base44.entities.PropertyChecklist.filter({ id: checklistId });
+          if (checklists.length > 0) {
+            const pChecklist = checklists[0];
+            setPropertyChecklist(pChecklist);
+            setChecklistInstructions(pChecklist.checklist_instructions || '');
+            raw = pChecklist.customized_sections?.length > 0
+              ? JSON.parse(JSON.stringify(pChecklist.customized_sections))
+              : JSON.parse(JSON.stringify(template.defaultSections));
 
-          const properties = await base44.entities.Property.filter({ id: pChecklist.property_id });
-          if (properties.length > 0) {
-            setProperty(properties[0]);
-            const clients = await base44.entities.Client.filter({ id: properties[0].client_id });
-            if (clients.length > 0) {
-              setClient(clients[0]);
+            const properties = await base44.entities.Property.filter({ id: pChecklist.property_id });
+            if (properties.length > 0) {
+              setProperty(properties[0]);
+              const clients = await base44.entities.Client.filter({ id: properties[0].client_id });
+              if (clients.length > 0) setClient(clients[0]);
             }
           }
-
-          if (pChecklist.template_id) {
-            const templateData = await base44.entities.ChecklistTemplate.filter({ id: pChecklist.template_id });
-            if (templateData.length > 0) {
-              const templateCode = templateData[0].code || 'sfh';
-              effectiveTemplate = TEMPLATES.find(t => t.key === templateCode) || TEMPLATES[0];
-            }
-          }
-
-          setChecklistInstructions(pChecklist.checklist_instructions || '');
-          raw = pChecklist.customized_sections?.length > 0
-            ? JSON.parse(JSON.stringify(pChecklist.customized_sections))
-            : JSON.parse(JSON.stringify(effectiveTemplate.defaultSections));
-        } else {
-          throw new Error(`Checklist not found or inaccessible`);
+        } catch (err) {
+          console.error('Error loading checklist:', err);
         }
-      } else {
-        // Save to Company template
-        const checklists = company?.settings?.checklists || {};
-        const updatedChecklists = {
-          ...checklists,
-          [templateKey]: { sections, instructions: checklistInstructions, published, updatedAt: new Date().toISOString() }
-        };
-        const updatedSettings = { ...(company.settings || {}), checklists: updatedChecklists };
-        await base44.entities.Company.update(company.id, { settings: updatedSettings });
-        setCompany(prev => ({ ...prev, settings: updatedSettings }));
-        setSavedMsg(published ? 'Published!' : 'Draft saved!');
-        setTimeout(() => setSavedMsg(''), 2500);
-        if (published) navigate(createPageUrl('Settings') + '?tab=templates');
       }
+      setSections(raw);
+    } catch (error) {
+      console.error('Error in loadData:', error);
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
@@ -203,7 +169,6 @@ export default function ChecklistEditor() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap rounded-2xl px-5 py-4" style={{background: 'linear-gradient(to bottom, rgba(30,58,95,1), rgba(20,40,68,1))'}}>
         <div className="flex items-center gap-3">
           <Button 
@@ -265,7 +230,6 @@ export default function ChecklistEditor() {
         </div>
       </div>
 
-      {/* Property Context Banner */}
       {propertyChecklist && property && client ? (
         <div className="flex flex-col items-center justify-center bg-blue-50 border border-blue-200 rounded-xl px-6 py-5 mb-6 shadow-sm text-center">
           <p className="text-sm font-semibold text-blue-900 mb-1">
@@ -291,7 +255,6 @@ export default function ChecklistEditor() {
         </div>
       )}
 
-      {/* Template selector or type display */}
       {propertyChecklist ? (
         <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 mb-6">
           <p className="text-sm text-slate-600 mb-2">Property Type</p>
@@ -321,7 +284,6 @@ export default function ChecklistEditor() {
         </div>
       )}
 
-      {/* Checklist Instructions */}
       <Card className="mb-4 overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-amber-200 bg-amber-50">
           <MessageSquare className="w-4 h-4 text-amber-600 shrink-0" />
@@ -338,7 +300,6 @@ export default function ChecklistEditor() {
         </CardContent>
       </Card>
 
-      {/* Sections */}
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="sections" type="section">
           {(provided) => (
@@ -351,7 +312,6 @@ export default function ChecklistEditor() {
                       {...dragProvided.draggableProps}
                       className={`overflow-hidden ${dragSnapshot.isDragging ? 'shadow-lg ring-2 ring-blue-300' : ''}`}
                     >
-                      {/* Section header */}
                       <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-200" style={{background: 'linear-gradient(to right, rgba(30,58,95,0.08), rgba(30,58,95,0.03))'}}>
                         <div {...dragProvided.dragHandleProps} className="text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing shrink-0">
                           <GripVertical className="w-4 h-4" />
@@ -379,7 +339,6 @@ export default function ChecklistEditor() {
                         </Button>
                       </div>
 
-                      {/* Items */}
                       {expandedSections[sIdx] && (
                         <CardContent className="p-4 space-y-2 bg-white">
                           <Droppable droppableId={`items-${sIdx}`} type="item">
