@@ -66,10 +66,12 @@ export default function ChecklistEditor() {
       
       // If editing a property-specific checklist
       if (checklistId) {
+        console.log('Loading PropertyChecklist:', checklistId, 'tenant:', user.primary_tenant_id);
         const checklists = await base44.entities.PropertyChecklist.filter({ 
           id: checklistId,
           tenant_id: user.primary_tenant_id
         });
+        console.log('Found checklists:', checklists);
         if (checklists.length > 0) {
           const pChecklist = checklists[0];
           setPropertyChecklist(pChecklist);
@@ -97,13 +99,6 @@ export default function ChecklistEditor() {
           raw = pChecklist.customized_sections?.length > 0
             ? JSON.parse(JSON.stringify(pChecklist.customized_sections))
             : JSON.parse(JSON.stringify(effectiveTemplate.defaultSections));
-        } else {
-          // Checklist not found - fallback to template editing
-          const saved = c?.settings?.checklists?.[templateKey];
-          setChecklistInstructions(saved?.instructions || '');
-          raw = (saved?.sections?.length > 0)
-            ? JSON.parse(JSON.stringify(saved.sections))
-            : JSON.parse(JSON.stringify(template.defaultSections));
         }
       } else {
         // Editing company template
