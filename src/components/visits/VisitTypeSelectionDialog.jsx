@@ -105,12 +105,9 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
       // Route based on visit type
       if (visitType === 'check-in' && propertyChecklist) {
         navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${targetProperty.id}&checklist_id=${propertyChecklist?.id}`);
-      } else if (template) {
-        navigate(createPageUrl('VisitFormRenderer') + `?visit_id=${visit.id}&property_id=${targetProperty.id}&template_id=${template.id}&visit_type=${visitType}`);
       } else {
-        // For visit types without templates, redirect to property detail
-        toast.success('Visit created');
-        navigate(createPageUrl('PropertyDetail') + `?id=${targetProperty.id}`);
+        // Route to VisitFormRenderer for all other visit types (with or without template)
+        navigate(createPageUrl('VisitFormRenderer') + `?visit_id=${visit.id}&property_id=${targetProperty.id}&template_id=${template?.id || ''}&visit_type=${visitType}`);
       }
 
       onOpenChange(false);
