@@ -26,10 +26,14 @@ export default function AIAssistant() {
 
   useEffect(() => {
     if (!activeConversation?.id) return;
-    const unsub = base44.agents.subscribeToConversation(activeConversation.id, (data) => {
-      setMessages(data.messages || []);
-    });
-    return unsub;
+    try {
+      const unsub = base44.agents.subscribeToConversation(activeConversation.id, (data) => {
+        setMessages(data.messages || []);
+      });
+      return unsub;
+    } catch (e) {
+      console.warn('Subscription error:', e);
+    }
   }, [activeConversation?.id]);
 
   const loadConversations = async () => {
