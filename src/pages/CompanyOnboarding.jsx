@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ArrowRight, Loader2, Check } from 'lucide-react';
+import { ArrowRight, Loader2, Check, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,7 +68,6 @@ export default function CompanyOnboarding() {
         fullName: currentUser.full_name || '',
       }));
 
-      // Check if user already has a tenant
       if (currentUser.primary_tenant_id) {
         try {
           const tenants = await base44.entities.Tenant.filter({ id: currentUser.primary_tenant_id });
@@ -107,7 +106,6 @@ export default function CompanyOnboarding() {
 
       if (response.data?.success) {
         if (response.data.pending_paid) {
-          // Paid plan: go to Stripe checkout
           if (!response.data.price_id) {
             toast.error('Could not load pricing. Please try again or contact support.');
             setLoading(false);
@@ -129,7 +127,6 @@ export default function CompanyOnboarding() {
             return;
           }
         } else if (response.data.tenant_id) {
-          // Trial: tenant already created, redirect to dashboard
           toast.success('Welcome to Home Watch 365!');
           const tenantSlug = response.data.tenant?.slug;
           if (tenantSlug) {
@@ -154,7 +151,16 @@ export default function CompanyOnboarding() {
 
   const field = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
-  // If onboarding type not selected, show selection screen
+  // Loading
+  if (checkingUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 to-slate-900 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-white" />
+      </div>
+    );
+  }
+
+  // Intent selection screen
   if (!onboardingType) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
@@ -206,6 +212,47 @@ export default function CompanyOnboarding() {
     );
   }
 
+  // Join screen — no form, just instructions
+  if (onboardingType === 'join') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <img
+              src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/26b3196de_image.png"
+              alt="Home Watch 365"
+              className="h-16 w-16 rounded-2xl object-contain mx-auto mb-4 bg-white"
+            />
+            <h1 className="text-3xl font-bold text-white">Home Watch 365</h1>
+          </div>
+
+          <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl p-8 text-center">
+            <div className="h-16 w-16 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto mb-4">
+              <Mail className="h-8 w-8 text-blue-300" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-3">Check Your Email</h2>
+            <p className="text-blue-200 text-sm mb-4">
+              To join an existing company, ask your <strong className="text-white">company admin</strong> to invite you from their <strong className="text-white">Settings → Team</strong> page.
+            </p>
+            <p className="text-blue-200 text-sm mb-6">
+              You'll receive an email with a link to accept the invitation and access your account.
+            </p>
+            <p className="text-blue-300 text-xs mb-8 italic">
+              Already received an invite? Check your inbox for a message from Home Watch 365 and click the link inside.
+            </p>
+            <button
+              onClick={() => setOnboardingType(null)}
+              className="text-sm text-blue-300 hover:text-white underline transition-colors"
+            >
+              ← Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Auth error screen
   if (authError && authError.type !== 'no_tenant') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-900 to-slate-900 flex items-center justify-center p-4">
@@ -217,14 +264,7 @@ export default function CompanyOnboarding() {
     );
   }
 
-  if (checkingUser) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 to-slate-900 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-white" />
-      </div>
-    );
-  }
-
+  // Create company form
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
@@ -335,6 +375,13 @@ export default function CompanyOnboarding() {
                 <>{form.plan === 'trial' ? 'Start Free Trial' : 'Continue to Payment'} <ArrowRight className="h-4 w-4 ml-2" /></>
               )}
             </Button>
+
+            <button
+              onClick={() => setOnboardingType(null)}
+              className="w-full text-center text-sm text-blue-300 hover:text-white underline transition-colors"
+            >
+              ← Back
+            </button>
           </div>
         </div>
       </div>
