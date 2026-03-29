@@ -9,14 +9,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const { user_id, primary_tenant_id } = await req.json();
+    const { user_email, primary_tenant_id } = await req.json();
 
-    if (!user_id || !primary_tenant_id) {
-      return Response.json({ error: 'user_id and primary_tenant_id required' }, { status: 400 });
+    if (!user_email || !primary_tenant_id) {
+      return Response.json({ error: 'user_email and primary_tenant_id required' }, { status: 400 });
     }
 
+    // Find user by email
+    const users = await base44.asServiceRole.entities.User.filter({ email: user_email });
+    if (users.length === 0) {
+      return Response.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    const targetUser = users[0];
+
     // Update using service role to bypass RLS
-    const updated = await base44.asServiceRole.entities.User.update(user_id, {
+    const updated = await base44.asServiceRole.entities.User.update(targetUser.id, {
       primary_tenant_id
     });
 
