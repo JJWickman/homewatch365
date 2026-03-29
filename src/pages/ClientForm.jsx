@@ -62,6 +62,21 @@ export default function ClientForm() {
         return;
       }
       setCompanyId(user.primary_tenant_id);
+
+      // Get clientId from URL params
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (id) {
+        setClientId(id);
+        // Load client data
+        const client = await base44.entities.Client.filter({ id });
+        if (client.length > 0) {
+          setFormData(client[0]);
+          // Load transactions for this client
+          const transactions = await base44.entities.ClientTransaction.filter({ client_id: id });
+          setMonthlyTransactions(transactions);
+        }
+      }
         
       // Load available per-visit services
       try {
