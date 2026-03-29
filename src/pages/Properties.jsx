@@ -146,6 +146,11 @@ export default function Properties() {
     };
   };
 
+  const getClientName = (clientId) => {
+    const client = clients.find(c => c.id === clientId);
+    return client ? `${client.first_name} ${client.last_name}` : 'Unknown';
+  };
+
   const PropertyCard = ({ property, compact = false }) => {
     const statuses = getVisitStatuses(property.id);
     const hasChecklist = checklists.some(c => c.property_id === property.id);
