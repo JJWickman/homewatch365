@@ -86,6 +86,7 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
 
       const visit = await base44.entities.Visit.create({
         company_id: targetProperty.company_id,
+        tenant_id: targetProperty.tenant_id,
         property_id: targetProperty.id,
         client_id: targetProperty.client_id || null,
         visit_type: visitType,
@@ -96,6 +97,9 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
       });
 
       navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${targetProperty.id}&checklist_id=${propertyChecklist?.id}`);
+      onOpenChange(false);
+      setStep(property ? 'type' : 'property');
+      setSelectedProperty(null);
     } catch (error) {
       console.error('Error creating visit:', error);
       toast.error('Failed to start visit');
@@ -114,8 +118,11 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="max-w-md rounded-2xl p-0 overflow-hidden border-0 shadow-lg" style={{padding: 0}}>
+        <DialogTitle className="sr-only">
+          {step === 'property' ? 'Select Property' : 'Select Visit Type'}
+        </DialogTitle>
         <div className="bg-white border-b-4 border-green-500 px-6 py-6 flex items-center justify-between rounded-t-2xl">
-         {step === 'type' && !property && (
+          {step === 'type' && !property && (
             <button
               onClick={() => {
                 setStep('property');
@@ -171,7 +178,7 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
             </div>
           )}
         </div>
-        </DialogContent>
-        </Dialog>
-        );
-        }
+      </DialogContent>
+    </Dialog>
+  );
+}
