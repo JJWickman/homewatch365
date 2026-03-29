@@ -43,6 +43,14 @@ export default function ChecklistEditor() {
     loadData();
   }, [templateKey, checklistId]);
 
+  // Auto-save every 60 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      saveTemplate(false);
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [sections, checklistInstructions, company, propertyChecklist]);
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -97,6 +105,7 @@ export default function ChecklistEditor() {
   };
 
   const saveTemplate = async (published) => {
+    if (!sections.length) return; // Skip if no sections loaded yet
     setSaving(true);
     try {
       if (checklistId && propertyChecklist) {
