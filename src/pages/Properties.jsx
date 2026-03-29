@@ -92,10 +92,6 @@ export default function Properties() {
       const visitsData = await base44.entities.Visit.filter({ tenant_id: user.primary_tenant_id });
       console.log('Visits loaded:', visitsData.length);
       
-      console.log('Loading checklists...');
-      const checklistsData = await base44.entities.PropertyChecklist.filter({ tenant_id: user.primary_tenant_id, is_active: true });
-      console.log('Checklists loaded:', checklistsData.length);
-      
       console.log('Loading tenants...');
       const tenantsData = await base44.entities.Tenant.filter({ id: user.primary_tenant_id });
       console.log('Tenants loaded:', tenantsData.length);
@@ -103,7 +99,7 @@ export default function Properties() {
       setProperties(propertiesData);
       setClients(clientsData);
       setVisits(visitsData);
-      setChecklists(checklistsData);
+      setChecklists([]);
       if (tenantsData.length > 0) setCompany(tenantsData[0]);
     } catch (error) {
       console.error('Error loading properties:', error);
