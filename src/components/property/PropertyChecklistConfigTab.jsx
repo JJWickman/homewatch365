@@ -89,13 +89,17 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
 
     setSaving(true);
     try {
-      // Create property-specific checklist copy from the MAIN template
+      // Load template items to copy into property-specific checklist
+      const templateSections = selectedTemplate.default_sections || [];
+      
+      // Create property-specific checklist with a copy of template sections
       const newChecklist = await base44.entities.PropertyChecklist.create({
         tenant_id: companyId,
         property_id: propertyId,
         template_id: selectedTemplate.id,
         name: checklistName,
-        customized_sections: [], // Start empty, user can customize
+        customized_sections: JSON.parse(JSON.stringify(templateSections)), // Copy template sections for unique customization
+        checklist_instructions: selectedTemplate.instructions || '',
         is_active: true
       });
       
