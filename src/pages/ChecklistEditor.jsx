@@ -60,9 +60,8 @@ export default function ChecklistEditor() {
       setCompany(c);
 
       let raw;
-      let effectiveTemplate = template; // Use the URL template key by default
-      
-      // If editing a property-specific checklist
+      let effectiveTemplate = template;
+
       if (checklistId) {
         console.log('Loading PropertyChecklist:', checklistId, 'tenant:', user.primary_tenant_id);
         const checklists = await base44.entities.PropertyChecklist.filter({ 
@@ -73,8 +72,7 @@ export default function ChecklistEditor() {
         if (checklists.length > 0) {
           const pChecklist = checklists[0];
           setPropertyChecklist(pChecklist);
-          
-          // Load property and client info
+
           const properties = await base44.entities.Property.filter({ id: pChecklist.property_id });
           if (properties.length > 0) {
             setProperty(properties[0]);
@@ -83,8 +81,7 @@ export default function ChecklistEditor() {
               setClient(clients[0]);
             }
           }
-          
-            // Determine template type from PropertyChecklist's template_id
+
           if (pChecklist.template_id) {
             const templateData = await base44.entities.ChecklistTemplate.filter({ id: pChecklist.template_id });
             if (templateData.length > 0) {
@@ -92,54 +89,13 @@ export default function ChecklistEditor() {
               effectiveTemplate = TEMPLATES.find(t => t.key === templateCode) || TEMPLATES[0];
             }
           }
-          
+
           setChecklistInstructions(pChecklist.checklist_instructions || '');
           raw = pChecklist.customized_sections?.length > 0
             ? JSON.parse(JSON.stringify(pChecklist.customized_sections))
             : JSON.parse(JSON.stringify(effectiveTemplate.defaultSections));
         } else {
-          // Checklist was passed but not found - error state
-          console.error(`PropertyChecklist ${checklistId} not found for tenant ${user.primary_tenant_id}`);
-          throw new Error(`Checklist not found. Make sure you have access to this property.`);
-        }
-      } else {
-        // Editing company template
-        const saved = c?.settings?.checklists?.[templateKey];
-        setChecklistInstructions(saved?.instructions || '');
-        raw = (saved?.sections?.length > 0)
-          ? JSON.parse(JSON.stringify(saved.sections))
-          : JSON.parse(JSON.stringify(effectiveTemplate.defaultSections));
-      }
-      
-      raw.forEach(s => s.items.forEach(item => {
-        if (item.instructions === undefined) item.instructions = '';
-      }));
-      setSections(raw);
-      setExpandedSections(Object.fromEntries(raw.map((_, i) => [i, true])));
-    } catch (error) {
-      console.error('Error loading data:', error);
-      toast.error(error.message || 'Failed to load checklist');
-      setTimeout(() => navigate(createPageUrl('Properties')), 2000);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const saveTemplate = async (published) => {
-    if (!sections.length) return; // Skip if no sections loaded yet
-    setSaving(true);
-    try {
-      if (checklistId && propertyChecklist) {
-        // Save to PropertyChecklist
-        await base44.entities.PropertyChecklist.update(checklistId, {
-          customized_sections: sections,
-          checklist_instructions: checklistInstructions
-        });
-        setSavedMsg('Saved!');
-        setTimeout(() => setSavedMsg(''), 2500);
-        // Return to property detail after editing property checklist
-        if (published && propertyId) {
-          navigate(createPageUrl('PropertyDetail') + `?id=${propertyId}`);
+          throw new Error(`Checklist not found or inaccessible`);
         }
       } else {
         // Save to Company template
