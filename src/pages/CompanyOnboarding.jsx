@@ -89,12 +89,16 @@ export default function CompanyOnboarding() {
       toast.error('Please fill in all required fields');
       return;
     }
+    if (!form.promoCode) {
+      toast.error('An invite code is required to create an account.');
+      return;
+    }
 
     const slug = form.companyName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
     setLoading(true);
 
     try {
-      // PAID plan: fetch price and go directly to Stripe checkout
+      // PAID plan: validate code then go to Stripe
       if (form.plan !== 'trial') {
         const pricesRes = await base44.functions.invoke('getStripePrices', {});
         const plans = pricesRes?.data?.plans || [];
@@ -107,12 +111,20 @@ export default function CompanyOnboarding() {
           return;
         }
 
+        const validateRes = await base44.functions.invoke('validatePromoCode', { code: form.promoCode });
+        if (!validateRes.data?.valid) {
+          toast.error(validateRes.data?.message || 'Invalid invite code.');
+          setLoading(false);
+          return;
+        }
+
         const checkout = await base44.functions.invoke('createCheckoutSession', {
           price_id,
           subscription_plan: form.plan,
           company_name: form.companyName,
           slug,
           email: form.email,
+          promo_code: form.promoCode,
         });
 
         if (checkout.data?.url) {
@@ -350,7 +362,19 @@ export default function CompanyOnboarding() {
               </div>
             </div>
 
-            {/* Multi-tenant confirmation warning */}
+            {/* Invite/Promo Code — required for all plans */}
+            <div className="space-y-2">
+              <Label className="text-white">Invite Code <span className="text-red-400">*</span></Label>
+              <Input
+                value={form.promoCode || ''}
+                onChange={e => field('promoCode', e.target.value)}
+                placeholder="Enter your invite or promo code"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+              />
+              <p className="text-xs text-blue-200">An invite code is required to create an account. Contact us at <a href="mailto:support@estatewatch365.com" className="underline">support@estatewatch365.com</a> to get one.</p>
+            </div>
+
+
             {hasExistingTenant && (
               <div className="rounded-xl border-2 border-yellow-400/50 bg-yellow-400/10 p-4">
                 <p className="text-yellow-300 font-semibold text-sm mb-1">⚠️ You already have a tenant</p>
@@ -371,8 +395,7 @@ export default function CompanyOnboarding() {
 
             <Button
               onClick={handleSubmit}
-              disabled={loading || !form.email || !form.companyName || (hasExistingTenant && !confirmedMultiTenant)}
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold"
+              disabled={loading || !form.email || !form.companyName || !form.promoCode || (hasExistingTenant && !confirmedMultiTenant)}
             >
               {loading ? (
                 <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Setting up...</>

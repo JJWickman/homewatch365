@@ -15,6 +15,27 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Company name and slug are required' }, { status: 400 });
     }
 
+    // GATE: Validate invite/promo code for ALL plans (trial and paid)
+    if (!promoCode) {
+      return Response.json({ error: 'An invite code is required to create an account.' }, { status: 403 });
+    }
+    const promoCodeUpper = promoCode.trim().toUpperCase();
+    const promos = await base44.asServiceRole.entities.Promotion.filter({ code: promoCodeUpper, is_active: true });
+    if (promos.length === 0) {
+      return Response.json({ error: 'Invalid or expired invite code. Please contact support@estatewatch365.com.' }, { status: 403 });
+    }
+    const promo = promos[0];
+    // Check expiry
+    if (promo.expiry_date && new Date(promo.expiry_date) < new Date()) {
+      return Response.json({ error: 'This invite code has expired.' }, { status: 403 });
+    }
+    // Check max uses
+    if (promo.max_uses && promo.uses_count >= promo.max_uses) {
+      return Response.json({ error: 'This invite code has already been used the maximum number of times.' }, { status: 403 });
+    }
+    // Increment usage count
+    await base44.asServiceRole.entities.Promotion.update(promo.id, { uses_count: (promo.uses_count || 0) + 1 });
+
     // Check slug uniqueness
     const existing = await base44.asServiceRole.entities.Tenant.filter({ slug: slug.toLowerCase() });
     if (existing.length > 0) {
