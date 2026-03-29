@@ -108,9 +108,9 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
       } else if (template) {
         navigate(createPageUrl('VisitFormRenderer') + `?visit_id=${visit.id}&property_id=${targetProperty.id}&template_id=${template.id}&visit_type=${visitType}`);
       } else {
-        toast.error(`No template found for ${visitType} visit type`);
-        setCreating(false);
-        return;
+        // For visit types without templates, redirect to property detail
+        toast.success('Visit created');
+        navigate(createPageUrl('PropertyDetail') + `?id=${targetProperty.id}`);
       }
 
       onOpenChange(false);
