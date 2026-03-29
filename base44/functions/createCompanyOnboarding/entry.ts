@@ -37,14 +37,20 @@ Deno.serve(async (req) => {
       created_by_email: user.email
     });
 
-    // Create TenantUser junction
-    await base44.asServiceRole.entities.TenantUser.create({
+    // Create TenantUser junction (only if one doesn't already exist)
+    const existingTenantUser = await base44.asServiceRole.entities.TenantUser.filter({
       user_id: user.id,
-      tenant_id: tenant.id,
-      role_in_tenant: 'admin',
-      is_owner: true,
-      is_active: true
+      tenant_id: tenant.id
     });
+    if (existingTenantUser.length === 0) {
+      await base44.asServiceRole.entities.TenantUser.create({
+        user_id: user.id,
+        tenant_id: tenant.id,
+        role_in_tenant: 'admin',
+        is_owner: true,
+        is_active: true
+      });
+    }
 
     // Set primary_tenant_id immediately and elevate role to admin for company owners
     await base44.auth.updateMe({
