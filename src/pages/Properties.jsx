@@ -69,12 +69,15 @@ export default function Properties() {
   const loadProperties = async () => {
     try {
       const user = await base44.auth.me();
+      console.log('Current user:', user);
       if (!user?.primary_tenant_id) {
+        console.log('No primary_tenant_id found');
         setLoading(false);
         return;
       }
       
       setCompanyId(user.primary_tenant_id);
+      console.log('Loading properties for tenant:', user.primary_tenant_id);
       const [propertiesData, clientsData, visitsData, checklistsData, tenantsData] = await Promise.all([
         base44.entities.Property.filter({ tenant_id: user.primary_tenant_id, is_active: true }, '-created_date'),
         base44.entities.Client.filter({ tenant_id: user.primary_tenant_id }),
@@ -82,7 +85,8 @@ export default function Properties() {
         base44.entities.PropertyChecklist.filter({ tenant_id: user.primary_tenant_id, is_active: true }),
         base44.entities.Tenant.filter({ id: user.primary_tenant_id })
       ]);
-        
+      
+      console.log('Properties loaded:', propertiesData.length);
       setProperties(propertiesData);
       setClients(clientsData);
       setVisits(visitsData);
