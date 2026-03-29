@@ -42,7 +42,10 @@ export default function CompanyOnboarding() {
   const [loading, setLoading] = useState(false);
   const [checkingUser, setCheckingUser] = useState(true);
   const [user, setUser] = useState(null);
-  const [onboardingType, setOnboardingType] = useState(null); // 'create' or 'join'
+  const [onboardingType, setOnboardingType] = useState(null);
+  const [hasExistingTenant, setHasExistingTenant] = useState(false);
+  const [existingTenantName, setExistingTenantName] = useState('');
+  const [confirmedMultiTenant, setConfirmedMultiTenant] = useState(false);
 
   const [form, setForm] = useState({
     companyName: '',
@@ -65,12 +68,17 @@ export default function CompanyOnboarding() {
         fullName: currentUser.full_name || '',
       }));
 
-      // Already onboarded?
-      if (currentUser.primary_tenant_id && currentUser.onboarding_completed === true) {
-        navigate(createPageUrl('Dashboard'));
+      // Check if user already has a tenant
+      if (currentUser.primary_tenant_id) {
+        try {
+          const tenants = await base44.entities.Tenant.filter({ id: currentUser.primary_tenant_id });
+          if (tenants.length > 0) {
+            setHasExistingTenant(true);
+            setExistingTenantName(tenants[0].name);
+          }
+        } catch (e) { /* ignore */ }
       }
     } catch (error) {
-      // If user is not authenticated, redirect to login
       base44.auth.redirectToLogin(createPageUrl('CompanyOnboarding'));
     } finally {
       setCheckingUser(false);
@@ -82,8 +90,7 @@ export default function CompanyOnboarding() {
       toast.error('Please fill in all required fields');
       return;
     }
-    
-    // Generate slug from company name (lowercase, no special chars)
+
     const slug = form.companyName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
     setLoading(true);
@@ -188,7 +195,6 @@ export default function CompanyOnboarding() {
     );
   }
 
-  // If there's an auth error indicating no tenant, show onboarding
   if (authError && authError.type !== 'no_tenant') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-900 to-slate-900 flex items-center justify-center p-4">
@@ -211,7 +217,6 @@ export default function CompanyOnboarding() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
-        {/* Header */}
         <div className="text-center mb-8">
           <img
             src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/26b3196de_image.png"
@@ -223,7 +228,6 @@ export default function CompanyOnboarding() {
         </div>
 
         <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl p-8">
-          {/* Single step: Personal info + plan (slug auto-generated) */}
           <div className="space-y-6">
             <div>
               <h2 className="text-2xl font-bold text-white mb-1">Create Your Account</h2>
@@ -290,9 +294,28 @@ export default function CompanyOnboarding() {
               </div>
             </div>
 
+            {/* Multi-tenant confirmation warning */}
+            {hasExistingTenant && (
+              <div className="rounded-xl border-2 border-yellow-400/50 bg-yellow-400/10 p-4">
+                <p className="text-yellow-300 font-semibold text-sm mb-1">⚠️ You already have a tenant</p>
+                <p className="text-yellow-200 text-xs mb-3">
+                  You're currently linked to <strong>{existingTenantName}</strong>. Creating a new company will add another tenant to your account.
+                </p>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={confirmedMultiTenant}
+                    onChange={e => setConfirmedMultiTenant(e.target.checked)}
+                    className="w-4 h-4 accent-yellow-400"
+                  />
+                  <span className="text-yellow-200 text-xs">I understand and want to create an additional company</span>
+                </label>
+              </div>
+            )}
+
             <Button
               onClick={handleSubmit}
-              disabled={loading || !form.email || !form.companyName}
+              disabled={loading || !form.email || !form.companyName || (hasExistingTenant && !confirmedMultiTenant)}
               className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold"
             >
               {loading ? (
