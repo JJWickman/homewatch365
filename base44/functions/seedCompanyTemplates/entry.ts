@@ -366,7 +366,8 @@ const SERVICE_VISIT_TEMPLATES = [
   }
 ];
 
-const ALL_TEMPLATES = [...HOME_WATCH_TEMPLATES, ...SERVICE_VISIT_TEMPLATES];
+// New tenants get ONLY the 3 core home watch templates
+const ALL_TEMPLATES = HOME_WATCH_TEMPLATES;
 
 // ─── Core seeding function ────────────────────────────────────────────────────
 
@@ -430,7 +431,7 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
-      message: 'Seeded 11 templates for company/tenant',
+      message: 'Seeded 3 core templates for company/tenant',
       results
     });
   } catch (error) {
