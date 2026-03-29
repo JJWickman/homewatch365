@@ -49,6 +49,27 @@ export default function ChecklistEditor() {
     return () => clearInterval(interval);
   }, [sections, checklistInstructions, company, propertyChecklist, checklistId, propertyId]);
 
+  const saveTemplate = async (published = false) => {
+    setSaving(true);
+    try {
+      if (checklistId && propertyChecklist) {
+        // Save property-specific checklist
+        await base44.entities.PropertyChecklist.update(checklistId, {
+          name: propertyChecklist.name,
+          customized_sections: sections,
+          checklist_instructions: checklistInstructions,
+          is_active: true
+        });
+      }
+      setSavedMsg('Saved!');
+      setTimeout(() => setSavedMsg(''), 2500);
+    } catch (error) {
+      console.error('Error saving:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const loadData = async () => {
     setLoading(true);
     try {
