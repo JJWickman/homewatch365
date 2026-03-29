@@ -78,15 +78,28 @@ export default function Properties() {
       
       setCompanyId(user.primary_tenant_id);
       console.log('Loading properties for tenant:', user.primary_tenant_id);
-      const [propertiesData, clientsData, visitsData, checklistsData, tenantsData] = await Promise.all([
-        base44.entities.Property.filter({ tenant_id: user.primary_tenant_id, is_active: true }, '-created_date'),
-        base44.entities.Client.filter({ tenant_id: user.primary_tenant_id }),
-        base44.entities.Visit.filter({ tenant_id: user.primary_tenant_id }),
-        base44.entities.PropertyChecklist.filter({ tenant_id: user.primary_tenant_id, is_active: true }),
-        base44.entities.Tenant.filter({ id: user.primary_tenant_id })
-      ]);
       
+      // Load each separately to isolate the error
+      console.log('Loading properties...');
+      const propertiesData = await base44.entities.Property.filter({ tenant_id: user.primary_tenant_id, is_active: true }, '-created_date');
       console.log('Properties loaded:', propertiesData.length);
+      
+      console.log('Loading clients...');
+      const clientsData = await base44.entities.Client.filter({ tenant_id: user.primary_tenant_id });
+      console.log('Clients loaded:', clientsData.length);
+      
+      console.log('Loading visits...');
+      const visitsData = await base44.entities.Visit.filter({ tenant_id: user.primary_tenant_id });
+      console.log('Visits loaded:', visitsData.length);
+      
+      console.log('Loading checklists...');
+      const checklistsData = await base44.entities.PropertyChecklist.filter({ tenant_id: user.primary_tenant_id, is_active: true });
+      console.log('Checklists loaded:', checklistsData.length);
+      
+      console.log('Loading tenants...');
+      const tenantsData = await base44.entities.Tenant.filter({ id: user.primary_tenant_id });
+      console.log('Tenants loaded:', tenantsData.length);
+      
       setProperties(propertiesData);
       setClients(clientsData);
       setVisits(visitsData);
