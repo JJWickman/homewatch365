@@ -204,9 +204,14 @@ export default function PropertyDetail() {
         }
 
         if (prop.contractors?.length > 0) {
-          const contractorsData = await base44.entities.Contractor.filter({ id: { $in: prop.contractors } });
-          setContractors(contractorsData);
-        }
+           try {
+             const contractorsData = await base44.entities.Contractor.filter({ id: { $in: prop.contractors } });
+             setContractors(contractorsData);
+           } catch (error) {
+             console.error('Error loading contractors:', error);
+             setContractors([]);
+           }
+         }
 
         const allPropsData = await base44.entities.Property.list();
         setAllProperties(allPropsData);
@@ -419,8 +424,13 @@ export default function PropertyDetail() {
       await base44.entities.Property.update(property.id, { contractors: updatedContractors });
       setProperty({ ...property, contractors: updatedContractors });
       if (updatedContractors.length > 0) {
-        const contractorsData = await base44.entities.Contractor.filter({ id: { $in: updatedContractors } });
-        setContractors(contractorsData);
+        try {
+          const contractorsData = await base44.entities.Contractor.filter({ id: { $in: updatedContractors } });
+          setContractors(contractorsData);
+        } catch (error) {
+          console.error('Error loading contractors:', error);
+          setContractors([]);
+        }
       } else {
         setContractors([]);
       }
