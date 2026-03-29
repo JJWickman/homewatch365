@@ -22,7 +22,19 @@ export default function ChecklistEditor() {
   const templateKey = urlParams.get('type') || 'sfh';
   const templateId = urlParams.get('templateId'); // For editing system templates
   const checklistId = urlParams.get('checklistId');
-  const propertyId = urlParams.get('propertyId');Msg, setSavedMsg] = useState('');
+  const propertyId = urlParams.get('propertyId');
+
+  const [company, setCompany] = useState(null);
+  const [propertyChecklist, setPropertyChecklist] = useState(null);
+  const [property, setProperty] = useState(null);
+  const [client, setClient] = useState(null);
+  const [systemTemplate, setSystemTemplate] = useState(null);
+  const [sections, setSections] = useState([]);
+  const [expandedSections, setExpandedSections] = useState({});
+  const [checklistInstructions, setChecklistInstructions] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [savedMsg, setSavedMsg] = useState('');
 
   const template = TEMPLATES.find(t => t.key === templateKey) || TEMPLATES[0];
   const Icon = template.icon;
