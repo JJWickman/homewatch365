@@ -162,13 +162,44 @@ export default function Layout({ children, currentPageName }) {
     return <>{children}</>;
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
-      </div>);
+  // Subscription gate — block access if no valid trial or active subscription
+  // (skip for superadmin/admin platform users)
+  if (!loading && company && user?.role !== 'superadmin' && user?.role !== 'admin') {
+    const status = company.subscription_status;
+    const trialExpired = status === 'trial' && company.trial_ends_at && new Date(company.trial_ends_at) < new Date();
+    const isBlocked = status === 'cancelled' || trialExpired || (!status);
 
+    if (isBlocked) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-900 to-slate-900 flex items-center justify-center p-4">
+          <div className="rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 p-8 max-w-md text-center">
+            <div className="h-16 w-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="h-8 w-8 text-red-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">Subscription Required</h2>
+            <p className="text-blue-200 text-sm mb-6">
+              {status === 'cancelled'
+                ? 'Your subscription has been cancelled.'
+                : 'Your free trial has expired.'}
+              {' '}Please upgrade to continue using Home Watch 365.
+            </p>
+            <a
+              href="https://www.estatewatch365.com"
+              className="inline-block px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors"
+            >
+              Upgrade Now
+            </a>
+            <div className="mt-4">
+              <button onClick={() => base44.auth.logout()} className="text-sm text-blue-300 hover:text-white underline">
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
   }
+
 
   const getInitials = (name) => {
     if (!name) return 'U';
