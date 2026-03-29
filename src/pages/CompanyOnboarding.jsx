@@ -106,8 +106,13 @@ export default function CompanyOnboarding() {
       });
 
       if (response.data?.success) {
-        if (response.data.pending_paid && response.data.price_id) {
-          // Paid plan: no tenant created yet, go straight to Stripe
+        if (response.data.pending_paid) {
+          // Paid plan: go to Stripe checkout
+          if (!response.data.price_id) {
+            toast.error('Could not load pricing. Please try again or contact support.');
+            setLoading(false);
+            return;
+          }
           const checkout = await base44.functions.invoke('createCheckoutSession', {
             price_id: response.data.price_id,
             subscription_plan: form.plan,
@@ -118,8 +123,12 @@ export default function CompanyOnboarding() {
           if (checkout.data?.url) {
             window.location.href = checkout.data.url;
             return;
+          } else {
+            toast.error('Could not create checkout session. Please try again.');
+            setLoading(false);
+            return;
           }
-        } else {
+        } else if (response.data.tenant_id) {
           // Trial: tenant already created, redirect to dashboard
           toast.success('Welcome to Home Watch 365!');
           const tenantSlug = response.data.tenant?.slug;
@@ -128,6 +137,8 @@ export default function CompanyOnboarding() {
           } else {
             navigate(createPageUrl('Dashboard'));
           }
+        } else {
+          toast.error('Unexpected response. Please try again.');
         }
       } else {
         let errMsg = response.data?.error || 'Something went wrong';
