@@ -375,13 +375,13 @@ async function seedTemplateForCompany(base44client, company_id, tenant_id) {
   const results = [];
 
   for (const tmpl of ALL_TEMPLATES) {
-    // Skip if already exists
+    // Skip if ANY template with this code exists
     const existingQuery = tenant_id
       ? { code: tmpl.meta.code, tenant_id }
       : { code: tmpl.meta.code, company_id };
     const existing = await base44client.entities.ChecklistTemplate.filter(existingQuery);
     if (existing.length > 0) {
-      results.push({ name: tmpl.meta.name, status: 'skipped' });
+      results.push({ name: tmpl.meta.name, status: 'skipped', count: existing.length });
       continue;
     }
 
