@@ -41,7 +41,8 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
 
       // Try to load existing property-specific checklist
       const existingChecklists = await base44.entities.PropertyChecklist.filter({
-        property_id: propertyId
+        property_id: propertyId,
+        tenant_id: companyId
       });
 
       if (existingChecklists.length > 0) {
