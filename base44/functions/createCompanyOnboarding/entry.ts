@@ -160,8 +160,8 @@ Deno.serve(async (req) => {
     let price_id = null;
     if (subscriptionPlan && subscriptionPlan !== 'trial') {
       try {
-        const pricesRes = await base44.functions.invoke('getStripePrices', {});
-        const plans = pricesRes.data?.plans || [];
+        const pricesRes = await base44.asServiceRole.functions.invoke('getStripePrices', {});
+        const plans = pricesRes?.plans || [];
         const plan = plans.find(p => p.id === subscriptionPlan);
         if (plan?.prices?.monthly?.priceId) price_id = plan.prices.monthly.priceId;
       } catch (e) {
