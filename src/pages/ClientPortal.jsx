@@ -342,8 +342,8 @@ export default function ClientPortal() {
         <div className="max-w-2xl mx-auto px-4 py-6 text-center">
           <a href="https://www.estatewatch365.com" target="_blank" rel="noopener noreferrer">
             <img
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696806e88e744d6cc803e3bb/c534cf318_NewEstateWatchLogo.png"
-              alt="Estate Watch 365"
+              src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/b43168cee_image.png"
+              alt="HomeWatch365"
               className="h-10 w-auto object-contain mx-auto opacity-70"
             />
           </a>
