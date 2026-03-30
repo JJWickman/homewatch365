@@ -14,14 +14,14 @@ import { ChevronLeft,
 } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 
-const VISIT_TYPE_TO_TEMPLATE_SLUG = {
-  'check-in': 'single_family', // Will vary by property type, but this is the base
+const VISIT_TYPE_TO_CATEGORY = {
+  'check-in': 'home_watch_visit',
   'arrival_departure': 'arrival_departure',
   'access_visit': 'access_visit',
   'emergency_visit': 'emergency_visit',
   'damage_recovery': 'damage_recovery',
   'auto_care': 'auto_care',
-  'pre_storm': null, // Use property type default
+  'pre_storm': 'pre_storm',
   'post_storm': 'post_storm',
   'client_service': 'client_service',
   'concierge': 'concierge',
@@ -96,10 +96,19 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         propertyChecklist = savedChecklists[0] || null;
       }
 
-      // Match template by exact slug — system templates (tenant_id=null) are visible to all via RLS
-      const templateSlug = VISIT_TYPE_TO_TEMPLATE_SLUG[visitType];
-      const templates = await base44.entities.ChecklistTemplate.filter({ active: true });
-      const template = templateSlug ? templates.find(t => t.template_slug === templateSlug) : null;
+      // Fetch all active templates and match by category (real data, not assumptions)
+      const allTemplates = await base44.entities.ChecklistTemplate.filter({ active: true });
+      const category = VISIT_TYPE_TO_CATEGORY[visitType];
+      
+      let template = null;
+      if (category) {
+        template = allTemplates.find(t => t.category === category);
+      }
+      
+      // If no template found by category, try property type for check-in
+      if (!template && visitType === 'check-in' && targetProperty?.property_type) {
+        template = allTemplates.find(t => t.property_type === targetProperty.property_type && t.category === 'home_watch_visit');
+      }
 
       const visit = await base44.entities.Visit.create({
         company_id: targetProperty.company_id,
