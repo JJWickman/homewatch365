@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import VisitChecklistModal from '@/components/checklist/VisitChecklistModal';
 
 import {
   Dialog,
@@ -48,6 +49,9 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
   const [creating, setCreating] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [step, setStep] = useState(property ? 'type' : 'property');
+  const [selectedVisitType, setSelectedVisitType] = useState(null);
+  const [currentVisit, setCurrentVisit] = useState(null);
+  const [currentTemplate, setCurrentTemplate] = useState(null);
 
 
   const handleSelectProperty = (prop) => {
@@ -130,18 +134,12 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         location_status: locationStatus,
       });
 
-      // Open form in popup window (same as Record Visit button behavior)
-      const formUrl = `${window.location.origin}/VisitFormRenderer?visit_id=${visit.id}&property_id=${targetProperty.id}&template_id=${template?.id || ''}&visit_type=${visitType}`;
-      window.open(formUrl, 'visitform', 'width=768,height=1024');
-      onOpenChange(false);
-      setStep(property ? 'type' : 'property');
-      setSelectedProperty(null);
+      // Show form in the same modal
+      setCurrentVisit(visit);
+      setCurrentTemplate(template);
+      setSelectedVisitType(visitType);
+      setStep('form');
       setCreating(false);
-      return;
-
-      onOpenChange(false);
-      setStep(property ? 'type' : 'property');
-      setSelectedProperty(null);
     } catch (error) {
       console.error('Error creating visit:', error);
       toast.error('Failed to start visit');
@@ -154,6 +152,9 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
     if (!newOpen) {
       setStep(property ? 'type' : 'property');
       setSelectedProperty(null);
+      setCurrentVisit(null);
+      setCurrentTemplate(null);
+      setSelectedVisitType(null);
     }
   };
 
@@ -187,7 +188,27 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
           </div>
         </div>
         <div className="p-4 sm:p-4 max-h-[calc(90vh-180px)] sm:max-h-[calc(85vh-180px)] overflow-y-auto bg-slate-50">
-          {step === 'property' ? (
+          {step === 'form' ? (
+            <VisitChecklistModal
+              visit={currentVisit}
+              property={property || selectedProperty}
+              template={currentTemplate}
+              onSubmitSuccess={() => {
+                onOpenChange(false);
+                setStep(property ? 'type' : 'property');
+                setSelectedProperty(null);
+                setCurrentVisit(null);
+                setCurrentTemplate(null);
+                setSelectedVisitType(null);
+              }}
+              onClose={() => {
+                setStep(property ? 'type' : 'property');
+                setCurrentVisit(null);
+                setCurrentTemplate(null);
+                setSelectedVisitType(null);
+              }}
+            />
+          ) : step === 'property' ? (
             <div className="space-y-2">
               {properties.length === 0 ? (
                 <p className="text-center text-slate-500 text-sm py-8">No properties available</p>
