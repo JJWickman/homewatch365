@@ -315,15 +315,6 @@ export default function ClientDetail() {
               <CardTitle className="text-sm font-medium text-slate-500">Service Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-between items-center border-t pt-4">
-                <span className="text-sm text-slate-500">Monthly Rate</span>
-                <span className="font-semibold text-lg">
-                  ${(() => {
-                    const propertyRate = properties.reduce((sum, p) => sum + (p.custom_fields?.estimated_monthly_cost || 0), 0);
-                    return propertyRate.toFixed(2);
-                  })()}
-                </span>
-              </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-500">Billing</span>
                 <span className="font-medium capitalize">{client.billing_frequency || 'Monthly'}</span>
