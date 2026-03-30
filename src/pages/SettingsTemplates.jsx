@@ -43,13 +43,13 @@ export default function SettingsTemplates() {
                 <ClipboardList className="h-5 w-5 text-blue-600" />
               </div>
               <div className="min-w-0">
-                <p className="font-medium text-slate-900">{t.name}</p>
-                <p className="text-xs text-slate-500 truncate">{t.template_slug}</p>
+                <p className="font-medium text-slate-900">{t.template_name}</p>
+                <p className="text-xs text-slate-500 truncate">{t.template_code}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <Badge variant="outline" className="text-xs">{CATEGORY_LABELS[t.category] || t.category}</Badge>
-              {t.active ? (
+              <Badge variant="outline" className="text-xs">{CATEGORY_LABELS[t.template_category] || t.template_category}</Badge>
+              {t.template_active ? (
                 <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">Active</Badge>
               ) : (
                 <Badge variant="outline" className="text-xs text-slate-400">Inactive</Badge>
