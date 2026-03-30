@@ -45,6 +45,8 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
     setCreating(true);
 
     try {
+      let locationStatus = 'verified';
+      
       // Check geofencing if enabled for the company
       const companies = await base44.entities.Company.filter({ id: targetProperty.company_id });
       const company = companies[0];
@@ -54,21 +56,19 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         ).catch(() => null);
 
         if (!position) {
-          toast.error('Location access is required to record a visit at this property. Please enable GPS and try again.');
-          setCreating(false);
-          return;
-        }
+          locationStatus = 'not_verified';
+          toast.error('Location access is required. Recording visit as "Not at Property".');
+        } else {
+          const result = await base44.functions.invoke('validateVisitLocation', {
+            propertyId: targetProperty.id,
+            userLat: position.coords.latitude,
+            userLon: position.coords.longitude,
+          });
 
-        const result = await base44.functions.invoke('validateVisitLocation', {
-          propertyId: targetProperty.id,
-          userLat: position.coords.latitude,
-          userLon: position.coords.longitude,
-        });
-
-        if (!result.data?.valid) {
-          toast.error(result.data?.message || 'You must be at the property to record a visit.');
-          setCreating(false);
-          return;
+          if (!result.data?.valid) {
+            locationStatus = 'not_verified';
+            toast.error(result.data?.message || 'You are not at the property. Recording visit as "Not at Property".');
+          }
         }
       }
 
@@ -96,6 +96,7 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         scheduled_date: format(new Date(), 'yyyy-MM-dd'),
         status: 'in_progress',
         template_id: template?.id || null,
+        location_status: locationStatus,
       });
 
       // Route based on visit type

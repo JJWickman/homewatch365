@@ -203,6 +203,15 @@
         }
       }
     },
+    "location_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "not_verified"
+      ],
+      "default": "verified",
+      "description": "GPS verification status at time of visit"
+    },
     "report_url": {
       "type": "string",
       "description": "URL to generated PDF report"
