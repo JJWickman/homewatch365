@@ -5,7 +5,7 @@ Deno.serve(async (req) => {
   const sr = base44.asServiceRole;
 
   try {
-    console.log('Starting ChecklistTemplate reset...');
+    console.log('Starting ChecklistTemplateV2 reset...');
     let totalDeleted = 0;
     let batchCount = 0;
     const batchSize = 500; // Process in chunks
@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
       batchCount++;
       console.log(`Batch ${batchCount}: Fetching records...`);
       
-      const batch = await sr.entities.ChecklistTemplate.filter({}, null, batchSize);
+      const batch = await sr.entities.ChecklistTemplateV2.filter({}, null, batchSize);
       
       if (batch.length === 0) {
         hasMore = false;
@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
       console.log(`Batch ${batchCount}: Deleting ${batch.length} records...`);
       for (const record of batch) {
         try {
-          await sr.entities.ChecklistTemplate.delete(record.id);
+          await sr.entities.ChecklistTemplateV2.delete(record.id);
           totalDeleted++;
         } catch (err) {
           console.warn(`Failed to delete ${record.id}:`, err.message);
@@ -44,10 +44,11 @@ Deno.serve(async (req) => {
     console.log(`Deleted ${totalDeleted} total records in ${batchCount} batches`);
 
     // Re-seed system templates with clean data
+    // Seed system templates to ChecklistTemplateV2
     const systemTemplates = [
       {
-        name: 'Single Family Home',
-        template_slug: 'single_family_standard',
+        template_name: 'Single Family Home',
+        template_code: 'single_family_standard',
         property_type: 'single_family',
         category: 'home_watch_visit',
         description: 'Standard home watch visit checklist for single family homes',
@@ -182,10 +183,10 @@ Deno.serve(async (req) => {
     let seededCount = 0;
     for (const template of systemTemplates) {
       try {
-        await sr.entities.ChecklistTemplate.create(template);
+        await sr.entities.ChecklistTemplateV2.create(template);
         seededCount++;
       } catch (err) {
-        console.error(`Failed to create template ${template.template_slug}:`, err.message);
+        console.error(`Failed to create template ${template.template_code}:`, err.message);
       }
     }
 

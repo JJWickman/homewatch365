@@ -65,9 +65,9 @@ export default function VisitChecklistMobile() {
 
       // Step 1: Load the property's unique checklist and basic data in parallel
       const [checklistRecords, visits, properties] = await Promise.all([
-        checklistId
-          ? base44.entities.PropertyChecklist.filter({ id: checklistId })
-          : base44.entities.PropertyChecklist.filter({ property_id: propertyId, is_active: true }),
+      checklistId
+        ? base44.entities.PropertyChecklist.filter({ id: checklistId })
+        : base44.entities.PropertyChecklist.filter({ property_id: propertyId, is_active: true }),
         base44.entities.Visit.filter({ id: visitId }),
         base44.entities.Property.filter({ id: propertyId })
       ]);
@@ -93,8 +93,8 @@ export default function VisitChecklistMobile() {
       let rawSections = propertyChecklist.customized_sections || [];
 
       if (rawSections.length === 0 && propertyChecklist.template_id) {
-        // Load from the linked ChecklistTemplate (sections field is canonical)
-        const linkedTemplates = await base44.entities.ChecklistTemplate.filter({ id: propertyChecklist.template_id });
+        // Load from the linked ChecklistTemplateV2 (sections field is canonical)
+        const linkedTemplates = await base44.entities.ChecklistTemplateV2.filter({ id: propertyChecklist.template_id });
         const linkedTemplate = linkedTemplates[0];
         if (linkedTemplate) {
           rawSections = linkedTemplate.sections || SLUG_DEFAULTS[linkedTemplate.template_slug] || [];

@@ -23,7 +23,7 @@ export default function SettingsTemplates() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.ChecklistTemplate.list('-created_date', 100)
+    base44.entities.ChecklistTemplateV2.list('-created_date', 100)
       .then(setTemplates)
       .finally(() => setLoading(false));
   }, []);
