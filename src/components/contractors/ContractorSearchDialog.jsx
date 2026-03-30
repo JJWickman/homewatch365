@@ -81,7 +81,7 @@ export default function ContractorSearchDialog({
         address: `${property.address}, ${property.city}, ${property.state}`,
         radius_miles: parseInt(radius),
         min_rating: parseFloat(minRating),
-        company_id: companyId
+        tenant_id: companyId
       });
 
       setResults(data.contractors || []);
