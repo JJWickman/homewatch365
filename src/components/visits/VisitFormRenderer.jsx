@@ -8,8 +8,13 @@ import { Loader2, ArrowLeft, Send, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
-export default function VisitFormRenderer({ visitId, propertyId, templateId, visitType }) {
+export default function VisitFormRenderer() {
   const navigate = useNavigate();
+  const searchParams = new URLSearchParams(window.location.search);
+  const visitId = searchParams.get('visit_id');
+  const propertyId = searchParams.get('property_id');
+  const templateId = searchParams.get('template_id');
+
   const [template, setTemplate] = useState(null);
   const [property, setProperty] = useState(null);
   const [visit, setVisit] = useState(null);
@@ -27,15 +32,20 @@ export default function VisitFormRenderer({ visitId, propertyId, templateId, vis
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      const [visitData, propertyData, templateData] = await Promise.all([
+      const calls = [
         base44.entities.Visit.filter({ id: visitId }),
         base44.entities.Property.filter({ id: propertyId }),
-        base44.entities.ChecklistTemplate.filter({ id: templateId }),
-      ]);
+      ];
+      
+      if (templateId) {
+        calls.push(base44.entities.ChecklistTemplate.filter({ id: templateId }));
+      }
+
+      const [visitData, propertyData, templateData] = await Promise.all(calls);
 
       if (visitData.length > 0) setVisit(visitData[0]);
       if (propertyData.length > 0) setProperty(propertyData[0]);
-      if (templateData.length > 0) setTemplate(templateData[0]);
+      if (templateId && templateData?.length > 0) setTemplate(templateData[0]);
 
       // Initialize response object
       if (templateData.length > 0 && templateData[0].sections) {
