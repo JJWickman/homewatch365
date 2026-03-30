@@ -23,13 +23,30 @@ export default function SettingsTemplates() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.ChecklistTemplate.filter({ tenant_id: null }, '-created_date', 100)
-      .then(setTemplates)
-      .finally(() => setLoading(false));
+    const loadTemplates = async () => {
+      try {
+        const user = await base44.auth.me();
+        if (user?.primary_tenant_id) {
+          const data = await base44.entities.ChecklistTemplate.filter(
+            { tenant_id: user.primary_tenant_id },
+            '-created_date',
+            100
+          );
+          setTemplates(data);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadTemplates();
   }, []);
 
   if (loading) {
     return <div className="p-6 text-slate-500 text-sm">Loading templates...</div>;
+  }
+
+  if (templates.length === 0) {
+    return <div className="p-6 text-slate-500 text-sm">No templates found.</div>;
   }
 
   const coreTemplateCodes = ['single_family_standard', 'condo_villa_standard', 'high_rise_standard'];
@@ -73,27 +90,23 @@ export default function SettingsTemplates() {
         </div>
       </div>
 
-      {/* Core Templates */}
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold text-slate-800 mb-4">Core Templates</h2>
-        <div className="space-y-3">
-          {coreTemplates.map(t => <TemplateCard key={t.id} t={t} />)}
-          {coreTemplates.length === 0 && (
-            <p className="text-slate-500 text-sm text-center py-8">No core templates found.</p>
-          )}
+      {coreTemplates.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-slate-800 mb-4">Core Templates</h2>
+          <div className="space-y-3">
+            {coreTemplates.map(t => <TemplateCard key={t.id} t={t} />)}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Additional Services */}
-      <div>
-        <h2 className="text-lg font-semibold text-slate-800 mb-4">Additional Services</h2>
-        <div className="space-y-3">
-          {additionalTemplates.map(t => <TemplateCard key={t.id} t={t} />)}
-          {additionalTemplates.length === 0 && (
-            <p className="text-slate-500 text-sm text-center py-8">No additional templates found.</p>
-          )}
+      {additionalTemplates.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold text-slate-800 mb-4">Additional Services</h2>
+          <div className="space-y-3">
+            {additionalTemplates.map(t => <TemplateCard key={t.id} t={t} />)}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
