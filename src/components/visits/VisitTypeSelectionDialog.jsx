@@ -96,18 +96,23 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         propertyChecklist = savedChecklists[0] || null;
       }
 
-      // Fetch all active templates and match by category (real data, not assumptions)
+      // Fetch all active templates and match by category
       const allTemplates = await base44.entities.ChecklistTemplate.filter({ active: true });
       const category = VISIT_TYPE_TO_CATEGORY[visitType];
       
       let template = null;
       if (category) {
-        template = allTemplates.find(t => t.category === category);
-      }
-      
-      // If no template found by category, try property type for check-in
-      if (!template && visitType === 'check-in' && targetProperty?.property_type) {
-        template = allTemplates.find(t => t.property_type === targetProperty.property_type && t.category === 'home_watch_visit');
+        // For check-in, prioritize property type match; for others, use category match
+        if (visitType === 'check-in') {
+          // Try property type first, fall back to category
+          template = allTemplates.find(t => t.property_type === targetProperty.property_type && t.category === 'home_watch_visit');
+          if (!template) {
+            template = allTemplates.find(t => t.category === category);
+          }
+        } else {
+          // For non-check-in types, match by category only
+          template = allTemplates.find(t => t.category === category);
+        }
       }
 
       const visit = await base44.entities.Visit.create({
