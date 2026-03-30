@@ -1,0 +1,50 @@
+{
+  "name": "ChecklistTemplateV2",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Reference to Tenant"
+    },
+    "template_code": {
+      "type": "string",
+      "description": "Unique slug identifier (e.g. single_family_standard)"
+    },
+    "template_name": {
+      "type": "string",
+      "description": "Template display name"
+    },
+    "property_type": {
+      "type": "string",
+      "description": "Property type this template applies to"
+    },
+    "template_description": {
+      "type": "string",
+      "description": "Human-readable description of what this template covers"
+    },
+    "template_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this template is active and available for use"
+    },
+    "template_category": {
+      "type": "string",
+      "description": "Visit category (e.g. home_watch_visit, arrival_departure, emergency_visit)"
+    },
+    "version": {
+      "type": "number",
+      "default": 1,
+      "description": "Template version number"
+    },
+    "is_sample": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a sample template"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "template_code",
+    "template_name"
+  ]
+}
