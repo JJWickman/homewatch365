@@ -23,7 +23,7 @@ export default function SettingsTemplates() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.ChecklistTemplateV2.list('-created_date', 100)
+    base44.entities.ChecklistTemplate.filter({ tenant_id: null }, '-created_date', 100)
       .then(setTemplates)
       .finally(() => setLoading(false));
   }, []);
@@ -33,8 +33,8 @@ export default function SettingsTemplates() {
   }
 
   const coreTemplateCodes = ['single_family_standard', 'condo_villa_standard', 'high_rise_standard'];
-  const coreTemplates = templates.filter(t => coreTemplateCodes.includes(t.template_code));
-  const additionalTemplates = templates.filter(t => !coreTemplateCodes.includes(t.template_code));
+  const coreTemplates = templates.filter(t => coreTemplateCodes.includes(t.template_slug));
+  const additionalTemplates = templates.filter(t => !coreTemplateCodes.includes(t.template_slug));
 
   const TemplateCard = ({ t }) => (
     <div key={t.id} className="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between gap-4">
@@ -43,13 +43,13 @@ export default function SettingsTemplates() {
           <ClipboardList className="h-5 w-5 text-blue-600" />
         </div>
         <div className="min-w-0">
-          <p className="font-medium text-slate-900">{t.template_name}</p>
-          <p className="text-xs text-slate-500 truncate">{t.template_code}</p>
+          <p className="font-medium text-slate-900">{t.name}</p>
+          <p className="text-xs text-slate-500 truncate">{t.template_slug}</p>
         </div>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <Badge variant="outline" className="text-xs">{CATEGORY_LABELS[t.template_category] || t.template_category}</Badge>
-        {t.template_active ? (
+        <Badge variant="outline" className="text-xs">{CATEGORY_LABELS[t.category] || t.category}</Badge>
+        {t.active ? (
           <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">Active</Badge>
         ) : (
           <Badge variant="outline" className="text-xs text-slate-400">Inactive</Badge>
