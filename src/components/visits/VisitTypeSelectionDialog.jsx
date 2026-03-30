@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import VisitChecklistModal from './VisitChecklistModal';
 import {
   Dialog,
   DialogContent,
@@ -47,6 +48,8 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
   const [creating, setCreating] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [step, setStep] = useState(property ? 'type' : 'property');
+  const [checklistVisitId, setChecklistVisitId] = useState(null);
+  const [showChecklistModal, setShowChecklistModal] = useState(false);
 
   const handleSelectProperty = (prop) => {
     setSelectedProperty(prop);
@@ -130,7 +133,8 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
 
       // Route based on visit type
       if (visitType === 'check-in' && propertyChecklist) {
-        navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${targetProperty.id}&checklist_id=${propertyChecklist?.id}`);
+        setChecklistVisitId(visit.id);
+        setShowChecklistModal(true);
       } else {
         // Route to VisitFormRenderer for all other visit types (with or without template)
         navigate(createPageUrl('VisitFormRenderer') + `?visit_id=${visit.id}&property_id=${targetProperty.id}&template_id=${template?.id || ''}&visit_type=${visitType}`);
@@ -155,6 +159,7 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="max-w-md max-h-[90vh] sm:max-h-[85vh] rounded-2xl p-0 overflow-hidden border-0 shadow-lg" style={{padding: 0}}>
         <DialogTitle className="sr-only">
@@ -219,5 +224,20 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         </div>
       </DialogContent>
     </Dialog>
+
+      <VisitChecklistModal
+      open={showChecklistModal}
+      onOpenChange={setShowChecklistModal}
+      visitId={checklistVisitId}
+      propertyId={selectedProperty?.id || property?.id}
+      property={selectedProperty || property}
+      onSubmitSuccess={() => {
+        onOpenChange(false);
+        setStep(property ? 'type' : 'property');
+        setSelectedProperty(null);
+        setChecklistVisitId(null);
+      }}
+    />
+    </>
   );
 }
