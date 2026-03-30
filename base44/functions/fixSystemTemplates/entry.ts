@@ -14,42 +14,74 @@ const SYSTEM_TEMPLATES = [
   { name: 'Concierge Service Visit', template_slug: 'concierge_service_standard', code: 'concierge_service_standard', property_type: null, category: 'concierge', description: 'Checklist for concierge service visits' },
 ];
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    // one-time admin fix — no auth guard needed
-
     const sr = base44.asServiceRole;
 
-    // 1. Fetch all null-tenant templates
+    // Fetch all null-tenant templates
     const existing = await sr.entities.ChecklistTemplate.list('-created_date', 200);
     const nullTenantTemplates = existing.filter(t => t.tenant_id === null || t.tenant_id === undefined);
 
-    // 2. Delete ALL null-tenant templates
-    let deleted = 0;
-    for (const t of nullTenantTemplates) {
-      await sr.entities.ChecklistTemplate.delete(t.id);
-      deleted++;
-    }
+    const updated = [];
+    const deleted = [];
 
-    // 3. Create the 11 canonical system templates
-    const created = [];
-    for (const tmpl of SYSTEM_TEMPLATES) {
-      const record = await sr.entities.ChecklistTemplate.create({
-        ...tmpl,
-        tenant_id: null,
+    // Update first 11 with correct data
+    for (let i = 0; i < Math.min(11, nullTenantTemplates.length); i++) {
+      const tmpl = SYSTEM_TEMPLATES[i];
+      await sr.entities.ChecklistTemplate.update(nullTenantTemplates[i].id, {
+        name: tmpl.name,
+        template_slug: tmpl.template_slug,
+        code: tmpl.code,
+        property_type: tmpl.property_type,
+        category: tmpl.category,
+        description: tmpl.description,
         version: 1,
         active: true,
         is_system_template: true,
+        tenant_id: null,
       });
-      created.push({ id: record.id, template_slug: tmpl.template_slug, name: tmpl.name });
+      updated.push({ id: nullTenantTemplates[i].id, name: tmpl.name });
+      await sleep(200);
+    }
+
+    // Delete extras beyond 11
+    for (let i = 11; i < nullTenantTemplates.length; i++) {
+      await sr.entities.ChecklistTemplate.delete(nullTenantTemplates[i].id);
+      deleted.push(nullTenantTemplates[i].id);
+      await sleep(200);
+    }
+
+    // If fewer than 11 existed, create the missing ones
+    const created = [];
+    if (nullTenantTemplates.length < 11) {
+      for (let i = nullTenantTemplates.length; i < 11; i++) {
+        const tmpl = SYSTEM_TEMPLATES[i];
+        const record = await sr.entities.ChecklistTemplate.create({
+          ...tmpl,
+          tenant_id: null,
+          version: 1,
+          active: true,
+          is_system_template: true,
+        });
+        created.push({ id: record.id, name: tmpl.name });
+        await sleep(200);
+      }
     }
 
     return Response.json({
       success: true,
-      deleted_count: deleted,
+      null_tenant_found: nullTenantTemplates.length,
+      updated_count: updated.length,
+      deleted_count: deleted.length,
       created_count: created.length,
-      created
+      updated,
+      deleted,
+      created,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
