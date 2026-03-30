@@ -319,7 +319,7 @@ export default function ClientDetail() {
                 <span className="text-sm text-slate-500">Monthly Rate</span>
                 <span className="font-semibold text-lg">
                   ${(() => {
-                    const propertyRate = properties.reduce((sum, p) => sum + (p.monthly_rate || 0), 0);
+                    const propertyRate = properties.reduce((sum, p) => sum + (p.custom_fields?.estimated_monthly_cost || 0), 0);
                     return propertyRate.toFixed(2);
                   })()}
                 </span>
