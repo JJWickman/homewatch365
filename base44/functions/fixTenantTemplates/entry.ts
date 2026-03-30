@@ -45,11 +45,13 @@ Deno.serve(async (req) => {
     for (const tmpl of ALL_TEMPLATE_CODES) {
       const record = await sr.entities.ChecklistTemplate.create({
         ...tmpl,
+        template_slug: tmpl.code,
         tenant_id,
         version: 1,
         active: true,
+        is_system_template: false,
       });
-      created.push({ id: record.id, code: tmpl.code, name: tmpl.name });
+      created.push({ id: record.id, template_slug: tmpl.code, name: tmpl.name });
     }
 
     return Response.json({
