@@ -67,10 +67,10 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
     try {
       let locationStatus = 'verified';
       
-      // Check geofencing if enabled for the company
-      const companies = await base44.entities.Company.filter({ id: targetProperty.company_id });
-      const company = companies[0];
-      if (company?.geofencing_enabled && targetProperty.latitude && targetProperty.longitude) {
+      // Check geofencing if enabled for the tenant
+      const tenants = await base44.entities.Tenant.filter({ id: targetProperty.tenant_id });
+      const tenant = tenants[0];
+      if (tenant?.geofencing_enabled && targetProperty.latitude && targetProperty.longitude) {
         const position = await new Promise((resolve, reject) =>
           navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 })
         ).catch(() => null);
@@ -122,7 +122,6 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
       }
 
       const visit = await base44.entities.Visit.create({
-        company_id: targetProperty.company_id,
         tenant_id: targetProperty.tenant_id,
         property_id: targetProperty.id,
         client_id: targetProperty.client_id || null,
