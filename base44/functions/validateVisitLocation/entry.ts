@@ -32,10 +32,10 @@ Deno.serve(async (req) => {
       return Response.json({ valid: false, message: 'Property has no GPS coordinates. Contact admin to geocode the address.' }, { status: 400 });
     }
 
-    // Load company geofencing settings
-    const companies = await base44.entities.Company.filter({ id: property.company_id });
-    const company = companies[0];
-    const maxRadius = company?.geofencing_radius_meters || 150;
+    // Load tenant geofencing settings
+    const tenants = await base44.asServiceRole.entities.Tenant.filter({ id: property.tenant_id });
+    const tenant = tenants[0];
+    const maxRadius = tenant?.geofencing_radius_meters || 150;
 
     const distance = haversineDistance(userLat, userLon, property.latitude, property.longitude);
     const valid = distance <= maxRadius;
