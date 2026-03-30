@@ -16,7 +16,7 @@ export default function SettingsTemplates() {
       </div>
       <div className="bg-white rounded-xl border border-slate-200 p-6">
         <p className="text-slate-500 text-sm">Manage your checklist templates here. Go to Settings → Templates tab to configure templates.</p>
-        <Button className="mt-4" onClick={() => navigate('/Settings?tab=templates')}>
+        <Button variant="outline" className="mt-4 text-slate-900" onClick={() => navigate('/Settings?tab=templates')}>
           Go to Templates Settings
         </Button>
       </div>
