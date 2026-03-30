@@ -26,13 +26,21 @@ export default function SettingsTemplates() {
     const loadTemplates = async () => {
       try {
         const user = await base44.auth.me();
-        if (user?.primary_tenant_id) {
-          const data = await base44.entities.ChecklistTemplate.filter(
-            { tenant_id: user.primary_tenant_id },
-            '-created_date',
-            100
+        if (user?.id) {
+          const tenantUsers = await base44.entities.TenantUser.filter(
+            { user_id: user.id },
+            null,
+            1
           );
-          setTemplates(data);
+          if (tenantUsers.length > 0) {
+            const tenantId = tenantUsers[0].tenant_id;
+            const data = await base44.entities.ChecklistTemplate.filter(
+              { tenant_id: tenantId },
+              '-created_date',
+              100
+            );
+            setTemplates(data);
+          }
         }
       } finally {
         setLoading(false);
