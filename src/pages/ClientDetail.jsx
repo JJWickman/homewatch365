@@ -444,7 +444,7 @@ export default function ClientDetail() {
                         return (
                           <Link
                             key={visit.id}
-                            to={createPageUrl('InspectionDetail') + `?id=${visit.id}`}
+                            to={createPageUrl('VisitDetail') + `?id=${visit.id}`}
                             className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors border"
                           >
                             <div className="flex items-center gap-3 flex-1">
