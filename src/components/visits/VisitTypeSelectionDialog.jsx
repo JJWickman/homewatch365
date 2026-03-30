@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import VisitChecklistModal from './VisitChecklistModal';
+import VisitChecklistModal from '../checklist/VisitChecklistModal';
 import {
   Dialog,
   DialogContent,
