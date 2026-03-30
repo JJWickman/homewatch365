@@ -76,7 +76,7 @@ export default function SettingsTemplates() {
 
       // Fetch all ChecklistTemplate records - 11 system templates (3 core home watch + 8 additional service)
       const allTemplates = await base44.entities.ChecklistTemplate.filter({});
-      const CORE_CODES = ['single_family_standard', 'condo_villa_standard', 'high_rise_standard'];
+      const CORE_SLUGS = ['single_family_standard', 'condo_villa_standard', 'high_rise_standard'];
       const dbTemplates = allTemplates.filter(t => t.active !== false).map(t => ({
         ...t,
         type: 'system',
@@ -98,7 +98,7 @@ export default function SettingsTemplates() {
             ...t,
             type: 'system',
             isSystem: true,
-            section: CORE_CODES.includes(t.code) ? 'core' : 'additional'
+            section: CORE_SLUGS.includes(t.template_slug) ? 'core' : 'additional'
           }));
           setTemplates([...storedTemplates, ...reloadedDbTemplates]);
         } catch (seedError) {
@@ -196,7 +196,7 @@ export default function SettingsTemplates() {
 
   // Icon mapping for templates by code/name
   const getTemplateIcon = (template) => {
-    const code = template.code || '';
+    const code = template.template_slug || template.code || '';
     const name = template.name?.toLowerCase() || '';
 
     // Core templates

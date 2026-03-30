@@ -32,11 +32,8 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
     setLoading(true);
     setChecklistError(null);
     try {
-      // Load all checklist templates for tenant
-      const allTemplates = await base44.entities.ChecklistTemplate.filter({ 
-        tenant_id: companyId,
-        active: true 
-      });
+      // Load all active checklist templates (system templates have tenant_id: null, readable by all)
+      const allTemplates = await base44.entities.ChecklistTemplate.filter({ active: true });
       setTemplates(allTemplates);
 
       // Try to load existing property-specific checklist

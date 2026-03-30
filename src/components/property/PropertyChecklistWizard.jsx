@@ -24,10 +24,13 @@ const PROPERTY_TYPE_MAP = {
   'commercial': { key: 'highrise', title: 'Commercial', icon: Building2, color: 'bg-emerald-500' },
 };
 
-const TEMPLATE_CONFIGS = {
-  'sfh-template': { key: 'sfh', title: 'Single Family Home', icon: Home, color: 'bg-blue-500', defaultSections: SFH_SECTIONS },
-  'condo-template': { key: 'condo', title: 'Condo / Villa', icon: Building, color: 'bg-purple-500', defaultSections: CONDO_SECTIONS },
-  'highrise-template': { key: 'highrise', title: 'Commercial / Multi-Family', icon: Building2, color: 'bg-emerald-500', defaultSections: HIGHRISE_SECTIONS },
+const CORE_SLUGS = ['single_family_standard', 'condo_villa_standard', 'high_rise_standard'];
+
+// Map template_slug → default sections for fallback
+const SLUG_TO_SECTIONS = {
+  'single_family_standard': SFH_SECTIONS,
+  'condo_villa_standard': CONDO_SECTIONS,
+  'high_rise_standard': HIGHRISE_SECTIONS,
 };
 
 export default function PropertyChecklistWizard({ property, onClose, onComplete }) {
@@ -44,26 +47,35 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState('');
 
-  // Three standard templates
-  const STANDARD_TEMPLATES = [
-    { id: 'sfh-template', name: 'Single Family Home', description: 'Home Watch checklist for single family homes and estates', propertyTypes: ['single_family', 'estate'] },
-    { id: 'condo-template', name: 'Condo / Villa', description: 'Checklist for condos, villas, and townhouses', propertyTypes: ['condo', 'townhouse'] },
-    { id: 'highrise-template', name: 'Commercial / Multi-Family', description: 'Checklist for commercial properties and high-rise buildings', propertyTypes: ['commercial'] },
-  ];
-
   useEffect(() => {
-    // Auto-select template based on property type
-    const autoSelected = STANDARD_TEMPLATES.find(t => 
-      t.propertyTypes.includes(property.property_type)
-    );
-    setTemplates(STANDARD_TEMPLATES);
-    if (autoSelected) {
-      setSelectedTemplate(autoSelected);
-    } else {
-      setSelectedTemplate(STANDARD_TEMPLATES[0]);
-    }
-    setLoadingTemplates(false);
+    loadTemplates();
   }, []);
+
+  const loadTemplates = async () => {
+    setLoadingTemplates(true);
+    try {
+      const dbTemplates = await base44.entities.ChecklistTemplate.filter({
+        tenant_id: property.tenant_id,
+        active: true
+      });
+      setTemplates(dbTemplates);
+      // Auto-select based on property type
+      const propertySlugMap = {
+        'single_family': 'single_family_standard',
+        'estate': 'single_family_standard',
+        'condo': 'condo_villa_standard',
+        'townhouse': 'condo_villa_standard',
+        'commercial': 'high_rise_standard',
+      };
+      const preferredSlug = propertySlugMap[property.property_type];
+      const autoSelected = dbTemplates.find(t => t.template_slug === preferredSlug) || dbTemplates[0];
+      if (autoSelected) setSelectedTemplate(autoSelected);
+    } catch (error) {
+      console.error('Error loading templates:', error);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
 
   const propertyTypeInfo = PROPERTY_TYPE_MAP[property.property_type] || PROPERTY_TYPE_MAP['single_family'];
   const TypeIcon = propertyTypeInfo.icon;
@@ -73,7 +85,6 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
     
     setCreating(true);
     try {
-      // Create property-specific checklist with selected standard template
       const newChecklist = await base44.entities.PropertyChecklist.create({
         tenant_id: property.tenant_id,
         property_id: property.id,
@@ -84,11 +95,11 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
         is_active: true
       });
 
-      // Initialize sections for editor
-      const templateConfig = TEMPLATE_CONFIGS[selectedTemplate.id];
-      setSections(JSON.parse(JSON.stringify(templateConfig.defaultSections)));
+      // Use default sections for this template slug, fallback to empty
+      const defaultSections = SLUG_TO_SECTIONS[selectedTemplate.template_slug] || [];
+      setSections(JSON.parse(JSON.stringify(defaultSections)));
       setExpandedSections(Object.fromEntries(
-        templateConfig.defaultSections.map((_, i) => [i, true])
+        defaultSections.map((_, i) => [i, true])
       ));
       setNewChecklistId(newChecklist.id);
       setStep(2);
@@ -167,7 +178,7 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
     }
   };
 
-  const templateConfig = selectedTemplate ? TEMPLATE_CONFIGS[selectedTemplate.id] : null;
+
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -195,74 +206,72 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
               </div>
             </div>
 
-            <div>
-              <p className="text-sm font-medium text-slate-700 mb-3">Choose a Template</p>
-              <div className="grid grid-cols-1 gap-3">
-                {templates.map((template) => (
-                  <Card
-                    key={template.id}
-                    onClick={() => setSelectedTemplate(template)}
-                    className={`cursor-pointer transition-all ${
-                      selectedTemplate?.id === template.id
-                        ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200'
-                        : 'border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-slate-900">{template.name}</p>
-                        <p className="text-sm text-slate-600 mt-1">{template.description}</p>
-                      </div>
-                      {selectedTemplate?.id === template.id && (
-                        <Check className="w-5 h-5 text-blue-600 shrink-0 ml-3" />
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+            {loadingTemplates ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
               </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-slate-700 block mb-2">
-                Checklist Name
-              </label>
-              <Input
-                placeholder={`${property.name || property.address} Checklist`}
-                value={checklistName}
-                onChange={(e) => setChecklistName(e.target.value)}
-                className="h-10"
-                autoFocus
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                Give this checklist a name to help you identify it later
-              </p>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={onClose}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleCreateChecklist}
-                disabled={!checklistName.trim() || !selectedTemplate || creating}
-                className="flex-1 text-slate-900"
-              >
-                {creating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    Next: Customize <ArrowRight className="w-4 h-4 ml-2" />
-                  </>
+            ) : (
+              <div className="space-y-4">
+                {/* Core Templates */}
+                {templates.filter(t => CORE_SLUGS.includes(t.template_slug)).length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Core Home Watch Templates</p>
+                    <div className="grid grid-cols-1 gap-2">
+                      {templates.filter(t => CORE_SLUGS.includes(t.template_slug)).map((template) => (
+                        <Card
+                          key={template.id}
+                          onClick={() => setSelectedTemplate(template)}
+                          className={`cursor-pointer transition-all ${
+                            selectedTemplate?.id === template.id
+                              ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200'
+                              : 'border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          <CardContent className="p-3 flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-slate-900 text-sm">{template.name}</p>
+                              <p className="text-xs text-slate-500 mt-0.5">{template.description}</p>
+                            </div>
+                            {selectedTemplate?.id === template.id && (
+                              <Check className="w-4 h-4 text-blue-600 shrink-0 ml-3" />
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
                 )}
-              </Button>
-            </div>
+                {/* Additional Templates */}
+                {templates.filter(t => !CORE_SLUGS.includes(t.template_slug)).length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Additional Service Templates</p>
+                    <div className="grid grid-cols-1 gap-2">
+                      {templates.filter(t => !CORE_SLUGS.includes(t.template_slug)).map((template) => (
+                        <Card
+                          key={template.id}
+                          onClick={() => setSelectedTemplate(template)}
+                          className={`cursor-pointer transition-all ${
+                            selectedTemplate?.id === template.id
+                              ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200'
+                              : 'border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          <CardContent className="p-3 flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-slate-900 text-sm">{template.name}</p>
+                              <p className="text-xs text-slate-500 mt-0.5">{template.description}</p>
+                            </div>
+                            {selectedTemplate?.id === template.id && (
+                              <Check className="w-4 h-4 text-blue-600 shrink-0 ml-3" />
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           // Step 2: Inline Editor
