@@ -4,11 +4,11 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Template name"
+      "description": "Template display name (e.g. Single Family Home)"
     },
-    "code": {
+    "template_slug": {
       "type": "string",
-      "description": "Unique code identifier"
+      "description": "Unique slug identifier (e.g. single_family_standard). Used to match system templates to tenant copies."
     },
     "property_type": {
       "type": "string",
@@ -19,34 +19,39 @@
         "service_visit",
         "high_rise"
       ],
-      "description": "Property type this template applies to"
+      "description": "Property type this template applies to (null for service visit templates)"
     },
     "category": {
       "type": "string",
-      "description": "Category (e.g., home_watch_visit)"
+      "description": "Visit category (e.g. home_watch_visit, arrival_departure, emergency_visit)"
     },
     "description": {
       "type": "string",
-      "description": "Template description"
+      "description": "Human-readable description of what this template covers"
     },
     "version": {
       "type": "number",
       "default": 1,
-      "description": "Template version"
+      "description": "Template version number"
     },
     "active": {
       "type": "boolean",
       "default": true,
-      "description": "Whether template is active"
+      "description": "Whether this template is active and available for use"
+    },
+    "is_system_template": {
+      "type": "boolean",
+      "default": false,
+      "description": "True for the 11 master system templates (tenant_id=null). Tenant copies are false."
     },
     "tenant_id": {
       "type": "string",
-      "description": "Reference to Tenant (null for system templates)"
+      "description": "Tenant this template belongs to. NULL = system master template shared across all tenants."
     }
   },
   "required": [
     "name",
-    "code"
+    "template_slug"
   ],
   "rls": {
     "create": {
