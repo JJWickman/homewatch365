@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { format, startOfWeek, endOfWeek, isToday, parseISO } from 'date-fns';
 import VisitFormInDialog from '@/components/visits/VisitFormInDialog';
 import {
   Dialog,
@@ -8,6 +10,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { 
+  ClipboardCheck, Building2, Users, AlertTriangle, 
+  Calendar, ArrowRight, Clock, MapPin, CheckCircle2,
+  TrendingUp, FileWarning, CloudRain, DollarSign
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import StatsCard from '@/components/shared/StatsCard';
+import StatusBadge from '@/components/shared/StatusBadge';
+import ActiveChatsWidget from '@/components/admin/ActiveChatsWidget';
 
 export default function Dashboard() {
   const navigate = useNavigate();
