@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import VisitChecklistModal from '@/components/checklist/VisitChecklistModal';
+import VisitFormInDialog from '@/components/visits/VisitFormInDialog';
 
 import {
   Dialog,
@@ -189,7 +189,7 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         </div>
         <div className="p-4 sm:p-4 max-h-[calc(90vh-180px)] sm:max-h-[calc(85vh-180px)] overflow-y-auto bg-slate-50">
           {step === 'form' ? (
-            <VisitChecklistModal
+            <VisitFormInDialog
               visit={currentVisit}
               property={property || selectedProperty}
               template={currentTemplate}
