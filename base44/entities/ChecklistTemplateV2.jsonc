@@ -40,6 +40,13 @@
       "type": "boolean",
       "default": false,
       "description": "Whether this is a sample template"
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Denormalized sections array with full form structure [{title, icon, sort_order, items:[{label, responseType, instructions, require_note, require_photo, allow_na}]}]"
     }
   },
   "required": [
