@@ -362,7 +362,7 @@ export default function ClientDetail() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg">Properties</CardTitle>
-                  <Button size="sm" onClick={() => navigate(createPageUrl('PropertyForm') + `?client_id=${client.id}`)}>
+                  <Button size="sm" onClick={() => navigate(createPageUrl('PropertyForm') + `?client_id=${client.id}`)} className="text-slate-900">
                     <Plus className="h-4 w-4 mr-2" />
                     <span>Add Property</span>
                   </Button>
