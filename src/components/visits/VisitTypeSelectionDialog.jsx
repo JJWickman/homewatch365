@@ -15,16 +15,16 @@ import { ChevronLeft,
 import { createPageUrl } from '@/utils';
 
 const VISIT_TYPE_TO_TEMPLATE_SLUG = {
-  'check-in': 'single_family_standard', // Will vary by property type, but this is the base
-  'arrival_departure': 'arrival_departure_standard',
-  'access_visit': 'access_visit_standard',
-  'emergency_visit': 'emergency_visit_standard',
-  'damage_recovery': 'damage_recovery_standard',
-  'auto_care': 'auto_care_standard',
+  'check-in': 'single_family', // Will vary by property type, but this is the base
+  'arrival_departure': 'arrival_departure',
+  'access_visit': 'access_visit',
+  'emergency_visit': 'emergency_visit',
+  'damage_recovery': 'damage_recovery',
+  'auto_care': 'auto_care',
   'pre_storm': null, // Use property type default
-  'post_storm': 'post_storm_standard',
-  'client_service': 'client_service_standard',
-  'concierge': 'concierge_service_standard',
+  'post_storm': 'post_storm',
+  'client_service': 'client_service',
+  'concierge': 'concierge',
   'followup': null, // No template for followup
 };
 
