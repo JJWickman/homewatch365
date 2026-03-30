@@ -82,9 +82,9 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         propertyChecklist = savedChecklists[0] || null;
       }
 
-      // Match template by slug — system templates (tenant_id=null) are visible to all via RLS
+      // Match template by exact slug — system templates (tenant_id=null) are visible to all via RLS
       const templates = await base44.entities.ChecklistTemplate.filter({ active: true });
-      const template = templates.find(t => t.template_slug && t.template_slug.startsWith(visitType));
+      const template = templates.find(t => t.template_slug === visitType);
 
       const visit = await base44.entities.Visit.create({
         company_id: targetProperty.company_id,
