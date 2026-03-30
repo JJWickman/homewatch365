@@ -134,7 +134,7 @@ export default function VisitFormRenderer({ visitId, propertyId, templateId, vis
     <div className="max-w-2xl mx-auto p-6">
       <Button
         variant="ghost"
-        onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${propertyId}`)}
+        onClick={() => navigate(createPageUrl('Properties'))}
         className="mb-6"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -208,7 +208,7 @@ export default function VisitFormRenderer({ visitId, propertyId, templateId, vis
           <div className="flex gap-3 pt-6 border-t">
             <Button
               variant="outline"
-              onClick={() => navigate(createPageUrl('PropertyDetail') + `?id=${propertyId}`)}
+              onClick={() => navigate(createPageUrl('Properties'))}
               disabled={submitting}
             >
               Cancel
