@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import StatusBadge from '@/components/shared/StatusBadge';
 
 export default function PortalVisitsTab({ visits, properties, onSelectVisit }) {
-  const upcoming = visits.filter(v => ['scheduled', 'open'].includes(v.status));
+  const upcoming = visits.filter(v => ['scheduled', 'open', 'in_progress'].includes(v.status));
   const completed = visits.filter(v => v.status === 'completed');
 
   const getProperty = (propertyId) => properties.find(p => p.id === propertyId);
