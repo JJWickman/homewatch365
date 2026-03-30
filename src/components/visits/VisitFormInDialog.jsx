@@ -9,6 +9,7 @@ export default function VisitFormInDialog({ visit, property, template, onSubmitS
   const [responses, setResponses] = useState({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [acknowledgedOffSite, setAcknowledgedOffSite] = useState(false);
 
   useEffect(() => {
     loadTemplate();
@@ -36,6 +37,12 @@ export default function VisitFormInDialog({ visit, property, template, onSubmitS
   };
 
   const handleSubmit = async () => {
+    // Check if location is not verified and user hasn't acknowledged
+    if (visit.location_status === 'not_verified' && !acknowledgedOffSite) {
+      toast.error('Please acknowledge that you are not on-site');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const submission = await base44.entities.ChecklistSubmission.create({
@@ -97,6 +104,30 @@ export default function VisitFormInDialog({ visit, property, template, onSubmitS
         <h3 className="font-semibold text-slate-900">{template.name}</h3>
         <p className="text-sm text-slate-500">{property.name || property.address}</p>
       </div>
+
+      {/* Location Status Banner */}
+      {visit.location_status === 'not_verified' && (
+        <div className="p-4 rounded-lg border-2 border-amber-300 bg-amber-50">
+          <p className="text-sm font-semibold text-amber-900 mb-2">⚠️ Not On-Site</p>
+          <p className="text-sm text-amber-800 mb-3">
+            Recording visits when NOT on-site can lead to inaccurate information. Please confirm you understand the implications.
+          </p>
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              checked={acknowledgedOffSite}
+              onChange={(e) => setAcknowledgedOffSite(e.target.checked)}
+              className="w-4 h-4 cursor-pointer"
+            />
+            <span className="text-amber-900 font-medium">I understand and acknowledge this visit will be recorded as not verified</span>
+          </label>
+        </div>
+      )}
+      {visit.location_status === 'verified' && (
+        <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+          <p className="text-sm font-medium text-green-900">✓ On-Site Verified</p>
+        </div>
+      )}
 
       {sections.map((section, sIdx) => (
         <div key={sIdx} className="space-y-3">
