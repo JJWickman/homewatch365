@@ -457,12 +457,14 @@ export default function PropertyDetail() {
     }
   };
 
+  const handleBack = () => navigate(-1);
+
   return (
     <div className="max-w-6xl mx-auto">
       <PageHeader
         title={property.name || property.address}
-        backLink="Properties"
-        backLabel="Back to Properties"
+        onBack={handleBack}
+        backLabel="Back"
       >
         {hasUnsavedChanges && (
           <Button onClick={handleSave} disabled={saving}>

@@ -11,20 +11,31 @@ export default function PageHeader({
   actionLabel, 
   actionIcon: ActionIcon = Plus,
   backLink,
+  onBack,
   backLabel = 'Back',
   actionClassName = 'bg-black text-white hover:bg-slate-900',
   children 
 }) {
   return (
     <div className="mb-6">
-      {backLink && (
-        <Link 
-          to={createPageUrl(backLink)} 
-          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-3"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {backLabel}
-        </Link>
+      {(backLink || onBack) && (
+        onBack ? (
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-3"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {backLabel}
+          </button>
+        ) : (
+          <Link 
+            to={createPageUrl(backLink)} 
+            className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-3"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {backLabel}
+          </Link>
+        )
       )}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
