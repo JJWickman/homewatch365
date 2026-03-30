@@ -130,15 +130,14 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         location_status: locationStatus,
       });
 
-      // Route based on visit type
-      if (visitType === 'check-in' && propertyChecklist) {
-        // Open checklist in popup window for mobile-friendly use
-        const checklistUrl = `${window.location.origin}/VisitChecklistMobile?visit_id=${visit.id}&property_id=${targetProperty.id}`;
-        window.open(checklistUrl, 'checklist', 'width=768,height=1024');
-      } else {
-        // Route to VisitFormRenderer for all other visit types (with or without template)
-        navigate(createPageUrl('VisitFormRenderer') + `?visit_id=${visit.id}&property_id=${targetProperty.id}&template_id=${template?.id || ''}&visit_type=${visitType}`);
-      }
+      // Open form in popup window (same as Record Visit button behavior)
+      const formUrl = `${window.location.origin}/VisitFormRenderer?visit_id=${visit.id}&property_id=${targetProperty.id}&template_id=${template?.id || ''}&visit_type=${visitType}`;
+      window.open(formUrl, 'visitform', 'width=768,height=1024');
+      onOpenChange(false);
+      setStep(property ? 'type' : 'property');
+      setSelectedProperty(null);
+      setCreating(false);
+      return;
 
       onOpenChange(false);
       setStep(property ? 'type' : 'property');
