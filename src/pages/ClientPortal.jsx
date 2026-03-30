@@ -140,7 +140,7 @@ export default function ClientPortal() {
   }
 
   const completedVisits = visits.filter(v => v.status === 'completed');
-  const upcomingVisits = visits.filter(v => ['scheduled', 'open'].includes(v.status));
+  const upcomingVisits = visits.filter(v => ['scheduled', 'open', 'in_progress'].includes(v.status));
   const initials = `${client.first_name?.[0] || ''}${client.last_name?.[0] || ''}`.toUpperCase();
 
   return (
