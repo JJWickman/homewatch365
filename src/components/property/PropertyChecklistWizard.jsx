@@ -193,7 +193,7 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
         </DialogHeader>
 
         {step === 1 ? (
-          // Step 1: Template Selection
+          // Step 1: Template Selection & Naming
           <div className="space-y-6 py-4">
             <div>
               <p className="text-sm font-medium text-slate-700 mb-3">Property Type</p>
@@ -270,6 +270,32 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
                           </div>
                           </div>
                           )}
+                          </div>
+                          )}
+
+                          {/* Checklist Name Input */}
+                          {templates.length > 0 && (
+                          <div className="border-t pt-6">
+                          <Label htmlFor="checklist-name" className="text-sm font-medium text-slate-700">Checklist Name *</Label>
+                          <Input
+                            id="checklist-name"
+                            type="text"
+                            value={checklistName}
+                            onChange={(e) => setChecklistName(e.target.value)}
+                            placeholder="e.g., Winter Weekly Checklist"
+                            className="mt-2 mb-4"
+                          />
+                          <div className="flex gap-3 justify-end">
+                            <Button variant="outline" onClick={onClose}>Cancel</Button>
+                            <Button
+                              onClick={handleCreateChecklist}
+                              disabled={!checklistName.trim() || !selectedTemplate || creating}
+                              className="bg-blue-600 hover:bg-blue-700 text-white"
+                            >
+                              {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ArrowRight className="w-4 h-4 mr-2" />}
+                              Continue to Editor
+                            </Button>
+                          </div>
                           </div>
                           )}
                           </div>
