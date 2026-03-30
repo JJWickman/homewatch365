@@ -371,67 +371,73 @@ const ALL_TEMPLATES = [...HOME_WATCH_TEMPLATES, ...SERVICE_VISIT_TEMPLATES];
 
 // ─── Core seeding function ────────────────────────────────────────────────────
 
-async function seedTemplateForCompany(base44client, company_id, tenant_id) {
+// Build a denormalized sections array from raw template data
+function buildSectionsArray(tmpl) {
+  return tmpl.sections.map((sec, sIdx) => ({
+    title: sec.title,
+    icon: sec.icon || null,
+    sort_order: sec.sort_order || sIdx + 1,
+    items: tmpl.items
+      .filter(item => item.section === sIdx)
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+      .map(item => ({
+        label: item.label,
+        responseType: item.response_type || 'ok_issue_na',
+        instructions: item.instructions || '',
+        require_note: item.allow_note || false,
+        require_photo: item.allow_photo || false,
+        allow_na: item.allow_na !== false,
+      }))
+  }));
+}
+
+// Seeds all 11 system templates (tenant_id=null) — idempotent
+async function seedSystemTemplates(sr) {
   const results = [];
 
   for (const tmpl of ALL_TEMPLATES) {
-    // Skip if ANY template with this code exists
-    const existingQuery = tenant_id
-      ? { code: tmpl.meta.code, tenant_id }
-      : { code: tmpl.meta.code, company_id };
-    const existing = await base44client.entities.ChecklistTemplate.filter(existingQuery);
+    const slug = tmpl.meta.code;
+    const existing = await sr.entities.ChecklistTemplate.filter({ template_slug: slug });
+    const sectionsJson = buildSectionsArray(tmpl);
+
     if (existing.length > 0) {
-      results.push({ name: tmpl.meta.name, status: 'skipped', count: existing.length });
-      continue;
-    }
-
-    const template = await base44client.entities.ChecklistTemplate.create({
-      ...tmpl.meta,
-      company_id: company_id || null,
-      tenant_id: tenant_id || null
-    });
-
-    // Create sections and build index map
-    const sectionMap = {};
-    for (const section of tmpl.sections) {
-      const created = await base44client.entities.ChecklistTemplateSection.create({
-        template_id: template.id,
-        ...section
+      // Update to ensure sections field is populated
+      await sr.entities.ChecklistTemplate.update(existing[0].id, {
+        sections: sectionsJson,
+        is_system_template: true,
+        active: true,
       });
-      sectionMap[section.sort_order - 1] = created.id;
-    }
-
-    // Create items
-    for (const item of tmpl.items) {
-      const { section, ...itemData } = item;
-      await base44client.entities.ChecklistTemplateItem.create({
-        template_id: template.id,
-        section_id: sectionMap[section],
-        ...itemData
+      results.push({ name: tmpl.meta.name, status: 'updated', id: existing[0].id });
+    } else {
+      const created = await sr.entities.ChecklistTemplate.create({
+        name: tmpl.meta.name,
+        template_slug: slug,
+        property_type: tmpl.meta.property_type || null,
+        category: tmpl.meta.category,
+        description: tmpl.meta.description,
+        version: 1,
+        active: true,
+        is_system_template: true,
+        tenant_id: null,
+        sections: sectionsJson,
       });
+      results.push({ name: tmpl.meta.name, status: 'created', id: created.id });
     }
-
-    results.push({ name: tmpl.meta.name, status: 'created', template_id: template.id });
   }
 
   return results;
 }
 
-// ─── Handler ─────────────────────────────────────────────────────────────────
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const payload = await req.json();
-
-    const company_id = payload.company_id || payload.data?.id || null;
-    const tenant_id = payload.tenant_id || null;
-
-    const results = await seedTemplateForCompany(base44.asServiceRole, company_id, tenant_id);
+    // This function seeds/updates SYSTEM templates only (tenant_id=null)
+    // No per-tenant seeding needed — RLS lets all tenants read null-tenant templates
+    const results = await seedSystemTemplates(base44.asServiceRole);
 
     return Response.json({
       success: true,
-      message: 'Seeded 3 core templates for company/tenant',
+      message: 'System templates seeded/updated',
       results
     });
   } catch (error) {

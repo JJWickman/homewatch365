@@ -72,14 +72,10 @@ Deno.serve(async (req) => {
               role: 'admin'
             });
 
-            // Seed templates and products
+            // Seed products (templates are system-level shared, no per-tenant seeding)
             try {
-              const checkExists = await base44.asServiceRole.entities.ChecklistTemplate.filter({ tenant_id: tenantId });
-              if (checkExists.length === 0) {
-                await base44.asServiceRole.functions.invoke('seedCompanyTemplates', { tenant_id: tenantId });
-                await base44.asServiceRole.functions.invoke('seedDefaultProducts', { tenant_id: tenantId });
-              }
-            } catch(e) { console.log('seeding failed:', e.message); }
+              await base44.asServiceRole.functions.invoke('seedDefaultProducts', { tenant_id: tenantId });
+            } catch(e) { console.log('product seeding failed:', e.message); }
 
             console.log(`New paid tenant ${tenantId} created from checkout session ${session.id}`);
           }

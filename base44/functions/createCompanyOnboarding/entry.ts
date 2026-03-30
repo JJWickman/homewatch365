@@ -73,15 +73,11 @@ Deno.serve(async (req) => {
     };
     await base44.auth.updateMe(updateData);
 
-    // Seed checklist templates and products for the new tenant
+    // Seed products for the new tenant (templates are system-level, no per-tenant seeding needed)
     try {
-      const checkExists = await base44.asServiceRole.entities.ChecklistTemplate.filter({ tenant_id: tenant.id });
-      if (checkExists.length === 0) {
-        await base44.asServiceRole.functions.invoke('seedCompanyTemplates', { tenant_id: tenant.id });
-        await base44.asServiceRole.functions.invoke('seedDefaultProducts', { tenant_id: tenant.id });
-      }
+      await base44.asServiceRole.functions.invoke('seedDefaultProducts', { tenant_id: tenant.id });
     } catch (e) {
-      console.log('Seeding failed (non-fatal):', e.message);
+      console.log('Product seeding failed (non-fatal):', e.message);
     }
 
     // Seed sample celebrity properties

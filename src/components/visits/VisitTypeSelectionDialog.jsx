@@ -83,11 +83,9 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         propertyChecklist = savedChecklists[0];
       }
 
-      // Get template for the visit type - match by code pattern (e.g., 'arrival_departure' matches 'arrival_departure_standard')
-      const templates = await base44.entities.ChecklistTemplate.filter({
-        active: true,
-      });
-      const template = templates.find(t => t.code && t.code.startsWith(visitType));
+      // Match template by slug — system templates (tenant_id=null) are visible to all via RLS
+      const templates = await base44.entities.ChecklistTemplate.filter({ active: true });
+      const template = templates.find(t => t.template_slug && t.template_slug.startsWith(visitType));
 
       const visit = await base44.entities.Visit.create({
         company_id: targetProperty.company_id,

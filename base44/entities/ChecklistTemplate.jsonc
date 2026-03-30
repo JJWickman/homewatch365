@@ -8,7 +8,7 @@
     },
     "template_slug": {
       "type": "string",
-      "description": "Unique slug identifier (e.g. single_family_standard). Used to match system templates to tenant copies."
+      "description": "Unique slug identifier (e.g. single_family_standard)."
     },
     "property_type": {
       "type": "string",
@@ -19,7 +19,7 @@
         "service_visit",
         "high_rise"
       ],
-      "description": "Property type this template applies to (null for service visit templates)"
+      "description": "Property type this template applies to"
     },
     "category": {
       "type": "string",
@@ -28,6 +28,17 @@
     "description": {
       "type": "string",
       "description": "Human-readable description of what this template covers"
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Denormalized sections array [{title, items:[{label, responseType, instructions, require_note, require_photo}]}]. Primary source of truth for template content."
+    },
+    "checklist_instructions": {
+      "type": "string",
+      "description": "Instructions shown to field users at the top of the checklist"
     },
     "version": {
       "type": "number",
@@ -55,12 +66,50 @@
   ],
   "rls": {
     "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "read": {
-      "data.tenant_id": null
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "data.tenant_id": null
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

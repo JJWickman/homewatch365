@@ -11,10 +11,11 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { SFH_SECTIONS, CONDO_SECTIONS, HIGHRISE_SECTIONS } from '@/components/checklist/checklistDefaults';
 
-const TEMPLATE_DEFAULTS = {
-  'sfh-template': SFH_SECTIONS,
-  'condo-template': CONDO_SECTIONS,
-  'highrise-template': HIGHRISE_SECTIONS,
+// Fallback sections by template_slug when PropertyChecklist has no customized_sections yet
+const SLUG_DEFAULTS = {
+  'single_family_standard': SFH_SECTIONS,
+  'condo_villa_standard': CONDO_SECTIONS,
+  'high_rise_standard': HIGHRISE_SECTIONS,
 };
 
 const AUTOSAVE_DEBOUNCE = 1000; // 1 second
@@ -88,12 +89,16 @@ export default function VisitChecklistMobile() {
       const companies = await base44.entities.Company.filter({ id: properties[0].company_id });
       company.current = companies[0];
 
-      // Step 2: Build sections and items from customized_sections, falling back to standard template defaults
+      // Step 2: Build sections — use customized_sections, or resolve from system template by slug
       let rawSections = propertyChecklist.customized_sections || [];
 
-      // If no customized sections saved yet, fall back to the standard template defaults
       if (rawSections.length === 0 && propertyChecklist.template_id) {
-        rawSections = TEMPLATE_DEFAULTS[propertyChecklist.template_id] || [];
+        // Load from the linked ChecklistTemplate (sections field is canonical)
+        const linkedTemplates = await base44.entities.ChecklistTemplate.filter({ id: propertyChecklist.template_id });
+        const linkedTemplate = linkedTemplates[0];
+        if (linkedTemplate) {
+          rawSections = linkedTemplate.sections || SLUG_DEFAULTS[linkedTemplate.template_slug] || [];
+        }
       }
       const builtSections = rawSections.map((sec, sIdx) => ({
         id: `${propertyChecklist.id}-sec-${sIdx}`,
@@ -126,10 +131,10 @@ export default function VisitChecklistMobile() {
         sub = existingSubmissions[0];
       } else {
         sub = await base44.entities.ChecklistSubmission.create({
-          template_id: propertyChecklist.id,
+          template_id: propertyChecklist.template_id || propertyChecklist.id,
           visit_id: visitId,
           property_id: propertyId,
-          company_id: properties[0].company_id,
+          tenant_id: properties[0].tenant_id,
           assigned_resource_id: user.current.email,
           status: 'draft',
           started_at: new Date().toISOString(),
