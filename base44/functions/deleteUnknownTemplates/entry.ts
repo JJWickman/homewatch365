@@ -5,13 +5,13 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const sr = base44.asServiceRole;
 
-    const batch = await sr.entities.ChecklistTemplate.filter({ name: 'unknown_name' }, null, 20);
+    const batch = await sr.entities.ChecklistTemplate.filter({ name: 'unknown_name' }, null, 50);
     
     let deleted = 0;
     for (const t of batch) {
       await sr.entities.ChecklistTemplate.delete(t.id);
       deleted++;
-      await new Promise(r => setTimeout(r, 300));
+      await new Promise(r => setTimeout(r, 100));
     }
 
     return Response.json({ success: true, deleted, remaining: batch.length === 20 ? 'more exist, run again' : 'all done' });
