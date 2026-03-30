@@ -14,11 +14,22 @@ export default function AIAssistant() {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [loadingConvos, setLoadingConvos] = useState(true);
+  const [user, setUser] = useState(null);
+  const [tenantId, setTenantId] = useState(null);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    loadConversations();
+    const initUser = async () => {
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
+      setTenantId(currentUser?.primary_tenant_id);
+    };
+    initUser();
   }, []);
+
+  useEffect(() => {
+    if (tenantId) loadConversations();
+  }, [tenantId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -39,9 +50,14 @@ export default function AIAssistant() {
   const loadConversations = async () => {
     try {
       const convos = await base44.agents.listConversations({ agent_name: AGENT_NAME });
-      setConversations(convos || []);
-      if (convos?.length > 0) {
-        selectConversation(convos[0]);
+      // Filter by tenant isolation and exclude archived chats
+      const filtered = (convos || []).filter(conv => 
+        conv.metadata?.tenant_id === tenantId && 
+        !conv.metadata?.archived
+      );
+      setConversations(filtered);
+      if (filtered?.length > 0) {
+        selectConversation(filtered[0]);
       }
     } catch (e) {
       console.error(e);
@@ -64,7 +80,7 @@ export default function AIAssistant() {
     try {
       const convo = await base44.agents.createConversation({
         agent_name: AGENT_NAME,
-        metadata: { name: `Chat ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}` }
+        metadata: { name: `Chat ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`, tenant_id: tenantId }
       });
       setConversations(prev => [convo, ...prev]);
       setActiveConversation(convo);
@@ -79,10 +95,10 @@ export default function AIAssistant() {
 
     let convo = activeConversation;
     if (!convo) {
-      convo = await base44.agents.createConversation({
-        agent_name: AGENT_NAME,
-        metadata: { name: `Chat ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` }
-      });
+     convo = await base44.agents.createConversation({
+       agent_name: AGENT_NAME,
+       metadata: { name: `Chat ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`, tenant_id: tenantId }
+     });
       setConversations(prev => [convo, ...prev]);
       setActiveConversation(convo);
     }
