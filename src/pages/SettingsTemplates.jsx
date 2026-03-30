@@ -35,6 +35,14 @@ export default function SettingsTemplates() {
   return (
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-xl font-semibold text-slate-900 mb-6">Checklist Templates</h1>
+      
+      <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6 mb-8 flex items-start gap-4">
+        <img src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/2763cff61_image.png" alt="Home Watch Academy" className="h-20 w-auto object-contain shrink-0" />
+        <div>
+          <p className="text-sm font-semibold text-blue-900">Templates created in partnership with <span className="font-bold">Home Watch Academy</span></p>
+          <p className="text-xs text-blue-700 mt-1">These checklist templates are registered intellectual property of Home Watch Academy and are provided to help standardize home watch inspections.</p>
+        </div>
+      </div>
       <div className="space-y-3">
         {templates.map(t => (
           <div key={t.id} className="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between gap-4">
