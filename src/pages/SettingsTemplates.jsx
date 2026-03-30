@@ -40,7 +40,7 @@ export default function SettingsTemplates() {
         <img src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/2763cff61_image.png" alt="Home Watch Academy" className="h-20 w-auto object-contain shrink-0" />
         <div>
           <p className="text-sm font-semibold text-blue-900">Templates created in partnership with <span className="font-bold">Home Watch Academy</span></p>
-          <p className="text-xs text-blue-700 mt-1">These checklist templates are registered intellectual property of Home Watch Academy and are provided to help standardize home watch inspections.</p>
+          <p className="text-xs text-blue-700 mt-1">These checklist templates are registered intellectual property of Home Watch Academy.</p>
         </div>
       </div>
       <div className="space-y-3">
