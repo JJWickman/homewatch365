@@ -1,21 +1,25 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 Deno.serve(async (req) => {
-  try {
-    const base44 = createClientFromRequest(req);
-    const sr = base44.asServiceRole;
+  const base44 = createClientFromRequest(req);
+  const sr = base44.asServiceRole;
 
+  let totalDeleted = 0;
+  let hasMore = true;
+
+  while (hasMore) {
     const batch = await sr.entities.ChecklistTemplate.filter({ name: 'unknown_name' }, null, 50);
-    
-    let deleted = 0;
+    if (batch.length === 0) {
+      hasMore = false;
+      break;
+    }
     for (const t of batch) {
       await sr.entities.ChecklistTemplate.delete(t.id);
-      deleted++;
-      await new Promise(r => setTimeout(r, 100));
+      totalDeleted++;
+      await new Promise(r => setTimeout(r, 80));
     }
-
-    return Response.json({ success: true, deleted, remaining: batch.length === 20 ? 'more exist, run again' : 'all done' });
-  } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    if (batch.length < 50) hasMore = false;
   }
+
+  return Response.json({ success: true, totalDeleted, status: 'all done' });
 });
