@@ -1,20 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
-import { format, startOfWeek, endOfWeek, isToday, parseISO } from 'date-fns';
-import { 
-  ClipboardCheck, Building2, Users, AlertTriangle, 
-  Calendar, ArrowRight, Clock, MapPin, CheckCircle2,
-  TrendingUp, FileWarning, CloudRain, DollarSign
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
-import StatsCard from '@/components/shared/StatsCard';
-import StatusBadge from '@/components/shared/StatusBadge';
-import ActiveChatsWidget from '@/components/admin/ActiveChatsWidget';
+import VisitFormInDialog from '@/components/visits/VisitFormInDialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -33,6 +26,9 @@ export default function Dashboard() {
   const [todayInspections, setTodayInspections] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedVisit, setSelectedVisit] = useState(null);
+  const [visitTemplate, setVisitTemplate] = useState(null);
+  const [showVisitForm, setShowVisitForm] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -147,6 +143,20 @@ export default function Dashboard() {
   const getInitials = (name) => {
     if (!name) return '?';
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const handleOpenVisit = async (visit) => {
+    setSelectedVisit(visit);
+    
+    // Load template for the visit
+    if (visit.template_id) {
+      const templates = await base44.entities.ChecklistTemplate.filter({ id: visit.template_id });
+      if (templates.length > 0) {
+        setVisitTemplate(templates[0]);
+      }
+    }
+    
+    setShowVisitForm(true);
   };
 
   const getActivityLink = (activity) => {
@@ -267,10 +277,10 @@ export default function Dashboard() {
           ) : (
             <div className="space-y-3">
               {todayInspections.map((visit) => (
-                <Link 
-                 key={visit.id} 
-                 to={createPageUrl('VisitDetail') + `?id=${visit.id}`}
-                  className="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200"
+                <button
+                 key={visit.id}
+                 onClick={() => handleOpenVisit(visit)}
+                  className="w-full flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200 text-left"
                 >
                   <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
                     <Building2 className="h-6 w-6 text-slate-500" />
@@ -298,7 +308,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <StatusBadge status={visit.status} />
-                </Link>
+                </button>
               ))}
             </div>
           )}
@@ -357,6 +367,35 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
+      {/* Visit Form Dialog */}
+      <Dialog open={showVisitForm} onOpenChange={setShowVisitForm}>
+       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+         <DialogHeader>
+           <DialogTitle>
+             {selectedVisit?.property?.name || selectedVisit?.property?.address}
+           </DialogTitle>
+         </DialogHeader>
+         {selectedVisit && (
+           <VisitFormInDialog
+             visit={selectedVisit}
+             property={selectedVisit.property}
+             template={visitTemplate}
+             onSubmitSuccess={() => {
+               setShowVisitForm(false);
+               setSelectedVisit(null);
+               setVisitTemplate(null);
+               loadDashboardData();
+             }}
+             onClose={() => {
+               setShowVisitForm(false);
+               setSelectedVisit(null);
+               setVisitTemplate(null);
+             }}
+           />
+         )}
+       </DialogContent>
+      </Dialog>
+
       {/* Issues Alert */}
       {stats.issuesFound > 0 && (
         <Card className="border-amber-200 bg-amber-50">
@@ -378,6 +417,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       )}
-    </div>
-  );
-}
+      </div>
+      );
+      }
