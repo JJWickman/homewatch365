@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     const property = properties[0];
 
     if (!property.latitude || !property.longitude) {
-      return Response.json({ valid: true, message: 'Property has no GPS coordinates set — check skipped.' });
+      return Response.json({ valid: false, message: 'Property has no GPS coordinates. Contact admin to geocode the address.' }, { status: 400 });
     }
 
     // Load company geofencing settings
