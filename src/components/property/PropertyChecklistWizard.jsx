@@ -7,6 +7,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { SFH_SECTIONS, CONDO_SECTIONS, HIGHRISE_SECTIONS } from '@/components/checklist/checklistDefaults';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
@@ -196,11 +197,10 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
           // Step 1: Template Selection & Naming
           <div className="space-y-6 py-4">
             <div>
-              <p className="text-sm font-medium text-slate-700 mb-3">Property Type</p>
               <div className={`${propertyTypeInfo.color} rounded-lg p-4 flex items-center gap-3`}>
                 {propertyTypeInfo.icon && <propertyTypeInfo.icon className="w-6 h-6 text-white" />}
                 <div>
-                  <p className="font-semibold text-white">{propertyTypeInfo.title}</p>
+                  <p className="font-semibold text-white">Create a custom checklist for</p>
                   <p className="text-sm text-white/90">{property.name || property.address}</p>
                 </div>
               </div>
