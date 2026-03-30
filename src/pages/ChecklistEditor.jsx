@@ -1,0 +1,195 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ArrowLeft, Save, Plus, Trash2, GripVertical } from 'lucide-react';
+import { toast } from 'sonner';
+
+export default function ChecklistEditor() {
+  const navigate = useNavigate();
+  const searchParams = new URLSearchParams(window.location.search);
+  const templateId = searchParams.get('template_id');
+  const checklistId = searchParams.get('checklist_id');
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [name, setName] = useState('');
+  const [sections, setSections] = useState([]);
+  const [target, setTarget] = useState(null); // { type: 'template'|'checklist', record }
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      if (templateId) {
+        const templates = await base44.entities.ChecklistTemplate.filter({ id: templateId });
+        if (templates[0]) {
+          const t = templates[0];
+          setTarget({ type: 'template', record: t });
+          setName(t.name || '');
+          setSections(t.sections || []);
+        }
+      } else if (checklistId) {
+        const checklists = await base44.entities.PropertyChecklist.filter({ id: checklistId });
+        if (checklists[0]) {
+          const c = checklists[0];
+          setTarget({ type: 'checklist', record: c });
+          setName(c.name || '');
+          // Try customized_sections first, then load from template
+          if (c.customized_sections?.length > 0) {
+            setSections(c.customized_sections);
+          } else if (c.template_id) {
+            const templates = await base44.entities.ChecklistTemplate.filter({ id: c.template_id });
+            setSections(templates[0]?.sections || []);
+          }
+        }
+      }
+    } catch (err) {
+      toast.error('Failed to load checklist');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      if (target?.type === 'template') {
+        await base44.entities.ChecklistTemplate.update(target.record.id, { name, sections });
+      } else if (target?.type === 'checklist') {
+        await base44.entities.PropertyChecklist.update(target.record.id, { name, customized_sections: sections });
+      }
+      toast.success('Saved successfully');
+      navigate(-1);
+    } catch (err) {
+      toast.error('Failed to save');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const addSection = () => {
+    setSections(prev => [...prev, { title: 'New Section', items: [] }]);
+  };
+
+  const updateSectionTitle = (sIdx, title) => {
+    setSections(prev => prev.map((s, i) => i === sIdx ? { ...s, title } : s));
+  };
+
+  const deleteSection = (sIdx) => {
+    setSections(prev => prev.filter((_, i) => i !== sIdx));
+  };
+
+  const addItem = (sIdx) => {
+    setSections(prev => prev.map((s, i) => i === sIdx
+      ? { ...s, items: [...(s.items || []), { label: 'New Item', responseType: 'ok_issue_na', instructions: '' }] }
+      : s
+    ));
+  };
+
+  const updateItem = (sIdx, iIdx, field, value) => {
+    setSections(prev => prev.map((s, i) => i === sIdx
+      ? { ...s, items: s.items.map((item, j) => j === iIdx ? { ...item, [field]: value } : item) }
+      : s
+    ));
+  };
+
+  const deleteItem = (sIdx, iIdx) => {
+    setSections(prev => prev.map((s, i) => i === sIdx
+      ? { ...s, items: s.items.filter((_, j) => j !== iIdx) }
+      : s
+    ));
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto p-4 pb-24">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6">
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div className="flex-1">
+          <Input
+            value={name}
+            onChange={e => setName(e.target.value)}
+            className="text-lg font-semibold border-0 shadow-none px-0 focus-visible:ring-0"
+            placeholder="Checklist name..."
+          />
+        </div>
+        <Button onClick={handleSave} disabled={saving} className="gap-2">
+          <Save className="h-4 w-4" />
+          {saving ? 'Saving...' : 'Save'}
+        </Button>
+      </div>
+
+      {/* Sections */}
+      <div className="space-y-4">
+        {sections.map((section, sIdx) => (
+          <div key={sIdx} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-slate-200">
+              <GripVertical className="h-4 w-4 text-slate-400" />
+              <Input
+                value={section.title}
+                onChange={e => updateSectionTitle(sIdx, e.target.value)}
+                className="font-medium border-0 shadow-none px-0 bg-transparent focus-visible:ring-0"
+              />
+              <Button variant="ghost" size="icon" onClick={() => deleteSection(sIdx)} className="text-red-500 hover:text-red-700 shrink-0">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="divide-y divide-slate-100">
+              {(section.items || []).map((item, iIdx) => (
+                <div key={iIdx} className="flex items-center gap-2 px-4 py-2.5">
+                  <GripVertical className="h-4 w-4 text-slate-300 shrink-0" />
+                  <Input
+                    value={item.label}
+                    onChange={e => updateItem(sIdx, iIdx, 'label', e.target.value)}
+                    className="flex-1 text-sm border-0 shadow-none px-0 focus-visible:ring-0"
+                    placeholder="Item label..."
+                  />
+                  <select
+                    value={item.responseType || 'ok_issue_na'}
+                    onChange={e => updateItem(sIdx, iIdx, 'responseType', e.target.value)}
+                    className="text-xs border border-slate-200 rounded px-2 py-1 bg-white shrink-0"
+                  >
+                    <option value="ok_issue_na">OK / Issue / N/A</option>
+                    <option value="number">Number</option>
+                    <option value="percentage">Percentage</option>
+                    <option value="photo_only">Photo Only</option>
+                    <option value="instruction_only">Instruction</option>
+                    <option value="text">Text</option>
+                  </select>
+                  <Button variant="ghost" size="icon" onClick={() => deleteItem(sIdx, iIdx)} className="text-red-400 hover:text-red-600 h-7 w-7 shrink-0">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            <div className="px-4 py-2 border-t border-slate-100">
+              <Button variant="ghost" size="sm" onClick={() => addItem(sIdx)} className="text-blue-600 gap-1 text-xs">
+                <Plus className="h-3.5 w-3.5" /> Add Item
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Button variant="outline" onClick={addSection} className="mt-4 w-full gap-2">
+        <Plus className="h-4 w-4" /> Add Section
+      </Button>
+    </div>
+  );
+}
