@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import VisitChecklistModal from '../checklist/VisitChecklistModal';
+
 import {
   Dialog,
   DialogContent,
@@ -48,8 +48,7 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
   const [creating, setCreating] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [step, setStep] = useState(property ? 'type' : 'property');
-  const [checklistVisitId, setChecklistVisitId] = useState(null);
-  const [showChecklistModal, setShowChecklistModal] = useState(false);
+
 
   const handleSelectProperty = (prop) => {
     setSelectedProperty(prop);
@@ -133,8 +132,9 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
 
       // Route based on visit type
       if (visitType === 'check-in' && propertyChecklist) {
-        setChecklistVisitId(visit.id);
-        setShowChecklistModal(true);
+        // Open checklist in popup window for mobile-friendly use
+        const checklistUrl = `${window.location.origin}/VisitChecklistMobile?visit_id=${visit.id}&property_id=${targetProperty.id}`;
+        window.open(checklistUrl, 'checklist', 'width=768,height=1024');
       } else {
         // Route to VisitFormRenderer for all other visit types (with or without template)
         navigate(createPageUrl('VisitFormRenderer') + `?visit_id=${visit.id}&property_id=${targetProperty.id}&template_id=${template?.id || ''}&visit_type=${visitType}`);
@@ -224,20 +224,6 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         </div>
       </DialogContent>
     </Dialog>
-
-      <VisitChecklistModal
-      open={showChecklistModal}
-      onOpenChange={setShowChecklistModal}
-      visitId={checklistVisitId}
-      propertyId={selectedProperty?.id || property?.id}
-      property={selectedProperty || property}
-      onSubmitSuccess={() => {
-        onOpenChange(false);
-        setStep(property ? 'type' : 'property');
-        setSelectedProperty(null);
-        setChecklistVisitId(null);
-      }}
-    />
     </>
   );
 }
