@@ -218,16 +218,16 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Core Home Watch Templates</p>
                     <div className="grid grid-cols-1 gap-2">
                       {templates.filter(t => CORE_SLUGS.includes(t.template_slug)).map((template) => (
-                        <Card
+                        <div
                           key={template.id}
                           onClick={() => setSelectedTemplate(template)}
-                          className={`cursor-pointer transition-all ${
+                          className={`cursor-pointer transition-all rounded-lg border p-3 ${
                             selectedTemplate?.id === template.id
                               ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200'
                               : 'border-slate-200 hover:border-slate-300'
                           }`}
                         >
-                          <CardContent className="p-3 flex items-center justify-between">
+                          <div className="flex items-center justify-between">
                             <div>
                               <p className="font-medium text-slate-900 text-sm">{template.name}</p>
                               <p className="text-xs text-slate-500 mt-0.5">{template.description}</p>
@@ -235,28 +235,28 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
                             {selectedTemplate?.id === template.id && (
                               <Check className="w-4 h-4 text-blue-600 shrink-0 ml-3" />
                             )}
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {/* Additional Templates */}
+                            </div>
+                            </div>
+                            ))}
+                            </div>
+                            </div>
+                            )}
+                            {/* Additional Templates */}
                 {templates.filter(t => !CORE_SLUGS.includes(t.template_slug)).length > 0 && (
                   <div>
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Additional Service Templates</p>
                     <div className="grid grid-cols-1 gap-2">
                       {templates.filter(t => !CORE_SLUGS.includes(t.template_slug)).map((template) => (
-                        <Card
+                        <div
                           key={template.id}
                           onClick={() => setSelectedTemplate(template)}
-                          className={`cursor-pointer transition-all ${
+                          className={`cursor-pointer transition-all rounded-lg border p-3 ${
                             selectedTemplate?.id === template.id
                               ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200'
                               : 'border-slate-200 hover:border-slate-300'
                           }`}
                         >
-                          <CardContent className="p-3 flex items-center justify-between">
+                          <div className="flex items-center justify-between">
                             <div>
                               <p className="font-medium text-slate-900 text-sm">{template.name}</p>
                               <p className="text-xs text-slate-500 mt-0.5">{template.description}</p>
@@ -264,16 +264,16 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
                             {selectedTemplate?.id === template.id && (
                               <Check className="w-4 h-4 text-blue-600 shrink-0 ml-3" />
                             )}
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        ) : (
+                          </div>
+                          </div>
+                          ))}
+                          </div>
+                          </div>
+                          )}
+                          </div>
+                          )}
+                          </div>
+                          ) : (
           // Step 2: Inline Editor
           <div className="space-y-4 py-4">
             {/* Header with save button */}
