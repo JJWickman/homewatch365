@@ -72,12 +72,15 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
         }
       }
 
-      // Always fetch the correct property's checklist from DB
-      const savedChecklists = await base44.entities.PropertyChecklist.filter({
-        property_id: targetProperty.id,
-        is_active: true
-      });
-      const propertyChecklist = savedChecklists[0] || null;
+      // Only fetch custom PropertyChecklist for check-in visits
+      let propertyChecklist = null;
+      if (visitType === 'check-in') {
+        const savedChecklists = await base44.entities.PropertyChecklist.filter({
+          property_id: targetProperty.id,
+          is_active: true
+        });
+        propertyChecklist = savedChecklists[0] || null;
+      }
 
       // Match template by slug — system templates (tenant_id=null) are visible to all via RLS
       const templates = await base44.entities.ChecklistTemplate.filter({ active: true });
