@@ -507,7 +507,9 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
   const isLastStep = step === steps.length - 1;
 
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 opacity-90" />
+      <div className="relative">
       <div className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-white/10 backdrop-blur-xl">
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 pt-6 pb-4 border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -570,6 +572,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
