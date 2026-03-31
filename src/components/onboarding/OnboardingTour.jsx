@@ -5,8 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import confetti from 'canvas-confetti';
 
 export default function OnboardingTour({ open, onComplete, onDismiss, user, tenant }) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [showCongrats, setShowCongrats] = useState(false);
+  const [currentStep, setCurrentStep] = useState(() => {
+    if (typeof window === 'undefined') return 0;
+    const saved = localStorage.getItem('onboarding_step');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [showCongrats, setShowCongrats] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('onboarding_congrats') === 'true';
+  });
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const [highlightElement, setHighlightElement] = useState(null);
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
@@ -93,6 +100,8 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     const tooltipWidth = 320;
     const tooltipHeight = 180;
     const gap = 48;
+
+    let top = rect.top + window.scrollY - tooltipHeight - gap;
     let left = rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2;
 
     // Ensure it doesn't go off-screen
@@ -103,19 +112,15 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     setTooltipPos({ top, left });
   }, [highlightElement]);
 
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      setShowCongrats(true);
-    }
-  };
+  // Save step to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('onboarding_step', currentStep.toString());
+  }, [currentStep]);
 
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
+  // Save congrats state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('onboarding_congrats', showCongrats.toString());
+  }, [showCongrats]);
 
   // Reposition tooltip on window resize/scroll
   useEffect(() => {
@@ -124,10 +129,12 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     const handleResize = () => {
       // Trigger repositioning by updating highlightElement
       if (highlightElement) {
-       const rect = highlightElement.getBoundingClientRect();
-       const tooltipWidth = 320;
-       const tooltipHeight = 180;
-       const gap = 48;
+        const rect = highlightElement.getBoundingClientRect();
+        const tooltipWidth = 320;
+        const tooltipHeight = 180;
+        const gap = 48;
+
+        let top = rect.top + window.scrollY - tooltipHeight - gap;
         let left = rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2;
 
         if (left < 16) left = 16;
@@ -145,6 +152,25 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
       window.removeEventListener('scroll', handleResize);
     };
   }, [highlightElement, open, showCongrats]);
+
+  const handleNext = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      setShowCongrats(true);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  // Check if onboarding is disabled
+  if (typeof window !== 'undefined' && localStorage.getItem('onboarding_dismissed') === 'true') {
+    return null;
+  }
 
   if (!open) return null;
 
@@ -205,6 +231,11 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
                 onClick={() => {
                   confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
                   setTimeout(() => {
+                    if (dontShowAgain) {
+                      localStorage.setItem('onboarding_dismissed', 'true');
+                    }
+                    localStorage.removeItem('onboarding_step');
+                    localStorage.removeItem('onboarding_congrats');
                     onDismiss?.(dontShowAgain);
                     onComplete();
                   }, 500);
