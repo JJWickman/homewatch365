@@ -422,7 +422,7 @@ export default function Dashboard() {
       </Dialog>
 
       {/* Onboarding Wizard */}
-       {user && company && showOnboarding && (
+       {showOnboarding && (
         <TenantOnboardingWizard
           open={showOnboarding}
           onComplete={() => {
