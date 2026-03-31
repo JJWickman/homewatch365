@@ -30,6 +30,18 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
       title: 'Create a Property',
       description: 'Add your first property with address, photos, and access information.',
       action: 'Click Properties'
+    },
+    {
+      selector: 'aside a:has-text("Visits")',
+      title: 'Schedule & Manage Visits',
+      description: 'Track and schedule property inspections and maintenance visits for your clients.',
+      action: 'Click Visits'
+    },
+    {
+      selector: 'aside a:has-text("Billing")',
+      title: 'Set Up Billing',
+      description: 'Configure pricing, subscriptions, and invoicing for your clients.',
+      action: 'Click Billing'
     }
   ];
 
