@@ -429,7 +429,7 @@ Your Property Management Team
                       {visit.status === 'scheduled' && (
                         <Button 
                           className="mt-4 bg-black text-white hover:bg-slate-900"
-                          onClick={() => navigate(createPageUrl('VisitFlow') + `?id=${visit.id}`)}
+                          onClick={() => setShowChecklistDialog(true)}
                         >
                           <Play className="h-4 w-4 mr-2" />
                           Start Check-In
