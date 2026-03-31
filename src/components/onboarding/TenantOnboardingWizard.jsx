@@ -501,7 +501,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
 
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl">
+      <div className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-white/10 backdrop-blur-md">
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 pt-6 pb-4 border-b border-white/10">
           <div className="flex items-center gap-3">
             <currentStep.icon className="h-6 w-6 text-white" />
@@ -513,7 +513,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
           </div>
         </div>
 
-        <div className="bg-slate-50/80 backdrop-blur px-6 pt-6 pb-6">
+        <div className="bg-white/95 backdrop-blur-sm px-6 pt-6 pb-6">
           {/* Progress indicator */}
           <div className="flex justify-between mb-6">
             {steps.map((_, i) => (
