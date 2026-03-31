@@ -88,13 +88,11 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     highlightElement.style.borderRadius = '6px';
     highlightElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // Position tooltip near the element
+    // Position tooltip far from the element
     const rect = highlightElement.getBoundingClientRect();
     const tooltipWidth = 320;
-    const tooltipHeight = 280;
-    const gap = 16;
-
-    let top = rect.top + window.scrollY - tooltipHeight - gap;
+    const tooltipHeight = 180;
+    const gap = 48;
     let left = rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2;
 
     // Ensure it doesn't go off-screen
@@ -118,6 +116,35 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
       setCurrentStep(currentStep - 1);
     }
   };
+
+  // Reposition tooltip on window resize/scroll
+  useEffect(() => {
+    if (!open || showCongrats) return;
+    
+    const handleResize = () => {
+      // Trigger repositioning by updating highlightElement
+      if (highlightElement) {
+       const rect = highlightElement.getBoundingClientRect();
+       const tooltipWidth = 320;
+       const tooltipHeight = 180;
+       const gap = 48;
+        let left = rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2;
+
+        if (left < 16) left = 16;
+        if (left + tooltipWidth > window.innerWidth - 16) left = window.innerWidth - tooltipWidth - 16;
+        if (top < 16) top = rect.bottom + window.scrollY + gap;
+
+        setTooltipPos({ top, left });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('scroll', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleResize);
+    };
+  }, [highlightElement, open, showCongrats]);
 
   if (!open) return null;
 
