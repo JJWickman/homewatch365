@@ -196,69 +196,67 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
 
   return (
     <div className="fixed z-40 max-w-sm" style={{ top: `${tooltipPos.top}px`, left: `${tooltipPos.left}px` }}>
-      <Card className="shadow-xl border-blue-200 bg-white">
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            {/* Header */}
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">
-                  Step {currentStep + 1} of {steps.length}
-                </div>
-                <h3 className="text-lg font-bold text-slate-900">{step.title}</h3>
+      <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl p-6">
+        <div className="space-y-4">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="text-xs font-semibold text-blue-200 uppercase tracking-wide mb-1">
+                Step {currentStep + 1} of {steps.length}
               </div>
-              <button
-                onClick={handleSkip}
-                className="text-slate-400 hover:text-slate-600 transition-colors shrink-0"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <h3 className="text-lg font-bold text-white">{step.title}</h3>
             </div>
-
-            {/* Description */}
-            <p className="text-sm text-slate-600 leading-relaxed">{step.description}</p>
-
-            {/* Progress bar */}
-            <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-              <div
-                className="bg-blue-500 h-full transition-all duration-300"
-                style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-              />
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-2 justify-between pt-2">
-              <div className="flex gap-2">
-                {currentStep > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleBack}
-                    className="text-slate-600"
-                  >
-                    ← Back
-                  </Button>
-                )}
-              </div>
-              <Button
-                onClick={handleNext}
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {currentStep === steps.length - 1 ? 'Finish' : 'Next'} →
-              </Button>
-            </div>
-
-            {/* Skip link */}
             <button
               onClick={handleSkip}
-              className="w-full text-xs text-slate-500 hover:text-slate-700 transition-colors py-2"
+              className="text-white/40 hover:text-white/60 transition-colors shrink-0"
             >
-              Skip tour
+              <X className="h-5 w-5" />
             </button>
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Description */}
+          <p className="text-sm text-blue-100 leading-relaxed">{step.description}</p>
+
+          {/* Progress bar */}
+          <div className="w-full bg-white/20 rounded-full h-1.5 overflow-hidden">
+            <div
+              className="bg-blue-400 h-full transition-all duration-300"
+              style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 justify-between pt-2">
+            <div className="flex gap-2">
+              {currentStep > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBack}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  ← Back
+                </Button>
+              )}
+            </div>
+            <Button
+              onClick={handleNext}
+              size="sm"
+              className="bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              {currentStep === steps.length - 1 ? 'Finish' : 'Next'} →
+            </Button>
+          </div>
+
+          {/* Skip link */}
+          <button
+            onClick={handleSkip}
+            className="w-full text-xs text-white/50 hover:text-white/70 transition-colors py-2"
+          >
+            Skip tour
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
