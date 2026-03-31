@@ -48,20 +48,14 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadDashboardData();
-    checkOnboardingStatus();
   }, []);
 
-  const checkOnboardingStatus = async () => {
-    try {
-      const currentUser = await base44.auth.me();
-      // Show onboarding if flag is explicitly false OR undefined (new users)
-      if (currentUser && currentUser.onboarding_completed !== true) {
-        setShowOnboarding(true);
-      }
-    } catch (error) {
-      console.error('Error checking onboarding status:', error);
+  useEffect(() => {
+    // Show onboarding wizard if user hasn't completed it and company is loaded
+    if (user && company && user.onboarding_completed !== true) {
+      setShowOnboarding(true);
     }
-  };
+  }, [user, company]);
 
   useEffect(() => {
     if (!user) return;
@@ -160,6 +154,10 @@ export default function Dashboard() {
       setTodayInspections(enrichedVisits);
       setRecentActivity(recentVisits);
 
+      // Check if onboarding needed (user and company now loaded)
+      if (currentUser && currentUser.onboarding_completed !== true) {
+        setShowOnboarding(true);
+      }
     } catch (error) {
       console.error('Error loading dashboard:', error);
     } finally {
