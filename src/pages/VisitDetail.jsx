@@ -190,14 +190,14 @@ Your Property Management Team
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </Button>
-              <Button onClick={() => navigate(createPageUrl('VisitFlow') + `?id=${visit.id}`)} className="bg-black text-white hover:bg-slate-900">
+              <Button onClick={() => navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${visit.property_id}`)} className="bg-black text-white hover:bg-slate-900">
                 <Play className="h-4 w-4 mr-2" />
                  Start Check-In
                 </Button>
             </>
           )}
           {visit.status === 'in_progress' && (
-            <Button onClick={() => navigate(createPageUrl('VisitFlow') + `?id=${visit.id}`)} className="bg-black text-white hover:bg-slate-900">
+            <Button onClick={() => navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${visit.property_id}`)} className="bg-black text-white hover:bg-slate-900">
               <Play className="h-4 w-4 mr-2" />
               Continue Visit
             </Button>
