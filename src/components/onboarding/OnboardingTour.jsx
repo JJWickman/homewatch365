@@ -50,8 +50,10 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
       prevLabel: '← Back',
       doneLabel: 'Complete Tour',
       disableInteraction: false,
+      allowKeyboardNavigation: true,
       scrollToElement: true,
-      scrollPadding: 30
+      scrollPadding: 30,
+      overlayOpacity: 0.4
     });
 
     intro.oncomplete(() => {
@@ -86,11 +88,16 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
       }
       .introjs-helperLayer {
         box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4) !important;
+        pointer-events: none !important;
+      }
+      .introjs-helperLayer * {
+        pointer-events: auto !important;
       }
       .introjs-highlight {
         outline: 3px solid #3b82f6 !important;
         outline-offset: 6px !important;
         border-radius: 8px !important;
+        pointer-events: auto !important;
       }
       .introjs-button {
         background-color: #3b82f6 !important;
