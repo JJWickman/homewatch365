@@ -430,7 +430,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
                   onClick={() => setSelectedTemplate(tmpl)}
                   className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
                     selectedTemplate?.id === tmpl.id
-                      ? 'border-blue-400 bg-blue-500/20'
+                      ? 'border-white/60 bg-white/15'
                       : 'border-white/20 bg-white/5 hover:border-white/40'
                   }`}
                 >
@@ -507,47 +507,35 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
   const isLastStep = step === steps.length - 1;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 opacity-90" />
-      <div className="relative">
-      <div className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-white/10 backdrop-blur-xl">
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 pt-6 pb-4 border-b border-white/10">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <currentStep.icon className="h-6 w-6 text-white" />
-              <div>
-                <h2 className="text-white text-lg font-semibold">
-                  Welcome to HomeWatch365 - We are here to help you get setup in the application
-                </h2>
-              </div>
-            </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{
+      background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #1a2a4a 100%)'
+    }}>
+      <div className="w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl border border-white/20 backdrop-blur-xl" style={{
+        background: 'rgba(255, 255, 255, 0.08)'
+      }}>
+        <div className="px-8 pt-8 pb-6 border-b border-white/10">
+          <div className="flex items-center justify-between gap-4 mb-2">
+            <h1 className="text-2xl font-bold text-white">
+              {currentStep.title}
+            </h1>
             <button
               onClick={() => onDismiss?.(false) || onComplete()}
-              className="text-white hover:bg-white/20 rounded-lg p-1 transition-colors"
+              className="text-white/60 hover:text-white transition-colors p-1 shrink-0"
               aria-label="Close wizard"
             >
-              <X className="h-5 w-5" />
+              <X className="h-6 w-6" />
             </button>
           </div>
+          <p className="text-blue-200 text-sm">{currentStep.description}</p>
         </div>
 
-        <div className="bg-white/10 px-6 pt-6 pb-6">
-          {/* Close button */}
-          <div className="flex justify-end mb-4">
-            <button
-              onClick={() => onDismiss?.(false) || onComplete()}
-              className="text-white/60 hover:text-white transition-colors p-1"
-              aria-label="Close wizard"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
+        <div className="px-8 py-8">
           {/* Progress indicator */}
-          <div className="flex justify-between mb-6">
+          <div className="flex justify-between gap-1.5 mb-8">
             {steps.map((_, i) => (
               <div
                 key={i}
-                className={`h-2 flex-1 mx-1 rounded-full transition-colors ${
+                className={`h-1 flex-1 rounded-full transition-colors ${
                   i <= step ? 'bg-blue-400' : 'bg-white/20'
                 }`}
               />
@@ -556,9 +544,9 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
 
           {currentStep.content}
 
-          <div className="flex justify-between gap-3 mt-6">
+          <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-white/10">
             {step > 0 && !isLastStep && (
-              <Button variant="outline" onClick={() => setStep(step - 1)} className="border-white/20 text-white hover:bg-white/10">
+              <Button variant="outline" onClick={() => setStep(step - 1)} className="border-white/30 text-white hover:bg-white/10">
                 Back
               </Button>
             )}
@@ -591,7 +579,6 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
             )}
           </div>
         </div>
-      </div>
       </div>
     </div>
   );
