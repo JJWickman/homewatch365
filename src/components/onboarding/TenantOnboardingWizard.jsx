@@ -509,7 +509,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
   if (!open) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 flex items-center justify-center p-4 z-50">
       <div className="w-full max-w-2xl">
         {/* Logo & Header */}
         <div className="text-center mb-8">
