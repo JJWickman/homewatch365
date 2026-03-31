@@ -12,7 +12,7 @@ export default function GeofencingSettings({ company, onUpdate }) {
   const handleToggle = async (enabled) => {
     // Before enabling, check for properties missing coordinates
     if (enabled) {
-      const properties = await base44.entities.Property.filter({ company_id: company.id, is_active: true });
+      const properties = await base44.entities.Property.filter({ tenant_id: company.id, is_active: true });
       const missing = properties.filter(p => !p.latitude || !p.longitude);
       if (missing.length > 0) {
         toast.error(
@@ -25,7 +25,7 @@ export default function GeofencingSettings({ company, onUpdate }) {
 
     setSaving(true);
     try {
-      await base44.entities.Company.update(company.id, { geofencing_enabled: enabled });
+      await base44.entities.Tenant.update(company.id, { geofencing_enabled: enabled });
       onUpdate({ ...company, geofencing_enabled: enabled });
       toast.success(enabled ? 'Geofencing enabled' : 'Geofencing disabled');
     } catch (e) {
@@ -38,7 +38,7 @@ export default function GeofencingSettings({ company, onUpdate }) {
   const handleRadiusSave = async () => {
     setSaving(true);
     try {
-      await base44.entities.Company.update(company.id, { geofencing_radius_meters: Number(radius) });
+      await base44.entities.Tenant.update(company.id, { geofencing_radius_meters: Number(radius) });
       onUpdate({ ...company, geofencing_radius_meters: Number(radius) });
       toast.success('Radius updated');
     } catch (e) {
