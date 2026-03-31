@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Sparkles, X } from 'lucide-react';
+import { CheckCircle2, Sparkles } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import confetti from 'canvas-confetti';
 
@@ -119,10 +119,6 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     }
   };
 
-  const handleSkip = () => {
-    onDismiss?.(false);
-  };
-
   if (!open) return null;
 
   // Congratulations modal
@@ -201,33 +197,31 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
   const step = steps[currentStep];
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="w-full max-w-sm">
-        <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl p-8">
-          <div className="space-y-6">
-            {/* Title */}
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-1">{step.title}</h2>
-              <p className="text-blue-200 text-sm">{step.description}</p>
-            </div>
+    <div className="fixed pointer-events-none z-50" style={{ top: `${tooltipPos.top}px`, left: `${tooltipPos.left}px`, width: '320px' }}>
+      <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl p-6 pointer-events-auto">
+        <div className="space-y-4">
+          {/* Title */}
+          <div>
+            <h3 className="text-lg font-bold text-white mb-1">{step.title}</h3>
+            <p className="text-blue-100 text-sm leading-relaxed">{step.description}</p>
+          </div>
 
-            {/* Progress indicator */}
-            <div className="flex justify-between gap-1.5">
-              {steps.map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-1 flex-1 rounded-full transition-colors ${
-                    i <= currentStep ? 'bg-blue-400' : 'bg-white/20'
-                  }`}
-                />
-              ))}
-            </div>
+          {/* Progress indicator */}
+          <div className="flex justify-between gap-1">
+            {steps.map((_, i) => (
+              <div
+                key={i}
+                className={`h-1 flex-1 rounded-full transition-colors ${
+                  i <= currentStep ? 'bg-blue-400' : 'bg-white/20'
+                }`}
+              />
+            ))}
           </div>
 
           {/* Footer */}
-          <div className="flex justify-between gap-3 pt-6 border-t border-white/10 mt-8">
+          <div className="flex justify-between gap-2 pt-2">
             {currentStep > 0 && (
-              <Button variant="outline" onClick={handleBack} className="border-white/20 text-white hover:bg-white/10">
+              <Button variant="outline" onClick={handleBack} size="sm" className="border-white/20 text-white hover:bg-white/10">
                 ← Back
               </Button>
             )}
@@ -235,6 +229,7 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
 
             <Button
               onClick={handleNext}
+              size="sm"
               className="ml-auto bg-blue-500 hover:bg-blue-600 text-white"
             >
               {currentStep === steps.length - 1 ? 'Finish' : 'Next'} →
