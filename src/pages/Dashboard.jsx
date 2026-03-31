@@ -51,8 +51,8 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    // Show onboarding wizard if user hasn't completed it and company is loaded
-    if (user && company && user.onboarding_completed !== true) {
+    // Show onboarding wizard if user hasn't completed it, hasn't dismissed it, and company is loaded
+    if (user && company && user.onboarding_completed !== true && user.onboarding_dismissed !== true) {
       setShowOnboarding(true);
     }
   }, [user, company]);
