@@ -103,12 +103,7 @@ Deno.serve(async (req) => {
       console.log('ChecklistTemplate seeding failed (non-fatal):', e.message);
     }
 
-    // Seed products for the new tenant
-    try {
-      await base44.asServiceRole.functions.invoke('seedDefaultProducts', { tenant_id: tenant.id });
-    } catch (e) {
-      console.log('Product seeding failed (non-fatal):', e.message);
-    }
+    // Products will be auto-seeded by automation on Tenant creation
 
     // Seed sample celebrity properties
     try {
