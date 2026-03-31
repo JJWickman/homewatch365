@@ -141,6 +141,12 @@ export default function CompanyOnboarding() {
 
       if (response.data?.success && response.data?.tenant_id) {
         toast.success('Welcome to Home Watch 365!');
+        // Refresh user object to pick up first_name/last_name that were just saved
+        try {
+          await base44.auth.me();
+        } catch (e) {
+          console.log('User refresh after onboarding:', e.message);
+        }
         const tenantSlug = response.data.tenant?.slug;
         if (tenantSlug) {
           window.location.href = `/?tenant=${tenantSlug}`;
