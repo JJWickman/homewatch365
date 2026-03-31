@@ -450,7 +450,6 @@ export default function Layout({ children, currentPageName }) {
 
         /* Glass cards - ALL card-like surfaces inside main content only */
         main [class*="Card"], main [class*="card"],
-        main .rounded-lg:not(button):not([role="option"]):not([data-radix-select-item]):not([role="switch"]), main .rounded-xl:not(button):not([role="switch"]),
         main [role="dialog"] > div,
         main [role="listbox"], main [role="menu"],
         main .border.bg-popover,
