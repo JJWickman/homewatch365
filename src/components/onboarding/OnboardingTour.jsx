@@ -55,13 +55,7 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
       doneLabel: 'Finish'
     });
 
-    intro.onbeforechange(() => {
-      // Ensure target element is visible by scrolling if needed
-      const element = document.querySelector(intro._introItems[intro._currentStep]?.element);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    });
+
 
     intro.oncomplete(() => {
       intro.exit();
