@@ -63,12 +63,72 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
       onDismiss?.(false);
     });
 
+    // Inject improved tooltip styling
+    const style = document.createElement('style');
+    style.textContent = `
+      .introjs-tooltip {
+        max-width: 500px !important;
+        width: 100% !important;
+        padding: 20px !important;
+        border-radius: 10px !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
+      }
+      .introjs-tooltip .introjs-tooltiptext {
+        font-size: 15px !important;
+        line-height: 1.6 !important;
+        color: #333 !important;
+      }
+      .introjs-tooltip .introjs-tooltip-title {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        margin-bottom: 12px !important;
+        color: #000 !important;
+      }
+      .introjs-helperLayer {
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4) !important;
+      }
+      .introjs-highlight {
+        outline: 3px solid #3b82f6 !important;
+        outline-offset: 6px !important;
+        border-radius: 8px !important;
+      }
+      .introjs-button {
+        background-color: #3b82f6 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 6px !important;
+        padding: 8px 16px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        cursor: pointer !important;
+        margin-right: 8px !important;
+      }
+      .introjs-button:hover {
+        background-color: #2563eb !important;
+      }
+      .introjs-skipbutton {
+        background-color: transparent !important;
+        color: #666 !important;
+        text-decoration: underline !important;
+      }
+      .introjs-skipbutton:hover {
+        background-color: transparent !important;
+        color: #000 !important;
+      }
+      .introjs-progress {
+        margin-top: 12px !important;
+      }
+    `;
+    document.head.appendChild(style);
+
     setTimeout(() => {
       intro.start();
     }, 300);
 
     return () => {
       intro.exit();
+      const styles = document.querySelectorAll('style');
+      styles.forEach(s => s.remove());
     };
   }, [open, showCongrats, onDismiss]);
 
@@ -76,32 +136,7 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
   if (showCongrats) {
     return (
       <>
-        <style>{`
-          .introjs-tooltip {
-            max-width: 400px !important;
-            padding: 16px !important;
-            border-radius: 8px !important;
-          }
-          .introjs-tooltip .introjs-tooltiptext {
-            font-size: 14px !important;
-            line-height: 1.5 !important;
-          }
-          .introjs-tooltip .introjs-tooltip-title {
-            font-size: 16px !important;
-            font-weight: 600 !important;
-            margin-bottom: 8px !important;
-          }
-          .introjs-highlight {
-            outline: 3px solid #3b82f6 !important;
-            outline-offset: 4px !important;
-          }
-          .introjs-button {
-            background-color: #3b82f6 !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 6px !important;
-          }
-        `}</style>
+
         <Dialog open={open && showCongrats} onOpenChange={() => {}}>
           <DialogContent className="max-w-md">
             <DialogHeader>
