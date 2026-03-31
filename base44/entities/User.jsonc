@@ -2,22 +2,20 @@
   "name": "User",
   "type": "object",
   "properties": {
-    "first_name": {
-      "type": "string",
-      "description": "User's first name"
-    },
-    "last_name": {
-      "type": "string",
-      "description": "User's last name"
-    },
     "role": {
       "type": "string",
       "enum": [
-        "superadmin",
         "admin",
-        "user"
+        "user",
+        "superadmin"
       ],
-      "default": "user"
+      "default": "user",
+      "description": "User role in the platform"
+    },
+    "onboarding_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has completed the tenant onboarding wizard"
     }
   }
 }
