@@ -92,6 +92,7 @@ export default function Visits() {
   const [checkInNowProperty, setCheckInNowProperty] = useState(null);
   const [checklists, setChecklists] = useState([]);
   const [showVisitTypeDialog, setShowVisitTypeDialog] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -133,7 +134,9 @@ export default function Visits() {
         setClients(clientsData);
         setTemplates(templatesData);
         setStaff(staffData);
-        setChecklists(checklistsData)
+        setChecklists(checklistsData);
+        const myTenantUser = staffData.find(s => s.user_id === user.id);
+        setIsAdmin(user.role === 'admin' || user.role === 'superadmin' || myTenantUser?.role_in_tenant === 'admin');
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -587,6 +590,34 @@ export default function Visits() {
               }}>
                 <Play className="h-4 w-4 mr-2" />
                 Start Checklist
+              </DropdownMenuItem>
+            )}
+            {isAdmin && visit.status !== 'cancelled' && visit.status !== 'completed' && (
+              <DropdownMenuItem
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (confirm('Cancel this visit?')) {
+                    await base44.entities.Visit.update(visit.id, { status: 'cancelled' });
+                    loadData();
+                  }
+                }}
+                className="text-amber-600"
+              >
+                Cancel Visit
+              </DropdownMenuItem>
+            )}
+            {isAdmin && (
+              <DropdownMenuItem
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (confirm('Permanently delete this visit? This cannot be undone.')) {
+                    await base44.entities.Visit.delete(visit.id);
+                    loadData();
+                  }
+                }}
+                className="text-red-600"
+              >
+                Delete Visit
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>

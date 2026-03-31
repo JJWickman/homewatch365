@@ -50,6 +50,7 @@ export default function VisitDetail() {
   });
   const [updating, setUpdating] = useState(false);
   const [showChecklistDialog, setShowChecklistDialog] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     loadVisit();
@@ -86,6 +87,9 @@ export default function VisitDetail() {
         if (propertyData.length > 0) setProperty(propertyData[0]);
         if (clientData.length > 0) setClient(clientData[0]);
         setStaff(staffData);
+        const me = await base44.auth.me();
+        const myTenantUser = staffData.find(s => s.user_id === me.id);
+        setIsAdmin(me.role === 'admin' || me.role === 'superadmin' || myTenantUser?.role_in_tenant === 'admin');
       }
     } catch (error) {
       console.error('Error loading visit:', error);
@@ -208,6 +212,34 @@ Your Property Management Team
             <Button onClick={handleNotifyClient}>
               <Send className="h-4 w-4 mr-2" />
               Notify Client
+            </Button>
+          )}
+          {isAdmin && visit.status !== 'cancelled' && visit.status !== 'completed' && (
+            <Button
+              variant="outline"
+              className="text-amber-600 border-amber-300 hover:bg-amber-50"
+              onClick={async () => {
+                if (confirm('Cancel this visit?')) {
+                  await base44.entities.Visit.update(visit.id, { status: 'cancelled' });
+                  loadVisit();
+                }
+              }}
+            >
+              Cancel Visit
+            </Button>
+          )}
+          {isAdmin && (
+            <Button
+              variant="outline"
+              className="text-red-600 border-red-300 hover:bg-red-50"
+              onClick={async () => {
+                if (confirm('Permanently delete this visit? This cannot be undone.')) {
+                  await base44.entities.Visit.delete(visit.id);
+                  navigate(createPageUrl('Visits'));
+                }
+              }}
+            >
+              Delete Visit
             </Button>
           )}
         </div>
