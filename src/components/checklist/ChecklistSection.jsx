@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import ChecklistItemRow from './ChecklistItemRow';
 
 export default function ChecklistSection({
   section,

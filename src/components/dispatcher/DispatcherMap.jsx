@@ -2,12 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Loader2 } from 'lucide-react';
 
-// Ensure google is globally accessible
-declare global {
-  interface Window {
-    google: any;
-  }
-}
+// Type assertion for global google object
+const google = (typeof window !== 'undefined' && (window as any).google) || {};
 
 export default function DispatcherMap({ properties, visits }) {
   const mapRef = useRef(null);
@@ -48,7 +44,7 @@ export default function DispatcherMap({ properties, visits }) {
   const initMap = () => {
     if (!mapRef.current) return;
 
-    const mapInstance = new google.maps.Map(mapRef.current, {
+    const mapInstance = new window.google.maps.Map(mapRef.current, {
       zoom: 11,
       center: { lat: 28.5383, lng: -81.3792 }, // Default to Orlando
       mapTypeControl: false,
@@ -65,7 +61,7 @@ export default function DispatcherMap({ properties, visits }) {
     markersRef.current.forEach(marker => marker.setMap(null));
     markersRef.current = [];
 
-    const bounds = new google.maps.LatLngBounds();
+    const bounds = new window.google.maps.LatLngBounds();
     let hasValidLocations = false;
 
     properties.forEach((property) => {
@@ -78,12 +74,12 @@ export default function DispatcherMap({ properties, visits }) {
       if (visit?.status === 'completed') markerColor = '#10B981'; // Green
       if (visit?.status === 'in_progress') markerColor = '#F59E0B'; // Amber
 
-      const marker = new google.maps.Marker({
+      const marker = new window.google.maps.Marker({
         position: { lat: property.latitude, lng: property.longitude },
         map: map,
         title: property.name || property.address,
         icon: {
-          path: google.maps.SymbolPath.CIRCLE,
+          path: window.google.maps.SymbolPath.CIRCLE,
           scale: 8,
           fillColor: markerColor,
           fillOpacity: 0.9,
@@ -92,7 +88,7 @@ export default function DispatcherMap({ properties, visits }) {
         },
       });
 
-      const infoWindow = new google.maps.InfoWindow({
+      const infoWindow = new window.google.maps.InfoWindow({
         content: `
           <div style="padding: 8px;">
             <h3 style="font-weight: 600; margin-bottom: 4px;">${property.name || 'Property'}</h3>

@@ -180,7 +180,7 @@ export default function PropertyForm() {
   }, []);
 
   const initializeGooglePlaces = () => {
-    const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || 'AIzaSyBPbLVxQ6d5dBkDX_5MHQ9dHJZECXX';
+    const apiKey = 'AIzaSyBPbLVxQ6d5dBkDX_5MHQ9dHJZECXX';
     const script = document.createElement('script');
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
     script.async = true;
