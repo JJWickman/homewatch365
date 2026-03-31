@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
+import VisitTypeSelectionDialog from '@/components/visits/VisitTypeSelectionDialog';
 
 export default function VisitDetail() {
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ export default function VisitDetail() {
     assigned_to: ''
   });
   const [updating, setUpdating] = useState(false);
+  const [showChecklistDialog, setShowChecklistDialog] = useState(false);
 
   useEffect(() => {
     loadVisit();
@@ -190,14 +192,14 @@ Your Property Management Team
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </Button>
-              <Button onClick={() => navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${visit.property_id}`)} className="bg-black text-white hover:bg-slate-900">
+              <Button onClick={() => setShowChecklistDialog(true)} className="bg-black text-white hover:bg-slate-900">
                 <Play className="h-4 w-4 mr-2" />
                  Start Check-In
                 </Button>
             </>
           )}
           {visit.status === 'in_progress' && (
-            <Button onClick={() => navigate(createPageUrl('VisitChecklistMobile') + `?visit_id=${visit.id}&property_id=${visit.property_id}`)} className="bg-black text-white hover:bg-slate-900">
+            <Button onClick={() => setShowChecklistDialog(true)} className="bg-black text-white hover:bg-slate-900">
               <Play className="h-4 w-4 mr-2" />
               Continue Visit
             </Button>
@@ -584,6 +586,16 @@ Your Property Management Team
           </Tabs>
         </div>
       </div>
+
+      {/* Checklist Modal */}
+      {property && (
+        <VisitTypeSelectionDialog
+          open={showChecklistDialog}
+          onOpenChange={setShowChecklistDialog}
+          property={property}
+          existingVisit={visit}
+        />
+      )}
 
       {/* Edit Visit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import VisitFormInDialog from '@/components/visits/VisitFormInDialog';
@@ -44,14 +44,27 @@ const VISIT_TYPES = [
   { value: 'followup', label: 'Follow-Up', icon: CalendarCheck, color: 'bg-teal-50 border-teal-200 hover:bg-teal-100' },
 ];
 
-export default function VisitTypeSelectionDialog({ open, onOpenChange, property, propertyChecklist, properties = [], checklists = [] }) {
+export default function VisitTypeSelectionDialog({ open, onOpenChange, property, propertyChecklist, properties = [], checklists = [], existingVisit = null }) {
   const navigate = useNavigate();
   const [creating, setCreating] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
-  const [step, setStep] = useState(property ? 'type' : 'property');
-  const [selectedVisitType, setSelectedVisitType] = useState(null);
-  const [currentVisit, setCurrentVisit] = useState(null);
+  const [step, setStep] = useState(existingVisit ? 'form' : property ? 'type' : 'property');
+  const [selectedVisitType, setSelectedVisitType] = useState(existingVisit?.visit_type || null);
+  const [currentVisit, setCurrentVisit] = useState(existingVisit || null);
   const [currentTemplate, setCurrentTemplate] = useState(null);
+
+  // When existingVisit changes (dialog reopens), load template and reset to form step
+  useEffect(() => {
+    if (existingVisit && open) {
+      setCurrentVisit(existingVisit);
+      setStep('form');
+      // Load the template for this visit
+      if (existingVisit.template_id) {
+        base44.entities.ChecklistTemplate.filter({ id: existingVisit.template_id })
+          .then(templates => setCurrentTemplate(templates[0] || null));
+      }
+    }
+  }, [existingVisit, open]);
 
 
   const handleSelectProperty = (prop) => {
