@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import OnboardingTour from '@/components/onboarding/OnboardingTour';
+
 import { format, startOfWeek, endOfWeek, isToday, parseISO } from 'date-fns';
 import VisitFormInDialog from '@/components/visits/VisitFormInDialog';
 import {
@@ -44,21 +44,12 @@ export default function Dashboard() {
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [visitTemplate, setVisitTemplate] = useState(null);
   const [showVisitForm, setShowVisitForm] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(true);
 
   useEffect(() => {
     loadDashboardData();
   }, []);
 
-  useEffect(() => {
-    // Show onboarding wizard if user hasn't completed it, hasn't dismissed it, and company is loaded
-    if (user && company) {
-      // Check localStorage first—tour persists across pages
-      const isDismissedInLocalStorage = typeof window !== 'undefined' && localStorage.getItem('onboarding_dismissed') === 'true';
-      const shouldShow = !isDismissedInLocalStorage && user.onboarding_completed !== true && user.onboarding_dismissed !== true;
-      setShowOnboarding(shouldShow);
-    }
-  }, [user, company]);
+
 
   useEffect(() => {
     if (!user) return;
@@ -156,11 +147,6 @@ export default function Dashboard() {
 
       setTodayInspections(enrichedVisits);
       setRecentActivity(recentVisits);
-
-      // Check if onboarding needed (user and company now loaded)
-      if (currentUser && currentUser.onboarding_completed !== true && currentUser.onboarding_dismissed !== true) {
-        setShowOnboarding(true);
-      }
     } catch (error) {
       console.error('Error loading dashboard:', error);
     } finally {
@@ -418,23 +404,7 @@ export default function Dashboard() {
        </DialogContent>
       </Dialog>
 
-      {/* Onboarding Tour */}
-       {showOnboarding && (
-        <OnboardingTour
-          open={showOnboarding}
-          onComplete={() => {
-            setShowOnboarding(false);
-          }}
-          onDismiss={(dontShowAgain) => {
-            if (dontShowAgain) {
-              base44.auth.updateMe({ onboarding_dismissed: true });
-            }
-            setShowOnboarding(false);
-          }}
-          user={user}
-          tenant={company}
-        />
-      )}
+
 
       {/* Issues Alert */}
        {stats.issuesFound > 0 && (
