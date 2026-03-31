@@ -203,7 +203,6 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       tenant_id: tenant.id,
-      company_id: tenant.id,
       tenant,
     });
 

@@ -3,10 +3,10 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { email, company_id } = await req.json();
+    const { email, tenant_id } = await req.json();
 
-    if (!email || !company_id) {
-      return Response.json({ error: 'Email and company_id are required' }, { status: 400 });
+    if (!email || !tenant_id) {
+      return Response.json({ error: 'Email and tenant_id are required' }, { status: 400 });
     }
 
     // Find the user by email
@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     // Update user via service role to set both fields
     await base44.asServiceRole.entities.User.update(user.id, { 
       onboarding_completed: true, 
-      company_id: company_id
+      primary_tenant_id: tenant_id
     });
 
     return Response.json({ 
