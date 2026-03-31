@@ -309,7 +309,7 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
   return (
     <div className="fixed pointer-events-none z-50" style={{ top: `${currentPos.top}px`, left: `${currentPos.left}px`, width: '320px' }}>
       <div 
-        className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl p-6 pointer-events-auto cursor-grab active:cursor-grabbing select-none"
+        className="rounded-2xl backdrop-blur-xl bg-slate-900/95 border border-slate-700 shadow-2xl p-6 pointer-events-auto cursor-grab active:cursor-grabbing select-none"
         onMouseDown={handleMouseDown}
       >
         <div className="space-y-4">
