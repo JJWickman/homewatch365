@@ -377,7 +377,6 @@ export default function BillingEmailSection({ company, onUpdate }) {
             <Button
               variant="outline"
               onClick={() => {
-                setVerifiedBillingEmail('');
                 onUpdate();
               }}
               size="sm"
