@@ -427,7 +427,6 @@ export default function Dashboard() {
           open={showOnboarding}
           onComplete={() => {
             setShowOnboarding(false);
-            loadDashboardData();
           }}
           user={user}
           tenant={company}
