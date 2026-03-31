@@ -205,7 +205,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
               placeholder="Your company name"
-              className="bg-blue-100/20 border-blue-300/40 backdrop-blur"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
             />
           </div>
           <div>
@@ -215,7 +215,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
               value={companyAddress}
               onChange={(e) => setCompanyAddress(e.target.value)}
               placeholder="Street address"
-              className="bg-blue-100/20 border-blue-300/40 backdrop-blur"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -310,7 +310,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
               id="prop-type"
               value={propertyType}
               onChange={(e) => setPropertyType(e.target.value)}
-              className="flex h-9 w-full rounded-md border border-blue-300/40 bg-blue-100/20 backdrop-blur px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
             >
               <option value="single_family">Single Family Home</option>
               <option value="condo">Condo/Villa</option>
@@ -326,7 +326,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
               value={propertyAddress}
               onChange={(e) => setPropertyAddress(e.target.value)}
               placeholder="Street address"
-              className="bg-blue-100/20 border-blue-300/40 backdrop-blur"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
             />
           </div>
           <div className="grid grid-cols-3 gap-3">
@@ -337,7 +337,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
                 value={propertyCity}
                 onChange={(e) => setPropertyCity(e.target.value)}
                 placeholder="City"
-                className="bg-blue-100/20 border-blue-300/40 backdrop-blur"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
               />
             </div>
             <div>
@@ -347,7 +347,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
                 value={propertyState}
                 onChange={(e) => setPropertyState(e.target.value)}
                 placeholder="State"
-                className="bg-blue-100/20 border-blue-300/40 backdrop-blur"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
               />
             </div>
             <div>
@@ -357,7 +357,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
                 value={propertyZip}
                 onChange={(e) => setPropertyZip(e.target.value)}
                 placeholder="ZIP"
-                className="bg-blue-100/20 border-blue-300/40 backdrop-blur"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
               />
             </div>
           </div>
@@ -391,7 +391,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
               id="visit-freq"
               value={visitFrequency}
               onChange={(e) => setVisitFrequency(e.target.value)}
-              className="flex h-9 w-full rounded-md border border-blue-300/40 bg-blue-100/20 backdrop-blur px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
             >
               <option value="weekly">Weekly</option>
               <option value="bi_weekly">Bi-weekly</option>
@@ -440,7 +440,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
               value={checklistName}
               onChange={(e) => setChecklistName(e.target.value)}
               placeholder="e.g., Beach House Weekly Checklist"
-              className="bg-blue-100/20 border-blue-300/40 backdrop-blur"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
             />
           </div>
           <div className="bg-green-50 border border-green-200 rounded-lg p-3">
@@ -501,7 +501,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
 
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-white/10 backdrop-blur-md">
+      <div className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-white/10 backdrop-blur-xl">
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 pt-6 pb-4 border-b border-white/10">
           <div className="flex items-center gap-3">
             <currentStep.icon className="h-6 w-6 text-white" />
@@ -513,7 +513,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
           </div>
         </div>
 
-        <div className="bg-white/70 backdrop-blur-xl px-6 pt-6 pb-6">
+        <div className="bg-white/10 px-6 pt-6 pb-6">
           {/* Progress indicator */}
           <div className="flex justify-between mb-6">
             {steps.map((_, i) => (
