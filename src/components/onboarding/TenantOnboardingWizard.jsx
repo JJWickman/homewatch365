@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   CheckCircle2, ArrowRight, Building, Users, Home,
-  DollarSign, ClipboardList, Loader2, X
+  DollarSign, ClipboardList, Loader2, X, Sparkles
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { base44 } from '@/api/base44Client';
 
 export default function TenantOnboardingWizard({ open, onComplete, onDismiss, user, tenant }) {
@@ -460,41 +461,54 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
       onNext: handleStep5Save,
     },
     {
-      title: "You're All Set!",
+      title: "Congratulations!",
       description: 'Onboarding complete',
-      icon: CheckCircle2,
+      icon: Sparkles,
       content: (
-        <div className="space-y-4">
-          <Card className="bg-green-50 border-green-200">
+        <div className="space-y-6 text-center">
+          <div className="py-4">
+            <Sparkles className="h-16 w-16 text-yellow-300 mx-auto mb-4 animate-bounce" />
+            <h3 className="text-2xl font-bold text-white mb-2">You're All Set!</h3>
+            <p className="text-blue-100 text-sm">Your Home Watch 365 account is ready to go</p>
+          </div>
+
+          <Card className="bg-blue-500/20 border-blue-400">
             <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="h-8 w-8 text-green-600 shrink-0" />
-                <div>
-                  <p className="font-semibold text-green-900">Setup Complete!</p>
-                  <p className="text-sm text-green-700 mt-1">
-                    Your tenant is ready to manage properties and schedule visits.
-                  </p>
+              <div className="space-y-3 text-left">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+                  <p className="text-white">Company information configured</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+                  <p className="text-white">First client added</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+                  <p className="text-white">Property set up with GPS coordinates</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+                  <p className="text-white">Pricing configured</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+                  <p className="text-white">Checklist template assigned</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <div className="space-y-2 text-sm text-slate-600">
-            <p>✓ Company information updated</p>
-            <p>✓ First client created</p>
-            <p>✓ First property created with coordinates</p>
-            <p>✓ Pricing configured</p>
-            <p>✓ Checklist assigned</p>
-          </div>
-          <div className="flex items-center gap-2 mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+
+          <div className="flex items-center gap-2 p-3 bg-white/10 rounded-lg border border-white/20">
             <input
               type="checkbox"
               id="dont-show-again"
               checked={dontShowAgain}
               onChange={(e) => setDontShowAgain(e.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 cursor-pointer"
+              className="h-4 w-4 rounded border-white/30 cursor-pointer"
             />
-            <label htmlFor="dont-show-again" className="text-sm text-slate-700 cursor-pointer flex-1">
-              Don't show this onboarding wizard on startup
+            <label htmlFor="dont-show-again" className="text-sm text-white/80 cursor-pointer flex-1 text-left">
+              Don't show this again
             </label>
           </div>
         </div>
@@ -571,10 +585,13 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
             ) : (
               <Button
                 onClick={() => {
-                  onDismiss?.(dontShowAgain);
-                  onComplete();
+                  confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                  setTimeout(() => {
+                    onDismiss?.(dontShowAgain);
+                    onComplete();
+                  }, 500);
                 }}
-                className="ml-auto bg-green-600 hover:bg-green-700 w-full"
+                className="ml-auto bg-green-600 hover:bg-green-700 w-full text-white"
               >
                 <CheckCircle2 className="h-4 w-4 mr-2" />
                 Start Using the App
