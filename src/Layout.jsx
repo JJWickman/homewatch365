@@ -450,13 +450,13 @@ export default function Layout({ children, currentPageName }) {
 
         /* Glass cards - ALL card-like surfaces inside main content only */
         main [class*="Card"], main [class*="card"],
-        main .rounded-lg, main .rounded-xl,
+        main .rounded-lg:not(button):not([role="option"]):not([data-radix-select-item]), main .rounded-xl:not(button),
         main [role="dialog"] > div,
         main [role="listbox"], main [role="menu"],
         main .border.bg-popover,
         main .border.bg-background,
-        main .border.bg-white,
-        main .bg-white {
+        main .border.bg-white:not(button),
+        main .bg-white:not(button) {
           background: rgba(240, 248, 255, 0.95) !important;
           backdrop-filter: blur(20px) !important;
           border: 1px solid rgba(147, 197, 253, 0.4) !important;
