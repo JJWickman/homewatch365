@@ -68,52 +68,16 @@
   ],
   "rls": {
     "create": {
-      "$or": [
-        {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "read": {
-      "$or": [
-        {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "update": {
-      "$or": [
-        {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "delete": {
-      "$or": [
-        {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     }
   }
 }
