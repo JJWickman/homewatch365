@@ -71,17 +71,44 @@ const TEMPLATES_WITH_SECTIONS = [
   { template_name: 'Concierge Service Visit', template_code: 'concierge_service_standard', property_type: null, template_category: 'concierge', template_description: 'Checklist for concierge service visits', version: 1, template_active: true, tenant_id: null, sections: [{ title: 'Visit Details', items: [] }, { title: 'Service Type', items: [] }] }
 ];
 
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function queryWithRetry(fn, maxRetries = 3) {
+  let lastError;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (error.message?.includes('rate limit') || error.message?.includes('429')) {
+        const delayMs = Math.pow(2, attempt) * 1000; // Exponential backoff: 1s, 2s, 4s
+        console.log(`Rate limited. Retry attempt ${attempt + 1}/${maxRetries} after ${delayMs}ms`);
+        await sleep(delayMs);
+      } else {
+        throw error;
+      }
+    }
+  }
+  throw lastError;
+}
+
 async function seedSystemTemplates(sr) {
   const results = [];
 
   for (const tmpl of TEMPLATES_WITH_SECTIONS) {
     const slug = tmpl.template_code;
-    const existing = await sr.entities.ChecklistTemplateV2.filter({ template_code: slug });
+    
+    // Add 500ms delay between operations to avoid rate limits
+    await sleep(500);
+    
+    const existing = await queryWithRetry(() => sr.entities.ChecklistTemplateV2.filter({ template_code: slug }));
 
     if (existing.length > 0) {
       results.push({ name: tmpl.template_name, status: 'exists', id: existing[0].id });
     } else {
-      const created = await sr.entities.ChecklistTemplateV2.create(tmpl);
+      const created = await queryWithRetry(() => sr.entities.ChecklistTemplateV2.create(tmpl));
       results.push({ name: tmpl.template_name, status: 'created', id: created.id });
     }
   }
