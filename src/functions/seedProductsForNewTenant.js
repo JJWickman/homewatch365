@@ -73,7 +73,7 @@ const DEFAULT_PRODUCTS = [
     is_recurring: true,
     is_active: true
   }
-];}
+];
 
 Deno.serve(async (req) => {
   try {
