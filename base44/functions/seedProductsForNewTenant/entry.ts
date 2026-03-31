@@ -116,11 +116,11 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const { event } = await req.json();
 
-    if (!event?.id) {
+    if (!event?.entity_id) {
       return Response.json({ error: 'No tenant ID in event' }, { status: 400 });
     }
 
-    const tenantId = event.id;
+    const tenantId = event.entity_id;
 
     // Check if products already exist
     const existing = await base44.asServiceRole.entities.ProductService.filter({ tenant_id: tenantId });
