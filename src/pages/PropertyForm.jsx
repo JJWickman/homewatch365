@@ -1529,7 +1529,7 @@ export default function PropertyForm() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              Inspection Schedule
+              Check-In Visit Schedule
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
