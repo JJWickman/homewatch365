@@ -76,11 +76,10 @@ Deno.serve(async (req) => {
 
     // Section 1: Account Creation
     checkPageBreak(80);
-    addHeading('Step 1: Create Your Account & Subdomain');
+    addHeading('Step 1: Create Your Account & Company');
     addStep('1a', 'Sign Up', 'Go to the login page and click Sign Up. Enter your email address, create a password, and verify your email.');
-    addStep('1b', 'Create Your Subdomain', 'On the Company Onboarding screen, enter a subdomain (e.g., mycompany). This becomes your permanent access URL: mycompany.estatewatch365.com');
-    addStep('1c', 'Verify Access', 'After creating your subdomain, log out and log back in using your subdomain URL. This ensures your account is linked correctly.');
-    yPosition += 5;
+    addStep('1b', 'Create Your Company', 'On the Company Onboarding screen, enter a unique company name (e.g., My Home Watch Company). This identifies your account in the system.');
+    addStep('1c', 'Verify Access', 'After creating your account, log out and log back in using your email. Your company is now set up and linked to your account.');
 
     // Section 2: Company Setup
     checkPageBreak(80);
@@ -152,7 +151,7 @@ Deno.serve(async (req) => {
     checkPageBreak(60);
     addHeading('Testing Complete!');
     addText('You have successfully validated:');
-    addText('- User account creation with subdomain setup', 5);
+    addText('- User account creation and company setup', 5);
     addText('- Company information and branding', 5);
     addText('- Checklist templates loaded correctly', 5);
     addText('- Products/services loaded correctly', 5);
