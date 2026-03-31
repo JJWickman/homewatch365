@@ -199,7 +199,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
       content: (
         <div className="space-y-4">
           <div>
-            <Label htmlFor="company-name">Company Name *</Label>
+            <Label htmlFor="company-name" className="text-white">Company Name *</Label>
             <Input
               id="company-name"
               value={companyName}
@@ -209,7 +209,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
             />
           </div>
           <div>
-            <Label htmlFor="company-address">Address *</Label>
+            <Label htmlFor="company-address" className="text-white">Address *</Label>
             <Input
               id="company-address"
               value={companyAddress}
@@ -327,7 +327,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
             </select>
           </div>
           <div>
-            <Label htmlFor="prop-address">Address *</Label>
+            <Label htmlFor="prop-address" className="text-white">Address *</Label>
             <Input
               id="prop-address"
               value={propertyAddress}
@@ -338,7 +338,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <Label htmlFor="prop-city">City *</Label>
+              <Label htmlFor="prop-city" className="text-white">City *</Label>
               <Input
                 id="prop-city"
                 value={propertyCity}
@@ -348,7 +348,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
               />
             </div>
             <div>
-              <Label htmlFor="prop-state">State *</Label>
+              <Label htmlFor="prop-state" className="text-white">State *</Label>
               <Input
                 id="prop-state"
                 value={propertyState}
@@ -358,7 +358,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
               />
             </div>
             <div>
-              <Label htmlFor="prop-zip">ZIP</Label>
+              <Label htmlFor="prop-zip" className="text-white">ZIP</Label>
               <Input
                 id="prop-zip"
                 value={propertyZip}
@@ -379,9 +379,9 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
       content: (
         <div className="space-y-4">
           <div>
-            <Label htmlFor="base-price">Base Price Per Visit *</Label>
+            <Label htmlFor="base-price" className="text-white">Base Price Per Visit *</Label>
             <div className="flex items-center gap-2">
-              <span className="text-lg font-semibold text-slate-600">$</span>
+              <span className="text-lg font-semibold text-white/60">$</span>
               <Input
                 id="base-price"
                 type="number"
@@ -393,12 +393,12 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
             </div>
           </div>
           <div>
-            <Label htmlFor="visit-freq">Visit Frequency *</Label>
+            <Label htmlFor="visit-freq" className="text-white">Visit Frequency *</Label>
             <select
               id="visit-freq"
               value={visitFrequency}
               onChange={(e) => setVisitFrequency(e.target.value)}
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+              className="flex h-9 w-full rounded-md border border-white/20 bg-white/10 px-3 py-1 text-sm shadow-sm text-white placeholder:text-white/40"
             >
               <option value="weekly">Weekly</option>
               <option value="bi_weekly">Bi-weekly</option>
@@ -441,7 +441,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
             </div>
           </div>
           <div>
-            <Label htmlFor="checklist-name">Checklist Name for This Property *</Label>
+            <Label htmlFor="checklist-name" className="text-white">Checklist Name for This Property *</Label>
             <Input
               id="checklist-name"
               value={checklistName}
