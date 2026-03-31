@@ -3,12 +3,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-
-    // Only admins can trigger this
-    if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // Use service role for scheduled automation (no user context)
 
     // Get all conversations for the support agent
     const conversations = await base44.agents.listConversations({
@@ -30,7 +25,7 @@ Deno.serve(async (req) => {
     }
 
     // Get tenant info for email
-    const tenant = await base44.entities.Tenant.list();
+    const tenant = await base44.asServiceRole.entities.Tenant.list();
     const tenantData = tenant[0];
     const notificationEmails = ['jason@estatewatch365.com', 'jasonwi@live.com'];
 
@@ -44,7 +39,7 @@ Deno.serve(async (req) => {
 
     // Send email notifications to both addresses
     await Promise.all(notificationEmails.map(email =>
-      base44.integrations.Core.SendEmail({
+      base44.asServiceRole.integrations.Core.SendEmail({
         to: email,
         subject: `[Support Alert] ${activeConversations.length} Active Chat(s)`,
         body: `You have ${activeConversations.length} active support conversations:\n\n${conversationsSummary}\n\nLog in to view and respond.`
