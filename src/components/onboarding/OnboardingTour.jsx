@@ -10,6 +10,7 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
   const [showCongrats, setShowCongrats] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const [highlightElement, setHighlightElement] = useState(null);
+  const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
 
   const steps = [
     {
@@ -75,6 +76,22 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     highlightElement.style.boxShadow = '0 0 0 6px rgba(59, 130, 246, 0.1)';
     highlightElement.style.borderRadius = '6px';
     highlightElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Position tooltip near the element
+    const rect = highlightElement.getBoundingClientRect();
+    const tooltipWidth = 320;
+    const tooltipHeight = 280;
+    const gap = 16;
+
+    let top = rect.top + window.scrollY - tooltipHeight - gap;
+    let left = rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2;
+
+    // Ensure it doesn't go off-screen
+    if (left < 16) left = 16;
+    if (left + tooltipWidth > window.innerWidth - 16) left = window.innerWidth - tooltipWidth - 16;
+    if (top < 16) top = rect.bottom + window.scrollY + gap;
+
+    setTooltipPos({ top, left });
   }, [highlightElement]);
 
   const handleNext = () => {
@@ -166,7 +183,7 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
   const step = steps[currentStep];
 
   return (
-    <div className="fixed bottom-6 right-6 z-40 max-w-sm">
+    <div className="fixed z-40 max-w-sm" style={{ top: `${tooltipPos.top}px`, left: `${tooltipPos.left}px` }}>
       <Card className="shadow-xl border-blue-200 bg-white">
         <CardContent className="p-6">
           <div className="space-y-4">
