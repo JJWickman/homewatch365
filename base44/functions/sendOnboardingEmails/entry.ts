@@ -196,6 +196,12 @@ Deno.serve(async (req) => {
       if (tenantUsers.length === 0) continue;
 
       const owner = tenantUsers[0];
+
+      // Look up actual user email from user_id
+      const users = await base44.asServiceRole.entities.User.filter({ id: owner.user_id });
+      if (users.length === 0) continue;
+      const ownerEmail = users[0].email;
+
       const trialEndsAt = tenant.trial_ends_at ? new Date(tenant.trial_ends_at) : null;
 
       if (!trialEndsAt) continue;
@@ -206,13 +212,13 @@ Deno.serve(async (req) => {
       // Check for existing tracking record
       let tracking = await base44.asServiceRole.entities.OnboardingEmailTracking.filter({
         tenant_id: tenant.id,
-        user_email: owner.user_id
+        user_email: ownerEmail
       });
 
       // Create tracking if doesn't exist
       if (tracking.length === 0) {
         tracking = [await base44.asServiceRole.entities.OnboardingEmailTracking.create({
-          user_email: owner.user_id,
+          user_email: ownerEmail,
           tenant_id: tenant.id,
           trial_start_date: tenant.created_date || new Date().toISOString(),
           emails_sent: [],
@@ -225,11 +231,11 @@ Deno.serve(async (req) => {
 
       // Send trial reminder if 3 days or less remaining
       if (daysUntilExpiry <= 3 && !trackingRecord.trial_reminder_sent) {
-        console.log(`Sending trial reminder to ${owner.user_id} (${daysUntilExpiry} days left)`);
+        console.log(`Sending trial reminder to ${ownerEmail} (${daysUntilExpiry} days left)`);
 
         await base44.asServiceRole.integrations.Core.SendEmail({
           from_name: 'Estate Watch 365',
-          to: owner.user_id,
+          to: ownerEmail,
           subject: TRIAL_REMINDER_SUBJECT,
           body: TRIAL_REMINDER_CONTENT(daysUntilExpiry, tenant.name)
         });
@@ -238,7 +244,7 @@ Deno.serve(async (req) => {
           trial_reminder_sent: true
         });
 
-        console.log(`Trial reminder sent to ${owner.user_id}`);
+        console.log(`Trial reminder sent to ${ownerEmail}`);
         continue;
       }
 
@@ -259,11 +265,11 @@ Deno.serve(async (req) => {
       if (daysSinceStart >= nextEmailDay && emailsSentCount < EMAIL_TOPICS.length) {
         const emailToSend = EMAIL_TOPICS[emailsSentCount];
 
-        console.log(`Sending email ${emailToSend.number} to ${owner.user_id} (day ${daysSinceStart})`);
+        console.log(`Sending email ${emailToSend.number} to ${ownerEmail} (day ${daysSinceStart})`);
 
         await base44.asServiceRole.integrations.Core.SendEmail({
           from_name: 'Estate Watch 365',
-          to: owner.user_id,
+          to: ownerEmail,
           subject: emailToSend.subject,
           body: emailToSend.content
         });
@@ -283,7 +289,8 @@ Deno.serve(async (req) => {
           completed: updatedEmailsSent.length >= EMAIL_TOPICS.length
         });
 
-        console.log(`Email ${emailToSend.number} sent to ${owner.user_id}`);
+        console.log(`Email ${emailToSend.number} sent to ${ownerEmail}`);
+
       }
     }
 
