@@ -488,6 +488,14 @@ export default function Layout({ children, currentPageName }) {
           background: transparent !important;
         }
 
+        /* Reset switch internals — never glass-ify */
+        [role="switch"], [role="switch"] * {
+          background: revert !important;
+          backdrop-filter: none !important;
+          border: revert !important;
+          box-shadow: revert !important;
+        }
+
         /* Glass buttons */
         button {
           backdrop-filter: blur(10px) !important;
