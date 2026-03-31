@@ -114,7 +114,13 @@ const DEFAULT_PRODUCTS = [
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch (e) {
+      // If JSON parsing fails, treat as empty payload
+      body = {};
+    }
     
     // Entity automation payload: { event: {type, entity_name, entity_id}, data: {...} }
     const tenantId = body.event?.entity_id || body.data?.id;
