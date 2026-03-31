@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import TenantOnboardingWizard from '@/components/onboarding/TenantOnboardingWizard';
 import { format, startOfWeek, endOfWeek, isToday, parseISO } from 'date-fns';
 import VisitFormInDialog from '@/components/visits/VisitFormInDialog';
 import {
@@ -43,10 +44,23 @@ export default function Dashboard() {
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [visitTemplate, setVisitTemplate] = useState(null);
   const [showVisitForm, setShowVisitForm] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
+    checkOnboardingStatus();
   }, []);
+
+  const checkOnboardingStatus = async () => {
+    try {
+      const currentUser = await base44.auth.me();
+      if (currentUser && !currentUser.onboarding_completed) {
+        setShowOnboarding(true);
+      }
+    } catch (error) {
+      console.error('Error checking onboarding status:', error);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -408,8 +422,21 @@ export default function Dashboard() {
        </DialogContent>
       </Dialog>
 
+      {/* Onboarding Wizard */}
+       {user && company && (
+        <TenantOnboardingWizard
+          open={showOnboarding}
+          onComplete={() => {
+            setShowOnboarding(false);
+            loadDashboardData();
+          }}
+          user={user}
+          tenant={company}
+        />
+      )}
+
       {/* Issues Alert */}
-      {stats.issuesFound > 0 && (
+       {stats.issuesFound > 0 && (
         <Card className="border-amber-200 bg-amber-50">
           <CardContent className="flex items-center gap-4 py-4">
             <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
