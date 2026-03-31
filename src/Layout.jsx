@@ -448,22 +448,19 @@ export default function Layout({ children, currentPageName }) {
           background-attachment: fixed;
         }
 
-        /* Glass cards - ALL card-like surfaces inside main content only */
-        main [class*="Card"], main [class*="card"],
-        main [role="dialog"] > div,
-        main [role="listbox"], main [role="menu"],
-        main .border.bg-popover,
-        main .border.bg-background,
-        main .border.bg-white:not(button),
-        main .bg-white:not(button) {
+        /* Glass cards */
+        main [class*="Card"], main [class*="card"] {
           background: rgba(240, 248, 255, 0.95) !important;
           backdrop-filter: blur(20px) !important;
           border: 1px solid rgba(147, 197, 253, 0.4) !important;
           box-shadow: 0 8px 32px 0 rgba(30, 58, 95, 0.15) !important;
         }
 
-        /* Glass inputs and selects */
-        main input:not([role="switch"]), main select, main textarea, main [role="combobox"] {
+        /* Glass inputs and selects — but NOT switch or its children */
+        main input:not([role="switch"]):not([data-state]),
+        main select,
+        main textarea,
+        main [role="combobox"] {
           background: rgba(219, 234, 254, 0.4) !important;
           backdrop-filter: blur(10px) !important;
           border: 1px solid rgba(147, 197, 253, 0.5) !important;
@@ -488,21 +485,27 @@ export default function Layout({ children, currentPageName }) {
           background: transparent !important;
         }
 
-        /* Reset switch internals — never glass-ify */
-        [role="switch"], [role="switch"] * {
-          background: revert !important;
+        /* Protect switch toggle — never override */
+        button[role="switch"],
+        button[role="switch"] span {
+          background-color: unset !important;
           backdrop-filter: none !important;
-          border: revert !important;
-          box-shadow: revert !important;
+          border: unset !important;
+          box-shadow: unset !important;
         }
 
-        /* Glass buttons */
-        button {
+        /* Protect colored icon containers with inline styles */
+        [style*="background"] {
+          backdrop-filter: none !important;
+        }
+
+        /* Glass buttons (non-switch) */
+        button:not([role="switch"]) {
           backdrop-filter: blur(10px) !important;
           transition: all 0.3s ease !important;
         }
 
-        button:hover {
+        button:not([role="switch"]):hover {
           transform: translateY(-2px);
           box-shadow: 0 4px 20px rgba(30, 58, 95, 0.2) !important;
         }
@@ -526,9 +529,6 @@ export default function Layout({ children, currentPageName }) {
         ::-webkit-scrollbar-thumb:hover {
           background: rgba(147, 197, 253, 0.8);
         }
-
-        /* Glass badges */
-        [class*="badge"]:not([role="switch"]) {
 
         /* Animations */
         * {
