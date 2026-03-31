@@ -1,46 +1,46 @@
 import React, { useEffect, useState } from 'react';
 import IntroJs from 'intro.js';
 import 'intro.js/introjs.css';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Sparkles } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
 import confetti from 'canvas-confetti';
 
 export default function OnboardingTour({ open, onComplete, onDismiss, user, tenant }) {
-  const [showCongrats, setShowCongrats] = React.useState(false);
-  const [dontShowAgain, setDontShowAgain] = React.useState(false);
-  const [currentStep, setCurrentStep] = React.useState(0);
+  const [showCongrats, setShowCongrats] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
+  const [introInstance, setIntroInstance] = useState(null);
 
   const steps = [
     {
+      element: 'aside nav a[href*="Settings"]',
       title: 'Step 1: Settings & Branding',
       intro: 'Go to Settings → Company tab. Update your company logo, name, address, and website. Optionally connect Google Business, Facebook, or Yelp profiles.',
-      element: 'aside nav a[href*="Settings"]',
       position: 'right'
     },
     {
+      element: 'aside nav a[href*="Clients"]',
       title: 'Step 2: Add Your First Client',
       intro: 'Go to Clients and click "Add Client". Enter their name, address, select services, choose billing frequency, and set a portal PIN.',
-      element: 'aside nav a[href*="Clients"]',
       position: 'right'
     },
     {
+      element: 'aside nav a[href*="Properties"]',
       title: 'Step 3: Create a Property',
-      intro: 'Go to Properties and click "Add Property". Select the client, enter property details (type, bedrooms, bathrooms, square feet, year built). Validate the address for aerial imagery, add access info, emergency contacts, and check-in visit schedule. Save the property.',
-      element: 'aside nav a[href*="Properties"]',
+      intro: 'Go to Properties and click "Add Property". Select the client, enter property details, validate the address for aerial imagery, add access info and emergency contacts. Save the property.',
       position: 'right'
     },
     {
+      element: 'aside nav a[href*="Properties"]',
       title: 'Step 4: Set Property Pricing',
-      intro: 'Open your property from Properties. Go to the Pricing tab. Configure base pricing ($60 standard + $15 per water zone), add water zones count, select visit frequency and payment terms (per visit, monthly, or annual). Save the property.',
-      element: 'aside nav a[href*="Properties"]',
+      intro: 'Open your property from Properties. Go to the Pricing tab. Configure base pricing, add water zones count, select visit frequency and payment terms. Save the property.',
       position: 'right'
     },
     {
-      title: 'Step 5: Customize a Checklist',
-      intro: 'In your property, go to the Checklist tab. Click "Start Checklist Setup", select property type (Single Family, Condo/Villa, or High Rise). Name your checklist (e.g., "SuziesSummer2026 Checklist"), customize sections and instructions, then save. This checklist will load for all check-in visits at this property.',
       element: 'aside nav a[href*="Properties"]',
+      title: 'Step 5: Customize a Checklist',
+      intro: 'In your property, go to the Checklist tab. Click "Start Checklist Setup", select property type, name your checklist, customize sections, then save. This checklist will load for all check-in visits.',
       position: 'right'
     }
   ];
@@ -49,25 +49,21 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     if (!open || showCongrats) return;
 
     const intro = IntroJs();
-    const currentStepData = steps[currentStep];
-    
+    setIntroInstance(intro);
+
     intro.setOptions({
-      steps: [{
-        element: currentStepData.element,
-        intro: currentStepData.intro,
-        position: currentStepData.position,
-        highlightClass: 'introjs-highlight'
-      }],
+      steps: steps,
       tooltipClass: 'introjs-tooltip onboarding-tooltip',
       highlightClass: 'introjs-highlight onboarding-highlight',
-      showBullets: false,
+      showBullets: true,
       showProgress: true,
-      exitOnEsc: false,
+      exitOnEsc: true,
       exitOnOverlayClick: false,
-      skipLabel: 'Skip',
-      nextLabel: currentStep === steps.length - 1 ? 'Complete' : 'Next →',
+      skipLabel: 'Skip Tour',
+      nextLabel: 'Next →',
       prevLabel: '← Back',
-      doneLabel: 'Complete'
+      doneLabel: 'Complete Tour',
+      disableInteraction: false
     });
 
     intro.oncomplete(() => {
@@ -84,17 +80,9 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     return () => {
       intro.exit();
     };
-  }, [open, showCongrats, currentStep, onDismiss]);
+  }, [open, showCongrats, onDismiss]);
 
-  const handleCompleteTour = () => {
-    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-    setTimeout(() => {
-      onDismiss?.(dontShowAgain);
-      onComplete();
-    }, 500);
-  };
-
-  // Congratulations screen
+  // Congratulations modal
   if (showCongrats) {
     return (
       <Dialog open={open && showCongrats} onOpenChange={() => {}}>
@@ -151,7 +139,13 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
             </div>
 
             <Button 
-              onClick={handleCompleteTour}
+              onClick={() => {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                setTimeout(() => {
+                  onDismiss?.(dontShowAgain);
+                  onComplete();
+                }, 500);
+              }}
               className="w-full bg-slate-900 hover:bg-slate-800 text-white"
             >
               Start Using the App
