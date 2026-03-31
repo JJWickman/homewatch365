@@ -16,32 +16,32 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     {
       selector: 'aside a:has-text("Settings")',
       title: 'Configure Your Company',
-      description: 'Start by clicking Settings in the sidebar to set up your company branding and information.',
+      description: 'Go to Settings → Company Tab. Update your logo & branding, enter company name, address, and website. Connect Google Business, Facebook, or Yelp if available (optional—you can come back later). This completes Step 1.',
       action: 'Click Settings'
     },
     {
       selector: 'aside a:has-text("Clients")',
-      title: 'Add Your First Client',
-      description: 'Navigate to Clients to add the property owners you manage.',
+      title: 'Create Your First Client',
+      description: 'Go to Clients on the main menu. Click "Add Client". Enter name, address, billing address (if different), select services they\'ve opted into, choose billing frequency, and set a portal PIN. This completes Step 2.',
       action: 'Click Clients'
     },
     {
       selector: 'aside a:has-text("Properties")',
-      title: 'Create a Property',
-      description: 'Add your first property with address, photos, and access information.',
+      title: 'Create Your First Property',
+      description: 'Go to Properties on the main menu. Click "Add Property". Choose the client you just created. Enter property details (type, status, bedrooms, bathrooms, square feet, year built, lot size). Type the address—the app will validate it and show an aerial image. Add access info, emergency contact, storm protection, check-in schedule, contractors, and notes as known. Save the property. This completes Step 3.',
       action: 'Click Properties'
     },
     {
-      selector: 'aside a:has-text("Visits")',
-      title: 'Schedule & Manage Visits',
-      description: 'Track and schedule property inspections and maintenance visits for your clients.',
-      action: 'Click Visits'
+      selector: 'aside a:has-text("Properties")',
+      title: 'Set Property Pricing',
+      description: 'Go back to the property you just created. Go to the Pricing tab. Review the standard pricing ($60 base + $15/additional water zone). Modify based on your business if needed. Set number of water zones, visit frequency, and payment terms (per visit, monthly invoice, or pre-pay annually). Add additional services (optional) and notes. Save the property. This completes Step 4.',
+      action: 'Click Properties'
     },
     {
-      selector: 'aside a:has-text("Billing")',
-      title: 'Set Up Billing',
-      description: 'Configure pricing, subscriptions, and invoicing for your clients.',
-      action: 'Click Billing'
+      selector: 'aside a:has-text("Properties")',
+      title: 'Customize Your Checklist',
+      description: 'Open the property you created. Go to the Checklist tab. Click "Start Checklist Setup". Select the property type (Single Family Home, Condo/Villa, or High Rise). Name your checklist something memorable (e.g., "SuziesSummer2026 Checklist"). Click "Continue to Editor". The standard checklist will load—add/remove/move sections, add instructions as needed. Save your checklist. It will highlight in green and load every time a Check-In visit is recorded. This completes Step 5.',
+      action: 'Click Properties'
     }
   ];
 
