@@ -3,10 +3,10 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    // Use service role for scheduled automation (no user context)
+    const sr = base44.asServiceRole; // Use service role for admin operations
 
     // Get all conversations for the support agent
-    const conversations = await base44.agents.listConversations({
+    const conversations = await sr.agents.listConversations({
       agent_name: 'supportAgent'
     });
 
@@ -24,9 +24,10 @@ Deno.serve(async (req) => {
       return Response.json({ active: [], sent: false });
     }
 
-    // Get tenant info for email
-    const tenant = await base44.asServiceRole.entities.Tenant.list();
-    const tenantData = tenant[0];
+    // Get tenant info for email (just need static admin emails, no tenant data needed)
+    // Tenants are fetched via service role; use filter for better control
+    const tenants = await sr.entities.Tenant.list();
+    const tenantData = tenants?.[0] || {};
     const notificationEmails = ['jason@estatewatch365.com', 'jasonwi@live.com'];
 
     // Format conversation summary
@@ -39,7 +40,7 @@ Deno.serve(async (req) => {
 
     // Send email notifications to both addresses
     await Promise.all(notificationEmails.map(email =>
-      base44.asServiceRole.integrations.Core.SendEmail({
+      sr.integrations.Core.SendEmail({
         to: email,
         subject: `[Support Alert] ${activeConversations.length} Active Chat(s)`,
         body: `You have ${activeConversations.length} active support conversations:\n\n${conversationsSummary}\n\nLog in to view and respond.`
