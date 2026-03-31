@@ -13,21 +13,21 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
 
   const steps = [
     {
-      element: 'aside nav a[href*="Settings"]',
+      element: 'aside a[href*="Settings"]',
       title: 'Step 1: Click Settings',
-      intro: 'Click Settings in the menu.',
+      intro: 'Click the Settings link in the sidebar to configure your company.',
       position: 'right'
     },
     {
-      element: 'aside nav a[href*="Clients"]',
+      element: 'aside a[href*="Clients"]',
       title: 'Step 2: Click Clients',
-      intro: 'Click Clients in the menu.',
+      intro: 'Navigate to Clients to manage your property owners.',
       position: 'right'
     },
     {
-      element: 'aside nav a[href*="Properties"]',
+      element: 'aside a[href*="Properties"]',
       title: 'Step 3: Click Properties',
-      intro: 'Click Properties in the menu.',
+      intro: 'Click Properties to set up your first property.',
       position: 'right'
     }
   ];
@@ -98,6 +98,7 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
         outline-offset: 6px !important;
         border-radius: 8px !important;
         pointer-events: auto !important;
+        background-color: rgba(59, 130, 246, 0.1) !important;
       }
       .introjs-button {
         background-color: #3b82f6 !important;
