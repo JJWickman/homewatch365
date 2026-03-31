@@ -74,50 +74,78 @@ Deno.serve(async (req) => {
     addText('This testing guide walks you through validating the core functionality of HomeWatch365. Complete each step in order to verify the platform works as expected.');
     yPosition += 5;
 
-    // Section 1: Account Creation
+    // Section 1: Onboarding Wizard
     checkPageBreak(80);
-    addHeading('Step 1: Create Your Account & Company');
-    addStep('1a', 'Sign Up', 'Go to the login page and click Sign Up. Enter your email address, create a password, and verify your email.');
-    addStep('1b', 'Create Your Company', 'On the Company Onboarding screen, enter a unique company name (e.g., My Home Watch Company). This identifies your account in the system.');
-    addStep('1c', 'Verify Access', 'After creating your account, log out and log back in using your email. Your company is now set up and linked to your account.');
+    addHeading('Step 1: Complete the Onboarding Wizard');
+    addStep('1a', 'First Login', 'After signing up and creating your company, you will be automatically shown an onboarding wizard on first login.');
+    addStep('1b', 'Follow the Wizard Steps', 'The wizard guides you through: (1) Update company info, (2) Create your first client, (3) Create your first property with aerial view, (4) Set pricing, (5) Assign a checklist template.');
+    addStep('1c', 'Complete All Steps', 'Work through all 5 steps in the wizard. Each step validates your input before moving to the next.');
+    addStep('1d', 'Wizard Completion', 'After completing step 5, the wizard will mark your onboarding as complete and close automatically.');
+    yPosition += 5;
 
-    // Section 2: Company Setup
+    // Section 2: Account Creation
+    checkPageBreak(50);
+    addHeading('Step 2: Verify Account & Company Creation');
+    addStep('2a', 'Sign Up', 'Go to the login page and click Sign Up. Enter your email address, create a password, and verify your email.');
+    addStep('2b', 'Create Your Company', 'On the Company Onboarding screen, enter a unique company name (e.g., My Home Watch Company). This identifies your account in the system.');
+    addStep('2c', 'Dashboard Access', 'After company creation, you will be taken to the Dashboard and the onboarding wizard will automatically appear.');
+
+    // Section 3: Dashboard & Onboarding Wizard
     checkPageBreak(80);
-    addHeading('Step 2: Update Company Information');
+    addHeading('Step 3: Dashboard & Post-Onboarding');
     addStep('2a', 'Go to Settings', 'From the dashboard, click Settings in the sidebar.');
     addStep('2b', 'Update Company Details', 'In the Company tab, update: Company Name, Address, City, State, ZIP, Phone, and Email.');
     addStep('2c', 'Add Branding', 'Upload your company logo and set primary/accent colors for your branded dashboard.');
     addStep('2d', 'Save Changes', 'Click Save. Your company profile is now configured.');
     yPosition += 5;
 
-    // Section 3: Validate Checklist Templates
+    // Section 4: Validate Checklist Templates
     checkPageBreak(80);
-    addHeading('Step 3: Validate Checklist Templates are Loaded');
+    addHeading('Step 4: Validate Checklist Templates are Loaded');
     addStep('3a', 'Go to Settings', 'Click Settings, then select the Checklist Templates tab.');
     addStep('3b', 'Verify Templates', 'Confirm you see default templates: Single Family Home, Condo/Villa, High-Rise, and Commercial.');
     addStep('3c', 'Review Structure', 'Click on one template to see its sections and checklist items. Each template should have relevant categories for that property type.');
     yPosition += 5;
 
-    // Section 4: Validate Products
+    // Section 5: Validate Products
     checkPageBreak(80);
-    addHeading('Step 4: Validate Products are Loaded');
+    addHeading('Step 5: Validate Products are Loaded');
     addStep('4a', 'Go to Settings', 'Click Settings, then select the Products tab.');
     addStep('4b', 'Verify Default Products', 'Confirm you see the default product: Standard Home Watch Visit with base pricing.');
     addStep('4c', 'Check Add-ons', 'Verify any add-on services are listed (e.g., Extra Bedroom Charge, Pool Maintenance).');
     yPosition += 5;
 
-    // Section 5: Create a Client
+    // Section 6: Verify Wizard-Created Data
     checkPageBreak(80);
-    addHeading('Step 5: Create a Client');
+    addHeading('Step 6: Verify Wizard-Created Data');
+    addStep('6a', 'Check Clients', 'Go to Clients. You should see the client created by the wizard.');
+    addStep('6b', 'Check Properties', 'Go to Properties. You should see the property created by the wizard with its aerial view and geocoded coordinates.');
+    addStep('6c', 'Check Pricing', 'Open the property detail and click the Pricing tab. Your pricing configuration should be saved.');
+    addStep('6d', 'Check Checklist', 'Click the Checklist tab. Your assigned checklist template should be active for the property.');
+    yPosition += 5;
+
+    // Section 7: Additional Setup (Optional)
+    checkPageBreak(80);
+    addHeading('Step 7: Additional Setup (Optional)');
+    addText('The wizard covers the essential first-time setup. For additional configuration:');
+    addStep('7a', 'Create More Clients', 'Go to Clients → Add Client to add additional clients.');
+    addStep('7b', 'Create More Properties', 'Go to Properties → Add Property to create more properties.');
+    addStep('7c', 'Customize Checklists', 'Edit property checklists in the property detail page to customize templates for specific needs.');
+    addStep('7d', 'Manage Products', 'Go to Settings → Products to add additional services or modify pricing.');
+    yPosition += 5;
+
+    // Section 8: Create a Client (Legacy - kept for reference)
+    checkPageBreak(50);
+    addHeading('Reference: Manual Client Creation');
     addStep('5a', 'Navigate to Clients', 'Click Clients in the sidebar.');
     addStep('5b', 'Add New Client', 'Click Add Client. Enter First Name, Last Name, Email, and Address.');
     addStep('5c', 'Enable Portal Access', 'Toggle on Portal Access so the client can view their properties and reports.');
     addStep('5d', 'Save', 'Click Create Client. Verify the client appears in your list.');
     yPosition += 5;
 
-    // Section 6: Create a Property with Aerial View
+    // Section 9: Reference: Manual Property Creation
     checkPageBreak(80);
-    addHeading('Step 6: Create a Property & Pull Aerial View');
+    addHeading('Reference: Manual Property Creation');
     addStep('6a', 'Navigate to Properties', 'Click Properties in the sidebar.');
     addStep('6b', 'Add New Property', 'Click Add Property. Select the client you created.');
     addStep('6c', 'Enter Address Details', 'Enter Address, City, State, ZIP, Property Type (Single Family/Condo/High-Rise), and Status.');
@@ -126,9 +154,9 @@ Deno.serve(async (req) => {
     addStep('6f', 'Save Property', 'Click Create. The property is now in the system with its aerial view.');
     yPosition += 5;
 
-    // Section 7: Set Up Pricing
+    // Section 10: Reference: Manual Pricing Setup
     checkPageBreak(80);
-    addHeading('Step 7: Create Pricing for the Property');
+    addHeading('Reference: Manual Pricing Setup');
     addStep('7a', 'Open Property Detail', 'From Properties, click on the property you created.');
     addStep('7b', 'Go to Pricing Tab', 'Click the Pricing tab. An onboarding guide will appear to help you.');
     addStep('7c', 'Enter Base Price', 'Set the base price per visit for this property.');
@@ -138,9 +166,9 @@ Deno.serve(async (req) => {
     addStep('7g', 'Save Pricing', 'Click "Save Pricing Configuration". The checklist onboarding guide will appear next.');
     yPosition += 5;
 
-    // Section 8: Create Checklist for Property
+    // Section 11: Reference: Manual Checklist Setup
     checkPageBreak(80);
-    addHeading('Step 8: Create a Checklist for the Property');
+    addHeading('Reference: Manual Checklist Setup');
     addStep('8a', 'Onboarding Guide', 'After saving pricing, a checklist onboarding guide will automatically appear.');
     addStep('8b', 'Go to Checklist Tab', 'Follow the guide or click the Checklist tab in the property detail page.');
     addStep('8c', 'Click "Start Checklist Setup"', 'This opens a wizard to select and create a custom checklist.');
@@ -154,12 +182,12 @@ Deno.serve(async (req) => {
     addHeading('Testing Complete!');
     addText('You have successfully validated:');
     addText('- User account creation and company setup', 5);
-    addText('- Company information and branding', 5);
+    addText('- Onboarding wizard guidance and workflow', 5);
+    addText('- Automated client, property, pricing, and checklist creation', 5);
     addText('- Checklist templates loaded correctly', 5);
     addText('- Products/services loaded correctly', 5);
-    addText('- Client creation and management', 5);
-    addText('- Property creation with aerial view', 5);
-    addText('- Pricing configuration', 5);
+    addText('- Property aerial view and geocoding', 5);
+    addText('- Pricing configuration persistence', 5);
     addText('- Checklist assignment to properties', 5);
     yPosition += 10;
 
