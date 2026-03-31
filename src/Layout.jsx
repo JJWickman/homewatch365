@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from 'lucide-react';
 import TrialBanner from '@/components/subscription/TrialBanner';
+import OnboardingTour from '@/components/onboarding/OnboardingTour';
 
 const getPageRestrictions = () => {
   return {
@@ -76,6 +77,7 @@ export default function Layout({ children, currentPageName }) {
   const [company, setCompany] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showTour, setShowTour] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -544,6 +546,16 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
       <FloatingChatWidget />
+      {/* Onboarding Tour */}
+      {showTour && (
+        <OnboardingTour
+          open={showTour}
+          onComplete={() => setShowTour(false)}
+          onDismiss={() => setShowTour(false)}
+          user={user}
+          tenant={company}
+        />
+      )}
       </div>
       </OfflineProvider>);
 
