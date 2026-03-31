@@ -49,7 +49,7 @@ export default function Visits() {
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('scheduled,open');
+  const [statusFilter, setStatusFilter] = useState('scheduled,open,in_progress');
   const [visitTypeFilter, setVisitTypeFilter] = useState('all');
   const [assignedFilter, setAssignedFilter] = useState('all');
   const [propertyFilter, setPropertyFilter] = useState('all');
@@ -652,7 +652,7 @@ export default function Visits() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="scheduled,open">Open/Scheduled</SelectItem>
+              <SelectItem value="scheduled,open,in_progress">Open/Scheduled</SelectItem>
               <SelectItem value="scheduled">Scheduled</SelectItem>
               <SelectItem value="open">Open</SelectItem>
               <SelectItem value="in_progress">In Progress</SelectItem>
