@@ -25,6 +25,13 @@ Deno.serve(async (req) => {
     });
     
     const owner = tenantUsers[0];
+
+    // Look up actual user email
+    let ownerEmail = 'Unknown';
+    if (owner?.user_id) {
+      const users = await base44.asServiceRole.entities.User.filter({ id: owner.user_id });
+      if (users.length > 0) ownerEmail = users[0].email;
+    }
     
     // Send notification email to platform admins
     const adminEmails = ['jason@estatewatch365.com', 'alex@estatewatch365.com'];
@@ -35,7 +42,7 @@ A new tenant has signed up for a trial!
 
 Tenant Details:
 - Name: ${tenant.name}
-- Owner: ${owner?.user_id || 'Unknown'}
+- Owner: ${ownerEmail}
 - Plan: ${tenant.subscription_plan || 'solopreneur'}
 - Trial Ends: ${tenant.trial_ends_at ? new Date(tenant.trial_ends_at).toLocaleDateString() : 'N/A'}
 - Phone: ${tenant.phone || 'N/A'}

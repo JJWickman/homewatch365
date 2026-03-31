@@ -8,8 +8,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    // Get all companies
-    const companies = await base44.asServiceRole.entities.Company.list();
+    // Get all tenants
+    const companies = await base44.asServiceRole.entities.Tenant.list();
 
     const results = {
       processed: 0,
@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
       try {
         // Get all active clients for this company
         const clients = await base44.asServiceRole.entities.Client.filter({
-          company_id: company.id,
+          tenant_id: company.id,
           is_active: true
         });
 
@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
 
             // Create statement
             const statement = await base44.asServiceRole.entities.MonthlyStatement.create({
-              company_id: company.id,
+              tenant_id: company.id,
               client_id: client.id,
               billing_month: billingMonth,
               status: 'draft',
@@ -98,8 +98,8 @@ Deno.serve(async (req) => {
         }
       } catch (error) {
         results.errors.push({
-          company_id: company.id,
-          company_name: company.name,
+          tenant_id: company.id,
+          tenant_name: company.name,
           error: error.message
         });
       }

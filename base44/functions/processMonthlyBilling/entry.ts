@@ -14,14 +14,14 @@ Deno.serve(async (req) => {
     const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const billingMonth = lastMonth.toISOString().slice(0, 7);
 
-    // Get all companies
-    const companies = await base44.asServiceRole.entities.Company.list();
+    // Get all tenants
+    const companies = await base44.asServiceRole.entities.Tenant.list();
     const results = [];
 
     for (const company of companies) {
       // Get all active clients for this company
       const clients = await base44.asServiceRole.entities.Client.filter({ 
-        company_id: company.id,
+        tenant_id: company.id,
         is_active: true,
         billing_status: 'active'
       });
@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
           // Add additional products
           if (client.additional_products && client.additional_products.length > 0) {
             const products = await base44.asServiceRole.entities.ProductService.filter({ 
-              company_id: company.id 
+              tenant_id: company.id 
             });
             
             for (const productId of client.additional_products) {
@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
             });
           } else {
             statement = await base44.asServiceRole.entities.MonthlyStatement.create({
-              company_id: company.id,
+              tenant_id: company.id,
               client_id: client.id,
               billing_month: billingMonth,
               status: 'finalized',
