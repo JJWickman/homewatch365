@@ -67,18 +67,6 @@
     "service_type"
   ],
   "rls": {
-    "create": {
-      "$or": [
-        {
-          "data.tenant_id": "{{user.data.primary_tenant_id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
     "read": {
       "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
