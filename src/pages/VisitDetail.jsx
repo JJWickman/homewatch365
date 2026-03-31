@@ -51,6 +51,7 @@ export default function VisitDetail() {
   const [updating, setUpdating] = useState(false);
   const [showChecklistDialog, setShowChecklistDialog] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [visitTemplate, setVisitTemplate] = useState(null);
 
   useEffect(() => {
     loadVisit();
@@ -90,6 +91,30 @@ export default function VisitDetail() {
         const me = await base44.auth.me();
         const myTenantUser = staffData.find(s => s.user_id === me.id);
         setIsAdmin(me.role === 'admin' || me.role === 'superadmin' || myTenantUser?.role_in_tenant === 'admin');
+
+        // Load template for this visit
+        if (vis.template_id) {
+          const templates = await base44.entities.ChecklistTemplate.filter({ id: vis.template_id });
+          if (templates.length > 0) setVisitTemplate(templates[0]);
+        } else {
+          // Look up by category based on visit type
+          const VISIT_TYPE_TO_CATEGORY = {
+            'check-in': 'home_watch_visit', 'followup': 'followup',
+            'arrival_departure': 'arrival_departure', 'access_visit': 'access_visit',
+            'emergency_visit': 'emergency_visit', 'damage_recovery': 'damage_recovery',
+            'auto_care': 'auto_care', 'pre_storm': 'pre_storm', 'post_storm': 'post_storm',
+            'client_service': 'client_service', 'concierge': 'concierge',
+          };
+          const category = VISIT_TYPE_TO_CATEGORY[vis.visit_type];
+          if (category) {
+            const allTemplates = await base44.entities.ChecklistTemplate.filter({ active: true });
+            const match = allTemplates.find(t => t.category === category);
+            if (match) {
+              setVisitTemplate(match);
+              await base44.entities.Visit.update(vis.id, { template_id: match.id });
+            }
+          }
+        }
       }
     } catch (error) {
       console.error('Error loading visit:', error);
@@ -185,7 +210,7 @@ Your Property Management Team
   return (
     <div className="max-w-5xl mx-auto">
       <PageHeader
-        title={`Visit - ${format(parseISO(visit.scheduled_date), 'MMM d, yyyy')}`}
+        title={`${visit.visit_type === 'check-in' ? 'Check-In Visit' : visit.visit_type === 'followup' ? 'Follow-Up Visit' : visit.visit_type === 'arrival_departure' ? 'Arrival/Departure' : visit.visit_type === 'emergency_visit' ? 'Emergency Visit' : visit.visit_type === 'pre_storm' ? 'Pre-Storm Check' : visit.visit_type === 'post_storm' ? 'Post-Storm Visit' : visit.visit_type === 'access_visit' ? 'Access Visit' : visit.visit_type === 'damage_recovery' ? 'Damage Recovery' : visit.visit_type === 'auto_care' ? 'Auto Care' : visit.visit_type === 'client_service' ? 'Client Service' : visit.visit_type === 'concierge' ? 'Concierge Service' : 'Visit'} — ${format(parseISO(visit.scheduled_date), 'MMM d, yyyy')}`}
         backLink="Visits"
         backLabel="Back to Visits"
       >
@@ -625,7 +650,7 @@ Your Property Management Team
           open={showChecklistDialog}
           onOpenChange={setShowChecklistDialog}
           property={property}
-          existingVisit={visit}
+          existingVisit={visit ? { ...visit, _resolvedTemplate: visitTemplate } : null}
         />
       )}
 

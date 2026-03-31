@@ -89,10 +89,29 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
     if (existingVisit && open) {
       setCurrentVisit(existingVisit);
       setStep('form');
-      // Load the template for this visit
-      if (existingVisit.template_id) {
+      // Use pre-resolved template if available
+      if (existingVisit._resolvedTemplate) {
+        setCurrentTemplate(existingVisit._resolvedTemplate);
+      } else if (existingVisit.template_id) {
         base44.entities.ChecklistTemplate.filter({ id: existingVisit.template_id })
           .then(templates => setCurrentTemplate(templates[0] || null));
+      } else {
+        // Fallback: look up by category
+        const VISIT_TYPE_TO_CATEGORY = {
+          'check-in': 'home_watch_visit', 'followup': 'followup',
+          'arrival_departure': 'arrival_departure', 'access_visit': 'access_visit',
+          'emergency_visit': 'emergency_visit', 'damage_recovery': 'damage_recovery',
+          'auto_care': 'auto_care', 'pre_storm': 'pre_storm', 'post_storm': 'post_storm',
+          'client_service': 'client_service', 'concierge': 'concierge',
+        };
+        const category = VISIT_TYPE_TO_CATEGORY[existingVisit.visit_type];
+        if (category) {
+          base44.entities.ChecklistTemplate.filter({ active: true })
+            .then(templates => {
+              const match = templates.find(t => t.category === category);
+              setCurrentTemplate(match || null);
+            });
+        }
       }
     }
   }, [existingVisit, open]);
