@@ -67,9 +67,6 @@
     "service_type"
   ],
   "rls": {
-    "read": {
-      "data.tenant_id": "{{user.data.primary_tenant_id}}"
-    },
     "update": {
       "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
