@@ -35,6 +35,8 @@ import PropertyPricingTab from '@/components/property/PropertyPricingTab';
 import PropertyChecklistConfigTab from '@/components/property/PropertyChecklistConfigTab';
 import ContractorSearchDialog from '@/components/contractors/ContractorSearchDialog.jsx';
 import VisitTypeSelectionDialog from '@/components/visits/VisitTypeSelectionDialog.jsx';
+import PropertyPricingOnboardingModal from '@/components/property/PropertyPricingOnboardingModal';
+import PropertyChecklistOnboardingModal from '@/components/property/PropertyChecklistOnboardingModal';
 import { toast } from 'sonner';
 
 const CONTRACTOR_TYPES = [
@@ -88,6 +90,8 @@ export default function PropertyDetail() {
   const [newTag, setNewTag] = useState('');
   const [savingTags, setSavingTags] = useState(false);
   const [showVisitTypeDialog, setShowVisitTypeDialog] = useState(false);
+  const [showPricingOnboarding, setShowPricingOnboarding] = useState(false);
+  const [showChecklistOnboarding, setShowChecklistOnboarding] = useState(false);
 
   useEffect(() => {
     loadProperty();
@@ -1269,6 +1273,20 @@ export default function PropertyDetail() {
         onOpenChange={setShowVisitTypeDialog}
         property={property}
         propertyChecklist={propertyChecklist}
+      />
+
+      {/* Pricing Onboarding Modal */}
+      <PropertyPricingOnboardingModal
+        open={showPricingOnboarding}
+        onOpenChange={setShowPricingOnboarding}
+        onComplete={() => setShowChecklistOnboarding(true)}
+      />
+
+      {/* Checklist Onboarding Modal */}
+      <PropertyChecklistOnboardingModal
+        open={showChecklistOnboarding}
+        onOpenChange={setShowChecklistOnboarding}
+        onComplete={() => {}}
       />
     </div>
   );

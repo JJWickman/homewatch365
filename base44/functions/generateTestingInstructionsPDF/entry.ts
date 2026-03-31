@@ -130,21 +130,23 @@ Deno.serve(async (req) => {
     checkPageBreak(80);
     addHeading('Step 7: Create Pricing for the Property');
     addStep('7a', 'Open Property Detail', 'From Properties, click on the property you created.');
-    addStep('7b', 'Go to Pricing Tab', 'Click the Pricing tab.');
-    addStep('7c', 'Select Primary Service', 'Choose Standard Home Watch Visit (or your default product).');
-    addStep('7d', 'Set Monthly Rate', 'Enter the monthly service rate for this property based on your pricing model.');
-    addStep('7e', 'Add Add-ons (Optional)', 'Select any additional charges (extra bedrooms, pool maintenance, etc.).');
-    addStep('7f', 'Save', 'Click Save. Pricing is now configured for this property.');
+    addStep('7b', 'Go to Pricing Tab', 'Click the Pricing tab. An onboarding guide will appear to help you.');
+    addStep('7c', 'Enter Base Price', 'Set the base price per visit for this property.');
+    addStep('7d', 'Select Visit Frequency', 'Choose how often the property should be visited (2, 3, or 4-5 times per month).');
+    addStep('7e', 'Choose Payment Terms', 'Select billing method: per visit, monthly, or annual pre-pay.');
+    addStep('7f', 'Add Optional Services', 'Select any additional services like concierge, emergency visits, or pool care.');
+    addStep('7g', 'Save Pricing', 'Click "Save Pricing Configuration". The checklist onboarding guide will appear next.');
     yPosition += 5;
 
     // Section 8: Create Checklist for Property
     checkPageBreak(80);
     addHeading('Step 8: Create a Checklist for the Property');
-    addStep('8a', 'Open Property Detail', 'From Properties, click on your property.');
-    addStep('8b', 'Go to Checklist Tab', 'Click the Checklist tab.');
-    addStep('8c', 'Select Template', 'Click Select Checklist Template. Choose the appropriate template (Single Family Home, Condo/Villa, or High-Rise).');
-    addStep('8d', 'Customize (Optional)', 'You can customize sections or remove irrelevant items for this specific property.');
-    addStep('8e', 'Save Checklist', 'Click Save. Field staff will now use this checklist during property visits.');
+    addStep('8a', 'Onboarding Guide', 'After saving pricing, a checklist onboarding guide will automatically appear.');
+    addStep('8b', 'Go to Checklist Tab', 'Follow the guide or click the Checklist tab in the property detail page.');
+    addStep('8c', 'Click "Start Checklist Setup"', 'This opens a wizard to select and create a custom checklist.');
+    addStep('8d', 'Select a Template', 'Choose the appropriate template based on property type (Single Family Home, Condo/Villa, High-Rise).');
+    addStep('8e', 'Customize (Optional)', 'You can customize sections, add questions, or remove irrelevant items for this property.');
+    addStep('8f', 'Save Checklist', 'Click Save Checklist. Field staff will now use this when recording property visits.');
     yPosition += 5;
 
     // Final Section: Testing Complete
