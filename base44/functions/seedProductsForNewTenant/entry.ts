@@ -114,13 +114,15 @@ const DEFAULT_PRODUCTS = [
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { event } = await req.json();
-
-    if (!event?.entity_id) {
+    const body = await req.json();
+    
+    // Entity automation payload: { event: {type, entity_name, entity_id}, data: {...} }
+    const tenantId = body.event?.entity_id || body.data?.id;
+    
+    if (!tenantId) {
+      console.error('Invalid payload:', JSON.stringify(body).slice(0, 200));
       return Response.json({ error: 'No tenant ID in event' }, { status: 400 });
     }
-
-    const tenantId = event.entity_id;
 
     // Check if products already exist
     const existing = await base44.asServiceRole.entities.ProductService.filter({ tenant_id: tenantId });
