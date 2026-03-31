@@ -506,12 +506,25 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
   const currentStep = steps[step];
   const isLastStep = step === steps.length - 1;
 
+  if (!open) return null;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl overflow-hidden">
-        <div className="px-8 pt-8 pb-8">
-          <div className="space-y-6">
+      <div className="w-full max-w-2xl">
+        {/* Logo & Header */}
+        <div className="text-center mb-8">
+          <img
+            src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/26b3196de_image.png"
+            alt="Home Watch 365"
+            className="h-16 w-16 rounded-2xl object-contain mx-auto mb-4 bg-white"
+          />
+          <h1 className="text-3xl font-bold text-white">Home Watch 365</h1>
+          <p className="text-blue-200 mt-1">Let's get your account set up</p>
+        </div>
 
+        {/* Card */}
+        <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl p-8">
+          <div className="space-y-6">
             {/* Title */}
             <div>
               <h2 className="text-2xl font-bold text-white mb-1">{currentStep.title}</h2>
@@ -532,41 +545,42 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
 
             {currentStep.content}
           </div>
-        </div>
 
-        <div className="px-8 py-6 border-t border-white/10 flex justify-between gap-3">
-          {step > 0 && !isLastStep && (
-            <Button variant="outline" onClick={() => setStep(step - 1)} className="border-white/20 text-white hover:bg-white/10">
-              ← Back
-            </Button>
-          )}
-          {step === 0 && <div />}
+          {/* Footer */}
+          <div className="flex justify-between gap-3 pt-6 border-t border-white/10 mt-8">
+            {step > 0 && !isLastStep && (
+              <Button variant="outline" onClick={() => setStep(step - 1)} className="border-white/20 text-white hover:bg-white/10">
+                ← Back
+              </Button>
+            )}
+            {step === 0 && <div />}
 
-          {!isLastStep ? (
-            <Button
-              onClick={currentStep.onNext}
-              disabled={loading}
-              className="ml-auto bg-blue-500 hover:bg-blue-600 text-white"
-            >
-              {loading ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <ArrowRight className="h-4 w-4 mr-2" />
-              )}
-              Next
-            </Button>
-          ) : (
-            <Button
-              onClick={() => {
-                onDismiss?.(dontShowAgain);
-                onComplete();
-              }}
-              className="ml-auto bg-green-600 hover:bg-green-700 w-full"
-            >
-              <CheckCircle2 className="h-4 w-4 mr-2" />
-              Start Using the App
-            </Button>
-          )}
+            {!isLastStep ? (
+              <Button
+                onClick={currentStep.onNext}
+                disabled={loading}
+                className="ml-auto bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                {loading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <ArrowRight className="h-4 w-4 mr-2" />
+                )}
+                Next
+              </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  onDismiss?.(dontShowAgain);
+                  onComplete();
+                }}
+                className="ml-auto bg-green-600 hover:bg-green-700 w-full"
+              >
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Start Using the App
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
