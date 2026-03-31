@@ -507,77 +507,66 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
   const isLastStep = step === steps.length - 1;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{
-      background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #1a2a4a 100%)'
-    }}>
-      <div className="w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl border border-white/20 backdrop-blur-xl" style={{
-        background: 'rgba(255, 255, 255, 0.08)'
-      }}>
-        <div className="px-8 pt-8 pb-6 border-b border-white/10">
-          <div className="flex items-center justify-between gap-4 mb-2">
-            <h1 className="text-2xl font-bold text-white">
-              {currentStep.title}
-            </h1>
-            <button
-              onClick={() => onDismiss?.(false) || onComplete()}
-              className="text-white/60 hover:text-white transition-colors p-1 shrink-0"
-              aria-label="Close wizard"
-            >
-              <X className="h-6 w-6" />
-            </button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl overflow-hidden">
+        <div className="px-8 pt-8 pb-8">
+          <div className="space-y-6">
+
+            {/* Title */}
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-1">{currentStep.title}</h2>
+              <p className="text-blue-200 text-sm">{currentStep.description}</p>
+            </div>
+
+            {/* Progress indicator */}
+            <div className="flex justify-between gap-1.5">
+              {steps.map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-1 flex-1 rounded-full transition-colors ${
+                    i <= step ? 'bg-blue-400' : 'bg-white/20'
+                  }`}
+                />
+              ))}
+            </div>
+
+            {currentStep.content}
           </div>
-          <p className="text-blue-200 text-sm">{currentStep.description}</p>
         </div>
 
-        <div className="px-8 py-8">
-          {/* Progress indicator */}
-          <div className="flex justify-between gap-1.5 mb-8">
-            {steps.map((_, i) => (
-              <div
-                key={i}
-                className={`h-1 flex-1 rounded-full transition-colors ${
-                  i <= step ? 'bg-blue-400' : 'bg-white/20'
-                }`}
-              />
-            ))}
-          </div>
+        <div className="px-8 py-6 border-t border-white/10 flex justify-between gap-3">
+          {step > 0 && !isLastStep && (
+            <Button variant="outline" onClick={() => setStep(step - 1)} className="border-white/20 text-white hover:bg-white/10">
+              ← Back
+            </Button>
+          )}
+          {step === 0 && <div />}
 
-          {currentStep.content}
-
-          <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-white/10">
-            {step > 0 && !isLastStep && (
-              <Button variant="outline" onClick={() => setStep(step - 1)} className="border-white/30 text-white hover:bg-white/10">
-                Back
-              </Button>
-            )}
-            {step === 0 && <div />}
-
-            {!isLastStep ? (
-              <Button
-                onClick={currentStep.onNext}
-                disabled={loading}
-                className="ml-auto bg-blue-500 hover:bg-blue-600 text-white"
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <ArrowRight className="h-4 w-4 mr-2" />
-                )}
-                Next
-              </Button>
-            ) : (
-              <Button
-                onClick={() => {
-                  onDismiss?.(dontShowAgain);
-                  onComplete();
-                }}
-                className="ml-auto bg-green-600 hover:bg-green-700 w-full"
-              >
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                Start Using the App
-              </Button>
-            )}
-          </div>
+          {!isLastStep ? (
+            <Button
+              onClick={currentStep.onNext}
+              disabled={loading}
+              className="ml-auto bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <ArrowRight className="h-4 w-4 mr-2" />
+              )}
+              Next
+            </Button>
+          ) : (
+            <Button
+              onClick={() => {
+                onDismiss?.(dontShowAgain);
+                onComplete();
+              }}
+              className="ml-auto bg-green-600 hover:bg-green-700 w-full"
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+              Start Using the App
+            </Button>
+          )}
         </div>
       </div>
     </div>
