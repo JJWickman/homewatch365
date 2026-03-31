@@ -1,5 +1,9 @@
 # Multi-Tenant Data Isolation Testing Checklist
 
+⚠️ **Brand Note**: This app is called **HomeWatch365**, but you may see references to **EstateWatch365** throughout the UI and code. These are legacy references that haven't been migrated yet and will be updated to the new URL over time. Both refer to the same application.
+
+---
+
 ## Setup: 3 Separate Test Tenants
 Before testing, ensure you have 3 separate tenant accounts:
 - **Tenant A**: User A1 (admin)
