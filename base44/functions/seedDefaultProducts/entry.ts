@@ -121,7 +121,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const tenantId = user.primary_tenant_id;
+    const { tenant_id: passedTenantId } = await req.json().catch(() => ({}));
+    const tenantId = passedTenantId || user.primary_tenant_id;
     if (!tenantId) {
       return Response.json({ error: 'No tenant found' }, { status: 400 });
     }
