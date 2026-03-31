@@ -4,67 +4,72 @@
   "properties": {
     "tenant_id": {
       "type": "string",
-      "description": "Reference to Tenant (isolation)"
+      "description": "Reference to Tenant (isolation). NULL = system product shared across all tenants."
     },
-    "service_name": {
+    "name": {
       "type": "string",
       "description": "Name of the service (e.g., Weekly Inspection, Monthly Maintenance)"
-    },
-    "service_type": {
-      "type": "string",
-      "enum": [
-        "inspection",
-        "maintenance",
-        "emergency",
-        "concierge",
-        "custom"
-      ],
-      "description": "Type of service"
     },
     "description": {
       "type": "string",
       "description": "Service description"
     },
+    "visit_type": {
+      "type": "string",
+      "enum": [
+        "check-in",
+        "followup",
+        "pre_storm",
+        "post_storm",
+        "arrival_departure",
+        "access_visit",
+        "emergency_visit",
+        "damage_recovery",
+        "auto_care",
+        "client_service",
+        "concierge"
+      ],
+      "description": "Type of visit this service represents"
+    },
     "base_price": {
       "type": "number",
       "description": "Base price for the service"
-    },
-    "billing_frequency": {
-      "type": "string",
-      "enum": [
-        "one_time",
-        "weekly",
-        "bi_weekly",
-        "monthly",
-        "quarterly",
-        "annually"
-      ],
-      "default": "monthly",
-      "description": "How often this service is billed"
-    },
-    "is_recurring": {
-      "type": "boolean",
-      "default": false,
-      "description": "Whether this is a recurring service"
-    },
-    "stripe_product_id": {
-      "type": "string",
-      "description": "Stripe product ID"
-    },
-    "stripe_price_ids": {
-      "type": "object",
-      "description": "Stripe price IDs for different billing frequencies"
     },
     "is_active": {
       "type": "boolean",
       "default": true,
       "description": "Whether this service is available"
+    },
+    "is_system_product": {
+      "type": "boolean",
+      "default": false,
+      "description": "True for system products (tenant_id=null, shared across all tenants). Tenant copies are false."
     }
   },
   "required": [
-    "tenant_id",
-    "service_name",
-    "service_type"
+    "name",
+    "visit_type",
+    "base_price"
   ],
-  "rls": {}
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "data.tenant_id": null
+        }
+      ]
+    },
+    "create": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "delete": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    }
+  }
 }
