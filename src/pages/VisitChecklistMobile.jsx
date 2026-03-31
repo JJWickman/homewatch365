@@ -43,6 +43,9 @@ export default function VisitChecklistMobile() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
+  const [locationWarning, setLocationWarning] = useState(null);
+  const [acknowledgedOffSite, setAcknowledgedOffSite] = useState(false);
+  const [showOffSiteBlock, setShowOffSiteBlock] = useState(false);
 
   const autosaveTimeout = useRef(null);
   const user = useRef(null);
@@ -88,6 +91,29 @@ export default function VisitChecklistMobile() {
 
       const companies = await base44.entities.Company.filter({ id: properties[0].company_id });
       company.current = companies[0];
+
+      // Geofencing check
+      const tenants = await base44.entities.Tenant.filter({ id: properties[0].tenant_id });
+      const tenant = tenants[0];
+      if (tenant?.geofencing_enabled && properties[0].latitude && properties[0].longitude) {
+        const position = await new Promise((resolve) =>
+          navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), { timeout: 10000 })
+        );
+        if (!position) {
+          setLocationWarning('Could not determine your location. Please confirm you are on-site before proceeding.');
+          setShowOffSiteBlock(true);
+        } else {
+          const result = await base44.functions.invoke('validateVisitLocation', {
+            propertyId: properties[0].id,
+            userLat: position.coords.latitude,
+            userLon: position.coords.longitude,
+          });
+          if (!result.data?.valid) {
+            setLocationWarning(result.data?.message || 'You do not appear to be at the property.');
+            setShowOffSiteBlock(true);
+          }
+        }
+      }
 
       // Step 2: Build sections — use customized_sections, or resolve from system template by slug
       let rawSections = propertyChecklist.customized_sections || [];
@@ -280,7 +306,27 @@ export default function VisitChecklistMobile() {
       />
 
       <div className="flex-1 p-4 space-y-4">
-        {/* Checklist Instructions Banner */}
+        {/* Off-Site Warning Block */}
+        {showOffSiteBlock && (
+          <div className="bg-amber-50 border-2 border-amber-400 rounded-xl p-4">
+            <p className="text-sm font-semibold text-amber-900 mb-1">⚠️ GPS Check Failed</p>
+            <p className="text-sm text-amber-800 mb-3">{locationWarning}</p>
+            {!acknowledgedOffSite ? (
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  onChange={(e) => setAcknowledgedOffSite(e.target.checked)}
+                  className="w-4 h-4 cursor-pointer"
+                />
+                <span className="text-amber-900 font-medium">I understand — I am not physically at the property</span>
+              </label>
+            ) : (
+              <p className="text-xs text-amber-700 font-medium">✓ Acknowledged — proceeding as off-site</p>
+            )}
+          </div>
+        )}
+
+      {/* Checklist Instructions Banner */}
         {template?.instructions && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
