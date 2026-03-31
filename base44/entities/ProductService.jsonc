@@ -66,21 +66,5 @@
     "service_name",
     "service_type"
   ],
-  "rls": {
-    "create": {
-      "data.tenant_id": "{{user.id}}"
-    },
-    "read": {
-      "data.tenant_id": "{{user.data.primary_tenant_id}}"
-    },
-    "update": {
-      "data.tenant_id": "{{user.data.primary_tenant_id}}"
-    },
-    "delete": {
-      "data.tenant_id": "{{user.data.primary_tenant_id}}"
-    },
-    "write": {
-      "data.tenant_id": "{{user.data.primary_tenant_id}}"
-    }
-  }
+  "rls": {}
 }
