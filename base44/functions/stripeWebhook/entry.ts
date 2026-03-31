@@ -40,6 +40,8 @@ Deno.serve(async (req) => {
           const companyName = session.metadata.company_name;
           const slug = session.metadata.slug;
           const email = session.metadata.email;
+          const firstName = session.metadata.first_name || '';
+          const lastName = session.metadata.last_name || '';
 
           // Check slug not already taken
           const slugCheck = await base44.asServiceRole.entities.Tenant.filter({ slug });
@@ -66,10 +68,12 @@ Deno.serve(async (req) => {
               is_active: true
             });
 
-            // Set primary_tenant_id and role on user
+            // Set primary_tenant_id, role, and name on user
             await base44.asServiceRole.entities.User.update(userId, {
               primary_tenant_id: tenantId,
-              role: 'admin'
+              role: 'admin',
+              first_name: firstName,
+              last_name: lastName
             });
 
             // Seed products (templates are system-level shared, no per-tenant seeding)

@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { price_id, subscription_plan, billing_cycle, company_name, slug, email } = await req.json();
+    const { price_id, subscription_plan, billing_cycle, company_name, slug, email, first_name, last_name } = await req.json();
 
     // For paid signups, NO tenant exists yet — create Stripe customer by email
     const customer = await stripe.customers.create({
@@ -33,7 +33,9 @@ Deno.serve(async (req) => {
         company_name,
         slug,
         email: email || user.email,
-        user_id: user.id
+        user_id: user.id,
+        first_name: first_name || '',
+        last_name: last_name || ''
       }
     };
 
@@ -52,7 +54,9 @@ Deno.serve(async (req) => {
         subscription_plan,
         company_name,
         slug,
-        email: email || user.email
+        email: email || user.email,
+        first_name: first_name || '',
+        last_name: last_name || ''
       },
       payment_method_options: { card: { request_three_d_secure: 'automatic' } },
       allow_promotion_codes: true
