@@ -44,7 +44,7 @@ export default function Dashboard() {
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [visitTemplate, setVisitTemplate] = useState(null);
   const [showVisitForm, setShowVisitForm] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(true);
 
   useEffect(() => {
     loadDashboardData();
