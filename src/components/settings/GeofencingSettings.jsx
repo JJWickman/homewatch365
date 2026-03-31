@@ -15,11 +15,10 @@ export default function GeofencingSettings({ company, onUpdate }) {
       const properties = await base44.entities.Property.filter({ tenant_id: company.id, is_active: true });
       const missing = properties.filter(p => !p.latitude || !p.longitude);
       if (missing.length > 0) {
-        toast.error(
-          `${missing.length} propert${missing.length === 1 ? 'y is' : 'ies are'} missing GPS coordinates. Use "Geocode All" below before enabling geofencing.`,
+        toast.warning(
+          `${missing.length} propert${missing.length === 1 ? 'y is' : 'ies are'} missing GPS coordinates — geofencing will be skipped for those properties.`,
           { duration: 6000 }
         );
-        return;
       }
     }
 
