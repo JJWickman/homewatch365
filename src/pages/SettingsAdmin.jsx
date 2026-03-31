@@ -74,13 +74,19 @@ export default function SettingsAdmin() {
       if (tenantUsers.length > 0) {
         setTenantUser(tenantUsers[0]);
 
-        const [tenants, staffData] = await Promise.all([
+        const [tenants, staffData, allUsers] = await Promise.all([
           base44.entities.Tenant.filter({ id: currentUser.primary_tenant_id }),
-          base44.entities.TenantUser.filter({ tenant_id: currentUser.primary_tenant_id })
+          base44.entities.TenantUser.filter({ tenant_id: currentUser.primary_tenant_id }),
+          base44.entities.User.list()
         ]);
 
         if (tenants.length > 0) setTenant(tenants[0]);
-        setStaff(staffData);
+        // Enrich staff with user details
+        const enriched = staffData.map(m => ({
+          ...m,
+          _user: allUsers.find(u => u.id === m.user_id) || null
+        }));
+        setStaff(enriched);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -275,8 +281,8 @@ ${tenant.name}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                   <p className="font-medium">{member.user_id}</p>
-                   <p className="text-sm text-slate-500">{member.role_in_tenant}</p>
+                    <p className="font-medium">{member._user?.full_name || member._user?.email || member.user_id}</p>
+                    <p className="text-sm text-slate-500">{member._user?.email || member.user_id}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
