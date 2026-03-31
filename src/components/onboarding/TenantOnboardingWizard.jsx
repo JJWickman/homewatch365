@@ -500,23 +500,20 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
   const isLastStep = step === steps.length - 1;
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-lg rounded-2xl p-0 bg-white/95 backdrop-blur-xl border border-white/30 shadow-2xl">
-        <DialogHeader className="rounded-t-2xl bg-gradient-to-r from-blue-600 to-blue-700 px-6 pt-6 pb-4">
+    <div className="fixed inset-0 z-50 bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 pt-6 pb-4 border-b border-white/10">
           <div className="flex items-center gap-3">
             <currentStep.icon className="h-6 w-6 text-white" />
             <div>
-              <DialogTitle className="text-white text-lg font-semibold">
-                {currentStep.title}
-              </DialogTitle>
-              <DialogDescription className="text-blue-100">
-                {currentStep.description}
-              </DialogDescription>
+              <h2 className="text-white text-lg font-semibold">
+              Welcome to HomeWatch365 - We are here to help you get setup in the application
+            </h2>
             </div>
           </div>
-        </DialogHeader>
+        </div>
 
-        <div className="px-6 pt-6 pb-6">
+        <div className="bg-white/95 backdrop-blur px-6 pt-6 pb-6">
           {/* Progress indicator */}
           <div className="flex justify-between mb-6">
             {steps.map((_, i) => (
@@ -566,7 +563,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
             )}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
