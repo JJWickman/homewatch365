@@ -52,7 +52,6 @@ export default function ChecklistSection({
       {expanded && (
         <CardContent className="space-y-3">
           {sortedItems.map(item => {
-            const ChecklistItemRow = require('./ChecklistItemRow').default;
             return (
               <ChecklistItemRow
                 key={item.id}

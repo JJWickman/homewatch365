@@ -2,6 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Loader2 } from 'lucide-react';
 
+// Ensure google is globally accessible
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
 export default function DispatcherMap({ properties, visits }) {
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);

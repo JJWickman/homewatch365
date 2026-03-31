@@ -11,7 +11,8 @@ const TEMPLATE_DEFINITIONS = [
   { name: 'Auto Care Visit', template_slug: 'auto_care_standard', property_type: null, category: 'auto_care', description: 'Checklist for vehicle care visits' },
   { name: 'Post-Storm Visit', template_slug: 'post_storm_standard', property_type: null, category: 'post_storm', description: 'Checklist for post-storm property assessment' },
   { name: 'Client Service Visit', template_slug: 'client_service_standard', property_type: null, category: 'client_service', description: 'Checklist for client service visits' },
-  { name: 'Concierge Service Visit', template_slug: 'concierge_service_standard', property_type: null, category: 'concierge', description: 'Checklist for concierge service visits' }
+  { name: 'Concierge Service Visit', template_slug: 'concierge_service_standard', property_type: null, category: 'concierge', description: 'Checklist for concierge service visits' },
+  { name: 'Follow-Up Visit', template_slug: 'followup_standard', property_type: null, category: 'followup', description: 'Follow-up visit for issue resolution or contractor coordination' }
 ];
 
 Deno.serve(async (req) => {

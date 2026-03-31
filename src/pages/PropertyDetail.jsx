@@ -8,7 +8,7 @@ import {
   Calendar, Clock, 
   AlertTriangle, CheckCircle2, FileText, Upload, Image, 
   Circle, Plus, ZoomIn, ZoomOut,
-  Search, Loader2, Globe, Zap, Tag
+  Search, Loader2, Globe, Zap, Tag, Trash2
 } from 'lucide-react';
 import {
   Select,
