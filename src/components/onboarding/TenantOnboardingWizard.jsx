@@ -220,21 +220,23 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label htmlFor="company-city">City</Label>
+              <Label htmlFor="company-city" className="text-white">City</Label>
               <Input
                 id="company-city"
                 value={companyCity}
                 onChange={(e) => setCompanyCity(e.target.value)}
                 placeholder="City"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
               />
             </div>
             <div>
-              <Label htmlFor="company-state">State</Label>
+              <Label htmlFor="company-state" className="text-white">State</Label>
               <Input
                 id="company-state"
                 value={companyState}
                 onChange={(e) => setCompanyState(e.target.value)}
                 placeholder="State"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
               />
             </div>
           </div>
@@ -249,40 +251,44 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
       content: (
         <div className="space-y-4">
           <div>
-            <Label htmlFor="client-first">First Name *</Label>
+            <Label htmlFor="client-first" className="text-white">First Name *</Label>
             <Input
               id="client-first"
               value={clientFirstName}
               onChange={(e) => setClientFirstName(e.target.value)}
               placeholder="John"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
             />
           </div>
           <div>
-            <Label htmlFor="client-last">Last Name *</Label>
+            <Label htmlFor="client-last" className="text-white">Last Name *</Label>
             <Input
               id="client-last"
               value={clientLastName}
               onChange={(e) => setClientLastName(e.target.value)}
               placeholder="Doe"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
             />
           </div>
           <div>
-            <Label htmlFor="client-email">Email *</Label>
+            <Label htmlFor="client-email" className="text-white">Email *</Label>
             <Input
               id="client-email"
               type="email"
               value={clientEmail}
               onChange={(e) => setClientEmail(e.target.value)}
               placeholder="john@example.com"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
             />
           </div>
           <div>
-            <Label htmlFor="client-phone">Phone</Label>
+            <Label htmlFor="client-phone" className="text-white">Phone</Label>
             <Input
               id="client-phone"
               value={clientPhone}
               onChange={(e) => setClientPhone(e.target.value)}
               placeholder="+1 (555) 000-0000"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
             />
           </div>
         </div>
@@ -296,21 +302,22 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
       content: (
         <div className="space-y-4">
           <div>
-            <Label htmlFor="prop-name">Property Name (Optional)</Label>
+            <Label htmlFor="prop-name" className="text-white">Property Name (Optional)</Label>
             <Input
               id="prop-name"
               value={propertyName}
               onChange={(e) => setPropertyName(e.target.value)}
               placeholder="e.g., Beach House, Mountain Cabin"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
             />
           </div>
           <div>
-            <Label htmlFor="prop-type">Property Type *</Label>
+            <Label htmlFor="prop-type" className="text-white">Property Type *</Label>
             <select
               id="prop-type"
               value={propertyType}
               onChange={(e) => setPropertyType(e.target.value)}
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+              className="flex h-9 w-full rounded-md border border-white/20 bg-white/10 px-3 py-1 text-sm shadow-sm text-white placeholder:text-white/40"
             >
               <option value="single_family">Single Family Home</option>
               <option value="condo">Condo/Villa</option>
@@ -381,7 +388,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
                 value={basePrice}
                 onChange={(e) => setBasePrice(e.target.value)}
                 placeholder="150"
-                className="flex-1 bg-blue-100/20 border-blue-300/40 backdrop-blur"
+                className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/40"
               />
             </div>
           </div>
@@ -415,7 +422,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
       content: (
         <div className="space-y-4">
           <div>
-            <Label>Select Template *</Label>
+            <Label className="text-white">Select Template *</Label>
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {templates.map((tmpl) => (
                 <button
@@ -423,12 +430,12 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
                   onClick={() => setSelectedTemplate(tmpl)}
                   className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
                     selectedTemplate?.id === tmpl.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-slate-200 hover:border-slate-300'
+                      ? 'border-blue-400 bg-blue-500/20'
+                      : 'border-white/20 bg-white/5 hover:border-white/40'
                   }`}
                 >
-                  <p className="font-medium text-slate-900">{tmpl.name}</p>
-                  <p className="text-xs text-slate-500 mt-1">{tmpl.description}</p>
+                  <p className="font-medium text-white">{tmpl.name}</p>
+                  <p className="text-xs text-white/60 mt-1">{tmpl.description}</p>
                 </button>
               ))}
             </div>
@@ -520,7 +527,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
               <div
                 key={i}
                 className={`h-2 flex-1 mx-1 rounded-full transition-colors ${
-                  i <= step ? 'bg-blue-600' : 'bg-slate-200'
+                  i <= step ? 'bg-blue-400' : 'bg-white/20'
                 }`}
               />
             ))}
@@ -530,7 +537,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
 
           <div className="flex justify-between gap-3 mt-6">
             {step > 0 && !isLastStep && (
-              <Button variant="outline" onClick={() => setStep(step - 1)}>
+              <Button variant="outline" onClick={() => setStep(step - 1)} className="border-white/20 text-white hover:bg-white/10">
                 Back
               </Button>
             )}
@@ -540,7 +547,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
               <Button
                 onClick={currentStep.onNext}
                 disabled={loading}
-                className="ml-auto bg-blue-600 hover:bg-blue-700"
+                className="ml-auto bg-blue-500 hover:bg-blue-600 text-white"
               >
                 {loading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
