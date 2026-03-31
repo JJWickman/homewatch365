@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Loader2 } from 'lucide-react';
-
-// Type assertion for global google object
-const google = (typeof window !== 'undefined' && (window as any).google) || {};
 
 export default function DispatcherMap({ properties, visits }) {
   const mapRef = useRef(null);
