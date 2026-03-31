@@ -6,82 +6,114 @@
       "type": "string",
       "description": "Reference to Tenant (isolation)"
     },
-    "name": {
+    "service_name": {
       "type": "string",
-      "description": "Service name"
+      "description": "Name of the service (e.g., Weekly Inspection, Monthly Maintenance)"
+    },
+    "service_type": {
+      "type": "string",
+      "enum": [
+        "inspection",
+        "maintenance",
+        "emergency",
+        "concierge",
+        "custom"
+      ],
+      "description": "Type of service"
     },
     "description": {
-      "type": "string"
-    },
-    "visit_type": {
       "type": "string",
-      "enum": [
-        "check-in",
-        "followup",
-        "pre_storm",
-        "post_storm",
-        "arrival_departure",
-        "access_visit",
-        "emergency_visit",
-        "damage_recovery",
-        "auto_care",
-        "client_service",
-        "concierge"
-      ],
-      "description": "Associated visit type"
-    },
-    "type": {
-      "type": "string",
-      "enum": [
-        "addon"
-      ],
-      "description": "Type (always addon for per-visit billing)"
+      "description": "Service description"
     },
     "base_price": {
       "type": "number",
-      "description": "Price per visit"
+      "description": "Base price for the service"
     },
-    "add_on_charges": {
+    "billing_frequency": {
+      "type": "string",
+      "enum": [
+        "one_time",
+        "weekly",
+        "bi_weekly",
+        "monthly",
+        "quarterly",
+        "annually"
+      ],
+      "default": "monthly",
+      "description": "How often this service is billed"
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a recurring service"
+    },
+    "stripe_product_id": {
+      "type": "string",
+      "description": "Stripe product ID"
+    },
+    "stripe_price_ids": {
       "type": "object",
-      "description": "Extra charges (e.g., per extra bedroom)"
-    },
-    "sort_order": {
-      "type": "number",
-      "default": 0,
-      "description": "Display order"
+      "description": "Stripe price IDs for different billing frequencies"
     },
     "is_active": {
       "type": "boolean",
-      "default": true
-    },
-    "is_standard_template": {
-      "type": "boolean",
-      "default": false,
-      "description": "Marks this product as a standard template to be copied to new tenants"
+      "default": true,
+      "description": "Whether this service is available"
     }
   },
   "required": [
     "tenant_id",
-    "name",
-    "visit_type",
-    "type",
-    "base_price"
+    "service_name",
+    "service_type"
   ],
   "rls": {
-    "read": {
-      "data.tenant_id": "{{user.id}}"
-    },
     "create": {
-      "data.tenant_id": "{{user.id}}"
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "data.tenant_id": "{{user.id}}"
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "data.tenant_id": "{{user.id}}"
-    },
-    "write": {
-      "data.tenant_id": "{{user.id}}"
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }
