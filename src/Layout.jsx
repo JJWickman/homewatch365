@@ -485,13 +485,21 @@ export default function Layout({ children, currentPageName }) {
           background: transparent !important;
         }
 
-        /* Protect switch toggle — never override */
-        button[role="switch"],
-        button[role="switch"] span {
-          background-color: unset !important;
+        /* Protect switch toggle — restore Radix UI defaults */
+        button[role="switch"] {
+          background-color: #e2e8f0 !important;
           backdrop-filter: none !important;
-          border: unset !important;
-          box-shadow: unset !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+        button[role="switch"][data-state="checked"] {
+          background-color: #0f172a !important;
+        }
+        button[role="switch"] span {
+          background-color: white !important;
+          backdrop-filter: none !important;
+          border: none !important;
+          box-shadow: none !important;
         }
 
         /* Protect colored icon containers with inline styles */
