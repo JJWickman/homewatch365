@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import TenantOnboardingWizard from '@/components/onboarding/TenantOnboardingWizard';
+import OnboardingTour from '@/components/onboarding/OnboardingTour';
 import { format, startOfWeek, endOfWeek, isToday, parseISO } from 'date-fns';
 import VisitFormInDialog from '@/components/visits/VisitFormInDialog';
 import {
@@ -416,9 +416,9 @@ export default function Dashboard() {
        </DialogContent>
       </Dialog>
 
-      {/* Onboarding Wizard */}
+      {/* Onboarding Tour */}
        {showOnboarding && (
-        <TenantOnboardingWizard
+        <OnboardingTour
           open={showOnboarding}
           onComplete={() => {
             setShowOnboarding(false);
