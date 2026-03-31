@@ -1,15 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Loader2, ChevronLeft } from 'lucide-react';
+import { Loader2, ChevronLeft, Camera, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function VisitFormInDialog({ visit, property, template, onSubmitSuccess, onClose }) {
   const [sections, setSections] = useState([]);
   const [responses, setResponses] = useState({});
+  const [itemPhotos, setItemPhotos] = useState({});
+  const [uploadingPhoto, setUploadingPhoto] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [acknowledgedOffSite, setAcknowledgedOffSite] = useState(false);
+  const fileInputRef = useRef(null);
+  const [activePhotoItem, setActivePhotoItem] = useState(null);
 
   useEffect(() => {
     loadTemplate();
@@ -34,6 +38,37 @@ export default function VisitFormInDialog({ visit, property, template, onSubmitS
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePhotoCapture = (itemLabel) => {
+    setActivePhotoItem(itemLabel);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !activePhotoItem) return;
+    e.target.value = '';
+    setUploadingPhoto(activePhotoItem);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setItemPhotos(prev => ({
+        ...prev,
+        [activePhotoItem]: [...(prev[activePhotoItem] || []), file_url]
+      }));
+    } catch (err) {
+      console.error('Photo upload failed', err);
+    } finally {
+      setUploadingPhoto(null);
+      setActivePhotoItem(null);
+    }
+  };
+
+  const removePhoto = (itemLabel, url) => {
+    setItemPhotos(prev => ({
+      ...prev,
+      [itemLabel]: (prev[itemLabel] || []).filter(u => u !== url)
+    }));
   };
 
   const handleSubmit = async () => {
@@ -65,7 +100,7 @@ export default function VisitFormInDialog({ visit, property, template, onSubmitS
         issue_flag: false,
         severity: 'low',
         note: '',
-        photo_urls: [],
+        photo_urls: itemPhotos[label] || [],
       }));
 
       await Promise.all(items.map(item => base44.entities.ChecklistSubmissionItem.create(item)));
@@ -95,6 +130,16 @@ export default function VisitFormInDialog({ visit, property, template, onSubmitS
 
   return (
     <div className="space-y-6">
+      {/* Hidden file input for camera capture */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
       <button onClick={onClose} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
         <ChevronLeft className="h-4 w-4" />
         Back to visit types
@@ -168,6 +213,38 @@ export default function VisitFormInDialog({ visit, property, template, onSubmitS
                   rows={2}
                 />
               )}
+
+              {/* Photo capture */}
+              <div className="mt-2">
+                <button
+                  type="button"
+                  onClick={() => handlePhotoCapture(item.label)}
+                  disabled={uploadingPhoto === item.label}
+                  className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 font-medium py-1"
+                >
+                  {uploadingPhoto === item.label ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Camera className="h-3.5 w-3.5" />
+                  )}
+                  {uploadingPhoto === item.label ? 'Uploading...' : 'Add Photo'}
+                </button>
+                {(itemPhotos[item.label] || []).length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {(itemPhotos[item.label] || []).map((url, idx) => (
+                      <div key={idx} className="relative">
+                        <img src={url} alt="" className="h-16 w-16 object-cover rounded-lg border border-slate-200" />
+                        <button
+                          onClick={() => removePhoto(item.label, url)}
+                          className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full h-4 w-4 flex items-center justify-center"
+                        >
+                          <X className="h-2.5 w-2.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
