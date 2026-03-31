@@ -219,6 +219,18 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Test Onboarding Button */}
+      <div className="mb-4">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => setShowOnboarding(!showOnboarding)}
+          className="text-xs text-slate-500"
+        >
+          {showOnboarding ? 'Hide' : 'Show'} Onboarding Wizard
+        </Button>
+      </div>
+
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
