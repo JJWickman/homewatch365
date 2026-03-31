@@ -18,29 +18,16 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     intro.setOptions({
       steps: [
         {
-          element: 'h1',
-          intro: 'Welcome to Home Watch 365! Let\'s set up your account. First, update your company name in Settings.',
-          position: 'bottom'
+          element: 'aside nav a[href*="Settings"]',
+          intro: 'Step 1: Go to Settings and select the Company tab. Update your company logo & branding, enter company name, address, and website. Optional: connect your Google Business, Facebook Business, or Yelp profiles.',
+          position: 'right',
+          highlightClass: 'introjs-highlight'
         },
         {
-          element: 'main button:has-text("Add Property")',
-          intro: 'Click here to add your first property. This is where you\'ll manage inspections and visits.',
-          position: 'bottom'
-        },
-        {
-          element: 'nav a[href*="Clients"]',
-          intro: 'Create clients - the property owners you manage properties for.',
-          position: 'bottom'
-        },
-        {
-          element: 'nav a[href*="Properties"]',
-          intro: 'View and manage all your properties here.',
-          position: 'bottom'
-        },
-        {
-          element: 'nav a[href*="Settings"]',
-          intro: 'Configure pricing, templates, and company details in Settings.',
-          position: 'bottom'
+          element: 'aside nav a[href*="Clients"]',
+          intro: 'Step 2: Go to Clients and click "Add Client". Enter client name, address, select services they\'ve opted into, choose billing frequency, and set their portal PIN.',
+          position: 'right',
+          highlightClass: 'introjs-highlight'
         }
       ],
       tooltipClass: 'introjs-tooltip onboarding-tooltip',
@@ -52,7 +39,7 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
       skipLabel: 'Skip',
       nextLabel: 'Next →',
       prevLabel: '← Back',
-      doneLabel: 'Got it!'
+      doneLabel: 'Continue'
     });
 
 
