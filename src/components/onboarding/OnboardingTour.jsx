@@ -18,41 +18,41 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     intro.setOptions({
       steps: [
         {
-          element: '.company-name-input',
-          intro: 'Update your company name to get started. This is how your team will identify your business.',
+          element: 'h1',
+          intro: 'Welcome to Home Watch 365! Let\'s set up your account. First, update your company name in Settings.',
           position: 'bottom'
         },
         {
-          element: '.add-client-button',
-          intro: 'Create your first client. Clients are the property owners you manage properties for.',
+          element: 'main button:has-text("Add Property")',
+          intro: 'Click here to add your first property. This is where you\'ll manage inspections and visits.',
           position: 'bottom'
         },
         {
-          element: '.add-property-button',
-          intro: 'Add your first property. This is where you\'ll manage inspections and visits.',
+          element: 'nav a[href*="Clients"]',
+          intro: 'Create clients - the property owners you manage properties for.',
           position: 'bottom'
         },
         {
-          element: '.pricing-tab',
-          intro: 'Set up pricing for your services. Configure your billing rates and visit frequencies here.',
-          position: 'left'
+          element: 'nav a[href*="Properties"]',
+          intro: 'View and manage all your properties here.',
+          position: 'bottom'
         },
         {
-          element: '.checklist-config',
-          intro: 'Assign a checklist template to your property. This defines what inspectors will check during visits.',
-          position: 'left'
+          element: 'nav a[href*="Settings"]',
+          intro: 'Configure pricing, templates, and company details in Settings.',
+          position: 'bottom'
         }
       ],
-      tooltipClass: 'onboarding-tooltip',
-      highlightClass: 'onboarding-highlight',
+      tooltipClass: 'introjs-tooltip onboarding-tooltip',
+      highlightClass: 'introjs-highlight onboarding-highlight',
       showBullets: true,
       showProgress: true,
-      exitOnEsc: false,
-      exitOnOverlayClick: false,
-      skipLabel: 'Skip Tour',
-      nextLabel: 'Next',
-      prevLabel: 'Back',
-      doneLabel: 'Finish'
+      exitOnEsc: true,
+      exitOnOverlayClick: true,
+      skipLabel: 'Skip',
+      nextLabel: 'Next →',
+      prevLabel: '← Back',
+      doneLabel: 'Got it!'
     });
 
 
