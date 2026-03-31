@@ -219,8 +219,8 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Test Onboarding Button */}
-      <div className="mb-4">
+      {/* Test Onboarding Buttons */}
+      <div className="mb-4 flex gap-2">
         <Button 
           variant="outline" 
           size="sm"
@@ -228,6 +228,14 @@ export default function Dashboard() {
           className="text-xs text-slate-500"
         >
           {showOnboarding ? 'Hide' : 'Show'} Onboarding Wizard
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => navigate(createPageUrl('CompanyOnboarding'))}
+          className="text-xs text-slate-500"
+        >
+          Show Company Onboarding
         </Button>
       </div>
 
