@@ -513,7 +513,7 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
           </div>
         </div>
 
-        <div className="bg-white/95 backdrop-blur-sm px-6 pt-6 pb-6">
+        <div className="bg-white/70 backdrop-blur-xl px-6 pt-6 pb-6">
           {/* Progress indicator */}
           <div className="flex justify-between mb-6">
             {steps.map((_, i) => (
