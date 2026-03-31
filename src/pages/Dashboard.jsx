@@ -54,7 +54,8 @@ export default function Dashboard() {
   const checkOnboardingStatus = async () => {
     try {
       const currentUser = await base44.auth.me();
-      if (currentUser && !currentUser.onboarding_completed) {
+      // Show onboarding if flag is explicitly false OR undefined (new users)
+      if (currentUser && currentUser.onboarding_completed !== true) {
         setShowOnboarding(true);
       }
     } catch (error) {
@@ -423,7 +424,7 @@ export default function Dashboard() {
       </Dialog>
 
       {/* Onboarding Wizard */}
-       {user && company && (
+       {user && company && showOnboarding && (
         <TenantOnboardingWizard
           open={showOnboarding}
           onComplete={() => {
