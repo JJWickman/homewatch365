@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   CheckCircle2, ArrowRight, Building, Users, Home,
-  DollarSign, ClipboardList, Loader2
+  DollarSign, ClipboardList, Loader2, X
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -512,17 +512,36 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
       <div className="relative">
       <div className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-white/10 backdrop-blur-xl">
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 pt-6 pb-4 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <currentStep.icon className="h-6 w-6 text-white" />
-            <div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <currentStep.icon className="h-6 w-6 text-white" />
+              <div>
                 <h2 className="text-white text-lg font-semibold">
-                Welcome to HomeWatch365 - We are here to help you get setup in the application
-              </h2>
+                  Welcome to HomeWatch365 - We are here to help you get setup in the application
+                </h2>
+              </div>
             </div>
+            <button
+              onClick={() => onDismiss?.(false) || onComplete()}
+              className="text-white hover:bg-white/20 rounded-lg p-1 transition-colors"
+              aria-label="Close wizard"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
         </div>
 
         <div className="bg-white/10 px-6 pt-6 pb-6">
+          {/* Close button */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={() => onDismiss?.(false) || onComplete()}
+              className="text-white/60 hover:text-white transition-colors p-1"
+              aria-label="Close wizard"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
           {/* Progress indicator */}
           <div className="flex justify-between mb-6">
             {steps.map((_, i) => (
