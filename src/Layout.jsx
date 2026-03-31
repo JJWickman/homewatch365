@@ -450,7 +450,7 @@ export default function Layout({ children, currentPageName }) {
 
         /* Glass cards - ALL card-like surfaces inside main content only */
         main [class*="Card"], main [class*="card"],
-        main .rounded-lg:not(button):not([role="option"]):not([data-radix-select-item]), main .rounded-xl:not(button),
+        main .rounded-lg:not(button):not([role="option"]):not([data-radix-select-item]):not([role="switch"]), main .rounded-xl:not(button):not([role="switch"]),
         main [role="dialog"] > div,
         main [role="listbox"], main [role="menu"],
         main .border.bg-popover,
@@ -464,7 +464,7 @@ export default function Layout({ children, currentPageName }) {
         }
 
         /* Glass inputs and selects */
-        main input, main select, main textarea, main [role="combobox"] {
+        main input:not([role="switch"]), main select, main textarea, main [role="combobox"] {
           background: rgba(219, 234, 254, 0.4) !important;
           backdrop-filter: blur(10px) !important;
           border: 1px solid rgba(147, 197, 253, 0.5) !important;
@@ -521,11 +521,7 @@ export default function Layout({ children, currentPageName }) {
         }
 
         /* Glass badges */
-        [class*="badge"] {
-          background: rgba(219, 234, 254, 0.5) !important;
-          backdrop-filter: blur(10px) !important;
-          border: 1px solid rgba(147, 197, 253, 0.4) !important;
-        }
+        [class*="badge"]:not([role="switch"]) {
 
         /* Animations */
         * {
