@@ -17,6 +17,13 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const [highlightElement, setHighlightElement] = useState(null);
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [dragPos, setDragPos] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    const saved = localStorage.getItem('onboarding_drag_pos');
+    return saved ? JSON.parse(saved) : null;
+  });
 
   const steps = [
     {
@@ -95,22 +102,24 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     highlightElement.style.borderRadius = '6px';
     highlightElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // Position tooltip far from the element
-    const rect = highlightElement.getBoundingClientRect();
-    const tooltipWidth = 320;
-    const tooltipHeight = 180;
-    const gap = 48;
+    // Position tooltip far from the element (only if not manually dragged)
+    if (!dragPos) {
+      const rect = highlightElement.getBoundingClientRect();
+      const tooltipWidth = 320;
+      const tooltipHeight = 180;
+      const gap = 48;
 
-    let top = rect.top + window.scrollY - tooltipHeight - gap;
-    let left = rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2;
+      let top = rect.top + window.scrollY - tooltipHeight - gap;
+      let left = rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2;
 
-    // Ensure it doesn't go off-screen
-    if (left < 16) left = 16;
-    if (left + tooltipWidth > window.innerWidth - 16) left = window.innerWidth - tooltipWidth - 16;
-    if (top < 16) top = rect.bottom + window.scrollY + gap;
+      // Ensure it doesn't go off-screen
+      if (left < 16) left = 16;
+      if (left + tooltipWidth > window.innerWidth - 16) left = window.innerWidth - tooltipWidth - 16;
+      if (top < 16) top = rect.bottom + window.scrollY + gap;
 
-    setTooltipPos({ top, left });
-  }, [highlightElement]);
+      setTooltipPos({ top, left });
+    }
+  }, [highlightElement, dragPos]);
 
   // Save step to localStorage whenever it changes
   useEffect(() => {
@@ -122,12 +131,53 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     localStorage.setItem('onboarding_congrats', showCongrats.toString());
   }, [showCongrats]);
 
-  // Reposition tooltip on window resize/scroll
+  // Save drag position to localStorage
   useEffect(() => {
-    if (!open || showCongrats) return;
+    if (dragPos) {
+      localStorage.setItem('onboarding_drag_pos', JSON.stringify(dragPos));
+    }
+  }, [dragPos]);
+
+  // Handle drag start
+  const handleMouseDown = (e) => {
+    if (e.target.closest('button')) return; // Don't drag when clicking buttons
+    setIsDragging(true);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+
+  // Handle drag move
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e) => {
+      setDragPos({
+        top: e.clientY - dragOffset.y,
+        left: e.clientX - dragOffset.x
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragOffset]);
+
+  // Reposition tooltip on window resize/scroll (only if not manually dragged)
+  useEffect(() => {
+    if (!open || showCongrats || dragPos) return;
     
     const handleResize = () => {
-      // Trigger repositioning by updating highlightElement
       if (highlightElement) {
         const rect = highlightElement.getBoundingClientRect();
         const tooltipWidth = 320;
@@ -151,7 +201,7 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', handleResize);
     };
-  }, [highlightElement, open, showCongrats]);
+  }, [highlightElement, open, showCongrats, dragPos]);
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -236,6 +286,7 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
                     }
                     localStorage.removeItem('onboarding_step');
                     localStorage.removeItem('onboarding_congrats');
+                    localStorage.removeItem('onboarding_drag_pos');
                     onDismiss?.(dontShowAgain);
                     onComplete();
                   }, 500);
@@ -253,10 +304,14 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
   }
 
   const step = steps[currentStep];
+  const currentPos = dragPos || tooltipPos;
 
   return (
-    <div className="fixed pointer-events-none z-50" style={{ top: `${tooltipPos.top}px`, left: `${tooltipPos.left}px`, width: '320px' }}>
-      <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl p-6 pointer-events-auto">
+    <div className="fixed pointer-events-none z-50" style={{ top: `${currentPos.top}px`, left: `${currentPos.left}px`, width: '320px' }}>
+      <div 
+        className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl p-6 pointer-events-auto cursor-grab active:cursor-grabbing select-none"
+        onMouseDown={handleMouseDown}
+      >
         <div className="space-y-4">
           {/* Title */}
           <div>
