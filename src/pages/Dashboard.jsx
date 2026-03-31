@@ -219,26 +219,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Test Onboarding Buttons */}
-      <div className="mb-4 flex gap-2">
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => setShowOnboarding(!showOnboarding)}
-          className="text-xs text-slate-500"
-        >
-          {showOnboarding ? 'Hide' : 'Show'} Onboarding Wizard
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => navigate(createPageUrl('CompanyOnboarding'))}
-          className="text-xs text-slate-500"
-        >
-          Show Company Onboarding
-        </Button>
-      </div>
-
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
