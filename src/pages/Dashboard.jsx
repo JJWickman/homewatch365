@@ -227,12 +227,6 @@ export default function Dashboard() {
           </h1>
           <p className="text-slate-500 mt-1">Here's what's happening with your properties today.</p>
         </div>
-        <Link to={createPageUrl('Visits') + '?action=new'}>
-          <Button className="bg-black text-white hover:bg-slate-900">
-            <Calendar className="h-4 w-4 mr-2" />
-            Book a Visit
-          </Button>
-        </Link>
       </div>
 
       {/* Stats Grid */}
