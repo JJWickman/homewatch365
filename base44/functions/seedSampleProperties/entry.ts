@@ -1,7 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const TENANT_ID = "69c4784908cbd3c8bce515f0";
-const COMPANY_ID = "69680a583d8f37520c3407ff";
 const USER_ID = "696806e88e744d6cc803e3bc";
 
 const CLIENTS = [
@@ -45,7 +44,6 @@ Deno.serve(async (req) => {
     // Fix jasonwi's user data fields so RLS works going forward
     await sr.entities.User.update(USER_ID, {
       primary_tenant_id: TENANT_ID,
-      company_id: COMPANY_ID,
       onboarding_completed: true,
     });
 

@@ -10,16 +10,16 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Get user's company membership
-        const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
-        if (members.length === 0) {
-            return Response.json({ error: 'No company membership found' }, { status: 403 });
+        // Get user's tenant
+        const tenantId = user.primary_tenant_id;
+        if (!tenantId) {
+            return Response.json({ error: 'No tenant found' }, { status: 403 });
         }
 
-        // Get company
-        const companies = await base44.entities.Company.filter({ id: members[0].company_id });
+        // Get tenant
+        const companies = await base44.entities.Tenant.filter({ id: tenantId });
         if (companies.length === 0) {
-            return Response.json({ error: 'Company not found' }, { status: 404 });
+            return Response.json({ error: 'Tenant not found' }, { status: 404 });
         }
 
         const company = companies[0];
@@ -40,14 +40,14 @@ Deno.serve(async (req) => {
 
         // Get or create email usage record for this month
         const usageRecords = await base44.entities.EmailUsage.filter({
-            company_id: company.id,
+            tenant_id: tenantId,
             month: currentMonth
         });
 
         let usage;
         if (usageRecords.length === 0) {
             usage = await base44.asServiceRole.entities.EmailUsage.create({
-                company_id: company.id,
+                tenant_id: tenantId,
                 month: currentMonth,
                 emails_sent: 0,
                 last_reset_date: now.toISOString()

@@ -9,53 +9,43 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    // Find all JP Home Watch companies
-    const companies = await base44.asServiceRole.entities.Company.filter({}, '-created_date', 100);
-    const jpCompanies = companies.filter(c => c.name && c.name.includes('JP Home Watch'));
+    // Find all JP Home Watch tenants
+    const tenants = await base44.asServiceRole.entities.Tenant.filter({}, '-created_date', 100);
+    const jpTenants = tenants.filter(c => c.name && c.name.includes('JP Home Watch'));
 
-    if (jpCompanies.length <= 1) {
+    if (jpTenants.length <= 1) {
       return Response.json({ message: 'No duplicates to merge' });
     }
 
-    // Keep the first (oldest) company
-    const keepCompany = jpCompanies[0];
-    const deleteCompanies = jpCompanies.slice(1);
+    // Keep the first (oldest) tenant
+    const keepTenant = jpTenants[0];
+    const deleteTenants = jpTenants.slice(1);
 
-    // Migrate all data from duplicate companies to the keeper
-    const entityTypes = ['Client', 'Property', 'Visit', 'CompanyMember', 'Invoice', 'CommunicationLog', 'MonthlyStatement', 'FollowUp'];
+    // Migrate all data from duplicate tenants to the keeper
+    const entityTypes = ['Client', 'Property', 'Visit', 'TenantUser', 'CommunicationLog', 'MonthlyStatement'];
 
-    for (const dupCompany of deleteCompanies) {
+    for (const dupTenant of deleteTenants) {
       for (const entityType of entityTypes) {
         try {
-          const records = await base44.asServiceRole.entities[entityType].filter({ company_id: dupCompany.id }, '', 1000);
+          const records = await base44.asServiceRole.entities[entityType].filter({ tenant_id: dupTenant.id }, '', 1000);
           for (const record of records) {
-            await base44.asServiceRole.entities[entityType].update(record.id, { company_id: keepCompany.id });
+            await base44.asServiceRole.entities[entityType].update(record.id, { tenant_id: keepTenant.id });
           }
         } catch (e) {
-          // Entity might not exist or have company_id field
+          // Entity might not exist or have tenant_id field
           console.log(`Skipped ${entityType}:`, e.message);
         }
       }
 
-      // Update user references
-      try {
-        const members = await base44.asServiceRole.entities.User.filter({ company_id: dupCompany.id }, '', 100);
-        for (const member of members) {
-          await base44.auth.updateMe({ company_id: keepCompany.id });
-        }
-      } catch (e) {
-        console.log('Could not update user company references:', e.message);
-      }
-
-      // Delete the duplicate company
-      await base44.asServiceRole.entities.Company.delete(dupCompany.id);
+      // Delete the duplicate tenant
+      await base44.asServiceRole.entities.Tenant.delete(dupTenant.id);
     }
 
     return Response.json({
       success: true,
-      message: `Merged ${deleteCompanies.length} duplicate companies into ${keepCompany.name}`,
-      kept_company_id: keepCompany.id,
-      deleted_count: deleteCompanies.length
+      message: `Merged ${deleteTenants.length} duplicate tenants into ${keepTenant.name}`,
+      kept_tenant_id: keepTenant.id,
+      deleted_count: deleteTenants.length
     });
   } catch (error) {
     console.error('Error merging companies:', error);

@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
 
     // Create transaction record
     await base44.asServiceRole.entities.ClientTransaction.create({
-      company_id: statement.company_id,
+      tenant_id: statement.tenant_id,
       client_id: statement.client_id,
       description: `Payment for invoice ${statement.id.slice(0, 8).toUpperCase()}`,
       amount: statement.total,

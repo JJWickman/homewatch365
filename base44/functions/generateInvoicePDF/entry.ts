@@ -19,10 +19,10 @@ Deno.serve(async (req) => {
     }
     const statement = statements[0];
 
-    // Get client and company
+    // Get client and tenant
     const [clients, companies] = await Promise.all([
       base44.entities.Client.filter({ id: statement.client_id }),
-      base44.entities.Company.filter({ id: statement.company_id })
+      base44.entities.Tenant.filter({ id: statement.tenant_id })
     ]);
 
     const client = clients[0];

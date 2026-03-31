@@ -11,24 +11,22 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { event } = body;
 
-    if (!event || event.type !== 'delete' || event.entity_name !== 'Company') {
+    if (!event || event.type !== 'delete' || event.entity_name !== 'Tenant') {
       return Response.json({ success: false, message: 'Invalid event' }, { status: 400 });
     }
 
-    const companyId = event.entity_id;
+    const tenantId = event.entity_id;
 
-    // Fetch the company record before deletion to get stripe_customer_id
-    // Since the company is being deleted, we need to get it from the event data if available
-    // Otherwise, attempt to fetch it if still in database
+    // Fetch the tenant record before deletion to get stripe_customer_id
     let stripeCustomerId = null;
 
     try {
-      const company = await base44.asServiceRole.entities.Company.get(companyId);
-      stripeCustomerId = company?.stripe_customer_id;
+      const tenant = await base44.asServiceRole.entities.Tenant.get(tenantId);
+      stripeCustomerId = tenant?.stripe_customer_id;
     } catch (err) {
-      // Company already deleted, stripe_customer_id may not be available
-      console.log('Company not found, skipping Stripe cleanup');
-      return Response.json({ success: true, message: 'Company not found, skipped cleanup' }, { status: 200 });
+      // Tenant already deleted, stripe_customer_id may not be available
+      console.log('Tenant not found, skipping Stripe cleanup');
+      return Response.json({ success: true, message: 'Tenant not found, skipped cleanup' }, { status: 200 });
     }
 
     if (!stripeCustomerId) {

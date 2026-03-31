@@ -9,10 +9,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    const { user_email, company_id } = await req.json();
+    const { user_email, tenant_id } = await req.json();
 
-    if (!user_email || !company_id) {
-      return Response.json({ error: 'Missing user_email or company_id' }, { status: 400 });
+    if (!user_email || !tenant_id) {
+      return Response.json({ error: 'Missing user_email or tenant_id' }, { status: 400 });
     }
 
     const entities = [
@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
       try {
         const recordsToDelete = await base44.asServiceRole.entities[entityName].filter({
           created_by: user_email,
-          company_id: company_id
+          tenant_id: tenant_id
         });
 
         if (recordsToDelete.length > 0) {

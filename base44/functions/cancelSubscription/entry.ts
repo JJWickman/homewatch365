@@ -14,19 +14,19 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { company_id } = await req.json();
+    const { tenant_id } = await req.json();
 
-    if (!company_id) {
-      return Response.json({ error: 'Missing company_id' }, { status: 400 });
+    if (!tenant_id) {
+      return Response.json({ error: 'Missing tenant_id' }, { status: 400 });
     }
 
-    // Get company details
-    const companies = await base44.entities.Company.filter({ id: company_id });
-    if (!companies || companies.length === 0) {
-      return Response.json({ error: 'Company not found' }, { status: 404 });
+    // Get tenant details
+    const tenants = await base44.entities.Tenant.filter({ id: tenant_id });
+    if (!tenants || tenants.length === 0) {
+      return Response.json({ error: 'Tenant not found' }, { status: 404 });
     }
 
-    const company = companies[0];
+    const company = tenants[0];
 
     if (!company.stripe_subscription_id) {
       return Response.json({ error: 'No active subscription found' }, { status: 404 });
@@ -35,8 +35,8 @@ Deno.serve(async (req) => {
     // Cancel subscription
     const canceledSubscription = await stripe.subscriptions.del(company.stripe_subscription_id);
 
-    // Update company record
-    await base44.asServiceRole.entities.Company.update(company_id, {
+    // Update tenant record
+    await base44.asServiceRole.entities.Tenant.update(tenant_id, {
       subscription_status: 'cancelled',
       stripe_subscription_id: null,
     });

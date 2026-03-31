@@ -9,16 +9,16 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { product_service_id, company_id } = await req.json();
+    const { product_service_id, tenant_id } = await req.json();
 
-    if (!product_service_id || !company_id) {
-      return Response.json({ error: 'Missing product_service_id or company_id' }, { status: 400 });
+    if (!product_service_id || !tenant_id) {
+      return Response.json({ error: 'Missing product_service_id or tenant_id' }, { status: 400 });
     }
 
-    // Load company and product
-    const companies = await base44.asServiceRole.entities.Company.filter({ id: company_id });
-    const company = companies[0];
-    if (!company) return Response.json({ error: 'Company not found' }, { status: 404 });
+    // Load tenant and product
+    const tenants = await base44.asServiceRole.entities.Tenant.filter({ id: tenant_id });
+    const company = tenants[0];
+    if (!company) return Response.json({ error: 'Tenant not found' }, { status: 404 });
 
     const products = await base44.asServiceRole.entities.ProductService.filter({ id: product_service_id });
     const product = products[0];
@@ -59,14 +59,14 @@ Deno.serve(async (req) => {
         stripeProduct = await stripe.products.create({
           name: product.name,
           description: product.description || undefined,
-          metadata: { product_service_id: product.id, company_id: company_id }
+          metadata: { product_service_id: product.id, tenant_id: tenant_id }
         }, stripeOptions);
       }
     } else {
       stripeProduct = await stripe.products.create({
         name: product.name,
         description: product.description || undefined,
-        metadata: { product_service_id: product.id, company_id: company_id }
+        metadata: { product_service_id: product.id, tenant_id: tenant_id }
       }, stripeOptions);
     }
 
@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
       product: stripeProduct.id,
       unit_amount: Math.round(product.price * 100),
       currency: 'usd',
-      metadata: { product_service_id: product.id, company_id: company_id }
+      metadata: { product_service_id: product.id, tenant_id: tenant_id }
     };
 
     // Add recurring if subscription

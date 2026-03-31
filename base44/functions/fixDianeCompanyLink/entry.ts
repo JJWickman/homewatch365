@@ -11,33 +11,31 @@ Deno.serve(async (req) => {
 
     const { email } = await req.json();
     
-    // Find diane's CompanyMember record
-    const members = await base44.asServiceRole.entities.CompanyMember.filter({ user_email: email });
-    if (members.length === 0) {
-      return Response.json({ error: 'No company found for this user' }, { status: 404 });
-    }
-
-    const realCompanyId = members[0].company_id;
-    
-    // Verify company exists
-    const companies = await base44.asServiceRole.entities.Company.filter({ id: realCompanyId });
-    if (companies.length === 0) {
-      return Response.json({ error: 'Company record missing' }, { status: 404 });
-    }
-
-    // Find the user and update their company_id
+    // Find diane's TenantUser record
     const users = await base44.asServiceRole.entities.User.filter({ email });
     if (users.length === 0) {
       return Response.json({ error: 'User not found' }, { status: 404 });
     }
-
-    const currentUser = users[0];
     
-    // Update user's company_id to match the real one
-    await base44.asServiceRole.entities.User.update(currentUser.id, {
-      company_id: realCompanyId,
-      onboarding_completed: true
-    });
+    const currentUser = users[0];
+    const tenantId = currentUser.primary_tenant_id;
+    if (!tenantId) {
+      return Response.json({ error: 'No tenant found for this user' }, { status: 404 });
+    }
+    
+    // Verify tenant exists
+    const tenants = await base44.asServiceRole.entities.Tenant.filter({ id: tenantId });
+    if (tenants.length === 0) {
+      return Response.json({ error: 'Tenant record missing' }, { status: 404 });
+    }
+
+    // Ensure primary_tenant_id is set
+    if (!currentUser.primary_tenant_id) {
+      await base44.asServiceRole.entities.User.update(currentUser.id, {
+        primary_tenant_id: tenantId,
+        onboarding_completed: true
+      });
+    }
 
     return Response.json({
       success: true,
@@ -45,12 +43,12 @@ Deno.serve(async (req) => {
       user: {
         id: currentUser.id,
         email: currentUser.email,
-        company_id: realCompanyId
+        primary_tenant_id: tenantId
       },
-      company: {
-        id: companies[0].id,
-        name: companies[0].name,
-        subscription_plan: companies[0].subscription_plan
+      tenant: {
+        id: tenants[0].id,
+        name: tenants[0].name,
+        subscription_plan: tenants[0].subscription_plan
       }
     });
   } catch (error) {

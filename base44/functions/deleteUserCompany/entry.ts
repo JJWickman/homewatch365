@@ -16,21 +16,27 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    // Find CompanyMember records for this user
-    const members = await base44.asServiceRole.entities.CompanyMember.filter({ user_email: email });
+    // Find TenantUser records for this user
+    const tenantUsers = await base44.asServiceRole.entities.User.filter({ email });
+    if (tenantUsers.length === 0) {
+      return Response.json({ message: 'User not found' }, { status: 404 });
+    }
+    
+    const user_id = tenantUsers[0].id;
+    const tenants = await base44.asServiceRole.entities.TenantUser.filter({ user_id });
 
-    if (members.length === 0) {
-      return Response.json({ message: 'No company found for this user' });
+    if (tenants.length === 0) {
+      return Response.json({ message: 'No tenant found for this user' });
     }
 
-    const companyId = members[0].company_id;
-
-    // Delete the company
-    await base44.asServiceRole.entities.Company.delete(companyId);
+    // Delete TenantUser associations
+    for (const tu of tenants) {
+      await base44.asServiceRole.entities.TenantUser.delete(tu.id);
+    }
 
     return Response.json({
       success: true,
-      message: `Company ${companyId} deleted for user ${email}`
+      message: `Tenant associations deleted for user ${email}`
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

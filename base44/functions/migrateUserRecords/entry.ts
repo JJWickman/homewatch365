@@ -20,9 +20,9 @@ Deno.serve(async (req) => {
     // Entities that have user_name and assigned_to_name fields
     const entitiesWithNames = [
       { name: 'ActivityLog', fields: ['user_name'] },
-      { name: 'Inspection', fields: ['assigned_to_name'] },
+      { name: 'Visit', fields: ['assigned_to_name'] },
       { name: 'FollowUp', fields: ['assigned_to_name'] },
-      { name: 'CompanyMember', fields: ['user_name'] }
+      { name: 'TenantUser', fields: ['user_name'] }
     ];
 
     const results = {};

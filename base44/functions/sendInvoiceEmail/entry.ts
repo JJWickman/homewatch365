@@ -19,10 +19,10 @@ Deno.serve(async (req) => {
     }
     const statement = statements[0];
 
-    // Get client and company using service role
+    // Get client and tenant using service role
     const [clients, companies] = await Promise.all([
       base44.asServiceRole.entities.Client.filter({ id: statement.client_id }),
-      base44.asServiceRole.entities.Company.filter({ id: statement.company_id })
+      base44.asServiceRole.entities.Tenant.filter({ id: statement.tenant_id })
     ]);
 
     const client = clients[0];
@@ -297,7 +297,7 @@ If you have any questions, please don't hesitate to contact us.
 
     // Log communication
     await base44.asServiceRole.entities.CommunicationLog.create({
-      company_id: statement.company_id,
+      tenant_id: statement.tenant_id,
       client_id: client.id,
       client_email: email_override || client.email,
       type: 'email',

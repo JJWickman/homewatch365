@@ -29,10 +29,10 @@ Deno.serve(async (req) => {
     }
     const client = clients[0];
 
-    // Get company
-    const companies = await base44.entities.Company.filter({ id: client.company_id });
+    // Get tenant
+    const companies = await base44.entities.Tenant.filter({ id: client.tenant_id });
     if (companies.length === 0) {
-      return Response.json({ error: 'Company not found' }, { status: 404 });
+      return Response.json({ error: 'Tenant not found' }, { status: 404 });
     }
     const company = companies[0];
 

@@ -24,21 +24,21 @@ Deno.serve(async (req) => {
 
     const userToDelete = usersToDelete[0];
 
-    // Find all company memberships
-    const memberships = await base44.asServiceRole.entities.CompanyMember.filter({ user_email: email });
-
-    // Delete related data for each company
-    for (const membership of memberships) {
-      const companyId = membership.company_id;
-
-      // Delete activity logs
-      const activityLogs = await base44.asServiceRole.entities.ActivityLog.filter({ company_id: companyId, user_email: email });
+    // Find user's primary tenant
+    const primaryTenant = userToDelete.primary_tenant_id;
+    
+    // Delete activity logs
+    if (primaryTenant) {
+      const activityLogs = await base44.asServiceRole.entities.ActivityLog.filter({ tenant_id: primaryTenant, user_email: email });
       for (const log of activityLogs) {
         await base44.asServiceRole.entities.ActivityLog.delete(log.id);
       }
+    }
 
-      // Delete company membership
-      await base44.asServiceRole.entities.CompanyMember.delete(membership.id);
+    // Delete TenantUser associations
+    const tenantUsers = await base44.asServiceRole.entities.TenantUser.filter({ user_id: userToDelete.id });
+    for (const tu of tenantUsers) {
+      await base44.asServiceRole.entities.TenantUser.delete(tu.id);
     }
 
     // Delete the user
@@ -46,8 +46,7 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
-      message: `Successfully deleted user ${email} and all related data`,
-      deletedCompanyMemberships: memberships.length
+      message: `Successfully deleted user ${email} and all related data`
     });
 
   } catch (error) {

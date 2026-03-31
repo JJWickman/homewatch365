@@ -22,9 +22,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invoice already paid' }, { status: 400 });
     }
 
-    // Get company
-    const companies = await base44.asServiceRole.entities.Company.filter({ id: statement.company_id });
-    const company = companies[0];
+    // Get tenant
+    const tenants = await base44.asServiceRole.entities.Tenant.filter({ id: statement.tenant_id });
+    const company = tenants[0];
 
     // Create payment intent
     const paymentIntent = await stripe.paymentIntents.create({
@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
       currency: 'usd',
       metadata: {
         statement_id: statement.id,
-        company_id: statement.company_id,
+        tenant_id: statement.tenant_id,
         client_id: statement.client_id
       },
       stripe_account: company.stripe_connect_account_id || undefined

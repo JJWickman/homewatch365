@@ -11,20 +11,20 @@ Deno.serve(async (req) => {
     }
 
     const user = users[0];
-    const companies = user.company_id ? await base44.asServiceRole.entities.Company.filter({ id: user.company_id }) : [];
+    const tenants = user.primary_tenant_id ? await base44.asServiceRole.entities.Tenant.filter({ id: user.primary_tenant_id }) : [];
 
     return Response.json({
       user: {
         id: user.id,
         email: user.email,
         onboarding_completed: user.onboarding_completed,
-        company_id: user.company_id
+        primary_tenant_id: user.primary_tenant_id
       },
-      company: companies.length > 0 ? {
-        id: companies[0].id,
-        name: companies[0].name,
-        subscription_plan: companies[0].subscription_plan,
-        subscription_status: companies[0].subscription_status
+      tenant: tenants.length > 0 ? {
+        id: tenants[0].id,
+        name: tenants[0].name,
+        subscription_plan: tenants[0].subscription_plan,
+        subscription_status: tenants[0].subscription_status
       } : null
     });
   } catch (error) {

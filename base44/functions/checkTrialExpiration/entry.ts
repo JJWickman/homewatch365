@@ -12,30 +12,30 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Get user's company
-    const members = await base44.asServiceRole.entities.CompanyMember.filter({ 
-      user_email: user.email 
-    });
-
-    if (members.length === 0) {
+    // Get user's tenant
+    const tenantId = user.primary_tenant_id;
+    if (!tenantId) {
       return Response.json({ 
         expired: false, 
-        message: 'No company membership found' 
+        message: 'No tenant found' 
       });
     }
 
-    const companies = await base44.asServiceRole.entities.Company.filter({ 
-      id: members[0].company_id 
-    });
-
-    if (companies.length === 0) {
+    const tenants = await base44.asServiceRole.entities.Tenant.filter({ id: tenantId });
+    if (tenants.length === 0) {
       return Response.json({ 
         expired: false, 
-        message: 'Company not found' 
+        message: 'Tenant not found' 
       });
     }
 
-    const company = companies[0];
+    const company = tenants[0];
+
+    // Check if user is owner
+    const tenantUsers = await base44.asServiceRole.entities.TenantUser.filter({
+      user_id: user.id, tenant_id: tenantId
+    });
+    const isOwner = tenantUsers[0]?.is_owner || false;
 
     // Check trial expiration
     if (company.subscription_status === 'trial' && company.trial_ends_at) {
@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
         trialEndsAt: company.trial_ends_at,
         subscriptionStatus: company.subscription_status,
         subscriptionPlan: company.subscription_plan,
-        isOwner: members[0].is_owner
+        isOwner
       });
     }
 
@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
       expired: false,
       subscriptionStatus: company.subscription_status,
       subscriptionPlan: company.subscription_plan,
-      isOwner: members[0].is_owner
+      isOwner
     });
 
   } catch (error) {

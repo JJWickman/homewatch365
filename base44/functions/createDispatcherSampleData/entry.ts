@@ -9,12 +9,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
-    if (members.length === 0) {
-      return Response.json({ error: 'No company found' }, { status: 400 });
+    const tenantId = user.primary_tenant_id;
+    if (!tenantId) {
+      return Response.json({ error: 'No tenant found' }, { status: 400 });
     }
-
-    const companyId = members[0].company_id;
 
     // Sample properties in 33921 (Fort Myers, FL)
     const sampleProperties = [
@@ -40,7 +38,7 @@ Deno.serve(async (req) => {
 
     // Create sample clients
     const clientsData = sampleProperties.map((prop, i) => ({
-      company_id: companyId,
+      tenant_id: tenantId,
       first_name: ['John', 'Sarah', 'Michael', 'Emily', 'David', 'Jessica', 'Robert', 'Jennifer', 'William', 'Lisa', 'James', 'Mary', 'Richard', 'Patricia', 'Thomas', 'Linda', 'Charles', 'Barbara'][i],
       last_name: ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore'][i],
       email: `client${i + 1}@example.com`,
@@ -53,7 +51,7 @@ Deno.serve(async (req) => {
 
     // Create properties
     const propertiesData = sampleProperties.map((prop, i) => ({
-      company_id: companyId,
+      tenant_id: tenantId,
       client_id: clients[i].id,
       name: prop.name,
       address: prop.address,
@@ -69,8 +67,8 @@ Deno.serve(async (req) => {
     const properties = await base44.asServiceRole.entities.Property.bulkCreate(propertiesData);
 
     // Get team members (Alex, Maria, James)
-    const team = await base44.entities.CompanyMember.filter({ 
-      company_id: companyId,
+    const team = await base44.entities.TenantUser.filter({ 
+      tenant_id: tenantId,
       role: 'field_inspector'
     });
 
@@ -97,7 +95,7 @@ Deno.serve(async (req) => {
         if (propertyIdx >= properties.length) break;
 
         visits.push({
-          company_id: companyId,
+          tenant_id: tenantId,
           property_id: properties[propertyIdx].id,
           client_id: clients[propertyIdx].id,
           visit_type: 'inspection',

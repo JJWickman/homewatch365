@@ -93,8 +93,8 @@ Deno.serve(async (req) => {
       }
     });
 
-    // Create company with trial (extended if promo applies)
-    const company = await base44.asServiceRole.entities.Company.create({
+    // Create tenant with trial (extended if promo applies)
+    const tenant = await base44.asServiceRole.entities.Tenant.create({
       name: companyName,
       slug: slug + '-' + Date.now().toString(36),
       phone: phone || '',
@@ -113,9 +113,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create company member (owner)
-    await base44.asServiceRole.entities.CompanyMember.create({
-      company_id: company.id,
+    // Create tenant user (owner)
+    await base44.asServiceRole.entities.TenantUser.create({
+      user_id: userToDelete.id,
       user_email: email,
       user_name: fullName,
       role: 'administrator',
@@ -123,9 +123,11 @@ Deno.serve(async (req) => {
       is_active: true
     });
 
-    // Create default inspection template
-    await base44.asServiceRole.entities.InspectionTemplate.create({
-      company_id: company.id,
+    // Invite user via Base44's built-in system
+    await base44.asServiceRole.users.inviteUser(email, 'user');
+
+    // Send welcome email
+    await base44.asServiceRole.integrations.Core.SendEmail({
       name: 'Standard Weekly Inspection',
       description: 'Default template for routine property inspections',
       type: 'routine',
@@ -201,7 +203,7 @@ The Estate Watch Team
     return Response.json({ 
       success: true,
       message: 'Registration successful! Please check your email to complete setup.',
-      company_id: company.id
+      tenant_id: tenant.id
     });
 
   } catch (error) {

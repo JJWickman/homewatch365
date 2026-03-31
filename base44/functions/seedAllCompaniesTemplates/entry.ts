@@ -10,20 +10,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin only' }, { status: 403 });
     }
 
-    // Get all companies
-    const companies = await base44.asServiceRole.entities.Company.list();
+    // Get all tenants
+    const tenants = await base44.asServiceRole.entities.Tenant.list();
     const results = [];
 
-    for (const company of companies) {
+    for (const tenant of tenants) {
       try {
-        // Check if company already has templates
+        // Check if tenant already has templates
         const existingTemplates = await base44.asServiceRole.entities.ChecklistTemplate.filter({
-          company_id: company.id
+          tenant_id: tenant.id
         });
 
         if (existingTemplates.length >= 3) {
           results.push({
-            company: company.name,
+            company: tenant.name,
             status: 'skipped',
             reason: 'Already has templates'
           });
@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
           {
             name: 'Single Family Home',
             code: 'single_family_standard',
-            company_id: company.id,
+            tenant_id: tenant.id,
             property_type: 'single_family',
             category: 'home_watch_visit',
             description: 'Standard home watch visit checklist for single family homes',
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
           {
             name: 'Condo/Villa',
             code: 'condo_villa_standard',
-            company_id: company.id,
+            tenant_id: tenant.id,
             property_type: 'condo_villa',
             category: 'home_watch_visit',
             description: 'Standard home watch visit checklist for condos and villas',
@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
           {
             name: 'High-Rise',
             code: 'high_rise_standard',
-            company_id: company.id,
+            tenant_id: tenant.id,
             property_type: 'high_rise',
             category: 'home_watch_visit',
             description: 'Standard home watch visit checklist for high-rise properties',
@@ -67,13 +67,13 @@ Deno.serve(async (req) => {
         const created = await base44.asServiceRole.entities.ChecklistTemplate.bulkCreate(templates);
 
         results.push({
-          company: company.name,
+          company: tenant.name,
           status: 'success',
           templatesCreated: created.length
         });
       } catch (error) {
         results.push({
-          company: company.name,
+          company: tenant.name,
           status: 'error',
           error: error.message
         });
@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
-      totalCompanies: companies.length,
+      totalCompanies: tenants.length,
       results
     });
   } catch (error) {

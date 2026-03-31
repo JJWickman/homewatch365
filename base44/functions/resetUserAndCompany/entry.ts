@@ -18,22 +18,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Find and delete CompanyMember records
-    const companyMembers = await base44.asServiceRole.entities.CompanyMember.filter({
-      user_email: targetUserEmail
+    // Find and delete TenantUser records
+    const tenantUsers = await base44.asServiceRole.entities.TenantUser.filter({
+      user_id: targetUserEmail
     });
 
-    for (const member of companyMembers) {
-      await base44.asServiceRole.entities.CompanyMember.delete(member.id);
-      
-      // Delete the associated Company if this user was the owner
-      const company = await base44.asServiceRole.entities.Company.filter({
-        id: member.company_id
-      });
-      
-      if (company.length > 0 && member.is_owner) {
-        await base44.asServiceRole.entities.Company.delete(company[0].id);
-      }
+    for (const tenantUser of tenantUsers) {
+      await base44.asServiceRole.entities.TenantUser.delete(tenantUser.id);
     }
 
     return Response.json({
