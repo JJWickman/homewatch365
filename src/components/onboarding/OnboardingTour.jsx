@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Sparkles, X } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import confetti from 'canvas-confetti';
 
@@ -129,132 +128,118 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
   // Congratulations modal
   if (showCongrats) {
     return (
-      <Dialog open={true} onOpenChange={() => {}}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-center">Congratulations! 🎉</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-6 text-center py-4">
-            <div>
-              <Sparkles className="h-16 w-16 text-yellow-400 mx-auto mb-4 animate-bounce" />
-              <h3 className="text-2xl font-bold text-slate-900 mb-2">Onboarding Complete!</h3>
-              <p className="text-slate-600 text-sm">You've successfully set up your Home Watch 365 account</p>
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="w-full max-w-md">
+          <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl p-8">
+            <div className="space-y-6 text-center">
+              <div>
+                <Sparkles className="h-16 w-16 text-yellow-300 mx-auto mb-4 animate-bounce" />
+                <h3 className="text-2xl font-bold text-white mb-2">You're All Set!</h3>
+                <p className="text-blue-100 text-sm">Your Home Watch 365 account is ready to go</p>
+              </div>
+
+              <Card className="bg-blue-500/20 border-blue-400">
+                <CardContent className="pt-6">
+                  <div className="space-y-3 text-left">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+                      <p className="text-white text-sm">Company information configured</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+                      <p className="text-white text-sm">First client added</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+                      <p className="text-white text-sm">Property set up with GPS coordinates</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+                      <p className="text-white text-sm">Pricing configured</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+                      <p className="text-white text-sm">Checklist template assigned</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="flex items-center gap-2 p-3 bg-white/10 rounded-lg border border-white/20">
+                <input
+                  type="checkbox"
+                  id="dont-show-again"
+                  checked={dontShowAgain}
+                  onChange={(e) => setDontShowAgain(e.target.checked)}
+                  className="h-4 w-4 rounded border-white/30 cursor-pointer"
+                />
+                <label htmlFor="dont-show-again" className="text-sm text-white/80 cursor-pointer flex-1 text-left">
+                  Don't show this again
+                </label>
+              </div>
+
+              <Button 
+                onClick={() => {
+                  confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                  setTimeout(() => {
+                    onDismiss?.(dontShowAgain);
+                    onComplete();
+                  }, 500);
+                }}
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+              >
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Start Using the App
+              </Button>
             </div>
-
-            <Card className="bg-blue-50 border-blue-200">
-              <CardContent className="pt-6">
-                <div className="space-y-3 text-left">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
-                    <p className="text-slate-900 text-sm"><strong>Settings:</strong> Company branding configured</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
-                    <p className="text-slate-900 text-sm"><strong>Clients:</strong> First client added</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
-                    <p className="text-slate-900 text-sm"><strong>Properties:</strong> Created with full details</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="flex items-center gap-2 p-3 bg-slate-100 rounded-lg border border-slate-200">
-              <input
-                type="checkbox"
-                id="dont-show-again"
-                checked={dontShowAgain}
-                onChange={(e) => setDontShowAgain(e.target.checked)}
-                className="h-4 w-4 rounded cursor-pointer"
-              />
-              <label htmlFor="dont-show-again" className="text-sm text-slate-700 cursor-pointer flex-1 text-left">
-                Don't show this again
-              </label>
-            </div>
-
-            <Button 
-              onClick={() => {
-                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                setTimeout(() => {
-                  onDismiss?.(dontShowAgain);
-                  onComplete();
-                }, 500);
-              }}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white"
-            >
-              Start Using the App
-            </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </div>
     );
   }
 
   const step = steps[currentStep];
 
   return (
-    <div className="fixed z-40 max-w-sm" style={{ top: `${tooltipPos.top}px`, left: `${tooltipPos.left}px` }}>
-      <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl p-6">
-        <div className="space-y-4">
-          {/* Header */}
-          <div className="flex items-start justify-between gap-4">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="w-full max-w-sm">
+        <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl p-8">
+          <div className="space-y-6">
+            {/* Title */}
             <div>
-              <div className="text-xs font-semibold text-blue-200 uppercase tracking-wide mb-1">
-                Step {currentStep + 1} of {steps.length}
-              </div>
-              <h3 className="text-lg font-bold text-white">{step.title}</h3>
+              <h2 className="text-2xl font-bold text-white mb-1">{step.title}</h2>
+              <p className="text-blue-200 text-sm">{step.description}</p>
             </div>
-            <button
-              onClick={handleSkip}
-              className="text-white/40 hover:text-white/60 transition-colors shrink-0"
-            >
-              <X className="h-5 w-5" />
-            </button>
+
+            {/* Progress indicator */}
+            <div className="flex justify-between gap-1.5">
+              {steps.map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-1 flex-1 rounded-full transition-colors ${
+                    i <= currentStep ? 'bg-blue-400' : 'bg-white/20'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
 
-          {/* Description */}
-          <p className="text-sm text-blue-100 leading-relaxed">{step.description}</p>
+          {/* Footer */}
+          <div className="flex justify-between gap-3 pt-6 border-t border-white/10 mt-8">
+            {currentStep > 0 && (
+              <Button variant="outline" onClick={handleBack} className="border-white/20 text-white hover:bg-white/10">
+                ← Back
+              </Button>
+            )}
+            {currentStep === 0 && <div />}
 
-          {/* Progress bar */}
-          <div className="w-full bg-white/20 rounded-full h-1.5 overflow-hidden">
-            <div
-              className="bg-blue-400 h-full transition-all duration-300"
-              style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-            />
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-2 justify-between pt-2">
-            <div className="flex gap-2">
-              {currentStep > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleBack}
-                  className="border-white/20 text-white hover:bg-white/10"
-                >
-                  ← Back
-                </Button>
-              )}
-            </div>
             <Button
               onClick={handleNext}
-              size="sm"
-              className="bg-blue-500 hover:bg-blue-600 text-white"
+              className="ml-auto bg-blue-500 hover:bg-blue-600 text-white"
             >
               {currentStep === steps.length - 1 ? 'Finish' : 'Next'} →
             </Button>
           </div>
-
-          {/* Skip link */}
-          <button
-            onClick={handleSkip}
-            className="w-full text-xs text-white/50 hover:text-white/70 transition-colors py-2"
-          >
-            Skip tour
-          </button>
         </div>
       </div>
     </div>
