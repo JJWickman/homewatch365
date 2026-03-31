@@ -69,16 +69,19 @@
   ],
   "rls": {
     "read": {
-      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+      "data.tenant_id": "{{user.id}}"
     },
     "create": {
-      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+      "data.tenant_id": "{{user.id}}"
     },
     "update": {
-      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+      "data.tenant_id": "{{user.id}}"
     },
     "delete": {
-      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+      "data.tenant_id": "{{user.id}}"
+    },
+    "write": {
+      "data.tenant_id": "{{user.id}}"
     }
   }
 }
