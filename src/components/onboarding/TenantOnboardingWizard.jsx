@@ -1,11 +1,4 @@
 import { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -506,9 +499,9 @@ export default function TenantOnboardingWizard({ open, onComplete, onDismiss, us
           <div className="flex items-center gap-3">
             <currentStep.icon className="h-6 w-6 text-white" />
             <div>
-              <h2 className="text-white text-lg font-semibold">
-              Welcome to HomeWatch365 - We are here to help you get setup in the application
-            </h2>
+                <h2 className="text-white text-lg font-semibold">
+                Welcome to HomeWatch365 - We are here to help you get setup in the application
+              </h2>
             </div>
           </div>
         </div>
