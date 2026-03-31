@@ -16,6 +16,37 @@ import { ChevronLeft,
 } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 
+const FOLLOWUP_DEFAULT_TEMPLATE = {
+  id: null,
+  name: 'Follow-Up Visit',
+  sections: [
+    {
+      title: 'Follow-Up Details',
+      items: [
+        { label: 'Reason for Follow-Up', responseType: 'text', instructions: 'Describe why this follow-up visit is needed' },
+        { label: 'Previous Issue Reference', responseType: 'text', instructions: 'Reference any prior visit or issue this relates to' },
+        { label: 'Priority Level', responseType: 'ok_issue_na', instructions: 'OK = Low, Issue = Medium, N/A = Urgent' },
+      ]
+    },
+    {
+      title: 'On-Site Observations',
+      items: [
+        { label: 'Current Condition', responseType: 'ok_issue_na' },
+        { label: 'Actions Taken', responseType: 'text', instructions: 'Describe what was done during this visit' },
+        { label: 'Resolution Status', responseType: 'ok_issue_na', instructions: 'OK = Resolved, Issue = Ongoing, N/A = Escalated' },
+      ]
+    },
+    {
+      title: 'Next Steps',
+      items: [
+        { label: 'Additional Follow-Up Required?', responseType: 'ok_issue_na', instructions: 'OK = No, Issue = Yes, N/A = Pending info' },
+        { label: 'Recommended Next Steps', responseType: 'text' },
+        { label: 'Notes', responseType: 'text' },
+      ]
+    }
+  ]
+};
+
 const VISIT_TYPE_TO_CATEGORY = {
   'check-in': 'home_watch_visit',
   'arrival_departure': 'arrival_departure',
@@ -27,7 +58,7 @@ const VISIT_TYPE_TO_CATEGORY = {
   'post_storm': 'post_storm',
   'client_service': 'client_service',
   'concierge': 'concierge',
-  'followup': null, // No template for followup
+  'followup': 'followup',
 };
 
 const VISIT_TYPES = [
@@ -132,6 +163,11 @@ export default function VisitTypeSelectionDialog({ open, onOpenChange, property,
           // For non-check-in types, match by category only
           template = allTemplates.find(t => t.category === category);
         }
+      }
+
+      // Fall back to built-in default for follow-up
+      if (!template && visitType === 'followup') {
+        template = FOLLOWUP_DEFAULT_TEMPLATE;
       }
 
       const visit = await base44.entities.Visit.create({
