@@ -2,9 +2,9 @@
   "name": "ActivityLog",
   "type": "object",
   "properties": {
-    "company_id": {
+    "tenant_id": {
       "type": "string",
-      "description": "Reference to Company (tenant isolation)"
+      "description": "Reference to Tenant (tenant isolation)"
     },
     "user_email": {
       "type": "string"
@@ -66,22 +66,22 @@
     }
   },
   "required": [
-    "company_id",
+    "tenant_id",
     "user_email",
     "action",
     "entity_type"
   ],
   "rls": {
     "create": {
-      "data.company_id": "{{user.data.company_id}}"
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "read": {
-      "data.company_id": "{{user.data.company_id}}"
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "update": {
       "$or": [
         {
-          "data.company_id": "{{user.data.company_id}}"
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
         {
           "user_condition": {
@@ -93,7 +93,7 @@
     "delete": {
       "$or": [
         {
-          "data.company_id": "{{user.data.company_id}}"
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
         {
           "user_condition": {
@@ -105,7 +105,7 @@
     "write": {
       "$or": [
         {
-          "data.company_id": "{{user.data.company_id}}"
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
         {
           "user_condition": {

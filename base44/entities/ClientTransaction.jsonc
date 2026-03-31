@@ -2,9 +2,9 @@
   "name": "ClientTransaction",
   "type": "object",
   "properties": {
-    "company_id": {
+    "tenant_id": {
       "type": "string",
-      "description": "Reference to Company (tenant isolation)"
+      "description": "Reference to Tenant (tenant isolation)"
     },
     "client_id": {
       "type": "string",
@@ -58,7 +58,7 @@
     }
   },
   "required": [
-    "company_id",
+    "tenant_id",
     "client_id",
     "description",
     "amount",
@@ -66,18 +66,18 @@
   ],
   "rls": {
     "create": {
-      "data.company_id": "{{user.data.company_id}}"
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "read": {
-      "data.company_id": "{{user.data.company_id}}"
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "update": {
-      "data.company_id": "{{user.data.company_id}}"
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
     },
     "delete": {
       "$or": [
         {
-          "data.company_id": "{{user.data.company_id}}"
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
         },
         {
           "user_condition": {

@@ -17,16 +17,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user's company
-    const members = await base44.entities.CompanyMember.filter({ user_email: user.email });
-    if (members.length === 0) {
-      return Response.json({ error: 'No company found' }, { status: 404 });
+    // Get user's tenant
+    const tenantId = user.primary_tenant_id;
+    if (!tenantId) {
+      return Response.json({ error: 'No tenant found' }, { status: 404 });
     }
 
-    const companyId = members[0].company_id;
-
     // Check if products already exist
-    const existing = await base44.entities.ProductService.filter({ company_id: companyId });
+    const existing = await base44.entities.ProductService.filter({ tenant_id: tenantId });
     if (existing.length > 0) {
       return Response.json({ 
         success: false, 
@@ -37,7 +35,7 @@ Deno.serve(async (req) => {
     // Create sample products and services
     const sampleData = [
       {
-        company_id: companyId,
+        tenant_id: tenantId,
         name: 'Monthly Property Visit Service',
         description: 'Standard monthly property inspection and monitoring service',
         type: 'service',
@@ -47,7 +45,7 @@ Deno.serve(async (req) => {
         is_active: true
       },
       {
-        company_id: companyId,
+        tenant_id: tenantId,
         name: 'Bi-Weekly Property Visit Service',
         description: 'Enhanced bi-weekly property inspection and monitoring service',
         type: 'service',
@@ -57,7 +55,7 @@ Deno.serve(async (req) => {
         is_active: true
       },
       {
-        company_id: companyId,
+        tenant_id: tenantId,
         name: 'Premium Monthly Visit Service',
         description: 'Premium monthly property inspection with detailed reporting',
         type: 'service',
@@ -67,7 +65,7 @@ Deno.serve(async (req) => {
         is_active: true
       },
       {
-        company_id: companyId,
+        tenant_id: tenantId,
         name: 'Follow-up or Issue Resolution',
         description: 'Additional follow-up visit for issue resolution or contractor coordination',
         type: 'service',
@@ -77,7 +75,7 @@ Deno.serve(async (req) => {
         is_active: true
       },
       {
-        company_id: companyId,
+        tenant_id: tenantId,
         name: 'Smart Moisture Monitor System',
         description: 'Advanced moisture monitoring system for early leak detection and water damage prevention',
         type: 'product',
@@ -87,7 +85,7 @@ Deno.serve(async (req) => {
         is_active: true
       },
       {
-        company_id: companyId,
+        tenant_id: tenantId,
         name: 'Smart Water Supply Meter System',
         description: 'Real-time water usage monitoring and leak detection system',
         type: 'product',
@@ -97,7 +95,7 @@ Deno.serve(async (req) => {
         is_active: true
       },
       {
-        company_id: companyId,
+        tenant_id: tenantId,
         name: 'Remote Home Monitoring Package',
         description: 'Complete remote monitoring solution including cameras, sensors, and 24/7 access',
         type: 'product',
