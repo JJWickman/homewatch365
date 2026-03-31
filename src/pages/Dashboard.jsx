@@ -155,7 +155,7 @@ export default function Dashboard() {
       setRecentActivity(recentVisits);
 
       // Check if onboarding needed (user and company now loaded)
-      if (currentUser && currentUser.onboarding_completed !== true) {
+      if (currentUser && currentUser.onboarding_completed !== true && currentUser.show_onboarding_on_startup !== false) {
         setShowOnboarding(true);
       }
     } catch (error) {
@@ -426,6 +426,12 @@ export default function Dashboard() {
         <TenantOnboardingWizard
           open={showOnboarding}
           onComplete={() => {
+            setShowOnboarding(false);
+          }}
+          onDismiss={(dontShowAgain) => {
+            if (dontShowAgain) {
+              base44.auth.updateMe({ show_onboarding_on_startup: false });
+            }
             setShowOnboarding(false);
           }}
           user={user}

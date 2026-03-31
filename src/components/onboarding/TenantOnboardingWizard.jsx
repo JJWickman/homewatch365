@@ -16,9 +16,10 @@ import {
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-export default function TenantOnboardingWizard({ open, onComplete, user, tenant }) {
+export default function TenantOnboardingWizard({ open, onComplete, onDismiss, user, tenant }) {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
 
   // Step 1: Company Info
   const [companyName, setCompanyName] = useState(tenant?.name || '');
@@ -477,6 +478,18 @@ export default function TenantOnboardingWizard({ open, onComplete, user, tenant 
             <p>✓ Pricing configured</p>
             <p>✓ Checklist assigned</p>
           </div>
+          <div className="flex items-center gap-2 mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+            <input
+              type="checkbox"
+              id="dont-show-again"
+              checked={dontShowAgain}
+              onChange={(e) => setDontShowAgain(e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 cursor-pointer"
+            />
+            <label htmlFor="dont-show-again" className="text-sm text-slate-700 cursor-pointer flex-1">
+              Don't show this onboarding wizard on startup
+            </label>
+          </div>
         </div>
       ),
       onNext: null,
@@ -541,7 +554,10 @@ export default function TenantOnboardingWizard({ open, onComplete, user, tenant 
               </Button>
             ) : (
               <Button
-                onClick={onComplete}
+                onClick={() => {
+                  onDismiss?.(dontShowAgain);
+                  onComplete();
+                }}
                 className="ml-auto bg-green-600 hover:bg-green-700 w-full"
               >
                 <CheckCircle2 className="h-4 w-4 mr-2" />

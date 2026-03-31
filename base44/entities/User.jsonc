@@ -16,6 +16,11 @@
       "type": "boolean",
       "default": false,
       "description": "Whether the user has completed the tenant onboarding wizard"
+    },
+    "show_onboarding_on_startup": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to show the onboarding wizard on app startup"
     }
   }
 }
