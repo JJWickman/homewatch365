@@ -55,24 +55,6 @@ const DEFAULT_PRODUCTS = [
     billing_frequency: 'one_time',
     is_recurring: false,
     is_active: true
-  },
-  {
-    service_name: 'Concierge Service',
-    service_type: 'concierge',
-    description: 'Additional concierge support services',
-    base_price: 75,
-    billing_frequency: 'one_time',
-    is_recurring: false,
-    is_active: true
-  },
-  {
-    service_name: 'Premium 24/7 Monitoring',
-    service_type: 'custom',
-    description: 'Premium 24/7 property monitoring service',
-    base_price: 1000,
-    billing_frequency: 'monthly',
-    is_recurring: true,
-    is_active: true
   }
 ];
 
