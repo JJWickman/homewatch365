@@ -102,13 +102,12 @@ export default function StripeConnectCard({ company, onRefresh }) {
       name: 'Square',
       placeholder: 'Square merchant ID or email',
       icon: (
-        <div className="h-10 w-10 rounded-lg bg-black flex items-center justify-center">
-          <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="currentColor">
+        <div style={{ background: '#000000' }} className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0">
+          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="white">
             <path d="M4.01 4.01v15.98h15.98V4.01H4.01zM5.31 5.31h13.38v13.38H5.31V5.31zm3.76 2.82v3.76h3.76V8.13H9.07zm4.87 0v3.76h3.76V8.13h-3.76zM9.07 12.94v3.76h3.76v-3.76H9.07zm4.87 0v3.76h3.76v-3.76h-3.76z"/>
           </svg>
         </div>
       ),
-      color: 'black'
     },
     {
       id: 'zelle',
@@ -116,11 +115,10 @@ export default function StripeConnectCard({ company, onRefresh }) {
       name: 'Zelle',
       placeholder: 'Email or phone number',
       icon: (
-        <div className="h-10 w-10 rounded-lg bg-[#6D1ED4] flex items-center justify-center">
-          <span className="text-white font-bold text-lg">Z</span>
+        <div style={{ background: '#6D1ED4' }} className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0">
+          <span style={{ color: 'white' }} className="font-bold text-lg">Z</span>
         </div>
       ),
-      color: '#6D1ED4'
     },
     {
       id: 'venmo',
@@ -128,11 +126,10 @@ export default function StripeConnectCard({ company, onRefresh }) {
       name: 'Venmo',
       placeholder: 'Username (without @)',
       icon: (
-        <div className="h-10 w-10 rounded-lg bg-[#008CFF] flex items-center justify-center">
-          <span className="text-white font-bold text-lg">V</span>
+        <div style={{ background: '#008CFF' }} className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0">
+          <span style={{ color: 'white' }} className="font-bold text-lg">V</span>
         </div>
       ),
-      color: '#008CFF'
     },
     {
       id: 'paypal',
@@ -140,13 +137,12 @@ export default function StripeConnectCard({ company, onRefresh }) {
       name: 'PayPal',
       placeholder: 'PayPal email address',
       icon: (
-        <div className="h-10 w-10 rounded-lg bg-[#003087] flex items-center justify-center">
-          <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="currentColor">
+        <div style={{ background: '#003087' }} className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0">
+          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="#009CDE">
             <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.76-4.852.76-4.852a.927.927 0 0 1 .918-.79h.58c3.76 0 6.705-1.528 7.565-5.946.36-1.847.174-3.388-.802-4.457z"/>
           </svg>
         </div>
       ),
-      color: '#003087'
     }
   ];
 
