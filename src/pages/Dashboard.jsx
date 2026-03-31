@@ -155,7 +155,7 @@ export default function Dashboard() {
       setRecentActivity(recentVisits);
 
       // Check if onboarding needed (user and company now loaded)
-      if (currentUser && currentUser.onboarding_completed !== true && currentUser.show_onboarding_on_startup !== false) {
+      if (currentUser && currentUser.onboarding_completed !== true && currentUser.onboarding_dismissed !== true) {
         setShowOnboarding(true);
       }
     } catch (error) {
@@ -430,7 +430,7 @@ export default function Dashboard() {
           }}
           onDismiss={(dontShowAgain) => {
             if (dontShowAgain) {
-              base44.auth.updateMe({ show_onboarding_on_startup: false });
+              base44.auth.updateMe({ onboarding_dismissed: true });
             }
             setShowOnboarding(false);
           }}
