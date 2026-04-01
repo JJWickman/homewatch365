@@ -334,7 +334,7 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
           {/* Footer */}
           <div className="flex justify-between gap-2 pt-2">
             {currentStep > 0 && (
-              <Button variant="outline" onClick={handleBack} size="sm" className="border-white/20 text-white hover:bg-white/10">
+              <Button onClick={handleBack} size="sm" className="bg-blue-500 hover:bg-blue-600 text-white">
                 ← Back
               </Button>
             )}
