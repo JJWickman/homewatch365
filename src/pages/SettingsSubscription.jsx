@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { CreditCard, Loader2, Check, AlertCircle, ArrowRight } from 'lucide-react';
+import { CreditCard, Loader2, Check, AlertCircle, ArrowRight, MessageSquarePlus } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -307,6 +310,94 @@ export default function SettingsSubscription() {
           </p>
         </CardContent>
       </Card>
+
+      {/* Feedback / Feature Request */}
+      <FeedbackSection user={user} tenant={tenant} />
     </div>
+  );
+}
+
+function FeedbackSection({ user, tenant }) {
+  const [type, setType] = useState('feedback');
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!message.trim()) return;
+    setSending(true);
+    try {
+      await base44.integrations.Core.SendEmail({
+        to: 'jason@estatewatch365.com',
+        subject: `[${type === 'feedback' ? 'Product Feedback' : 'Feature Request'}] ${subject || '(no subject)'} — ${tenant?.name || 'Unknown Tenant'}`,
+        body: `From: ${user?.full_name || ''} (${user?.email || ''})\nCompany: ${tenant?.name || ''}\n\n${message}`
+      });
+      setSent(true);
+      setSubject('');
+      setMessage('');
+      setTimeout(() => setSent(false), 4000);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <MessageSquarePlus className="h-5 w-5" />
+          Product Feedback & Feature Requests
+        </CardTitle>
+        <CardDescription>Help us improve Home Watch 365 — share your thoughts or suggest a new feature.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Type toggle */}
+        <div className="flex gap-2">
+          {['feedback', 'feature'].map(t => (
+            <button
+              key={t}
+              onClick={() => setType(t)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                type === t ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-300 hover:border-slate-500'
+              }`}
+            >
+              {t === 'feedback' ? 'Product Feedback' : 'Feature Request'}
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-2">
+          <Label>Subject</Label>
+          <Input
+            placeholder={type === 'feedback' ? 'What area does this relate to?' : 'Short description of the feature'}
+            value={subject}
+            onChange={e => setSubject(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Message</Label>
+          <Textarea
+            placeholder={type === 'feedback' ? 'Tell us what you think or what could be improved...' : 'Describe the feature and why it would help your business...'}
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+            rows={5}
+          />
+        </div>
+
+        <Button
+          onClick={handleSubmit}
+          disabled={sending || !message.trim()}
+          className="bg-slate-900 hover:bg-slate-800 text-white"
+        >
+          {sending ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending...</> :
+           sent ? <><Check className="h-4 w-4 mr-2" /> Sent! Thank you</> :
+           'Send Feedback'}
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
