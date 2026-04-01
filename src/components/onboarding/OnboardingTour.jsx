@@ -1,204 +1,132 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Sparkles } from 'lucide-react';
-import { Card, CardContent } from "@/components/ui/card";
 import confetti from 'canvas-confetti';
 
-export default function OnboardingTour({ open, onComplete, onDismiss, user, tenant }) {
-  const [currentStep, setCurrentStep] = useState(() => {
-    if (typeof window === 'undefined') return 0;
-    const saved = localStorage.getItem('onboarding_step');
-    return saved ? parseInt(saved, 10) : 0;
-  });
-  const [showCongrats, setShowCongrats] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('onboarding_congrats') === 'true';
-  });
+const STEPS = [
+  {
+    selector: null,
+    title: '🏡 Welcome to Home Watch 365!',
+    description: 'Congratulations on taking an important step toward running a successful Home Watch business! Home Watch 365 is your trusted partner — a platform built specifically for aspiring and growing Home Watch business owners like you.\n\nWe\'re going to walk you through 5 quick steps to help you get acquainted with the application and get your business up and running.',
+  },
+  {
+    selector: 'Settings',
+    title: 'Configure Your Company',
+    description: 'Go to Settings → Company to set up your business name, logo, contact info, and branding. This is the foundation of your Home Watch business on the platform. This completes Step 2.',
+  },
+  {
+    selector: 'Clients',
+    title: 'Add Your First Client',
+    description: 'Go to Clients on the main menu and click "Add Client". Enter the client\'s name, email, phone, and address. Set their service subscription and billing frequency. Save the client. This completes Step 2.',
+  },
+  {
+    selector: 'Properties',
+    title: 'Add a Property',
+    description: 'Go to Properties on the main menu. Click "Add Property". Choose the client you just created. Enter property details and address — the app will validate it and show an aerial image. Add access info, emergency contact, and notes as needed. Save the property. This completes Step 3.',
+  },
+  {
+    selector: 'Properties',
+    title: 'Customize Your Checklist',
+    description: 'Open the property you created. Go to the Checklist tab. Click "Start Checklist Setup". Select the property type, name your checklist, and click "Continue to Editor". The standard checklist will load — add/remove/move sections as needed. Save your checklist. This completes Step 5.',
+  }
+];
+
+function getSavedStep() {
+  try { return parseInt(localStorage.getItem('onboarding_step') || '0', 10); } catch { return 0; }
+}
+function getSavedCongrats() {
+  try { return localStorage.getItem('onboarding_congrats') === 'true'; } catch { return false; }
+}
+
+export default function OnboardingTour({ open, onComplete, onDismiss }) {
+  const [currentStep, setCurrentStep] = useState(getSavedStep);
+  const [showCongrats, setShowCongrats] = useState(getSavedCongrats);
   const [dontShowAgain, setDontShowAgain] = useState(false);
-  const [highlightElement, setHighlightElement] = useState(null);
-  const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
+  const [tooltipPos, setTooltipPos] = useState({ top: 80, left: 80 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [dragPos, setDragPos] = useState(() => {
-    if (typeof window === 'undefined') return null;
-    const saved = localStorage.getItem('onboarding_drag_pos');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('onboarding_drag_pos');
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
   });
 
-  const steps = [
-    {
-      selector: null,
-      title: '🏡 Welcome to Home Watch 365!',
-      description: 'Congratulations on taking an important step toward running a successful Home Watch business! Home Watch 365 is your trusted partner — a platform built specifically for aspiring and growing Home Watch business owners like you.\n\nWe\'re going to walk you through 5 quick steps to help you get acquainted with the application and get your business up and running.',
-      action: null
-    },
-    {
-      selector: 'aside a:has-text("Settings")',
-      title: 'Configure Your Company',
-      description: 'Go to Properties on the main menu. Click "Add Property". Choose the client you just created. Enter property details (type, status, bedrooms, bathrooms, square feet, year built, lot size). Type the address—the app will validate it and show an aerial image. Add access info, emergency contact, storm protection, check-in schedule, contractors, and notes as known. Save the property. This completes Step 3.',
-      action: 'Click Properties'
-    },
-    {
-      selector: 'aside a:has-text("Properties")',
-      title: 'Set Property Pricing',
-      description: 'Go back to the property you just created. Go to the Pricing tab. Review the standard pricing ($60 base + $15/additional water zone). Modify based on your business if needed. Set number of water zones, visit frequency, and payment terms (per visit, monthly invoice, or pre-pay annually). Add additional services (optional) and notes. Save the property. This completes Step 4.',
-      action: 'Click Properties'
-    },
-    {
-      selector: 'aside a:has-text("Properties")',
-      title: 'Customize Your Checklist',
-      description: 'Open the property you created. Go to the Checklist tab. Click "Start Checklist Setup". Select the property type (Single Family Home, Condo/Villa, or High Rise). Name your checklist something memorable (e.g., "SuziesSummer2026 Checklist"). Click "Continue to Editor". The standard checklist will load—add/remove/move sections, add instructions as needed. Save your checklist. It will highlight in green and load every time a Check-In visit is recorded. This completes Step 5.',
-      action: 'Click Properties'
-    }
-  ];
-
+  // Highlight nav element for current step
   useEffect(() => {
     if (!open || showCongrats) return;
-
-    const step = steps[currentStep];
+    const step = STEPS[currentStep];
     if (!step || !step.selector) return;
 
-    // Simple selector - find the element by text content
-    const findElementByText = (text) => {
-      const links = document.querySelectorAll('aside a');
-      for (const link of links) {
-        if (link.textContent.trim() === text) {
-          return link;
-        }
+    const links = document.querySelectorAll('aside a');
+    let element = null;
+    for (const link of links) {
+      if (link.textContent && link.textContent.trim() === step.selector) {
+        element = link;
+        break;
       }
-      return null;
-    };
-
-    const text = step.selector.match(/\"(.+?)\"/)?.[1];
-    const element = text ? findElementByText(text) : null;
-
-    if (element) {
-      setHighlightElement(element);
-      
-      // Cleanup previous styles
-      return () => {
-        if (element) {
-          element.style.outline = '';
-          element.style.outlineOffset = '';
-          element.style.boxShadow = '';
-        }
-      };
     }
-  }, [currentStep, open, showCongrats, steps]);
 
-  useEffect(() => {
-    if (!highlightElement) return;
+    if (!element) return;
 
-    // Apply highlight styles
-    highlightElement.style.outline = '3px solid #3b82f6';
-    highlightElement.style.outlineOffset = '4px';
-    highlightElement.style.boxShadow = '0 0 0 6px rgba(59, 130, 246, 0.1)';
-    highlightElement.style.borderRadius = '6px';
-    highlightElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    element.style.outline = '3px solid #3b82f6';
+    element.style.outlineOffset = '4px';
+    element.style.boxShadow = '0 0 0 6px rgba(59, 130, 246, 0.1)';
+    element.style.borderRadius = '6px';
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // Position tooltip far from the element (only if not manually dragged)
     if (!dragPos) {
-      const rect = highlightElement.getBoundingClientRect();
-      const tooltipWidth = 320;
-      const tooltipHeight = 180;
-      const gap = 48;
-
-      let top = rect.top + window.scrollY - tooltipHeight - gap;
-      let left = rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2;
-
-      // Ensure it doesn't go off-screen
+      const rect = element.getBoundingClientRect();
+      const tw = 320, th = 200, gap = 48;
+      let top = rect.top + window.scrollY - th - gap;
+      let left = rect.left + window.scrollX + rect.width / 2 - tw / 2;
       if (left < 16) left = 16;
-      if (left + tooltipWidth > window.innerWidth - 16) left = window.innerWidth - tooltipWidth - 16;
+      if (left + tw > window.innerWidth - 16) left = window.innerWidth - tw - 16;
       if (top < 16) top = rect.bottom + window.scrollY + gap;
-
       setTooltipPos({ top, left });
     }
-  }, [highlightElement, dragPos]);
 
-  // Save step to localStorage whenever it changes
+    return () => {
+      element.style.outline = '';
+      element.style.outlineOffset = '';
+      element.style.boxShadow = '';
+      element.style.borderRadius = '';
+    };
+  }, [currentStep, open, showCongrats, dragPos]);
+
+  // Persist step
   useEffect(() => {
-    localStorage.setItem('onboarding_step', currentStep.toString());
+    try { localStorage.setItem('onboarding_step', currentStep.toString()); } catch {}
   }, [currentStep]);
 
-  // Save congrats state to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('onboarding_congrats', showCongrats.toString());
+    try { localStorage.setItem('onboarding_congrats', showCongrats.toString()); } catch {}
   }, [showCongrats]);
 
-  // Save drag position to localStorage
   useEffect(() => {
     if (dragPos) {
-      localStorage.setItem('onboarding_drag_pos', JSON.stringify(dragPos));
+      try { localStorage.setItem('onboarding_drag_pos', JSON.stringify(dragPos)); } catch {}
     }
   }, [dragPos]);
 
-  // Handle drag start
+  // Drag handling
   const handleMouseDown = (e) => {
-    if (e.target.closest('button')) return; // Don't drag when clicking buttons
+    if (e.target.closest('button')) return;
     setIsDragging(true);
     const rect = e.currentTarget.getBoundingClientRect();
-    setDragOffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    });
+    setDragOffset({ x: e.clientX - rect.left, y: e.clientY - rect.top });
   };
 
-  // Handle drag move
   useEffect(() => {
     if (!isDragging) return;
-
-    const handleMouseMove = (e) => {
-      setDragPos({
-        top: e.clientY - dragOffset.y,
-        left: e.clientX - dragOffset.x
-      });
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
+    const move = (e) => setDragPos({ top: e.clientY - dragOffset.y, left: e.clientX - dragOffset.x });
+    const up = () => setIsDragging(false);
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
+    return () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); };
   }, [isDragging, dragOffset]);
 
-  // Reposition tooltip on window resize/scroll (only if not manually dragged)
-  useEffect(() => {
-    if (!open || showCongrats || dragPos) return;
-    
-    const handleResize = () => {
-      if (highlightElement) {
-        const rect = highlightElement.getBoundingClientRect();
-        const tooltipWidth = 320;
-        const tooltipHeight = 180;
-        const gap = 48;
-
-        let top = rect.top + window.scrollY - tooltipHeight - gap;
-        let left = rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2;
-
-        if (left < 16) left = 16;
-        if (left + tooltipWidth > window.innerWidth - 16) left = window.innerWidth - tooltipWidth - 16;
-        if (top < 16) top = rect.bottom + window.scrollY + gap;
-
-        setTooltipPos({ top, left });
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('scroll', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('scroll', handleResize);
-    };
-  }, [highlightElement, open, showCongrats, dragPos]);
-
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
+    if (currentStep < STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       setShowCongrats(true);
@@ -206,25 +134,35 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
   };
 
   const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
+    if (currentStep > 0) setCurrentStep(currentStep - 1);
   };
 
-  // Check if onboarding is disabled
-  if (typeof window !== 'undefined' && localStorage.getItem('onboarding_dismissed') === 'true') {
-    return null;
-  }
+  const handleFinish = () => {
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    setTimeout(() => {
+      try {
+        if (dontShowAgain) localStorage.setItem('onboarding_dismissed', 'true');
+        localStorage.removeItem('onboarding_step');
+        localStorage.removeItem('onboarding_congrats');
+        localStorage.removeItem('onboarding_drag_pos');
+      } catch {}
+      onDismiss?.(dontShowAgain);
+      onComplete?.();
+    }, 500);
+  };
+
+  try {
+    if (localStorage.getItem('onboarding_dismissed') === 'true') return null;
+  } catch {}
 
   if (!open) return null;
 
-  // Congratulations modal
+  // Congratulations screen
   if (showCongrats) {
     return (
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div className="w-full max-w-md">
-          <div className="rounded-2xl overflow-hidden backdrop-blur-xl bg-slate-900 border border-white/20 shadow-2xl">
-            {/* Hero image */}
+          <div className="rounded-2xl overflow-hidden bg-slate-900 border border-white/20 shadow-2xl">
             <div className="relative h-52 overflow-hidden">
               <img
                 src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/930dadf8d_image.png"
@@ -237,12 +175,10 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
                 <p className="text-blue-200 text-sm mt-1">Here's to your success 🥂</p>
               </div>
             </div>
-
             <div className="p-6 space-y-4">
               <p className="text-white/80 text-sm text-center leading-relaxed">
                 Congratulations on completing your onboarding! You've taken the most important steps to get your Home Watch business up and running with Home Watch 365. Go make it happen!
               </p>
-
               <div
                 className="flex items-center gap-3 p-3 bg-white/10 rounded-lg border border-white/20 cursor-pointer"
                 onClick={() => setDontShowAgain(!dontShowAgain)}
@@ -258,21 +194,8 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
                   Don't show this tour again
                 </label>
               </div>
-
               <button
-                onClick={() => {
-                  confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                  setTimeout(() => {
-                    if (dontShowAgain) {
-                      localStorage.setItem('onboarding_dismissed', 'true');
-                    }
-                    localStorage.removeItem('onboarding_step');
-                    localStorage.removeItem('onboarding_congrats');
-                    localStorage.removeItem('onboarding_drag_pos');
-                    onDismiss?.(dontShowAgain);
-                    onComplete();
-                  }, 500);
-                }}
+                onClick={handleFinish}
                 className="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
               >
                 Start Using the App 🚀
@@ -284,49 +207,42 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     );
   }
 
-  const step = steps[currentStep];
+  const step = STEPS[currentStep];
+  if (!step) return null;
   const currentPos = dragPos || tooltipPos;
 
   return (
-    <div className="fixed pointer-events-none z-50" style={{ top: `${currentPos.top}px`, left: `${currentPos.left}px`, width: '320px' }}>
-      <div 
-        className="rounded-2xl backdrop-blur-xl bg-slate-900/95 border border-slate-700 shadow-2xl p-6 pointer-events-auto cursor-grab active:cursor-grabbing select-none"
+    <div
+      className="fixed pointer-events-none z-50"
+      style={{ top: `${currentPos.top}px`, left: `${currentPos.left}px`, width: '320px' }}
+    >
+      <div
+        className="rounded-2xl bg-slate-900/95 border border-slate-700 shadow-2xl p-6 pointer-events-auto cursor-grab active:cursor-grabbing select-none"
         onMouseDown={handleMouseDown}
       >
         <div className="space-y-4">
-          {/* Title */}
           <div>
             <h3 className="text-lg font-bold text-white mb-1">{step.title}</h3>
             <p className="text-blue-100 text-sm leading-relaxed whitespace-pre-line">{step.description}</p>
           </div>
 
-          {/* Progress indicator */}
           <div className="flex justify-between gap-1">
-            {steps.map((_, i) => (
+            {STEPS.map((_, i) => (
               <div
                 key={i}
-                className={`h-1 flex-1 rounded-full transition-colors ${
-                  i <= currentStep ? 'bg-blue-400' : 'bg-white/20'
-                }`}
+                className={`h-1 flex-1 rounded-full transition-colors ${i <= currentStep ? 'bg-blue-400' : 'bg-white/20'}`}
               />
             ))}
           </div>
 
-          {/* Footer */}
           <div className="flex justify-between gap-2 pt-2">
-            {currentStep > 0 && (
+            {currentStep > 0 ? (
               <Button onClick={handleBack} size="sm" className="bg-blue-500 hover:bg-blue-600 text-white">
                 ← Back
               </Button>
-            )}
-            {currentStep === 0 && <div />}
-
-            <Button
-              onClick={handleNext}
-              size="sm"
-              className="ml-auto bg-blue-500 hover:bg-blue-600 text-white"
-            >
-              {currentStep === steps.length - 1 ? 'Finish' : 'Next'} →
+            ) : <div />}
+            <Button onClick={handleNext} size="sm" className="ml-auto bg-blue-500 hover:bg-blue-600 text-white">
+              {currentStep === STEPS.length - 1 ? 'Finish' : 'Next'} →
             </Button>
           </div>
         </div>
