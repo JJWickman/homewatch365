@@ -136,6 +136,10 @@ export default function Layout({ children, currentPageName }) {
       // Load tenant
       const tenants = await base44.entities.Tenant.filter({ id: currentUser.primary_tenant_id });
       if (tenants.length > 0) setCompany(tenants[0]);
+
+      if (!currentUser.onboarding_dismissed) {
+        setShowTour(true);
+      }
     } catch (error) {
       console.error('Error loading user data:', error);
     } finally {
