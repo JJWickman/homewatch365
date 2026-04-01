@@ -137,7 +137,8 @@ export default function Layout({ children, currentPageName }) {
       const tenants = await base44.entities.Tenant.filter({ id: currentUser.primary_tenant_id });
       if (tenants.length > 0) setCompany(tenants[0]);
 
-      if (!currentUser.onboarding_dismissed) {
+      const isDismissed = currentUser.onboarding_dismissed || currentUser.data?.onboarding_dismissed;
+      if (!isDismissed) {
         setShowTour(true);
       }
     } catch (error) {
