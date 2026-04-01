@@ -56,7 +56,7 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     if (!open || showCongrats) return;
 
     const step = steps[currentStep];
-    if (!step) return;
+    if (!step || !step.selector) return;
 
     // Simple selector - find the element by text content
     const findElementByText = (text) => {
