@@ -77,7 +77,7 @@ export default function Layout({ children, currentPageName }) {
   const [company, setCompany] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [showTour, setShowTour] = useState(true);
+  const [showTour, setShowTour] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -135,7 +135,16 @@ export default function Layout({ children, currentPageName }) {
 
       // Load tenant
       const tenants = await base44.entities.Tenant.filter({ id: currentUser.primary_tenant_id });
-      if (tenants.length > 0) setCompany(tenants[0]);
+      if (tenants.length > 0) {
+        setCompany(tenants[0]);
+        // Show onboarding tour only for new tenants (created within 7 days) and not dismissed
+        const dismissed = localStorage.getItem('onboarding_dismissed') === 'true';
+        const tenantCreated = tenants[0].created_date ? new Date(tenants[0].created_date) : null;
+        const isNewTenant = tenantCreated && (Date.now() - tenantCreated.getTime()) < 7 * 24 * 60 * 60 * 1000;
+        if (!dismissed && isNewTenant) {
+          setShowTour(true);
+        }
+      }
     } catch (error) {
       console.error('Error loading user data:', error);
     } finally {
