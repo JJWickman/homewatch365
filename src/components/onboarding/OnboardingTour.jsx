@@ -27,20 +27,14 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
 
   const steps = [
     {
+      selector: null,
+      title: '🏡 Welcome to Home Watch 365!',
+      description: 'Congratulations on taking an important step toward running a successful Home Watch business! Home Watch 365 is your trusted partner — a platform built specifically for aspiring and growing Home Watch business owners like you.\n\nWe\'re going to walk you through 5 quick steps to help you get acquainted with the application and get your business up and running.',
+      action: null
+    },
+    {
       selector: 'aside a:has-text("Settings")',
       title: 'Configure Your Company',
-      description: 'Go to Settings → Company Tab. Update your logo & branding, enter company name, address, and website. Connect Google Business, Facebook, or Yelp if available (optional—you can come back later). This completes Step 1.',
-      action: 'Click Settings'
-    },
-    {
-      selector: 'aside a:has-text("Clients")',
-      title: 'Create Your First Client',
-      description: 'Go to Clients on the main menu. Click "Add Client". Enter name, address, billing address (if different), select services they\'ve opted into, choose billing frequency, and set a portal PIN. This completes Step 2.',
-      action: 'Click Clients'
-    },
-    {
-      selector: 'aside a:has-text("Properties")',
-      title: 'Create Your First Property',
       description: 'Go to Properties on the main menu. Click "Add Property". Choose the client you just created. Enter property details (type, status, bedrooms, bathrooms, square feet, year built, lot size). Type the address—the app will validate it and show an aerial image. Add access info, emergency contact, storm protection, check-in schedule, contractors, and notes as known. Save the property. This completes Step 3.',
       action: 'Click Properties'
     },
@@ -316,7 +310,7 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
           {/* Title */}
           <div>
             <h3 className="text-lg font-bold text-white mb-1">{step.title}</h3>
-            <p className="text-blue-100 text-sm leading-relaxed">{step.description}</p>
+            <p className="text-blue-100 text-sm leading-relaxed whitespace-pre-line">{step.description}</p>
           </div>
 
           {/* Progress indicator */}
