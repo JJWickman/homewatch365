@@ -11,7 +11,7 @@ const STEPS = [
   {
     selector: 'Settings',
     title: 'Configure Your Company',
-    description: 'Go to Settings → Company to set up your business name, logo, contact info, and branding. This is the foundation of your Home Watch business on the platform. This completes Step 2.',
+    description: 'Go to Settings → Company to set up your business name, logo, contact info, and branding. This is the foundation of your Home Watch business on the platform. This completes Step 1.',
   },
   {
     selector: 'Clients',
@@ -214,7 +214,7 @@ export default function OnboardingTour({ open, onComplete, onDismiss }) {
   return (
     <div
       className="fixed pointer-events-none z-50"
-      style={{ top: `${currentPos.top}px`, left: `${currentPos.left}px`, width: '320px' }}
+      style={{ top: `${currentPos.top}px`, left: `${currentPos.left}px`, width: '400px' }}
     >
       <div
         className="rounded-2xl bg-slate-900/95 border border-slate-700 shadow-2xl p-6 pointer-events-auto cursor-grab active:cursor-grabbing select-none"
