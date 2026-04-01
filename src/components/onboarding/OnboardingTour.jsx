@@ -223,42 +223,30 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
     return (
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div className="w-full max-w-md">
-          <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl p-8">
-            <div className="space-y-6 text-center">
-              <div>
-                <Sparkles className="h-16 w-16 text-yellow-300 mx-auto mb-4 animate-bounce" />
-                <h3 className="text-2xl font-bold text-white mb-2">You're All Set!</h3>
-                <p className="text-blue-100 text-sm">Your Home Watch 365 account is ready to go</p>
+          <div className="rounded-2xl overflow-hidden backdrop-blur-xl bg-slate-900 border border-white/20 shadow-2xl">
+            {/* Hero image */}
+            <div className="relative h-52 overflow-hidden">
+              <img
+                src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/930dadf8d_image.png"
+                alt="Congratulations"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
+              <div className="absolute bottom-4 left-0 right-0 text-center">
+                <h3 className="text-2xl font-bold text-white">You're All Set!</h3>
+                <p className="text-blue-200 text-sm mt-1">Here's to your success 🥂</p>
               </div>
+            </div>
 
-              <Card className="bg-blue-500/20 border-blue-400">
-                <CardContent className="pt-6">
-                  <div className="space-y-3 text-left">
-                    <div className="flex items-center gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
-                      <p className="text-white text-sm">Company information configured</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
-                      <p className="text-white text-sm">First client added</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
-                      <p className="text-white text-sm">Property set up with GPS coordinates</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
-                      <p className="text-white text-sm">Pricing configured</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
-                      <p className="text-white text-sm">Checklist template assigned</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="p-6 space-y-4">
+              <p className="text-white/80 text-sm text-center leading-relaxed">
+                Congratulations on completing your onboarding! You've taken the most important steps to get your Home Watch business up and running with Home Watch 365. Go make it happen!
+              </p>
 
-              <div className="flex items-center gap-2 p-3 bg-white/10 rounded-lg border border-white/20">
+              <div
+                className="flex items-center gap-3 p-3 bg-white/10 rounded-lg border border-white/20 cursor-pointer"
+                onClick={() => setDontShowAgain(!dontShowAgain)}
+              >
                 <input
                   type="checkbox"
                   id="dont-show-again"
@@ -266,12 +254,12 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
                   onChange={(e) => setDontShowAgain(e.target.checked)}
                   className="h-4 w-4 rounded border-white/30 cursor-pointer"
                 />
-                <label htmlFor="dont-show-again" className="text-sm text-white/80 cursor-pointer flex-1 text-left">
-                  Don't show this again
+                <label htmlFor="dont-show-again" className="text-sm text-white/80 cursor-pointer flex-1">
+                  Don't show this tour again
                 </label>
               </div>
 
-              <Button 
+              <button
                 onClick={() => {
                   confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
                   setTimeout(() => {
@@ -285,11 +273,10 @@ export default function OnboardingTour({ open, onComplete, onDismiss, user, tena
                     onComplete();
                   }, 500);
                 }}
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                className="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
               >
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                Start Using the App
-              </Button>
+                Start Using the App 🚀
+              </button>
             </div>
           </div>
         </div>
