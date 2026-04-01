@@ -25,6 +25,11 @@ const STEPS = [
   },
   {
     selector: 'Properties',
+    title: 'Set Property Pricing',
+    description: 'Go back to the property you just created. Go to the Pricing tab. Review the standard pricing ($60 base + $15/additional water zone). Modify based on your business if needed. Set number of water zones, visit frequency, and payment terms (per visit, monthly invoice, or pre-pay annually). Add additional services (optional) and notes. Save the property. This completes Step 4.',
+  },
+  {
+    selector: 'Properties',
     title: 'Customize Your Checklist',
     description: 'Open the property you created. Go to the Checklist tab. Click "Start Checklist Setup". Select the property type, name your checklist, and click "Continue to Editor". The standard checklist will load — add/remove/move sections as needed. Save your checklist. This completes Step 5.',
   }
