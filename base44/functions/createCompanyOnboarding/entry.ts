@@ -63,11 +63,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Set primary_tenant_id, elevate to admin, and save first/last name
+    // Set primary_tenant_id and save first/last name (cannot change platform role via updateMe)
     const updateData = {
       primary_tenant_id: tenant.id,
       onboarding_completed: true,
-      role: 'admin',
       first_name: firstName || '',
       last_name: lastName || ''
     };
