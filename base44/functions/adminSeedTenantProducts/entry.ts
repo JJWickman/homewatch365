@@ -15,51 +15,28 @@ const DEFAULT_PRODUCTS = [
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    let body;
-    try {
-      body = await req.json();
-    } catch (e) {
-      // If JSON parsing fails, treat as empty payload
-      body = {};
-    }
-    
-    // Support both entity automation payload and direct call with tenant_id
-    const tenantId = body.tenant_id || body.event?.entity_id || body.data?.id;
-    
+
+    const body = await req.json();
+    const tenantId = body.tenant_id;
+
     if (!tenantId) {
-      console.error('Invalid payload:', JSON.stringify(body).slice(0, 200));
-      return Response.json({ error: 'No tenant ID in event' }, { status: 400 });
+      return Response.json({ error: 'tenant_id required' }, { status: 400 });
     }
 
     // Check if products already exist
     const existing = await base44.asServiceRole.entities.ProductService.filter({ tenant_id: tenantId });
     if (existing.length > 0) {
-      console.log(`Products already exist for tenant ${tenantId}, skipping`);
-      return Response.json({
-        success: true,
-        message: 'Products already seeded',
-        count: existing.length
-      });
+      return Response.json({ success: true, message: 'Products already seeded', count: existing.length });
     }
 
-    // Create all default products
-    const created = [];
-    for (const product of DEFAULT_PRODUCTS) {
-      const result = await base44.asServiceRole.entities.ProductService.create({
-        tenant_id: tenantId,
-        ...product
-      });
-      created.push({ id: result.id, name: result.name });
-    }
+    // Create all default products using bulkCreate with service role
+    const productsWithTenant = DEFAULT_PRODUCTS.map(p => ({ tenant_id: tenantId, ...p }));
+    const created = await base44.asServiceRole.entities.ProductService.bulkCreate(productsWithTenant);
 
     console.log(`Seeded ${created.length} products for tenant ${tenantId}`);
-    return Response.json({
-      success: true,
-      message: `Created ${created.length} default visit-based services`,
-      count: created.length
-    });
+    return Response.json({ success: true, count: created.length, products: created });
   } catch (error) {
-    console.error('Error seeding products for new tenant:', error);
+    console.error('Error seeding products:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
