@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import confetti from 'canvas-confetti';
 
@@ -222,9 +223,15 @@ export default function OnboardingTour({ open, onComplete, onDismiss }) {
       style={{ top: `${currentPos.top}px`, left: `${currentPos.left}px`, width: '400px' }}
     >
       <div
-        className="rounded-2xl bg-slate-900/95 border border-slate-700 shadow-2xl p-6 pointer-events-auto cursor-grab active:cursor-grabbing select-none"
+        className="rounded-2xl bg-slate-900/95 border border-slate-700 shadow-2xl p-6 pointer-events-auto cursor-grab active:cursor-grabbing select-none relative"
         onMouseDown={handleMouseDown}
       >
+        <button
+          onClick={onDismiss}
+          className="absolute top-3 right-3 text-slate-400 hover:text-white transition-colors pointer-events-auto"
+        >
+          <X className="h-4 w-4" />
+        </button>
         <div className="space-y-4">
           <div>
             <h3 className="text-lg font-bold text-white mb-1">{step.title}</h3>
