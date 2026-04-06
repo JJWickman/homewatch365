@@ -5,7 +5,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import SettingsProfile from './SettingsProfile';
 import SettingsCompany from './SettingsCompany';
 import SettingsAdmin from './SettingsAdmin';
-import SettingsTemplates from './SettingsTemplates';
+
 import SettingsSubscription from './SettingsSubscription';
 import SettingsProducts from './SettingsProducts';
 
@@ -18,7 +18,7 @@ export default function Settings() {
       />
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-6 mb-6">
+        <TabsList className="grid w-full grid-cols-5 mb-6">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">Profile</span>
@@ -35,10 +35,7 @@ export default function Settings() {
             <Shield className="h-4 w-4" />
             <span className="hidden sm:inline">Admin</span>
           </TabsTrigger>
-          <TabsTrigger value="templates" className="flex items-center gap-2">
-            <Palette className="h-4 w-4" />
-            <span className="hidden sm:inline">Templates</span>
-          </TabsTrigger>
+
           <TabsTrigger value="products" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
             <span className="hidden sm:inline">Products</span>
@@ -61,9 +58,7 @@ export default function Settings() {
           <SettingsAdmin />
         </TabsContent>
 
-        <TabsContent value="templates">
-          <SettingsTemplates />
-        </TabsContent>
+
 
         <TabsContent value="products">
           <SettingsProducts />
