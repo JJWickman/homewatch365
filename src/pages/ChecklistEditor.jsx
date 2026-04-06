@@ -25,11 +25,11 @@ export default function ChecklistEditor() {
   const loadData = async () => {
     try {
       if (templateId) {
-        const templates = await base44.entities.ChecklistTemplateV2.filter({ id: templateId });
+        const templates = await base44.entities.ChecklistTemplate.filter({ id: templateId });
         if (templates[0]) {
           const t = templates[0];
           setTarget({ type: 'template', record: t });
-          setName(t.template_name || '');
+          setName(t.name || '');
           setSections(t.sections || []);
         }
       } else if (checklistId) {
