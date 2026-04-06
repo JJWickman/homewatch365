@@ -8,7 +8,7 @@ import FloatingChatWidget from '@/components/support/FloatingChatWidget';
 import {
   Home, Users, Building2, ClipboardCheck, Calendar,
   FileText, Settings, Menu, X, LogOut, ChevronDown,
-  Bell, Search, Plus, Building, UserCircle, Megaphone, Briefcase, BookOpen, DollarSign, Download, Bot, MessageSquare } from
+  Bell, Search, Plus, Building, UserCircle, Megaphone, Briefcase, BookOpen, DollarSign, Download, Bot, MessageSquare, ListChecks } from
 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -56,6 +56,7 @@ const getNavigationItems = (subscriptionPlan, roleInTenant, globalRole) => {
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
   { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
   { name: 'Help & Tutorials', icon: BookOpen, page: 'HelpTutorials' },
+  { name: 'Checklists', icon: ListChecks, page: 'Checklists' },
   { name: 'AI Assistant', icon: Bot, page: 'AIAssistant' }];
 
 
