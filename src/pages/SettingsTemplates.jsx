@@ -70,7 +70,7 @@ export default function SettingsTemplates() {
         <div className="min-w-0">
           <p className="font-medium text-slate-900">{t.name}</p>
           <p className="text-xs text-slate-500 truncate">{t.template_slug}</p>
-          <p className="text-xs text-slate-400 truncate">Tenant: {t.tenant_id || 'system'}</p>
+
         </div>
       </div>
       <div className="flex items-center gap-2 shrink-0">
