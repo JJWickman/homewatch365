@@ -56,7 +56,7 @@ const getNavigationItems = (subscriptionPlan, roleInTenant, globalRole) => {
   { name: 'Schedule', icon: Calendar, page: 'Schedule' },
   { name: 'Contractors', icon: Briefcase, page: 'Contractors' },
   { name: 'Help & Tutorials', icon: BookOpen, page: 'HelpTutorials' },
-  { name: 'Checklist Templates', icon: ListChecks, page: 'Settings' },
+
   { name: 'AI Assistant', icon: Bot, page: 'AIAssistant' }];
 
 
