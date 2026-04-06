@@ -206,6 +206,21 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
               </div>
             </div>
 
+            {/* Checklist Name — shown immediately after the blue bar */}
+            {!loadingTemplates && templates.length > 0 && (
+              <div>
+                <Label htmlFor="checklist-name" className="text-sm font-medium text-slate-700">Checklist Name *</Label>
+                <Input
+                  id="checklist-name"
+                  type="text"
+                  value={checklistName}
+                  onChange={(e) => setChecklistName(e.target.value)}
+                  placeholder="e.g., Winter Weekly Checklist"
+                  className="mt-2"
+                />
+              </div>
+            )}
+
             {loadingTemplates ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
@@ -273,35 +288,25 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
                           </div>
                           )}
 
-                          {/* Checklist Name Input */}
                           {templates.length > 0 && (
                           <div className="border-t pt-6">
-                          <Label htmlFor="checklist-name" className="text-sm font-medium text-slate-700">Checklist Name *</Label>
-                          <Input
-                            id="checklist-name"
-                            type="text"
-                            value={checklistName}
-                            onChange={(e) => setChecklistName(e.target.value)}
-                            placeholder="e.g., Winter Weekly Checklist"
-                            className="mt-2 mb-4"
-                          />
-                          <div className="flex gap-3 justify-end">
-                            <Button variant="outline" onClick={onClose}>Cancel</Button>
-                            <Button
-                              onClick={handleCreateChecklist}
-                              disabled={!checklistName.trim() || !selectedTemplate || creating}
-                              className="bg-blue-600 hover:bg-blue-700 text-white"
-                            >
-                              {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ArrowRight className="w-4 h-4 mr-2" />}
-                              Continue to Editor
-                            </Button>
-                          </div>
+                            <div className="flex gap-3 justify-end">
+                              <Button variant="outline" onClick={onClose}>Cancel</Button>
+                              <Button
+                                onClick={handleCreateChecklist}
+                                disabled={!checklistName.trim() || !selectedTemplate || creating}
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                              >
+                                {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ArrowRight className="w-4 h-4 mr-2" />}
+                                Continue to Editor
+                              </Button>
+                            </div>
                           </div>
                           )}
                           </div>
+                          )}
                           ) : (
-          // Step 2: Inline Editor
-          <div className="space-y-4 py-4">
+                          <div className="space-y-4 py-4">
             {/* Header with save button */}
             <div className="flex items-center justify-between gap-4 pb-4 border-b">
               <div>
