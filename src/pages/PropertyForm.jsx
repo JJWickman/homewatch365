@@ -105,7 +105,7 @@ export default function PropertyForm() {
     emergency_notification_contact_email: '',
     storm_protection_description: '',
     storm_panels_notes: '',
-    inspection_frequency: 'weekly',
+    visit_frequency: 'weekly',
     assigned_staff: [],
     contractors: [],
     primary_photo_url: '',
@@ -259,7 +259,7 @@ export default function PropertyForm() {
             emergency_notification_contact_email: p.emergency_notification_contact_email || '',
             storm_protection_description: p.storm_protection_description || '',
             storm_panels_notes: p.storm_panels_notes || '',
-            inspection_frequency: p.inspection_frequency || 'weekly',
+            visit_frequency: p.visit_frequency || 'weekly',
             assigned_staff: p.assigned_staff || [],
             contractors: p.contractors || [],
             primary_photo_url: p.primary_photo_url || '',
@@ -775,7 +775,11 @@ export default function PropertyForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!companyId || !formData.client_id) return;
+    if (!companyId) return;
+    if (!formData.client_id) {
+      toast.error('Please select a client before saving');
+      return;
+    }
 
     if (!formData.latitude || !formData.longitude) {
       toast.warning('No GPS coordinates — the property will be saved without a location pin. You can validate the address later.');
@@ -1534,10 +1538,10 @@ export default function PropertyForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="inspection_frequency">Inspection Frequency</Label>
-              <Select
-                value={formData.inspection_frequency}
-                onValueChange={(value) => handleChange('inspection_frequency', value)}
+              <Label htmlFor="visit_frequency">Inspection Frequency</Label>
+               <Select
+                 value={formData.visit_frequency}
+                 onValueChange={(value) => handleChange('visit_frequency', value)}
               >
                 <SelectTrigger className="w-full sm:w-48">
                   <SelectValue />
