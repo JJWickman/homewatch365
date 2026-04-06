@@ -116,7 +116,7 @@ export default function PropertyChecklistConfigTab({ propertyId, companyId, prop
     // Navigate to ChecklistEditor to customize the property-specific checklist
     navigate(
       createPageUrl('ChecklistEditor') + 
-      `?checklistId=${checklist.id}&propertyId=${propertyId}&companyId=${companyId}&mode=customize`
+      `?checklist_id=${checklist.id}&propertyId=${propertyId}&companyId=${companyId}&mode=customize`
     );
   };
 
