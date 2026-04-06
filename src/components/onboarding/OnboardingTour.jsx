@@ -168,8 +168,14 @@ export default function OnboardingTour({ open, onComplete, onDismiss }) {
     return (
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div className="w-full max-w-md">
-          <div className="rounded-2xl overflow-hidden bg-slate-900 border border-white/20 shadow-2xl">
-            <div className="relative h-52 overflow-hidden">
+          <div className="rounded-2xl overflow-hidden bg-slate-900 border border-white/20 shadow-2xl relative">
+            <button
+              onClick={onDismiss}
+              className="absolute top-3 right-3 z-10 text-white/60 hover:text-white transition-colors bg-black/30 rounded-full p-1"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          <div className="relative h-52 overflow-hidden">
               <img
                 src="https://media.base44.com/images/public/696806e88e744d6cc803e3bb/930dadf8d_image.png"
                 alt="Congratulations"
