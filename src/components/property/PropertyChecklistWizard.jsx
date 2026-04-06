@@ -194,19 +194,17 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
         </DialogHeader>
 
         {step === 1 ? (
-          // Step 1: Template Selection & Naming
           <div className="space-y-6 py-4">
-            <div>
-              <div className={`${propertyTypeInfo.color} rounded-lg p-4 flex items-center gap-3`}>
-                {propertyTypeInfo.icon && <propertyTypeInfo.icon className="w-6 h-6 text-white" />}
-                <div>
-                  <p className="font-semibold text-white">Create a custom checklist for</p>
-                  <p className="text-sm text-white/90">{property.name || property.address}</p>
-                </div>
+            {/* Property bar */}
+            <div className={`${propertyTypeInfo.color} rounded-lg p-4 flex items-center gap-3`}>
+              {propertyTypeInfo.icon && <propertyTypeInfo.icon className="w-6 h-6 text-white" />}
+              <div>
+                <p className="font-semibold text-white">Create a custom checklist for</p>
+                <p className="text-sm text-white/90">{property.name || property.address}</p>
               </div>
             </div>
 
-            {/* Checklist Name — shown immediately after the blue bar */}
+            {/* Checklist Name */}
             {!loadingTemplates && templates.length > 0 && (
               <div>
                 <Label htmlFor="checklist-name" className="text-sm font-medium text-slate-700">Checklist Name *</Label>
@@ -221,13 +219,13 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
               </div>
             )}
 
+            {/* Templates */}
             {loadingTemplates ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
               </div>
             ) : (
               <div className="space-y-4">
-                {/* Core Templates */}
                 {templates.filter(t => CORE_SLUGS.includes(t.template_slug)).length > 0 && (
                   <div>
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Core Home Watch Templates</p>
@@ -250,13 +248,13 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
                             {selectedTemplate?.id === template.id && (
                               <Check className="w-4 h-4 text-blue-600 shrink-0 ml-3" />
                             )}
-                            </div>
-                            </div>
-                            ))}
-                            </div>
-                            </div>
-                            )}
-                            {/* Additional Templates */}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {templates.filter(t => !CORE_SLUGS.includes(t.template_slug)).length > 0 && (
                   <div>
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Additional Service Templates</p>
@@ -280,33 +278,30 @@ export default function PropertyChecklistWizard({ property, onClose, onComplete 
                               <Check className="w-4 h-4 text-blue-600 shrink-0 ml-3" />
                             )}
                           </div>
-                          </div>
-                          ))}
-                          </div>
-                          </div>
-                          )}
-                          </div>
-                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-                          {templates.length > 0 && (
-                          <div className="border-t pt-6">
-                            <div className="flex gap-3 justify-end">
-                              <Button variant="outline" onClick={onClose}>Cancel</Button>
-                              <Button
-                                onClick={handleCreateChecklist}
-                                disabled={!checklistName.trim() || !selectedTemplate || creating}
-                                className="bg-blue-600 hover:bg-blue-700 text-white"
-                              >
-                                {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ArrowRight className="w-4 h-4 mr-2" />}
-                                Continue to Editor
-                              </Button>
-                            </div>
-                          </div>
-                          )}
-                          </div>
-                          )}
-                          ) : (
-                          <div className="space-y-4 py-4">
+                {templates.length > 0 && (
+                  <div className="border-t pt-4 flex gap-3 justify-end">
+                    <Button variant="outline" onClick={onClose}>Cancel</Button>
+                    <Button
+                      onClick={handleCreateChecklist}
+                      disabled={!checklistName.trim() || !selectedTemplate || creating}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ArrowRight className="w-4 h-4 mr-2" />}
+                      Continue to Editor
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-4 py-4">
             {/* Header with save button */}
             <div className="flex items-center justify-between gap-4 pb-4 border-b">
               <div>
