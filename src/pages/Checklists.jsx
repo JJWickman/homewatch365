@@ -25,19 +25,7 @@ export default function Checklists() {
       const user = await base44.auth.me();
       const tenantId = user?.primary_tenant_id;
 
-      const [customs, templates] = await Promise.all([
-        base44.entities.PropertyChecklist.filter({ tenant_id: tenantId }),
-        base44.entities.ChecklistTemplate.filter({ active: true }),
-      ]);
-
-      const customItems = customs.map(c => ({
-        id: c.id,
-        name: c.name || 'Unnamed Checklist',
-        type: 'custom',
-        description: c.description || '',
-        sectionCount: (c.customized_sections || []).length,
-        raw: c,
-      }));
+      const templates = await base44.entities.ChecklistTemplate.filter({ active: true });
 
       const templateItems = templates.map(t => ({
         id: t.id,
@@ -48,7 +36,7 @@ export default function Checklists() {
         raw: t,
       }));
 
-      setItems([...customItems, ...templateItems]);
+      setItems(templateItems);
     } catch (err) {
       console.error(err);
     } finally {
@@ -74,8 +62,8 @@ export default function Checklists() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Checklists</h1>
-        <p className="text-slate-500 text-sm mt-1">View and edit all property checklists and templates</p>
+        <h1 className="text-2xl font-bold text-slate-900">Checklist Templates</h1>
+        <p className="text-slate-500 text-sm mt-1">View and edit all checklist templates</p>
       </div>
 
       {/* Controls */}
@@ -89,19 +77,7 @@ export default function Checklists() {
             className="pl-9"
           />
         </div>
-        <div className="flex gap-2">
-          {['all', 'custom', 'template'].map(f => (
-            <Button
-              key={f}
-              size="sm"
-              variant={filter === f ? 'default' : 'outline'}
-              onClick={() => setFilter(f)}
-              className={filter === f ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}
-            >
-              {f.charAt(0).toUpperCase() + f.slice(1)}
-            </Button>
-          ))}
-        </div>
+
       </div>
 
       {/* List */}
