@@ -64,5 +64,25 @@
     "name",
     "template_slug"
   ],
-  "rls": {}
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.primary_tenant_id}}"
+        },
+        {
+          "data.tenant_id": null
+        }
+      ]
+    },
+    "create": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "update": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    },
+    "delete": {
+      "data.tenant_id": "{{user.data.primary_tenant_id}}"
+    }
+  }
 }
