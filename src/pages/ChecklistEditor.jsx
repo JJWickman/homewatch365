@@ -258,9 +258,9 @@ export default function ChecklistEditor() {
             </>
             )}
             </Droppable>
-          </div>
+            </div>
             )}
-          </Draggable>
+            </Draggable>
         ))}
         {provided.placeholder}
       </div>
