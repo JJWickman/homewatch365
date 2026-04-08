@@ -266,33 +266,15 @@ export default function ChecklistEditor() {
               </Button>
             </div>
 
-            <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 space-y-2">
-
-              <label className="flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={section.allow_notes || false}
-                  onChange={e => updateSectionField(sIdx, 'allow_notes', e.target.checked)}
-                  className="rounded border-slate-300"
-                />
-                Allow Notes
-              </label>
-              <label className="flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={section.allow_photo || false}
-                  onChange={e => updateSectionField(sIdx, 'allow_photo', e.target.checked)}
-                  className="rounded border-slate-300"
-                />
-                Allow Photo Capture (device camera)
-              </label>
+            <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 space-y-3 text-xs">
+              <div className="flex gap-2">
+                <button className="px-3 py-1.5 rounded bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors">📷 Take Photo</button>
+              </div>
               <div>
-                <label className="text-xs font-medium text-slate-600 block mb-1">Notes</label>
+                <label className="font-medium text-slate-600 block mb-1">Notes</label>
                 <textarea
-                  value={section.notes || ''}
-                  onChange={e => updateSectionField(sIdx, 'notes', e.target.value)}
                   placeholder="Add notes for this section..."
-                  className="w-full text-xs border border-slate-200 rounded px-2 py-1 focus-visible:ring-1 focus-visible:ring-blue-500"
+                  className="w-full border border-slate-200 rounded px-2 py-1 focus-visible:ring-1 focus-visible:ring-blue-500"
                   rows="2"
                 />
               </div>
