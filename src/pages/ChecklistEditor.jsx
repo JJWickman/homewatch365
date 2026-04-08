@@ -73,7 +73,7 @@ export default function ChecklistEditor() {
   };
 
   const addSection = () => {
-    setSections(prev => [...prev, { title: 'New Section', items: [], allow_photo: true }]);
+    setSections(prev => [...prev, { title: 'New Section', items: [], allow_photo: true, allow_notes: true }]);
   };
 
   const updateSectionTitle = (sIdx, title) => {
