@@ -271,6 +271,15 @@ export default function ChecklistEditor() {
               <label className="flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer">
                 <input
                   type="checkbox"
+                  checked={section.allow_notes || false}
+                  onChange={e => updateSectionField(sIdx, 'allow_notes', e.target.checked)}
+                  className="rounded border-slate-300"
+                />
+                Allow Notes
+              </label>
+              <label className="flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer">
+                <input
+                  type="checkbox"
                   checked={section.allow_photo || false}
                   onChange={e => updateSectionField(sIdx, 'allow_photo', e.target.checked)}
                   className="rounded border-slate-300"
