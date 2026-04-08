@@ -127,7 +127,7 @@ export default function ChecklistEditor() {
             placeholder="Checklist name..."
           />
         </div>
-        <Button onClick={handleSave} disabled={saving} className="gap-2">
+        <Button onClick={handleSave} disabled={saving} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
           <Save className="h-4 w-4" />
           {saving ? 'Saving...' : 'Save'}
         </Button>
