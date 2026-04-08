@@ -189,7 +189,7 @@ export default function ChecklistEditor() {
 
             <Droppable droppableId={`section-${sIdx}`} type="ITEM">
               {(provided) => (
-            <>
+              <>
               <div className="px-4 py-3 border-t border-slate-100 bg-slate-50">
                 <label className="text-xs font-medium text-slate-600 block mb-2">Section Instructions</label>
                 <textarea
