@@ -10,10 +10,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    // Get ALL templates from both ChecklistTemplate and ChecklistTemplateV2
-    const v1Templates = await base44.asServiceRole.entities.ChecklistTemplate.list('-created_date', 1000);
-    const v2Templates = await base44.asServiceRole.entities.ChecklistTemplateV2.list('-created_date', 1000);
-    const allTemplates = [...v1Templates, ...v2Templates];
+    // Get ALL templates across all tenants
+    const allTemplates = await base44.asServiceRole.entities.ChecklistTemplate.list('-created_date', 2000);
 
     let updatedCount = 0;
     const updates = [];
