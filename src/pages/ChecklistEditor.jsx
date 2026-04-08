@@ -266,25 +266,29 @@ export default function ChecklistEditor() {
               </Button>
             </div>
 
-            <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 space-y-2">
-              <label className="flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={section.allow_notes || false}
-                  onChange={e => updateSectionField(sIdx, 'allow_notes', e.target.checked)}
-                  className="rounded border-slate-300"
+            <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 space-y-3">
+              <div>
+                <label className="text-xs font-medium text-slate-600 block mb-1">Notes Instructions</label>
+                <textarea
+                  value={section.notes_instruction || ''}
+                  onChange={e => updateSectionField(sIdx, 'notes_instruction', e.target.value.slice(0, 256))}
+                  placeholder="Instructions for notes field (max 256 characters)..."
+                  className="w-full text-xs border border-slate-200 rounded px-2 py-1 focus-visible:ring-1 focus-visible:ring-blue-500"
+                  rows="2"
                 />
-                Allow Notes
-              </label>
-              <label className="flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={section.allow_photo || false}
-                  onChange={e => updateSectionField(sIdx, 'allow_photo', e.target.checked)}
-                  className="rounded border-slate-300"
+                <p className="text-xs text-slate-400 mt-1">{(section.notes_instruction || '').length}/256 characters</p>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-slate-600 block mb-1">Photo Instructions</label>
+                <textarea
+                  value={section.photo_instruction || ''}
+                  onChange={e => updateSectionField(sIdx, 'photo_instruction', e.target.value.slice(0, 256))}
+                  placeholder="Instructions for photo capture (max 256 characters)..."
+                  className="w-full text-xs border border-slate-200 rounded px-2 py-1 focus-visible:ring-1 focus-visible:ring-blue-500"
+                  rows="2"
                 />
-                Allow Photo
-              </label>
+                <p className="text-xs text-slate-400 mt-1">{(section.photo_instruction || '').length}/256 characters</p>
+              </div>
             </div>
             </>
             )}
