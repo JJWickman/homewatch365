@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -104,6 +105,28 @@ export default function ChecklistEditor() {
     ));
   };
 
+  const handleDragEnd = (result) => {
+    const { source, destination, type } = result;
+    if (!destination) return;
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
+
+    if (type === 'SECTION') {
+      const newSections = Array.from(sections);
+      const [movedSection] = newSections.splice(source.index, 1);
+      newSections.splice(destination.index, 0, movedSection);
+      setSections(newSections);
+    } else if (type === 'ITEM') {
+      const sIdx = parseInt(source.droppableId.split('-')[1]);
+      const dIdx = parseInt(destination.droppableId.split('-')[1]);
+      setSections(prev => {
+        const newSections = prev.map(s => ({ ...s, items: [...(s.items || [])] }));
+        const [movedItem] = newSections[sIdx].items.splice(source.index, 1);
+        newSections[dIdx].items.splice(destination.index, 0, movedItem);
+        return newSections;
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -113,6 +136,7 @@ export default function ChecklistEditor() {
   }
 
   return (
+    <DragDropContext onDragEnd={handleDragEnd}>
     <div className="max-w-3xl mx-auto p-4 pb-24">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
@@ -134,10 +158,20 @@ export default function ChecklistEditor() {
       </div>
 
       {/* Sections */}
-      <div className="space-y-4">
+      <Droppable droppableId="sections" type="SECTION">
+        {(provided) => (
+      <div className="space-y-4" {...provided.droppableProps} ref={provided.innerRef}>
         {sections.map((section, sIdx) => (
-          <div key={sIdx} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-slate-200">
+          <Draggable key={`section-${sIdx}`} draggableId={`section-${sIdx}`} index={sIdx}>
+            {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            className={`bg-white rounded-xl border border-slate-200 overflow-hidden ${
+              snapshot.isDragging ? 'shadow-lg bg-blue-50' : ''
+            }`}
+          >
+            <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-slate-200" {...provided.dragHandleProps}>
               <GripVertical className="h-4 w-4 text-slate-400" />
               <Input
                 value={section.title}
@@ -149,10 +183,20 @@ export default function ChecklistEditor() {
               </Button>
             </div>
 
-            <div className="divide-y divide-slate-100">
+            <Droppable droppableId={`section-${sIdx}`} type="ITEM">
+              {(provided) => (
+            <div className="divide-y divide-slate-100" {...provided.droppableProps} ref={provided.innerRef}>
               {(section.items || []).map((item, iIdx) => (
-                <div key={iIdx} className="flex items-center gap-2 px-4 py-2.5">
-                  <GripVertical className="h-4 w-4 text-slate-300 shrink-0" />
+                <Draggable key={`item-${sIdx}-${iIdx}`} draggableId={`item-${sIdx}-${iIdx}`} index={iIdx}>
+                  {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.draggableProps}
+                  className={`flex items-center gap-2 px-4 py-2.5 ${
+                    snapshot.isDragging ? 'bg-blue-50' : ''
+                  }`}
+                >
+                  <GripVertical className="h-4 w-4 text-slate-300 shrink-0" {...provided.dragHandleProps} />
                   <Input
                     value={item.label}
                     onChange={e => updateItem(sIdx, iIdx, 'label', e.target.value)}
@@ -175,8 +219,13 @@ export default function ChecklistEditor() {
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
+                  )}
+                </Draggable>
               ))}
+              {provided.placeholder}
             </div>
+              )}
+            </Droppable>
 
             <div className="px-4 py-2 border-t border-slate-100">
               <Button variant="ghost" size="sm" onClick={() => addItem(sIdx)} className="text-blue-600 gap-1 text-xs">
@@ -184,12 +233,18 @@ export default function ChecklistEditor() {
               </Button>
             </div>
           </div>
+            )}
+          </Draggable>
         ))}
+        {provided.placeholder}
       </div>
+        )}
+      </Droppable>
 
       <Button variant="outline" onClick={addSection} className="mt-4 w-full gap-2">
         <Plus className="h-4 w-4" /> Add Section
       </Button>
     </div>
+    </DragDropContext>
   );
 }
