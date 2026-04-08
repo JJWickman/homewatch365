@@ -286,6 +286,16 @@ export default function ChecklistEditor() {
                 />
                 Allow Photo Capture (device camera)
               </label>
+              <div>
+                <label className="text-xs font-medium text-slate-600 block mb-1">Notes</label>
+                <textarea
+                  value={section.notes || ''}
+                  onChange={e => updateSectionField(sIdx, 'notes', e.target.value)}
+                  placeholder="Add notes for this section..."
+                  className="w-full text-xs border border-slate-200 rounded px-2 py-1 focus-visible:ring-1 focus-visible:ring-blue-500"
+                  rows="2"
+                />
+              </div>
             </div>
             </>
             )}
