@@ -229,7 +229,7 @@ export default function ChecklistEditor() {
               {provided.placeholder}
               </div>
 
-            <div className="px-4 py-2 border-t border-slate-100">
+              <div className="px-4 py-2 border-t border-slate-100">
               <Button variant="ghost" size="sm" onClick={() => addItem(sIdx)} className="text-blue-600 gap-1 text-xs">
                 <Plus className="h-3.5 w-3.5" /> Add Item
               </Button>
@@ -255,6 +255,9 @@ export default function ChecklistEditor() {
                 Allow Photo
               </label>
             </div>
+            </>
+            )}
+            </Droppable>
           </div>
             )}
           </Draggable>
