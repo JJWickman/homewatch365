@@ -203,18 +203,7 @@ export default function ChecklistEditor() {
                     className="flex-1 text-sm border-0 shadow-none px-0 focus-visible:ring-0"
                     placeholder="Item label..."
                   />
-                  <select
-                    value={item.responseType || 'ok_issue_na'}
-                    onChange={e => updateItem(sIdx, iIdx, 'responseType', e.target.value)}
-                    className="text-xs border border-slate-200 rounded px-2 py-1 bg-white shrink-0"
-                  >
-                    <option value="ok_issue_na">OK / Issue / N/A</option>
-                    <option value="number">Number</option>
-                    <option value="percentage">Percentage</option>
-                    <option value="photo_only">Photo Only</option>
-                    <option value="instruction_only">Instruction</option>
-                    <option value="text">Text</option>
-                  </select>
+                  <span className="text-xs text-slate-500 shrink-0">OK / Issue / N/A</span>
                   <Button variant="ghost" size="icon" onClick={() => deleteItem(sIdx, iIdx)} className="text-red-400 hover:text-red-600 h-7 w-7 shrink-0">
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
