@@ -218,7 +218,38 @@ export default function ChecklistEditor() {
                     className="flex-1 text-sm border-0 shadow-none px-0 focus-visible:ring-0"
                     placeholder="Item label..."
                   />
-                  <span className="text-xs text-slate-500 shrink-0">OK / Issue / N/A</span>
+                  <div className="flex gap-1 shrink-0">
+                    <button
+                      onClick={() => updateItem(sIdx, iIdx, 'response_type', 'ok')}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                        item.response_type === 'ok'
+                          ? 'bg-green-500 text-white'
+                          : 'bg-green-100 text-green-700 hover:bg-green-200'
+                      }`}
+                    >
+                      OK
+                    </button>
+                    <button
+                      onClick={() => updateItem(sIdx, iIdx, 'response_type', 'issue')}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                        item.response_type === 'issue'
+                          ? 'bg-red-500 text-white'
+                          : 'bg-red-100 text-red-700 hover:bg-red-200'
+                      }`}
+                    >
+                      Issue
+                    </button>
+                    <button
+                      onClick={() => updateItem(sIdx, iIdx, 'response_type', 'na')}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                        item.response_type === 'na'
+                          ? 'bg-slate-500 text-white'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      N/A
+                    </button>
+                  </div>
                   <Button variant="ghost" size="icon" onClick={() => deleteItem(sIdx, iIdx)} className="text-red-400 hover:text-red-600 h-7 w-7 shrink-0">
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
