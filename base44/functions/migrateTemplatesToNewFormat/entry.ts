@@ -10,8 +10,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    // Get ALL templates across all tenants
-    const allTemplates = await base44.asServiceRole.entities.ChecklistTemplate.list('-created_date', 2000);
+    // Get user's tenant templates (RLS applies with user context, not service role)
+    const allTemplates = await base44.entities.ChecklistTemplate.list('-created_date', 2000);
 
     let updatedCount = 0;
     const updates = [];
