@@ -80,6 +80,10 @@ export default function ChecklistEditor() {
     setSections(prev => prev.map((s, i) => i === sIdx ? { ...s, title } : s));
   };
 
+  const updateSectionField = (sIdx, field, value) => {
+    setSections(prev => prev.map((s, i) => i === sIdx ? { ...s, [field]: value } : s));
+  };
+
   const deleteSection = (sIdx) => {
     setSections(prev => prev.filter((_, i) => i !== sIdx));
   };
@@ -185,8 +189,19 @@ export default function ChecklistEditor() {
 
             <Droppable droppableId={`section-${sIdx}`} type="ITEM">
               {(provided) => (
-            <div className="divide-y divide-slate-100" {...provided.droppableProps} ref={provided.innerRef}>
-              {(section.items || []).map((item, iIdx) => (
+            <>
+              <div className="px-4 py-3 border-t border-slate-100 bg-slate-50">
+                <label className="text-xs font-medium text-slate-600 block mb-2">Section Instructions</label>
+                <textarea
+                  value={section.instructions || ''}
+                  onChange={e => updateSectionField(sIdx, 'instructions', e.target.value)}
+                  placeholder="Instructions for field staff..."
+                  className="w-full text-xs border border-slate-200 rounded px-2 py-1 focus-visible:ring-1 focus-visible:ring-blue-500"
+                  rows="2"
+                />
+              </div>
+              <div className="divide-y divide-slate-100" {...provided.droppableProps} ref={provided.innerRef}>
+                {(section.items || []).map((item, iIdx) => (
                 <Draggable key={`item-${sIdx}-${iIdx}`} draggableId={`item-${sIdx}-${iIdx}`} index={iIdx}>
                   {(provided, snapshot) => (
                 <div
@@ -212,14 +227,33 @@ export default function ChecklistEditor() {
                 </Draggable>
               ))}
               {provided.placeholder}
-            </div>
-              )}
-            </Droppable>
+              </div>
 
             <div className="px-4 py-2 border-t border-slate-100">
               <Button variant="ghost" size="sm" onClick={() => addItem(sIdx)} className="text-blue-600 gap-1 text-xs">
                 <Plus className="h-3.5 w-3.5" /> Add Item
               </Button>
+            </div>
+
+            <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 space-y-2">
+              <label className="flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={section.allow_notes || false}
+                  onChange={e => updateSectionField(sIdx, 'allow_notes', e.target.checked)}
+                  className="rounded border-slate-300"
+                />
+                Allow Notes
+              </label>
+              <label className="flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={section.allow_photo || false}
+                  onChange={e => updateSectionField(sIdx, 'allow_photo', e.target.checked)}
+                  className="rounded border-slate-300"
+                />
+                Allow Photo
+              </label>
             </div>
           </div>
             )}
