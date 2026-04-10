@@ -4,237 +4,18 @@ import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Save, Plus, Trash2, GripVertical, ChevronDown, ChevronRight, Copy, Settings2, Camera, FileText, ToggleLeft, AlignLeft, Pencil, X, Check } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, GripVertical, ChevronDown, ChevronRight, Copy, Settings2, Camera, FileText, AlignLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 
-const DEFAULT_RESPONSE_TYPES = [
-  { value: 'ok_issue_na', label: 'OK / Issue / N/A', color: 'bg-blue-100 text-blue-700', options: [
-    { label: 'OK', color: 'green', triggers_popup: false },
-    { label: 'Issue', color: 'red', triggers_popup: true, popup_note: true, popup_photo: true },
-    { label: 'N/A', color: 'slate', triggers_popup: false },
-  ]},
-  { value: 'ok_issue', label: 'OK / Issue', color: 'bg-green-100 text-green-700', options: [
-    { label: 'OK', color: 'green', triggers_popup: false },
-    { label: 'Issue', color: 'red', triggers_popup: true, popup_note: true, popup_photo: true },
-  ]},
-  { value: 'yes_no', label: 'Yes / No', color: 'bg-purple-100 text-purple-700', options: [
-    { label: 'Yes', color: 'green', triggers_popup: false },
-    { label: 'No', color: 'red', triggers_popup: false },
-  ]},
-  { value: 'yes_no_na', label: 'Yes / No / N/A', color: 'bg-violet-100 text-violet-700', options: [
-    { label: 'Yes', color: 'green', triggers_popup: false },
-    { label: 'No', color: 'red', triggers_popup: false },
-    { label: 'N/A', color: 'slate', triggers_popup: false },
-  ]},
-  { value: 'pass_fail', label: 'Pass / Fail', color: 'bg-orange-100 text-orange-700', options: [
-    { label: 'Pass', color: 'green', triggers_popup: false },
-    { label: 'Fail', color: 'red', triggers_popup: true, popup_note: true, popup_photo: false },
-  ]},
-  { value: 'text', label: 'Text Input', color: 'bg-slate-100 text-slate-700', options: [] },
-  { value: 'number', label: 'Number', color: 'bg-yellow-100 text-yellow-700', options: [] },
-  { value: 'photo_only', label: 'Photo Only', color: 'bg-pink-100 text-pink-700', options: [] },
+const SECTION_RESPONSE_OPTIONS = [
+  { label: 'No Visible Issue', color: 'bg-green-100 text-green-700 border-green-200' },
+  { label: 'Visible Issue', color: 'bg-red-100 text-red-700 border-red-200', triggers_popup: true },
+  { label: 'N/A', color: 'bg-slate-100 text-slate-500 border-slate-200' },
 ];
 
-const COLOR_OPTIONS = [
-  'bg-blue-100 text-blue-700',
-  'bg-green-100 text-green-700',
-  'bg-purple-100 text-purple-700',
-  'bg-orange-100 text-orange-700',
-  'bg-pink-100 text-pink-700',
-  'bg-yellow-100 text-yellow-700',
-  'bg-slate-100 text-slate-700',
-  'bg-red-100 text-red-700',
-  'bg-teal-100 text-teal-700',
-];
-
-function ResponseTypeManager({ responseTypes, onChange }) {
-  const [editingIdx, setEditingIdx] = useState(null);
-  const [editLabel, setEditLabel] = useState('');
-  const [editColor, setEditColor] = useState('');
-  const [newLabel, setNewLabel] = useState('');
-  const [showAdd, setShowAdd] = useState(false);
-  const [expandedRt, setExpandedRt] = useState(null); // which response type is open for option editing
-
-  const startEdit = (idx) => {
-    setEditingIdx(idx);
-    setEditLabel(responseTypes[idx].label);
-    setEditColor(responseTypes[idx].color);
-  };
-
-  const saveEdit = () => {
-    if (!editLabel.trim()) return;
-    onChange(responseTypes.map((rt, i) => i === editingIdx ? { ...rt, label: editLabel.trim(), color: editColor } : rt));
-    setEditingIdx(null);
-  };
-
-  const removeType = (idx) => {
-    if (expandedRt === idx) setExpandedRt(null);
-    onChange(responseTypes.filter((_, i) => i !== idx));
-  };
-
-  const addType = () => {
-    if (!newLabel.trim()) return;
-    const value = newLabel.toLowerCase().replace(/[^a-z0-9]+/g, '_');
-    onChange([...responseTypes, { value, label: newLabel.trim(), color: COLOR_OPTIONS[responseTypes.length % COLOR_OPTIONS.length], options: [] }]);
-    setNewLabel('');
-    setShowAdd(false);
-  };
-
-  // Option-level helpers
-  const updateOption = (rtIdx, optIdx, changes) => {
-    onChange(responseTypes.map((rt, i) => i !== rtIdx ? rt : {
-      ...rt,
-      options: rt.options.map((o, j) => j !== optIdx ? o : { ...o, ...changes })
-    }));
-  };
-
-  const addOption = (rtIdx) => {
-    onChange(responseTypes.map((rt, i) => i !== rtIdx ? rt : {
-      ...rt,
-      options: [...(rt.options || []), { label: 'New', color: 'slate', triggers_popup: false, popup_note: false, popup_photo: false }]
-    }));
-  };
-
-  const removeOption = (rtIdx, optIdx) => {
-    onChange(responseTypes.map((rt, i) => i !== rtIdx ? rt : {
-      ...rt,
-      options: rt.options.filter((_, j) => j !== optIdx)
-    }));
-  };
-
-  const OPTION_COLORS = ['green', 'red', 'yellow', 'blue', 'slate', 'orange', 'purple'];
-  const optionColorClass = (c) => ({
-    green: 'bg-green-100 text-green-700 border-green-300',
-    red: 'bg-red-100 text-red-700 border-red-300',
-    yellow: 'bg-yellow-100 text-yellow-700 border-yellow-300',
-    blue: 'bg-blue-100 text-blue-700 border-blue-300',
-    slate: 'bg-slate-100 text-slate-700 border-slate-300',
-    orange: 'bg-orange-100 text-orange-700 border-orange-300',
-    purple: 'bg-purple-100 text-purple-700 border-purple-300',
-  }[c] || 'bg-slate-100 text-slate-700 border-slate-300');
-
-  return (
-    <div className="space-y-3">
-      {responseTypes.map((rt, idx) => (
-        <div key={rt.value} className="border border-slate-200 rounded-lg overflow-hidden">
-          {/* Response Type Row */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-slate-50">
-            <button onClick={() => setExpandedRt(expandedRt === idx ? null : idx)} className="text-slate-400 hover:text-slate-600">
-              {expandedRt === idx ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-            </button>
-
-            {editingIdx === idx ? (
-              <div className="flex items-center gap-1 flex-1">
-                <input value={editLabel} onChange={e => setEditLabel(e.target.value)}
-                  className="text-xs flex-1 outline-none border border-blue-300 rounded px-1"
-                  onKeyDown={e => e.key === 'Enter' && saveEdit()} autoFocus />
-                <div className="flex gap-1">
-                  {COLOR_OPTIONS.map(c => (
-                    <button key={c} onClick={() => setEditColor(c)}
-                      className={`w-3 h-3 rounded-full border ${c.split(' ')[0]} ${editColor === c ? 'ring-1 ring-offset-1 ring-slate-500' : ''}`} />
-                  ))}
-                </div>
-                <button onClick={saveEdit} className="text-green-600"><Check className="h-3 w-3" /></button>
-                <button onClick={() => setEditingIdx(null)} className="text-slate-400"><X className="h-3 w-3" /></button>
-              </div>
-            ) : (
-              <>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${rt.color}`}>{rt.label}</span>
-                <span className="text-xs text-slate-400">{(rt.options || []).length} options</span>
-                <div className="flex gap-1 ml-auto">
-                  <button onClick={() => startEdit(idx)} className="opacity-50 hover:opacity-100"><Pencil className="h-3 w-3" /></button>
-                  {responseTypes.length > 1 && (
-                    <button onClick={() => removeType(idx)} className="opacity-50 hover:opacity-100 text-red-500"><Trash2 className="h-3 w-3" /></button>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Options Editor */}
-          {expandedRt === idx && (
-            <div className="px-3 py-2 space-y-1 bg-white">
-              {(rt.options || []).map((opt, optIdx) => (
-                <div key={optIdx} className="flex items-center gap-2 py-1 border-b border-slate-50 last:border-0">
-                  {/* Color dot */}
-                  <select value={opt.color} onChange={e => updateOption(idx, optIdx, { color: e.target.value })}
-                    className="text-xs border border-slate-200 rounded px-1 py-0.5">
-                    {OPTION_COLORS.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-
-                  {/* Label */}
-                  <input value={opt.label} onChange={e => updateOption(idx, optIdx, { label: e.target.value })}
-                    className={`text-xs px-2 py-0.5 rounded border font-medium w-24 ${optionColorClass(opt.color)}`} />
-
-                  {/* Triggers popup toggle */}
-                  <label className="flex items-center gap-1 text-xs text-slate-600 cursor-pointer ml-2">
-                    <input type="checkbox" checked={!!opt.triggers_popup}
-                      onChange={e => updateOption(idx, optIdx, { triggers_popup: e.target.checked })}
-                      className="rounded border-slate-300" />
-                    Triggers popup
-                  </label>
-
-                  {opt.triggers_popup && (
-                    <>
-                      <label className="flex items-center gap-1 text-xs text-amber-600 cursor-pointer">
-                        <input type="checkbox" checked={!!opt.popup_note}
-                          onChange={e => updateOption(idx, optIdx, { popup_note: e.target.checked })}
-                          className="rounded" />
-                        <FileText className="h-3 w-3" /> Note
-                      </label>
-                      <label className="flex items-center gap-1 text-xs text-blue-600 cursor-pointer">
-                        <input type="checkbox" checked={!!opt.popup_photo}
-                          onChange={e => updateOption(idx, optIdx, { popup_photo: e.target.checked })}
-                          className="rounded" />
-                        <Camera className="h-3 w-3" /> Photo
-                      </label>
-                    </>
-                  )}
-
-                  <button onClick={() => removeOption(idx, optIdx)} className="ml-auto text-red-400 hover:text-red-600">
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-              <button onClick={() => addOption(idx)}
-                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 mt-1">
-                <Plus className="h-3 w-3" /> Add option
-              </button>
-            </div>
-          )}
-        </div>
-      ))}
-
-      {/* Add new response type */}
-      <div className="flex items-center gap-2">
-        {showAdd ? (
-          <div className="flex items-center gap-1 border border-blue-300 rounded-lg px-2 py-1 bg-white">
-            <input value={newLabel} onChange={e => setNewLabel(e.target.value)}
-              placeholder="Type name..." className="text-xs w-24 outline-none"
-              onKeyDown={e => e.key === 'Enter' && addType()} autoFocus />
-            <button onClick={addType} className="text-green-600"><Check className="h-3 w-3" /></button>
-            <button onClick={() => { setShowAdd(false); setNewLabel(''); }} className="text-slate-400"><X className="h-3 w-3" /></button>
-          </div>
-        ) : (
-          <button onClick={() => setShowAdd(true)}
-            className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border border-dashed border-slate-300 text-slate-500 hover:border-blue-400 hover:text-blue-600">
-            <Plus className="h-3 w-3" /> Add Response Type
-          </button>
-        )}
-        <button onClick={() => onChange(DEFAULT_RESPONSE_TYPES)}
-          className="text-xs text-slate-400 hover:text-slate-600 underline ml-auto">
-          Reset to defaults
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function ItemEditor({ item, onUpdate, onDelete, onDuplicate, dragHandleProps, isDragging, responseTypes }) {
+function ItemEditor({ item, onUpdate, onDelete, onDuplicate, dragHandleProps, isDragging }) {
   const [expanded, setExpanded] = useState(false);
-
-  const responseType = responseTypes.find(r => r.value === (item.responseType || item.response_type || responseTypes[0]?.value)) || responseTypes[0];
 
   return (
     <div className={`border border-slate-200 rounded-lg overflow-hidden mb-2 bg-white ${isDragging ? 'shadow-lg ring-2 ring-blue-400' : ''}`}>
@@ -255,10 +36,6 @@ function ItemEditor({ item, onUpdate, onDelete, onDuplicate, dragHandleProps, is
           placeholder="Item label..."
         />
 
-        <Badge className={`text-xs shrink-0 ${responseType.color} border-0`}>
-          {responseType.label}
-        </Badge>
-
         <div className="flex gap-1 shrink-0">
           {item.require_photo && <Camera className="h-3.5 w-3.5 text-blue-500" title="Photo required" />}
           {item.require_note && <FileText className="h-3.5 w-3.5 text-amber-500" title="Note required" />}
@@ -275,26 +52,6 @@ function ItemEditor({ item, onUpdate, onDelete, onDuplicate, dragHandleProps, is
       {/* Expanded Editor */}
       {expanded && (
         <div className="border-t border-slate-100 bg-slate-50 px-4 py-3 space-y-3">
-          {/* Response Type */}
-          <div>
-            <label className="text-xs font-semibold text-slate-600 block mb-1.5">Response Type</label>
-            <div className="flex flex-wrap gap-1.5">
-              {responseTypes.map(rt => (
-                <button
-                  key={rt.value}
-                  onClick={() => onUpdate('responseType', rt.value)}
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
-                    (item.responseType || item.response_type || responseTypes[0]?.value) === rt.value
-                      ? rt.color + ' border-current ring-2 ring-offset-1 ring-blue-400'
-                      : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400'
-                  }`}
-                >
-                  {rt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Instructions */}
           <div>
             <label className="text-xs font-semibold text-slate-600 block mb-1">
@@ -333,27 +90,6 @@ function ItemEditor({ item, onUpdate, onDelete, onDuplicate, dragHandleProps, is
               <FileText className="h-3.5 w-3.5 text-amber-500" />
               <span className="text-xs font-medium text-slate-700">Require Note</span>
             </label>
-
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={!!item.allow_na}
-                onChange={e => onUpdate('allow_na', e.target.checked)}
-                className="rounded border-slate-300"
-              />
-              <ToggleLeft className="h-3.5 w-3.5 text-slate-500" />
-              <span className="text-xs font-medium text-slate-700">Allow N/A</span>
-            </label>
-
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={item.flaggable !== false}
-                onChange={e => onUpdate('flaggable', e.target.checked)}
-                className="rounded border-slate-300"
-              />
-              <span className="text-xs font-medium text-slate-700">Can Flag Issue</span>
-            </label>
           </div>
         </div>
       )}
@@ -375,8 +111,6 @@ export default function ChecklistEditor() {
   const [sections, setSections] = useState([]);
   const [target, setTarget] = useState(null);
   const [collapsedSections, setCollapsedSections] = useState({});
-  const [responseTypes, setResponseTypes] = useState(DEFAULT_RESPONSE_TYPES);
-  const [showRTManager, setShowRTManager] = useState(false);
 
   useEffect(() => { loadData(); }, []);
 
@@ -391,7 +125,6 @@ export default function ChecklistEditor() {
           setDescription(t.description || '');
           setChecklistInstructions(t.checklist_instructions || '');
           setSections(t.sections || []);
-          if (t.response_types?.length > 0) setResponseTypes(t.response_types);
         }
       } else if (checklistId) {
         const checklists = await base44.entities.PropertyChecklist.filter({ id: checklistId });
@@ -419,7 +152,7 @@ export default function ChecklistEditor() {
     setSaving(true);
     try {
       if (target?.type === 'template') {
-        await base44.entities.ChecklistTemplate.update(target.record.id, { name, description, checklist_instructions, sections, response_types: responseTypes });
+        await base44.entities.ChecklistTemplate.update(target.record.id, { name, description, checklist_instructions, sections });
       } else if (target?.type === 'checklist') {
         await base44.entities.PropertyChecklist.update(target.record.id, { name, checklist_instructions, customized_sections: sections });
       }
@@ -456,7 +189,7 @@ export default function ChecklistEditor() {
 
   const addItem = (sIdx) => {
     setSections(prev => prev.map((s, i) => i === sIdx
-      ? { ...s, items: [...(s.items || []), { label: 'New Item', responseType: 'ok_issue_na', instructions: '', require_photo: false, require_note: false, allow_na: true, flaggable: true }] }
+      ? { ...s, items: [...(s.items || []), { label: 'New Item', instructions: '', require_photo: false, require_note: false }] }
       : s
     ));
   };
@@ -548,31 +281,23 @@ export default function ChecklistEditor() {
 
         {/* Template Meta */}
         <div className="bg-white rounded-xl border border-slate-200 p-4 mb-5 space-y-3">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-              <Settings2 className="h-4 w-4" /> Template Settings
-            </div>
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-1">
+            <Settings2 className="h-4 w-4" /> Template Settings
           </div>
+
+          {/* Standard Response Options */}
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-semibold text-slate-600">Response Types</label>
-              <button onClick={() => setShowRTManager(!showRTManager)} className="text-xs text-blue-600 hover:underline">
-                {showRTManager ? 'Hide' : 'Manage'}
-              </button>
+            <label className="text-xs font-semibold text-slate-600 block mb-2">Standard Response Options (applied to every item)</label>
+            <div className="flex flex-wrap gap-2">
+              {SECTION_RESPONSE_OPTIONS.map(opt => (
+                <span key={opt.label} className={`px-3 py-1 rounded-full text-xs font-medium border ${opt.color}`}>
+                  {opt.label}{opt.triggers_popup ? ' — triggers note & photo popup' : ''}
+                </span>
+              ))}
             </div>
-            {showRTManager && (
-              <div className="mb-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <ResponseTypeManager responseTypes={responseTypes} onChange={setResponseTypes} />
-              </div>
-            )}
-            {!showRTManager && (
-              <div className="flex flex-wrap gap-1 mb-3">
-                {responseTypes.map(rt => (
-                  <span key={rt.value} className={`px-2 py-0.5 rounded-full text-xs font-medium ${rt.color}`}>{rt.label}</span>
-                ))}
-              </div>
-            )}
           </div>
+
+          {/* Checklist Instructions */}
           <div>
             <label className="text-xs font-medium text-slate-600 block mb-1">Checklist Instructions (shown to inspector at top)</label>
             <textarea
@@ -655,7 +380,6 @@ export default function ChecklistEditor() {
                                           onDuplicate={() => duplicateItem(sIdx, iIdx)}
                                           dragHandleProps={provided.dragHandleProps}
                                           isDragging={snapshot.isDragging}
-                                          responseTypes={responseTypes}
                                         />
                                       </div>
                                     )}
