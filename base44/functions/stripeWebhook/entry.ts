@@ -45,7 +45,27 @@ Deno.serve(async (req) => {
 
           // Check slug not already taken
           const slugCheck = await base44.asServiceRole.entities.Tenant.filter({ slug });
-          if (slugCheck.length === 0) {
+          if (slugCheck.length > 0) {
+            // Slug already taken — reuse existing tenant (previous failed attempt)
+            tenantId = slugCheck[0].id;
+            await base44.asServiceRole.entities.Tenant.update(tenantId, {
+              subscription_plan: subscriptionPlan,
+              subscription_status: 'active',
+              stripe_subscription_id: session.subscription,
+              marketing_addon_active: hasCrm
+            });
+            // Ensure TenantUser exists
+            const existingTU = await base44.asServiceRole.entities.TenantUser.filter({ user_id: userId, tenant_id: tenantId });
+            if (existingTU.length === 0) {
+              await base44.asServiceRole.entities.TenantUser.create({
+                user_id: userId, tenant_id: tenantId, role_in_tenant: 'admin', is_owner: true, is_active: true
+              });
+            }
+            await base44.asServiceRole.entities.User.update(userId, {
+              primary_tenant_id: tenantId, role: 'admin', first_name: firstName, last_name: lastName
+            });
+            console.log(`Reused existing tenant ${tenantId} (slug already existed) for session ${session.id}`);
+          } else {
             const newTenant = await base44.asServiceRole.entities.Tenant.create({
               name: companyName,
               slug,
@@ -76,7 +96,7 @@ Deno.serve(async (req) => {
               last_name: lastName
             });
 
-            // Seed products (templates are system-level shared, no per-tenant seeding)
+            // Seed products
             try {
               await base44.asServiceRole.functions.invoke('seedDefaultProducts', { tenant_id: tenantId });
             } catch(e) { console.log('product seeding failed:', e.message); }
