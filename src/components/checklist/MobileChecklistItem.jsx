@@ -127,7 +127,7 @@ export default function MobileChecklistItem({ label, instructions, responseType,
           { key: 'na',    label: 'Not Observed / Not Accessible',   active: 'bg-slate-500 border-slate-500 text-white', inactive: 'border-slate-200 text-slate-500 bg-slate-50' },
         ].map(btn => (
           <button key={btn.key} onClick={() => update({ value: btn.key })}
-            className={`py-2.5 px-4 rounded-xl text-sm font-semibold border-2 text-left flex items-center gap-2 transition-all active:scale-[0.98] ${val === btn.key ? btn.active : btn.inactive}`}>
+            className={`py-4 px-4 rounded-xl text-base font-semibold border-2 text-left flex items-center gap-3 transition-all active:scale-[0.98] ${val === btn.key ? btn.active : btn.inactive}`}>
             <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${val === btn.key ? 'border-white bg-white/30' : 'border-current'}`}>
               {val === btn.key && <span className="w-2 h-2 rounded-full bg-white block" />}
             </span>

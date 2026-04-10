@@ -78,7 +78,7 @@ export default function ChecklistItemRow({
                 onItemChange(item.id, { ...response, response_value: btn.key, issue_flag: btn.issueFlag });
                 setShowIssueDetails(btn.issueFlag);
               }}
-              className={`w-full flex items-center gap-2 px-3 py-2 rounded-md border text-sm font-medium text-left transition-colors ${btn.cls}`}
+              className={`w-full flex items-center gap-3 px-4 py-4 rounded-xl border-2 text-base font-semibold text-left transition-colors ${btn.cls}`}
             >
               <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${value === btn.key ? 'border-white' : 'border-current'}`}>
                 {value === btn.key && <span className="w-2 h-2 rounded-full bg-white block" />}
