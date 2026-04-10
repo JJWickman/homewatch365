@@ -287,7 +287,7 @@ export default function ChecklistEditor() {
 
           {/* Standard Response Options */}
           <div>
-            <label className="text-xs font-semibold text-slate-600 block mb-2">Standard Response Options (applied to every item)</label>
+            <label className="text-xs font-semibold text-slate-600 block mb-2">Standard Response Options (applied to every section)</label>
             <div className="flex flex-wrap gap-2">
               {SECTION_RESPONSE_OPTIONS.map(opt => (
                 <span key={opt.label} className={`px-3 py-1 rounded-full text-xs font-medium border ${opt.color}`}>
