@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Save, Plus, Trash2, GripVertical } from 'lucide-react';
@@ -207,10 +207,9 @@ export default function ChecklistEditor() {
                 <div
                   ref={provided.innerRef}
                   {...provided.draggableProps}
-                  className={`flex items-center gap-2 px-4 py-2.5 ${
-                    snapshot.isDragging ? 'bg-blue-50' : ''
-                  }`}
+                  className={`px-4 py-2.5 ${snapshot.isDragging ? 'bg-blue-50' : ''}`}
                 >
+                  <div className="flex items-center gap-2">
                   <GripVertical className="h-4 w-4 text-slate-300 shrink-0" {...provided.dragHandleProps} />
                   <Input
                     value={item.label}
@@ -220,7 +219,7 @@ export default function ChecklistEditor() {
                   />
                   <div className="flex gap-1 shrink-0">
                     <button
-                      onClick={() => updateItem(sIdx, iIdx, 'response_type', 'ok')}
+                      onClick={() => updateItem(sIdx, iIdx, 'response_type', item.response_type === 'ok' ? null : 'ok')}
                       className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
                         item.response_type === 'ok'
                           ? 'bg-green-500 text-white'
@@ -230,7 +229,7 @@ export default function ChecklistEditor() {
                       OK
                     </button>
                     <button
-                      onClick={() => updateItem(sIdx, iIdx, 'response_type', 'issue')}
+                      onClick={() => updateItem(sIdx, iIdx, 'response_type', item.response_type === 'issue' ? null : 'issue')}
                       className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
                         item.response_type === 'issue'
                           ? 'bg-red-500 text-white'
@@ -240,7 +239,7 @@ export default function ChecklistEditor() {
                       Issue
                     </button>
                     <button
-                      onClick={() => updateItem(sIdx, iIdx, 'response_type', 'na')}
+                      onClick={() => updateItem(sIdx, iIdx, 'response_type', item.response_type === 'na' ? null : 'na')}
                       className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
                         item.response_type === 'na'
                           ? 'bg-slate-500 text-white'
@@ -253,6 +252,49 @@ export default function ChecklistEditor() {
                   <Button variant="ghost" size="icon" onClick={() => deleteItem(sIdx, iIdx)} className="text-red-400 hover:text-red-600 h-7 w-7 shrink-0">
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
+                  </div>
+                  {item.response_type === 'issue' && (
+                    <div className="ml-6 mt-2 space-y-2">
+                      <textarea
+                        value={item.note || ''}
+                        onChange={e => updateItem(sIdx, iIdx, 'note', e.target.value)}
+                        placeholder="Describe the issue..."
+                        className="w-full text-xs border border-red-200 rounded px-2 py-1.5 focus:ring-1 focus:ring-red-400 bg-red-50"
+                        rows="2"
+                      />
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <label className="cursor-pointer">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files[0];
+                              if (!file) return;
+                              try {
+                                const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                                const existing = item.photo_urls || [];
+                                updateItem(sIdx, iIdx, 'photo_urls', [...existing, file_url]);
+                              } catch(err) { console.error('Upload failed', err); }
+                            }}
+                          />
+                          <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-medium cursor-pointer transition-colors">
+                            📷 Add Photo
+                          </span>
+                        </label>
+                        {(item.photo_urls || []).map((url, pIdx) => (
+                          <div key={pIdx} className="relative group">
+                            <img src={url} alt="issue" className="h-12 w-12 object-cover rounded border border-red-200" />
+                            <button
+                              onClick={() => updateItem(sIdx, iIdx, 'photo_urls', item.photo_urls.filter((_, i) => i !== pIdx))}
+                              className="absolute -top-1 -right-1 hidden group-hover:flex h-4 w-4 bg-red-500 text-white rounded-full items-center justify-center text-xs"
+                            >×</button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                   )}
                 </Draggable>
