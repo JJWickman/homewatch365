@@ -353,6 +353,19 @@ export default function ChecklistEditor() {
                         </button>
                       </div>
 
+                      {/* Response Options - always visible on section */}
+                      <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 border-b border-slate-100">
+                        <span className="text-xs text-slate-500 font-medium shrink-0">Response options:</span>
+                        {SECTION_RESPONSE_OPTIONS.map(opt => (
+                          <span key={opt.label} className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${opt.color}`}>
+                            {opt.label}
+                          </span>
+                        ))}
+                        {SECTION_RESPONSE_OPTIONS.find(o => o.triggers_popup) && (
+                          <span className="text-xs text-slate-400 ml-1">📋 "Visible Issue" captures note + photo</span>
+                        )}
+                      </div>
+
                       {!collapsedSections[sIdx] && (
                         <>
                           {/* Section Instructions */}
