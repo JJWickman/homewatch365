@@ -210,7 +210,9 @@ export default function ChecklistEditor() {
                   className={`px-4 py-2.5 ${snapshot.isDragging ? 'bg-blue-50' : ''}`}
                 >
                   <div className="flex items-center gap-2">
-                  <GripVertical className="h-4 w-4 text-slate-300 shrink-0" {...provided.dragHandleProps} />
+                  <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-1 -ml-1 shrink-0">
+                    <GripVertical className="h-4 w-4 text-slate-400 hover:text-slate-600" />
+                  </div>
                   <Input
                     value={item.label}
                     onChange={e => updateItem(sIdx, iIdx, 'label', e.target.value)}
