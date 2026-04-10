@@ -16,8 +16,8 @@ Deno.serve(async (req) => {
     const seen = {};
     const toDelete = [];
 
-    // Sort by created_date ascending so we keep the oldest
-    const sorted = [...allTemplates].sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+    // Sort by created_date DESCENDING so we keep the newest
+    const sorted = [...allTemplates].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
     for (const t of sorted) {
       const key = `${t.tenant_id}__${t.name}`;
