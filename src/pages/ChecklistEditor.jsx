@@ -4,8 +4,150 @@ import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Save, Plus, Trash2, GripVertical } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, GripVertical, ChevronDown, ChevronRight, Copy, Settings2, Camera, FileText, ToggleLeft, Hash, AlignLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+
+const RESPONSE_TYPES = [
+  { value: 'ok_issue_na', label: 'OK / Issue / N/A', color: 'bg-blue-100 text-blue-700' },
+  { value: 'ok_issue', label: 'OK / Issue', color: 'bg-green-100 text-green-700' },
+  { value: 'yes_no', label: 'Yes / No', color: 'bg-purple-100 text-purple-700' },
+  { value: 'yes_no_na', label: 'Yes / No / N/A', color: 'bg-violet-100 text-violet-700' },
+  { value: 'pass_fail', label: 'Pass / Fail', color: 'bg-orange-100 text-orange-700' },
+  { value: 'text', label: 'Text Input', color: 'bg-slate-100 text-slate-700' },
+  { value: 'number', label: 'Number', color: 'bg-yellow-100 text-yellow-700' },
+  { value: 'photo_only', label: 'Photo Only', color: 'bg-pink-100 text-pink-700' },
+];
+
+function ItemEditor({ item, onUpdate, onDelete, onDuplicate, dragHandleProps, isDragging }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const responseType = RESPONSE_TYPES.find(r => r.value === (item.responseType || item.response_type || 'ok_issue_na')) || RESPONSE_TYPES[0];
+
+  return (
+    <div className={`border border-slate-200 rounded-lg overflow-hidden mb-2 bg-white ${isDragging ? 'shadow-lg ring-2 ring-blue-400' : ''}`}>
+      {/* Item Header Row */}
+      <div className="flex items-center gap-2 px-3 py-2.5">
+        <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing p-1 shrink-0">
+          <GripVertical className="h-4 w-4 text-slate-400 hover:text-slate-600" />
+        </div>
+
+        <button onClick={() => setExpanded(!expanded)} className="shrink-0 text-slate-400 hover:text-slate-600">
+          {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        </button>
+
+        <Input
+          value={item.label}
+          onChange={e => onUpdate('label', e.target.value)}
+          className="flex-1 text-sm border-0 shadow-none px-0 focus-visible:ring-0 font-medium"
+          placeholder="Item label..."
+        />
+
+        <Badge className={`text-xs shrink-0 ${responseType.color} border-0`}>
+          {responseType.label}
+        </Badge>
+
+        <div className="flex gap-1 shrink-0">
+          {item.require_photo && <Camera className="h-3.5 w-3.5 text-blue-500" title="Photo required" />}
+          {item.require_note && <FileText className="h-3.5 w-3.5 text-amber-500" title="Note required" />}
+        </div>
+
+        <button onClick={onDuplicate} className="p-1 text-slate-400 hover:text-slate-600 shrink-0" title="Duplicate item">
+          <Copy className="h-3.5 w-3.5" />
+        </button>
+        <button onClick={onDelete} className="p-1 text-red-400 hover:text-red-600 shrink-0" title="Delete item">
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      {/* Expanded Editor */}
+      {expanded && (
+        <div className="border-t border-slate-100 bg-slate-50 px-4 py-3 space-y-3">
+          {/* Response Type */}
+          <div>
+            <label className="text-xs font-semibold text-slate-600 block mb-1.5">Response Type</label>
+            <div className="flex flex-wrap gap-1.5">
+              {RESPONSE_TYPES.map(rt => (
+                <button
+                  key={rt.value}
+                  onClick={() => onUpdate('responseType', rt.value)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
+                    (item.responseType || item.response_type || 'ok_issue_na') === rt.value
+                      ? rt.color + ' border-current ring-2 ring-offset-1 ring-blue-400'
+                      : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400'
+                  }`}
+                >
+                  {rt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Instructions */}
+          <div>
+            <label className="text-xs font-semibold text-slate-600 block mb-1">
+              <AlignLeft className="h-3 w-3 inline mr-1" />
+              Inspector Instructions
+            </label>
+            <textarea
+              value={item.instructions || ''}
+              onChange={e => onUpdate('instructions', e.target.value)}
+              placeholder="Optional guidance for the field inspector..."
+              className="w-full text-xs border border-slate-200 rounded px-2 py-1.5 focus:ring-1 focus:ring-blue-400 bg-white resize-none"
+              rows="2"
+            />
+          </div>
+
+          {/* Toggles Row */}
+          <div className="flex flex-wrap gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!!item.require_photo}
+                onChange={e => onUpdate('require_photo', e.target.checked)}
+                className="rounded border-slate-300"
+              />
+              <Camera className="h-3.5 w-3.5 text-blue-500" />
+              <span className="text-xs font-medium text-slate-700">Require Photo</span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!!item.require_note}
+                onChange={e => onUpdate('require_note', e.target.checked)}
+                className="rounded border-slate-300"
+              />
+              <FileText className="h-3.5 w-3.5 text-amber-500" />
+              <span className="text-xs font-medium text-slate-700">Require Note</span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!!item.allow_na}
+                onChange={e => onUpdate('allow_na', e.target.checked)}
+                className="rounded border-slate-300"
+              />
+              <ToggleLeft className="h-3.5 w-3.5 text-slate-500" />
+              <span className="text-xs font-medium text-slate-700">Allow N/A</span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={item.flaggable !== false}
+                onChange={e => onUpdate('flaggable', e.target.checked)}
+                className="rounded border-slate-300"
+              />
+              <span className="text-xs font-medium text-slate-700">Can Flag Issue</span>
+            </label>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ChecklistEditor() {
   const navigate = useNavigate();
@@ -16,12 +158,13 @@ export default function ChecklistEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [checklist_instructions, setChecklistInstructions] = useState('');
   const [sections, setSections] = useState([]);
-  const [target, setTarget] = useState(null); // { type: 'template'|'checklist', record }
+  const [target, setTarget] = useState(null);
+  const [collapsedSections, setCollapsedSections] = useState({});
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     try {
@@ -31,6 +174,8 @@ export default function ChecklistEditor() {
           const t = templates[0];
           setTarget({ type: 'template', record: t });
           setName(t.name || '');
+          setDescription(t.description || '');
+          setChecklistInstructions(t.checklist_instructions || '');
           setSections(t.sections || []);
         }
       } else if (checklistId) {
@@ -39,7 +184,7 @@ export default function ChecklistEditor() {
           const c = checklists[0];
           setTarget({ type: 'checklist', record: c });
           setName(c.name || '');
-          // Try customized_sections first, then load from template
+          setChecklistInstructions(c.checklist_instructions || '');
           if (c.customized_sections?.length > 0) {
             setSections(c.customized_sections);
           } else if (c.template_id) {
@@ -59,9 +204,9 @@ export default function ChecklistEditor() {
     setSaving(true);
     try {
       if (target?.type === 'template') {
-        await base44.entities.ChecklistTemplate.update(target.record.id, { name, sections });
+        await base44.entities.ChecklistTemplate.update(target.record.id, { name, description, checklist_instructions, sections });
       } else if (target?.type === 'checklist') {
-        await base44.entities.PropertyChecklist.update(target.record.id, { name, customized_sections: sections });
+        await base44.entities.PropertyChecklist.update(target.record.id, { name, checklist_instructions, customized_sections: sections });
       }
       toast.success('Saved successfully');
       navigate(-1);
@@ -73,24 +218,30 @@ export default function ChecklistEditor() {
   };
 
   const addSection = () => {
-    setSections(prev => [...prev, { title: 'New Section', items: [], allow_photo: true, allow_notes: true }]);
+    setSections(prev => [...prev, { title: 'New Section', items: [], instructions: '' }]);
   };
 
-  const updateSectionTitle = (sIdx, title) => {
-    setSections(prev => prev.map((s, i) => i === sIdx ? { ...s, title } : s));
-  };
-
-  const updateSectionField = (sIdx, field, value) => {
+  const updateSection = (sIdx, field, value) => {
     setSections(prev => prev.map((s, i) => i === sIdx ? { ...s, [field]: value } : s));
   };
 
+  const duplicateSection = (sIdx) => {
+    setSections(prev => {
+      const copy = { ...prev[sIdx], title: prev[sIdx].title + ' (Copy)', items: [...(prev[sIdx].items || [])] };
+      const next = [...prev];
+      next.splice(sIdx + 1, 0, copy);
+      return next;
+    });
+  };
+
   const deleteSection = (sIdx) => {
+    if (!confirm('Delete this section and all its items?')) return;
     setSections(prev => prev.filter((_, i) => i !== sIdx));
   };
 
   const addItem = (sIdx) => {
     setSections(prev => prev.map((s, i) => i === sIdx
-      ? { ...s, items: [...(s.items || []), { label: 'New Item', responseType: 'ok_issue_na', instructions: '' }] }
+      ? { ...s, items: [...(s.items || []), { label: 'New Item', responseType: 'ok_issue_na', instructions: '', require_photo: false, require_note: false, allow_na: true, flaggable: true }] }
       : s
     ));
   };
@@ -102,11 +253,25 @@ export default function ChecklistEditor() {
     ));
   };
 
+  const duplicateItem = (sIdx, iIdx) => {
+    setSections(prev => prev.map((s, i) => {
+      if (i !== sIdx) return s;
+      const copy = { ...s.items[iIdx], label: s.items[iIdx].label + ' (Copy)' };
+      const items = [...s.items];
+      items.splice(iIdx + 1, 0, copy);
+      return { ...s, items };
+    }));
+  };
+
   const deleteItem = (sIdx, iIdx) => {
     setSections(prev => prev.map((s, i) => i === sIdx
       ? { ...s, items: s.items.filter((_, j) => j !== iIdx) }
       : s
     ));
+  };
+
+  const toggleSection = (sIdx) => {
+    setCollapsedSections(prev => ({ ...prev, [sIdx]: !prev[sIdx] }));
   };
 
   const handleDragEnd = (result) => {
@@ -116,17 +281,17 @@ export default function ChecklistEditor() {
 
     if (type === 'SECTION') {
       const newSections = Array.from(sections);
-      const [movedSection] = newSections.splice(source.index, 1);
-      newSections.splice(destination.index, 0, movedSection);
+      const [moved] = newSections.splice(source.index, 1);
+      newSections.splice(destination.index, 0, moved);
       setSections(newSections);
     } else if (type === 'ITEM') {
       const sIdx = parseInt(source.droppableId.split('-')[1]);
       const dIdx = parseInt(destination.droppableId.split('-')[1]);
       setSections(prev => {
-        const newSections = prev.map(s => ({ ...s, items: [...(s.items || [])] }));
-        const [movedItem] = newSections[sIdx].items.splice(source.index, 1);
-        newSections[dIdx].items.splice(destination.index, 0, movedItem);
-        return newSections;
+        const next = prev.map(s => ({ ...s, items: [...(s.items || [])] }));
+        const [moved] = next[sIdx].items.splice(source.index, 1);
+        next[dIdx].items.splice(destination.index, 0, moved);
+        return next;
       });
     }
   };
@@ -141,204 +306,166 @@ export default function ChecklistEditor() {
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-    <div className="max-w-3xl mx-auto p-4 pb-24">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex-1">
-          <Input
-            value={name}
-            onChange={e => setName(e.target.value)}
-            className="text-lg font-semibold border-0 shadow-none px-0 focus-visible:ring-0"
-            placeholder="Checklist name..."
-          />
+      <div className="max-w-4xl mx-auto p-4 pb-24">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6 sticky top-0 bg-white/90 backdrop-blur z-10 py-3 -mx-4 px-4 border-b border-slate-100">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex-1 min-w-0">
+            <Input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              className="text-lg font-bold border-0 shadow-none px-0 focus-visible:ring-0"
+              placeholder="Template name..."
+            />
+          </div>
+          <div className="flex items-center gap-2 shrink-0 text-xs text-slate-500">
+            <span>{sections.length} sections</span>
+            <span>·</span>
+            <span>{sections.reduce((a, s) => a + (s.items?.length || 0), 0)} items</span>
+          </div>
+          <Button onClick={handleSave} disabled={saving} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shrink-0">
+            <Save className="h-4 w-4" />
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
         </div>
-        <Button onClick={handleSave} disabled={saving} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
-          <Save className="h-4 w-4" />
-          {saving ? 'Saving...' : 'Save'}
-        </Button>
-      </div>
 
-      {/* Sections */}
-      <Droppable droppableId="sections" type="SECTION">
-        {(provided) => (
-      <div className="space-y-4" {...provided.droppableProps} ref={provided.innerRef}>
-        {sections.map((section, sIdx) => (
-          <Draggable key={`section-${sIdx}`} draggableId={`section-${sIdx}`} index={sIdx}>
-            {(provided, snapshot) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            className={`bg-white rounded-xl border border-slate-200 overflow-hidden ${
-              snapshot.isDragging ? 'shadow-lg bg-blue-50' : ''
-            }`}
-          >
-            <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-slate-200" {...provided.dragHandleProps}>
-              <GripVertical className="h-4 w-4 text-slate-400" />
+        {/* Template Meta */}
+        <div className="bg-white rounded-xl border border-slate-200 p-4 mb-5 space-y-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-1">
+            <Settings2 className="h-4 w-4" /> Template Settings
+          </div>
+          {target?.type === 'template' && (
+            <div>
+              <label className="text-xs font-medium text-slate-600 block mb-1">Description</label>
               <Input
-                value={section.title}
-                onChange={e => updateSectionTitle(sIdx, e.target.value)}
-                className="font-medium border-0 shadow-none px-0 bg-transparent focus-visible:ring-0"
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="Brief description of this template..."
+                className="text-sm"
               />
-              <Button variant="ghost" size="icon" onClick={() => deleteSection(sIdx)} className="text-red-500 hover:text-red-700 shrink-0">
-                <Trash2 className="h-4 w-4" />
-              </Button>
             </div>
+          )}
+          <div>
+            <label className="text-xs font-medium text-slate-600 block mb-1">Checklist Instructions (shown to inspector at top)</label>
+            <textarea
+              value={checklist_instructions}
+              onChange={e => setChecklistInstructions(e.target.value)}
+              placeholder="Instructions shown to field inspector when starting this checklist..."
+              className="w-full text-sm border border-slate-200 rounded-md px-3 py-2 focus:ring-1 focus:ring-blue-400 resize-none"
+              rows="2"
+            />
+          </div>
+        </div>
 
-            <Droppable droppableId={`section-${sIdx}`} type="ITEM">
-              {(provided) => (
-              <>
-              <div className="px-4 py-3 border-t border-slate-100 bg-slate-50">
-                <label className="text-xs font-medium text-slate-600 block mb-2">Section Instructions</label>
-                <textarea
-                  value={section.instructions || ''}
-                  onChange={e => updateSectionField(sIdx, 'instructions', e.target.value)}
-                  placeholder="Instructions for field staff..."
-                  className="w-full text-xs border border-slate-200 rounded px-2 py-1 focus-visible:ring-1 focus-visible:ring-blue-500"
-                  rows="2"
-                />
-              </div>
-              <div className="divide-y divide-slate-100" {...provided.droppableProps} ref={provided.innerRef}>
-                {(section.items || []).map((item, iIdx) => (
-                <Draggable key={`item-${sIdx}-${iIdx}`} draggableId={`item-${sIdx}-${iIdx}`} index={iIdx}>
+        {/* Sections */}
+        <Droppable droppableId="sections" type="SECTION">
+          {(provided) => (
+            <div className="space-y-3" {...provided.droppableProps} ref={provided.innerRef}>
+              {sections.map((section, sIdx) => (
+                <Draggable key={`section-${sIdx}`} draggableId={`section-${sIdx}`} index={sIdx}>
                   {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.draggableProps}
-                  className={`px-4 py-2.5 ${snapshot.isDragging ? 'bg-blue-50' : ''}`}
-                >
-                  <div className="flex items-center gap-2">
-                  <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-1 -ml-1 shrink-0">
-                    <GripVertical className="h-4 w-4 text-slate-400 hover:text-slate-600" />
-                  </div>
-                  <Input
-                    value={item.label}
-                    onChange={e => updateItem(sIdx, iIdx, 'label', e.target.value)}
-                    className="flex-1 text-sm border-0 shadow-none px-0 focus-visible:ring-0"
-                    placeholder="Item label..."
-                  />
-                  <div className="flex gap-1 shrink-0">
-                    <button
-                      onClick={() => updateItem(sIdx, iIdx, 'response_type', item.response_type === 'ok' ? null : 'ok')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                        item.response_type === 'ok'
-                          ? 'bg-green-500 text-white'
-                          : 'bg-green-100 text-green-700 hover:bg-green-200'
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className={`bg-white rounded-xl border overflow-hidden ${
+                        snapshot.isDragging ? 'shadow-xl border-blue-300 ring-2 ring-blue-400' : 'border-slate-200'
                       }`}
                     >
-                      OK
-                    </button>
-                    <button
-                      onClick={() => updateItem(sIdx, iIdx, 'response_type', item.response_type === 'issue' ? null : 'issue')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                        item.response_type === 'issue'
-                          ? 'bg-red-500 text-white'
-                          : 'bg-red-100 text-red-700 hover:bg-red-200'
-                      }`}
-                    >
-                      Issue
-                    </button>
-                    <button
-                      onClick={() => updateItem(sIdx, iIdx, 'response_type', item.response_type === 'na' ? null : 'na')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                        item.response_type === 'na'
-                          ? 'bg-slate-500 text-white'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      N/A
-                    </button>
-                  </div>
-                  <Button variant="ghost" size="icon" onClick={() => deleteItem(sIdx, iIdx)} className="text-red-400 hover:text-red-600 h-7 w-7 shrink-0">
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                  </div>
-                  {item.response_type === 'issue' && (
-                    <div className="ml-6 mt-2 space-y-2">
-                      <textarea
-                        value={item.note || ''}
-                        onChange={e => updateItem(sIdx, iIdx, 'note', e.target.value)}
-                        placeholder="Describe the issue..."
-                        className="w-full text-xs border border-red-200 rounded px-2 py-1.5 focus:ring-1 focus:ring-red-400 bg-red-50"
-                        rows="2"
-                      />
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <label className="cursor-pointer">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            capture="environment"
-                            className="hidden"
-                            onChange={async (e) => {
-                              const file = e.target.files[0];
-                              if (!file) return;
-                              try {
-                                const { file_url } = await base44.integrations.Core.UploadFile({ file });
-                                const existing = item.photo_urls || [];
-                                updateItem(sIdx, iIdx, 'photo_urls', [...existing, file_url]);
-                              } catch(err) { console.error('Upload failed', err); }
-                            }}
-                          />
-                          <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-medium cursor-pointer transition-colors">
-                            📷 Add Photo
-                          </span>
-                        </label>
-                        {(item.photo_urls || []).map((url, pIdx) => (
-                          <div key={pIdx} className="relative group">
-                            <img src={url} alt="issue" className="h-12 w-12 object-cover rounded border border-red-200" />
-                            <button
-                              onClick={() => updateItem(sIdx, iIdx, 'photo_urls', item.photo_urls.filter((_, i) => i !== pIdx))}
-                              className="absolute -top-1 -right-1 hidden group-hover:flex h-4 w-4 bg-red-500 text-white rounded-full items-center justify-center text-xs"
-                            >×</button>
-                          </div>
-                        ))}
+                      {/* Section Header */}
+                      <div className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-50 to-slate-50 border-b border-slate-200">
+                        <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-1 shrink-0">
+                          <GripVertical className="h-5 w-5 text-slate-400 hover:text-slate-600" />
+                        </div>
+
+                        <button onClick={() => toggleSection(sIdx)} className="shrink-0 text-slate-500 hover:text-slate-700">
+                          {collapsedSections[sIdx] ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </button>
+
+                        <Input
+                          value={section.title}
+                          onChange={e => updateSection(sIdx, 'title', e.target.value)}
+                          className="flex-1 font-semibold text-sm border-0 shadow-none px-0 bg-transparent focus-visible:ring-0 text-blue-900"
+                          placeholder="Section title..."
+                        />
+
+                        <Badge variant="outline" className="text-xs shrink-0">
+                          {(section.items || []).length} items
+                        </Badge>
+
+                        <button onClick={() => duplicateSection(sIdx)} className="p-1.5 text-slate-400 hover:text-slate-700 shrink-0" title="Duplicate section">
+                          <Copy className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => deleteSection(sIdx)} className="p-1.5 text-red-400 hover:text-red-600 shrink-0" title="Delete section">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
+
+                      {!collapsedSections[sIdx] && (
+                        <>
+                          {/* Section Instructions */}
+                          <div className="px-4 pt-3 pb-2">
+                            <Input
+                              value={section.instructions || ''}
+                              onChange={e => updateSection(sIdx, 'instructions', e.target.value)}
+                              placeholder="Section instructions for inspector (optional)..."
+                              className="text-xs text-slate-500 border-dashed"
+                            />
+                          </div>
+
+                          {/* Items */}
+                          <Droppable droppableId={`section-${sIdx}`} type="ITEM">
+                            {(provided) => (
+                              <div className="px-4 pb-2" {...provided.droppableProps} ref={provided.innerRef}>
+                                {(section.items || []).map((item, iIdx) => (
+                                  <Draggable key={`item-${sIdx}-${iIdx}`} draggableId={`item-${sIdx}-${iIdx}`} index={iIdx}>
+                                    {(provided, snapshot) => (
+                                      <div ref={provided.innerRef} {...provided.draggableProps}>
+                                        <ItemEditor
+                                          item={item}
+                                          onUpdate={(field, value) => updateItem(sIdx, iIdx, field, value)}
+                                          onDelete={() => deleteItem(sIdx, iIdx)}
+                                          onDuplicate={() => duplicateItem(sIdx, iIdx)}
+                                          dragHandleProps={provided.dragHandleProps}
+                                          isDragging={snapshot.isDragging}
+                                        />
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                ))}
+                                {provided.placeholder}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => addItem(sIdx)}
+                                  className="w-full mt-1 text-blue-600 border border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50 gap-2 text-xs"
+                                >
+                                  <Plus className="h-3.5 w-3.5" /> Add Item
+                                </Button>
+                              </div>
+                            )}
+                          </Droppable>
+                        </>
+                      )}
                     </div>
-                  )}
-                </div>
                   )}
                 </Draggable>
               ))}
               {provided.placeholder}
-              </div>
+            </div>
+          )}
+        </Droppable>
 
-              <div className="px-4 py-2 border-t border-slate-100">
-              <Button variant="ghost" size="sm" onClick={() => addItem(sIdx)} className="text-blue-600 gap-1 text-xs">
-                <Plus className="h-3.5 w-3.5" /> Add Item
-              </Button>
-            </div>
-
-            <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 space-y-3 text-xs">
-              <div className="flex gap-2">
-                <button className="px-3 py-1.5 rounded bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors">📷 Take Photo</button>
-              </div>
-              <div>
-                <label className="font-medium text-slate-600 block mb-1">Notes</label>
-                <textarea
-                  placeholder="Add notes for this section..."
-                  className="w-full border border-slate-200 rounded px-2 py-1 focus-visible:ring-1 focus-visible:ring-blue-500"
-                  rows="2"
-                />
-              </div>
-            </div>
-            </>
-            )}
-            </Droppable>
-            </div>
-            )}
-            </Draggable>
-        ))}
-        {provided.placeholder}
+        {/* Add Section */}
+        <Button
+          variant="outline"
+          onClick={addSection}
+          className="mt-4 w-full gap-2 border-dashed border-2 border-blue-200 text-blue-600 hover:border-blue-400 hover:bg-blue-50 py-6 text-sm font-semibold"
+        >
+          <Plus className="h-5 w-5" /> Add Section
+        </Button>
       </div>
-        )}
-      </Droppable>
-
-      <Button variant="outline" onClick={addSection} className="mt-4 w-full gap-2">
-        <Plus className="h-4 w-4" /> Add Section
-      </Button>
-    </div>
     </DragDropContext>
   );
 }
