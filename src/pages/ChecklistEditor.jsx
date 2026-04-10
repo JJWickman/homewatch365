@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Save, Plus, Trash2, GripVertical, ChevronDown, ChevronRight, Copy, Settings2, Camera, FileText, ToggleLeft, Hash, AlignLeft } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, GripVertical, ChevronDown, ChevronRight, Copy, Settings2, Camera, FileText, ToggleLeft, AlignLeft, Pencil, X, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 
-const RESPONSE_TYPES = [
+const DEFAULT_RESPONSE_TYPES = [
   { value: 'ok_issue_na', label: 'OK / Issue / N/A', color: 'bg-blue-100 text-blue-700' },
   { value: 'ok_issue', label: 'OK / Issue', color: 'bg-green-100 text-green-700' },
   { value: 'yes_no', label: 'Yes / No', color: 'bg-purple-100 text-purple-700' },
@@ -19,10 +19,122 @@ const RESPONSE_TYPES = [
   { value: 'photo_only', label: 'Photo Only', color: 'bg-pink-100 text-pink-700' },
 ];
 
-function ItemEditor({ item, onUpdate, onDelete, onDuplicate, dragHandleProps, isDragging }) {
+const COLOR_OPTIONS = [
+  'bg-blue-100 text-blue-700',
+  'bg-green-100 text-green-700',
+  'bg-purple-100 text-purple-700',
+  'bg-orange-100 text-orange-700',
+  'bg-pink-100 text-pink-700',
+  'bg-yellow-100 text-yellow-700',
+  'bg-slate-100 text-slate-700',
+  'bg-red-100 text-red-700',
+  'bg-teal-100 text-teal-700',
+];
+
+function ResponseTypeManager({ responseTypes, onChange }) {
+  const [editingIdx, setEditingIdx] = useState(null);
+  const [editLabel, setEditLabel] = useState('');
+  const [editColor, setEditColor] = useState('');
+  const [newLabel, setNewLabel] = useState('');
+  const [showAdd, setShowAdd] = useState(false);
+
+  const startEdit = (idx) => {
+    setEditingIdx(idx);
+    setEditLabel(responseTypes[idx].label);
+    setEditColor(responseTypes[idx].color);
+  };
+
+  const saveEdit = () => {
+    if (!editLabel.trim()) return;
+    onChange(responseTypes.map((rt, i) => i === editingIdx ? { ...rt, label: editLabel.trim(), color: editColor } : rt));
+    setEditingIdx(null);
+  };
+
+  const removeType = (idx) => {
+    onChange(responseTypes.filter((_, i) => i !== idx));
+  };
+
+  const addType = () => {
+    if (!newLabel.trim()) return;
+    const value = newLabel.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+    onChange([...responseTypes, { value, label: newLabel.trim(), color: COLOR_OPTIONS[responseTypes.length % COLOR_OPTIONS.length] }]);
+    setNewLabel('');
+    setShowAdd(false);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        {responseTypes.map((rt, idx) => (
+          <div key={rt.value} className="flex items-center gap-1">
+            {editingIdx === idx ? (
+              <div className="flex items-center gap-1 border border-blue-300 rounded-lg px-2 py-1 bg-white">
+                <input
+                  value={editLabel}
+                  onChange={e => setEditLabel(e.target.value)}
+                  className="text-xs w-28 outline-none"
+                  onKeyDown={e => e.key === 'Enter' && saveEdit()}
+                  autoFocus
+                />
+                <div className="flex gap-1 ml-1">
+                  {COLOR_OPTIONS.map(c => (
+                    <button key={c} onClick={() => setEditColor(c)}
+                      className={`w-3 h-3 rounded-full border ${c.split(' ')[0]} ${editColor === c ? 'ring-1 ring-offset-1 ring-slate-500' : ''}`}
+                    />
+                  ))}
+                </div>
+                <button onClick={saveEdit} className="text-green-600 hover:text-green-700"><Check className="h-3 w-3" /></button>
+                <button onClick={() => setEditingIdx(null)} className="text-slate-400 hover:text-slate-600"><X className="h-3 w-3" /></button>
+              </div>
+            ) : (
+              <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${rt.color}`}>
+                <span>{rt.label}</span>
+                <button onClick={() => startEdit(idx)} className="opacity-50 hover:opacity-100"><Pencil className="h-2.5 w-2.5" /></button>
+                {responseTypes.length > 1 && (
+                  <button onClick={() => removeType(idx)} className="opacity-50 hover:opacity-100 text-red-500"><X className="h-2.5 w-2.5" /></button>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+
+        {showAdd ? (
+          <div className="flex items-center gap-1 border border-blue-300 rounded-lg px-2 py-1 bg-white">
+            <input
+              value={newLabel}
+              onChange={e => setNewLabel(e.target.value)}
+              placeholder="Label..."
+              className="text-xs w-24 outline-none"
+              onKeyDown={e => e.key === 'Enter' && addType()}
+              autoFocus
+            />
+            <button onClick={addType} className="text-green-600 hover:text-green-700"><Check className="h-3 w-3" /></button>
+            <button onClick={() => { setShowAdd(false); setNewLabel(''); }} className="text-slate-400"><X className="h-3 w-3" /></button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border border-dashed border-slate-300 text-slate-500 hover:border-blue-400 hover:text-blue-600"
+          >
+            <Plus className="h-3 w-3" /> Add Type
+          </button>
+        )}
+      </div>
+
+      <button
+        onClick={() => onChange(DEFAULT_RESPONSE_TYPES)}
+        className="text-xs text-slate-400 hover:text-slate-600 underline"
+      >
+        Reset to defaults
+      </button>
+    </div>
+  );
+}
+
+function ItemEditor({ item, onUpdate, onDelete, onDuplicate, dragHandleProps, isDragging, responseTypes }) {
   const [expanded, setExpanded] = useState(false);
 
-  const responseType = RESPONSE_TYPES.find(r => r.value === (item.responseType || item.response_type || 'ok_issue_na')) || RESPONSE_TYPES[0];
+  const responseType = responseTypes.find(r => r.value === (item.responseType || item.response_type || responseTypes[0]?.value)) || responseTypes[0];
 
   return (
     <div className={`border border-slate-200 rounded-lg overflow-hidden mb-2 bg-white ${isDragging ? 'shadow-lg ring-2 ring-blue-400' : ''}`}>
@@ -67,12 +179,12 @@ function ItemEditor({ item, onUpdate, onDelete, onDuplicate, dragHandleProps, is
           <div>
             <label className="text-xs font-semibold text-slate-600 block mb-1.5">Response Type</label>
             <div className="flex flex-wrap gap-1.5">
-              {RESPONSE_TYPES.map(rt => (
+              {responseTypes.map(rt => (
                 <button
                   key={rt.value}
                   onClick={() => onUpdate('responseType', rt.value)}
                   className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
-                    (item.responseType || item.response_type || 'ok_issue_na') === rt.value
+                    (item.responseType || item.response_type || responseTypes[0]?.value) === rt.value
                       ? rt.color + ' border-current ring-2 ring-offset-1 ring-blue-400'
                       : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400'
                   }`}
@@ -163,6 +275,8 @@ export default function ChecklistEditor() {
   const [sections, setSections] = useState([]);
   const [target, setTarget] = useState(null);
   const [collapsedSections, setCollapsedSections] = useState({});
+  const [responseTypes, setResponseTypes] = useState(DEFAULT_RESPONSE_TYPES);
+  const [showRTManager, setShowRTManager] = useState(false);
 
   useEffect(() => { loadData(); }, []);
 
@@ -177,6 +291,7 @@ export default function ChecklistEditor() {
           setDescription(t.description || '');
           setChecklistInstructions(t.checklist_instructions || '');
           setSections(t.sections || []);
+          if (t.response_types?.length > 0) setResponseTypes(t.response_types);
         }
       } else if (checklistId) {
         const checklists = await base44.entities.PropertyChecklist.filter({ id: checklistId });
@@ -204,7 +319,7 @@ export default function ChecklistEditor() {
     setSaving(true);
     try {
       if (target?.type === 'template') {
-        await base44.entities.ChecklistTemplate.update(target.record.id, { name, description, checklist_instructions, sections });
+        await base44.entities.ChecklistTemplate.update(target.record.id, { name, description, checklist_instructions, sections, response_types: responseTypes });
       } else if (target?.type === 'checklist') {
         await base44.entities.PropertyChecklist.update(target.record.id, { name, checklist_instructions, customized_sections: sections });
       }
@@ -333,20 +448,31 @@ export default function ChecklistEditor() {
 
         {/* Template Meta */}
         <div className="bg-white rounded-xl border border-slate-200 p-4 mb-5 space-y-3">
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-1">
-            <Settings2 className="h-4 w-4" /> Template Settings
-          </div>
-          {target?.type === 'template' && (
-            <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1">Description</label>
-              <Input
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                placeholder="Brief description of this template..."
-                className="text-sm"
-              />
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <Settings2 className="h-4 w-4" /> Template Settings
             </div>
-          )}
+          </div>
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-semibold text-slate-600">Response Types</label>
+              <button onClick={() => setShowRTManager(!showRTManager)} className="text-xs text-blue-600 hover:underline">
+                {showRTManager ? 'Hide' : 'Manage'}
+              </button>
+            </div>
+            {showRTManager && (
+              <div className="mb-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <ResponseTypeManager responseTypes={responseTypes} onChange={setResponseTypes} />
+              </div>
+            )}
+            {!showRTManager && (
+              <div className="flex flex-wrap gap-1 mb-3">
+                {responseTypes.map(rt => (
+                  <span key={rt.value} className={`px-2 py-0.5 rounded-full text-xs font-medium ${rt.color}`}>{rt.label}</span>
+                ))}
+              </div>
+            )}
+          </div>
           <div>
             <label className="text-xs font-medium text-slate-600 block mb-1">Checklist Instructions (shown to inspector at top)</label>
             <textarea
@@ -429,6 +555,7 @@ export default function ChecklistEditor() {
                                           onDuplicate={() => duplicateItem(sIdx, iIdx)}
                                           dragHandleProps={provided.dragHandleProps}
                                           isDragging={snapshot.isDragging}
+                                          responseTypes={responseTypes}
                                         />
                                       </div>
                                     )}
