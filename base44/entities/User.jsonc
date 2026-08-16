@@ -22,5 +22,6 @@
       "default": false,
       "description": "Whether the user has dismissed the onboarding wizard and doesn't want to see it on startup"
     }
-  }
+  },
+  "required": []
 }
